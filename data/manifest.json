@@ -96,6 +96,30 @@
    "status": "reported",
    "owner": "Assistant lane",
    "what": "Saved assistant answers"
+  },
+  {
+   "name": "flame_static",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "Flame sim stages 1-2: droplet burning, flame shapes, flame on a plate (Moon/Mars cases model only)"
+  },
+  {
+   "name": "flame_spread",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "Flame sim stage 3: spread rates, flammability map, front over time (checked vs BASS-II)"
+  },
+  {
+   "name": "drift_lbm",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "LBM smoke drift frames for one cabin scenario (same shape as drift)"
+  },
+  {
+   "name": "drift_whatif",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "LBM what-if runs: share of fires detected within 60 s and 180 s by detector layout"
   }
  ]
 }

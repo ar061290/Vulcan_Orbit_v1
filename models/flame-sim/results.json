@@ -1,0 +1,330 @@
+{
+ "status": "model",
+ "lhv_vs_reported_worst": 0.05881813561913307,
+ "radiative_constants": {
+  "G": 0.01,
+  "T_lim_K": 1725,
+  "tune_balanced_accuracy": 0.588,
+  "tune_n": 98,
+  "held_out_n": 108
+ },
+ "sibal_plate": "not computed: cotton heat of combustion and heat of gasification have no verified source (properties.json)",
+ "emmons_smallB_f2": 0.33205493384731916,
+ "standoff_exponents": {
+  "0 g 0.05 m/s": 0.5,
+  "Earth 1 g 0.05 m/s": 0.257,
+  "Earth 1 g 0.0 m/s": 0.25
+ },
+ "spread_constants": {
+  "C_Da": 11939299.828613138,
+  "R_c": 0.8215703667167034,
+  "calibration": "blow-off of 100 um PMMA in air at 0.40 m/s; quench at 0.010 m/s"
+ },
+ "quench_supplementary": [
+  {
+   "X_O2": 0.16,
+   "thickness_um": 100.0,
+   "reported_quench_mm_s": 30.0,
+   "model_quench_mm_s": 15.09,
+   "source": "TM-20210011385 Table 2.1: 30 +/- 5 mm/s at 16% O2 (thin PMMA, 1 atm)"
+  },
+  {
+   "X_O2": 0.21,
+   "thickness_um": 400.0,
+   "reported_quench_mm_s": 15.0,
+   "model_quench_mm_s": 11.82,
+   "source": "TM-20210011385 Sec. 2.2.5: about 1.5 cm/s for 400 um at 21% O2"
+  }
+ ],
+ "checks": [
+  {
+   "id": "S1-K-hep",
+   "ok": true,
+   "result": "n-heptane: median |error| 25.0% over 107 FLEX tests (range of signed error [-7.9, 78.8] %), held-out 29.3%; baseline constant K 0.530 mm2/s: held-out 22.1% (limit <= 30%)"
+  },
+  {
+   "id": "S1-K-meth",
+   "ok": true,
+   "result": "methanol: median |error| 7.0% over 150 FLEX tests (range of signed error [-16.7, 32.7] %), held-out 6.3%; baseline constant K 0.497 mm2/s: held-out 18.4% (limit <= 30%)"
+  },
+  {
+   "id": "S1-K-base",
+   "ok": true,
+   "result": "baseline reported beside S1-K-hep and S1-K-meth"
+  },
+  {
+   "id": "S1-ext-class",
+   "ok": false,
+   "result": "balanced accuracy 0.64 [0.48, 0.74] on 108 held-out tests (tuned G=0.01, T_lim=1725 K on 98 tests); always-one-class baseline 0.50 (limit >= 0.65)"
+  },
+  {
+   "id": "S1-ext-diam",
+   "ok": true,
+   "result": "median |error| 30% on 38 held-out tests; measured value inside model range in 82% (limit <= 35%)"
+  },
+  {
+   "id": "S1-sphere",
+   "ok": true,
+   "result": "0 g, no flow: worst (max - min radius)/mean radius 0.0e+00 over 20 cases (limit < 1%)"
+  },
+  {
+   "id": "S1-order",
+   "ok": true,
+   "result": "aspect ratio does not decrease from 0 g to Moon to Mars to 1 g at zero forced flow, in every fuel/O2/pressure case"
+  },
+  {
+   "id": "S1-height",
+   "ok": false,
+   "result": "model / Roper: methane 173.3/66.6 mm = 2.60, ethylene 219.0/98.3 mm = 2.23, propane 453.1/161.6 mm = 2.80 (limit 0.5 to 2.0)"
+  },
+  {
+   "id": "S2-thick",
+   "ok": true,
+   "result": "standoff 0 g / 1 g at 0.05 m/s: 4.21 to 8.71 along the plate (limit > 1 everywhere)"
+  },
+  {
+   "id": "S2-flat",
+   "ok": true,
+   "result": "burning-rate drop from 2 to 20 cm: 0 g at 0.05 m/s 1.33, 0 g at 0.20 m/s 2.67, 1 g at 0.05 m/s 4.32 g/m2/s (0 g low flow must be smallest)"
+  },
+  {
+   "id": "S2-rate",
+   "ok": true,
+   "result": "Ananth, Ndubizu & Tatem, 'Flow past a bu: model 3.905 vs reported [4.0, 4.0]; Ndubizu, Ananth & Tatem, Halon Options T: model 20.662 vs reported [18.2, 18.2]; Singh, PhD thesis, Univ. of Maryland 201: model 6.836 vs reported [5.99, 5.99]; Singh, PhD thesis 2015, Table 8: PMMA 7.: model 11.039 vs reported [7.84, 7.84]; Singh, PhD thesis 2015, Ch. 5 (vertical : model 8.945 vs reported [8.9, 8.9] (limit: inside the reported range widened x2 each side)",
+   "items": [
+    {
+     "source": "Ananth, Ndubizu & Tatem, 'Flow past a burning solid surface', NRL/NIST, https://www.nist.gov/document/r0201328pdf: 'r0 falls from about 1mm/min near the leading edge to about 0.2 mm/min at 6 cm from the leading edge' (U = 60 cm/s); 0.2 mm/min x 1.19 g/cm3 = 4.0 g/m2/s",
+     "avg": false,
+     "x_m": 0.06,
+     "flow_m_s": 0.6,
+     "g": 0.0,
+     "model": 3.905,
+     "reported": [
+      4.0,
+      4.0
+     ],
+     "ok": true
+    },
+    {
+     "source": "Ndubizu, Ananth & Tatem, Halon Options Technical Working Conference 2001, https://www.nist.gov/document/r0200517pdf: 'The base case peak regression rate of 0.92 mm/min occurred 3 mm from the leading edge' (U = 84 cm/s); x 1.19 g/cm3 = 18.2 g/m2/s",
+     "avg": false,
+     "x_m": 0.003,
+     "flow_m_s": 0.84,
+     "g": 0.0,
+     "model": 20.662,
+     "reported": [
+      18.2,
+      18.2
+     ],
+     "ok": true
+    },
+    {
+     "source": "Singh, PhD thesis, Univ. of Maryland 2015, Table 8 (load cell), https://api.drum.lib.umd.edu/server/api/core/bitstreams/dc935834-a7f4-4787-8cfb-16932639be3f/content: PMMA 5.99 g/m2 s at 0.79 m/s, 10 cm sample",
+     "avg": true,
+     "x_m": 0.1,
+     "flow_m_s": 0.79,
+     "g": 0.0,
+     "model": 6.836,
+     "reported": [
+      5.99,
+      5.99
+     ],
+     "ok": true
+    },
+    {
+     "source": "Singh, PhD thesis 2015, Table 8: PMMA 7.84 g/m2 s at 2.06 m/s, 10 cm sample",
+     "avg": true,
+     "x_m": 0.1,
+     "flow_m_s": 2.06,
+     "g": 0.0,
+     "model": 11.039,
+     "reported": [
+      7.84,
+      7.84
+     ],
+     "ok": true
+    },
+    {
+     "source": "Singh, PhD thesis 2015, Ch. 5 (vertical wall, free convection, 8 cm tall): 'mass-burning rate evaluated though the load cell data was found to be ... 8.9 g/m2s for ... PMMA'",
+     "avg": true,
+     "x_m": 0.08,
+     "flow_m_s": 0.0,
+     "g": 1.0,
+     "model": 8.945,
+     "reported": [
+      8.9,
+      8.9
+     ],
+     "ok": true
+    }
+   ]
+  },
+  {
+   "id": "S2-standoff",
+   "ok": null,
+   "result": "not run: no data. No verified measured PMMA standoff in mm found in text or tables (literature.json)"
+  },
+  {
+   "id": "S3-spread",
+   "ok": false,
+   "result": "median |error| 175% over 41 BASS-II points (range [4.7, 892.7] %); group: thick PMMA (1-5 mm) 189.6%; group: thin PMMA (100 um) 6.9%; band: 5 to 10 cm/s 154.5%; band: < 5 cm/s 64.2%; band: > 10 cm/s 679.8% (limit <= 50%)",
+   "groups": {
+    "group: thick PMMA (1-5 mm)": {
+     "n": 39,
+     "median_abs_err_pct": 189.6,
+     "baseline_median_abs_err_pct": 262.3,
+     "signed_err_5_95_pct": [
+      15.8,
+      901.0
+     ]
+    },
+    "group: thin PMMA (100 um)": {
+     "n": 2,
+     "median_abs_err_pct": 6.9,
+     "baseline_median_abs_err_pct": 5.8,
+     "signed_err_5_95_pct": [
+      -9.5,
+      -4.2
+     ]
+    },
+    "band: 5 to 10 cm/s": {
+     "n": 22,
+     "median_abs_err_pct": 154.5,
+     "baseline_median_abs_err_pct": 196.4,
+     "signed_err_5_95_pct": [
+      17.8,
+      657.9
+     ]
+    },
+    "band: < 5 cm/s": {
+     "n": 8,
+     "median_abs_err_pct": 64.2,
+     "baseline_median_abs_err_pct": 112.6,
+     "signed_err_5_95_pct": [
+      -0.9,
+      137.9
+     ]
+    },
+    "band: > 10 cm/s": {
+     "n": 11,
+     "median_abs_err_pct": 679.8,
+     "baseline_median_abs_err_pct": 829.0,
+     "signed_err_5_95_pct": [
+      454.2,
+      1096.3
+     ]
+    }
+   }
+  },
+  {
+   "id": "S3-base",
+   "ok": true,
+   "result": "de Ris without extinction: median |error| 216% (range [38.8, 1008.2] %)"
+  },
+  {
+   "id": "S3-map",
+   "ok": true,
+   "result": "0 g, 101.3 kPa: quenching and blow-off branches meet at minimum O2 0.11 near 0.027 m/s"
+  },
+  {
+   "id": "S3-march",
+   "ok": true,
+   "result": "front vs V t: worst error 1.4e-16 of sample length; burn-out time error 0.0e+00 (limit < 1%)"
+  }
+ ],
+ "K_stats": {
+  "n-heptane": {
+   "n": 107,
+   "median_abs_err_pct": 25.0,
+   "signed_err_5_95_pct": [
+    -7.9,
+    78.8
+   ],
+   "bias_pct": 24.9,
+   "held_out_n": 42,
+   "held_out_median_abs_err_pct": 29.3,
+   "baseline_K_mm2_s": 0.53,
+   "baseline_held_out_median_abs_err_pct": 22.1
+  },
+  "methanol": {
+   "n": 150,
+   "median_abs_err_pct": 7.0,
+   "signed_err_5_95_pct": [
+    -16.7,
+    32.7
+   ],
+   "bias_pct": 0.7,
+   "held_out_n": 81,
+   "held_out_median_abs_err_pct": 6.3,
+   "baseline_K_mm2_s": 0.497,
+   "baseline_held_out_median_abs_err_pct": 18.4
+  }
+ },
+ "roper": [
+  {
+   "fuel": "methane",
+   "model_mm": 173.282,
+   "roper_mm": 66.6,
+   "ratio": 2.602
+  },
+  {
+   "fuel": "ethylene",
+   "model_mm": 219.01,
+   "roper_mm": 98.29,
+   "ratio": 2.228
+  },
+  {
+   "fuel": "propane",
+   "model_mm": 453.116,
+   "roper_mm": 161.64,
+   "ratio": 2.803
+  }
+ ],
+ "groups": {
+  "group: thick PMMA (1-5 mm)": {
+   "n": 39,
+   "median_abs_err_pct": 189.6,
+   "baseline_median_abs_err_pct": 262.3,
+   "signed_err_5_95_pct": [
+    15.8,
+    901.0
+   ]
+  },
+  "group: thin PMMA (100 um)": {
+   "n": 2,
+   "median_abs_err_pct": 6.9,
+   "baseline_median_abs_err_pct": 5.8,
+   "signed_err_5_95_pct": [
+    -9.5,
+    -4.2
+   ]
+  },
+  "band: 5 to 10 cm/s": {
+   "n": 22,
+   "median_abs_err_pct": 154.5,
+   "baseline_median_abs_err_pct": 196.4,
+   "signed_err_5_95_pct": [
+    17.8,
+    657.9
+   ]
+  },
+  "band: < 5 cm/s": {
+   "n": 8,
+   "median_abs_err_pct": 64.2,
+   "baseline_median_abs_err_pct": 112.6,
+   "signed_err_5_95_pct": [
+    -0.9,
+    137.9
+   ]
+  },
+  "band: > 10 cm/s": {
+   "n": 11,
+   "median_abs_err_pct": 679.8,
+   "baseline_median_abs_err_pct": 829.0,
+   "signed_err_5_95_pct": [
+    454.2,
+    1096.3
+   ]
+  }
+ }
+}
