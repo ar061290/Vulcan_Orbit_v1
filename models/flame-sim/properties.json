@@ -1,0 +1,73 @@
+{
+ "status": "reported",
+ "note": "Every input property used by the flame simulation, with its source. Values copied from the sources named; per-kg values derived by dividing by the NIST molecular weight. Gas-phase thermochemistry and transport are computed by Cantera (see chem.py), not taken from this file.",
+ "liquids": {
+  "n-heptane": {
+   "T_boil_K": 371.5, "h_fg_kJ_kg": 317.1, "rho_l_kg_m3": 682.28, "cp_l_kJ_kgK": 2.2347, "MW_g_mol": 100.2019,
+   "sources": {
+    "T_boil_K": "NIST Chemistry WebBook, C142825, phase change: 371.5 +/- 0.3 K (average of 215 of 227 values) https://webbook.nist.gov/cgi/cbook.cgi?ID=C142825&Mask=4",
+    "h_fg_kJ_kg": "NIST WebBook: dvapH 31.77 kJ/mol at 371.6 K (Majer and Svoboda, 1985), / 100.2019 g/mol",
+    "rho_l_kg_m3": "NIST WebBook fluid properties, isobar 0.101325 MPa, 295 K: 682.28 kg/m3",
+    "cp_l_kJ_kgK": "NIST WebBook fluid properties, isobar 0.101325 MPa, 295 K: 2.2347 J/g K"
+   }
+  },
+  "ethanol": {
+   "T_boil_K": 351.5, "h_fg_kJ_kg": 837.0, "rho_l_kg_m3": 789.3, "cp_l_kJ_kgK": 2.440, "MW_g_mol": 46.0684,
+   "sources": {
+    "T_boil_K": "NIST WebBook C64175: 351.5 +/- 0.2 K (average of 138 of 148 values) https://webbook.nist.gov/cgi/cbook.cgi?ID=C64175&Mask=4",
+    "h_fg_kJ_kg": "NIST WebBook: dvapH 38.56 kJ/mol at 351.5 K (Majer and Svoboda, 1985), / 46.0684 g/mol",
+    "rho_l_kg_m3": "PubChem CID 702, Density: 0.7893 g/cu cm at 20 C (CRC Handbook 95th ed., p. 3-246)",
+    "cp_l_kJ_kgK": "NIST WebBook C64175 condensed phase: Cp,liquid 112.4 J/mol K at 298.15 K (Petrov, Peshekhodov et al., 1989), / 46.0684"
+   }
+  },
+  "methanol": {
+   "T_boil_K": 337.8, "h_fg_kJ_kg": 1098.9, "rho_l_kg_m3": 789.28, "cp_l_kJ_kgK": 2.5155, "MW_g_mol": 32.0419,
+   "sources": {
+    "T_boil_K": "NIST WebBook C67561: 337.8 +/- 0.3 K (average of 154 of 171 values) https://webbook.nist.gov/cgi/cbook.cgi?ID=C67561&Mask=4",
+    "h_fg_kJ_kg": "NIST WebBook: dvapH 35.21 kJ/mol at 337.7 K (Majer and Svoboda, 1985), / 32.0419 g/mol",
+    "rho_l_kg_m3": "NIST WebBook fluid properties, isobar 0.101325 MPa, 295 K: 789.28 kg/m3",
+    "cp_l_kJ_kgK": "NIST WebBook fluid properties, isobar 0.101325 MPa, 295 K: 2.5155 J/g K"
+   }
+  }
+ },
+ "gases_note": "Methane, ethylene and propane are gases at cabin conditions, so no droplet values (K, B, burn-out time) are given for them: null. Their flames are modelled as a small gas-jet source.",
+ "lhv_reported_MJ_kg": {
+  "values": {"methane": 50.009, "ethylene": 47.195, "propane": 46.357, "n-heptane": 44.566, "methanol": 19.930, "ethanol": 26.70},
+  "source": "Wikipedia 'Heat of combustion', table 'Lower heating value for some organic compounds (at 25 C)'; used only to cross-check the Cantera values"
+ },
+ "transport_added": {
+  "note": "Lennard-Jones parameters for species missing from gri30 transport, from the San Diego mechanism transport file https://web.eng.ucsd.edu/mae/groups/combustion/sdmech/sandiego20161214/sandiego20160815_trans.txt (thermo for these species from Cantera's n-hexane-NUIG-2015.yaml)",
+  "HE": {"geometry": "atom", "well_depth_K": 10.2, "diameter_A": 2.576, "rot_relax": 0.0},
+  "NC7H16": {"geometry": "nonlinear", "well_depth_K": 459.6, "diameter_A": 6.253, "rot_relax": 1.0, "file_name": "C7H16"},
+  "C2H5OH": {"geometry": "nonlinear", "well_depth_K": 470.6, "diameter_A": 4.41, "rot_relax": 1.5}
+ },
+ "radiation": {
+  "source": "TNF Workshop radiation model, https://tnfworkshop.org/radiation/ (RADCAL fits, Grosshandler NIST TN 1402; Barlow et al. 2001 Combust. Flame 127:2102). a_p in 1/(m atm), valid 300-2500 K, a_p = sum c_k (1000/T)^k",
+  "H2O": [-0.23093, -1.12390, 9.41530, -2.99880, 0.51382, -1.86840e-5],
+  "CO2": [18.741, -121.310, 273.500, -194.050, 56.310, -5.8169],
+  "sigma_W_m2K4": 5.669e-8
+ },
+ "solids": {
+  "PMMA": {
+   "rho_s_kg_m3": 1190, "cp_s_kJ_kgK": 1.465, "k_s_W_mK": 0.18, "dh_c_MJ_kg": 25.9, "dh_v_MJ_kg": 0.941,
+   "T_v_K": 668, "L_gasif_kJ_kg": 1600, "B_air": 1.6, "formula": "C5H8O2 (monomer)",
+   "sources": {
+    "rho_s_kg_m3,cp_s_kJ_kgK,k_s_W_mK,dh_c_MJ_kg,dh_v_MJ_kg": "Carmignani, PhD dissertation 'Opposed-Flow Flame Spread over Solid Fuels in Different Burning Regimes' (UCSD/SDSU 2019), Table A.1, https://escholarship.org/content/qt0rb693zc/qt0rb693zc.pdf",
+    "T_v_K,L_gasif_kJ_kg,B_air": "Zhang et al., J. Fire Sciences 32(1) 2014 52-71, Table 1 (properties from Ahmad and Faeth), https://www.grace.umd.edu/~pbs/2014%20Zhang%20et%20al.%20JFS.pdf"
+   }
+  },
+  "SIBAL": {
+   "area_density_mg_cm2": 18.05, "cotton_area_density_mg_cm2": 13.54, "thickness_mm": 0.32, "half_area_density_g_cm2": 0.009,
+   "cp_cotton_J_gK": 1.26, "cp_glass_J_gK": 0.7, "T_pyro_K": 673, "Lv_J_g_at_300K": 300, "formula": "C6H10O5 (cellulose)",
+   "sources": {
+    "area_density_mg_cm2,cotton_area_density_mg_cm2": "Olson et al., 'The effect of duct size, sample size, and fuel composition on concurrent flame spread over large cellulose samples in microgravity' (accepted manuscript), https://discovery.ucl.ac.uk/id/eprint/10164340/",
+    "half_area_density_g_cm2,cp_cotton_J_gK,cp_glass_J_gK,Lv_J_g_at_300K,T_pyro_K": "same paper: 'initial half-thickness area density ... 0.009 g/cm2', 'fiberglass (0.7 J/g K) and cotton (1.26 J/g K)', 'Lv=300+(Cp,f - Cs)(Ts-300) J/g', 'plateaued ... at the 400 C pyrolysis temperature'",
+    "thickness_mm": "Zhao, T'ien, Ferkul, Olson, 9th US National Combustion Meeting 2015, NTRS 20150008962: 'thickness of the sample is about 0.32 mm with an area density 18.2 mg/cm2'"
+   }
+  },
+  "gas_for_spread": {
+   "rho_g_kg_m3": 0.518, "cp_g_kJ_kgK": 1.183, "k_g_W_mK": 0.052, "de_Ris_F_range": [4.4, 5.5], "de_Ris_F_thin_fit": 4.76,
+   "source": "Carmignani dissertation (2019), Table A.1 gas column and Sec. 3.2.1: F 'varying between 4.4 and 5.5', good agreement for thin fuels 'when F = 4.76'"
+  }
+ }
+}
