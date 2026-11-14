@@ -41,7 +41,7 @@
    "name": "models",
    "status": "model",
    "owner": "Karthikeya",
-   "what": "Trained models: smoke miss risk (M5); spread and extinction to come"
+   "what": "Trained models: smoke miss risk (M5), extinction, burning rate, cool flames (M7)"
   },
   {
    "name": "drift",
@@ -75,7 +75,7 @@
   },
   {
    "name": "flex_suppression",
-   "status": "missing",
+   "status": "real",
    "owner": "Karthikeya",
    "what": "FLEX extinction by suppressant gas"
   },
