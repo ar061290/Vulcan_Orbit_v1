@@ -71,3 +71,9 @@ Dataset file checksums: `datasets/psi/MANIFEST.csv`.
 |---|---|
 | `data/drift_calibration.json` (engine/calibrate.py, Saffire-III PSI-100) | M3 mixing values (0.004, 0.02, 0.1 m2/s), clearance time range, detector delay range |
 | `engine/drift.py`, `engine/drift_core.py` | M3 cross-check X-agree / X-time (imported read-only); alarm level 1 mg/m3 (NASA Saffire analysis ICES-2024-365, as cited in engine/drift.py); 2 mg/s upper release value |
+
+## M4 detection latency (models/m4-latency)
+- NASA PSI-100, Saffire-III flight telemetry, doi 10.60555/040q-4h36, CC0-1.0. File: `PSI-100_Raw Data_Saffire_Data_Table2017.161.00.42.03-EU.csv`.
+- Published smoke-detector thresholds (context only; cannot be applied to the raw PSI-100 counts):
+  - ISS detector calibrated to alarm at 1 %/ft obscuration (3.3 %/m): NASA NTRS 20170000248, https://ntrs.nasa.gov/api/citations/20170000248/downloads/20170000248.pdf
+  - ISS detection threshold about 10 mg/m3; Space Shuttle 2 mg/m3: NASA NTRS 20170002629, https://ntrs.nasa.gov/api/citations/20170002629/downloads/20170002629.pdf

@@ -15,9 +15,9 @@
   },
   {
    "name": "saffire_latency",
-   "status": "demo",
+   "status": "real",
    "owner": "Karthikeya",
-   "what": "Sensor alarm timing from Saffire-III telemetry"
+   "what": "Alarm timing per sensor for each Saffire-III orbital event (M4)"
   },
   {
    "name": "smoke_sizes",

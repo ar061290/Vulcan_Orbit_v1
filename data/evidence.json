@@ -23,10 +23,10 @@
   {
    "id": "E3",
    "what": "Detection-time extraction reproduces a published Saffire alarm time",
-   "ref": "NASA Saffire papers",
+   "ref": "NASA PSI-100 Saffire-III telemetry; NTRS search",
    "limit": "Within the limit the team writes here",
    "owner": "Karthikeya",
-   "result": null,
+   "result": "Not run: no published Saffire-III smoke-detector alarm time found (NTRS search, 14 Nov 2026)",
    "state": "pending"
   },
   {
@@ -171,6 +171,42 @@
    "limit": "at least 20 points more, 3/3 layouts",
    "owner": "Karthikeya",
    "result": "Pass: A: 100% vs 49%; B: 100% vs 49%; C: 100% vs 48%",
+   "state": "pass"
+  },
+  {
+   "id": "L1",
+   "what": "Detection latency: Negative control: no radiometer alarm during the smoke-wire puff (smoke, no flame)",
+   "ref": "NASA PSI-100 Saffire-III telemetry, models/m4-latency/build.py",
+   "limit": "no radiometer alarm",
+   "owner": "Karthikeya",
+   "result": "Pass: radiometer alarms in the smoke-wire window: 0",
+   "state": "pass"
+  },
+  {
+   "id": "L2",
+   "what": "Detection latency: The rule can fail: the Sample 1 scatter channel replaced by its own baseline",
+   "ref": "NASA PSI-100 Saffire-III telemetry, models/m4-latency/build.py",
+   "limit": "no alarm on a flat signal",
+   "owner": "Karthikeya",
+   "result": "Pass: alarm with flat signal: None",
+   "state": "pass"
+  },
+  {
+   "id": "L3",
+   "what": "Detection latency: Radiometer alarms are not igniter glow: alarm counted only after the igniter switches off",
+   "ref": "NASA PSI-100 Saffire-III telemetry, models/m4-latency/build.py",
+   "limit": "shift at most 2 s",
+   "owner": "Karthikeya",
+   "result": "Pass: largest shift 1 s over 6 radiometer alarms (limit 2 s)",
+   "state": "pass"
+  },
+  {
+   "id": "L4",
+   "what": "Detection latency: Every event reported on its own",
+   "ref": "NASA PSI-100 Saffire-III telemetry, models/m4-latency/build.py",
+   "limit": "3 events reported",
+   "owner": "Karthikeya",
+   "result": "Pass: 3 events, no averages",
    "state": "pass"
   }
  ]

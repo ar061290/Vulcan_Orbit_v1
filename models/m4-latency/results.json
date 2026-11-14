@@ -1,0 +1,258 @@
+{
+ "per_channel": [
+  {
+   "event": "wire",
+   "channel": "Radiometer 1",
+   "alarm_s": null,
+   "alarm_s_k3": null,
+   "alarm_after_igniter_off_s": null,
+   "baseline": -17.56218884416197,
+   "sd": 0.14477784164773327,
+   "threshold": -16.838299635923303,
+   "resolution_s": 1.0,
+   "peak": -17.13997688660107
+  },
+  {
+   "event": "wire",
+   "channel": "Radiometer 2",
+   "alarm_s": null,
+   "alarm_s_k3": null,
+   "alarm_after_igniter_off_s": null,
+   "baseline": -17.891407016487406,
+   "sd": 0.17764837371430192,
+   "threshold": -17.003165147915897,
+   "resolution_s": 1.0,
+   "peak": -17.45131974379493
+  },
+  {
+   "event": "wire",
+   "channel": "Radiometer 3",
+   "alarm_s": null,
+   "alarm_s_k3": null,
+   "alarm_after_igniter_off_s": null,
+   "baseline": -16.397856500951423,
+   "sd": 0.1564417088034812,
+   "threshold": -15.615647956934017,
+   "resolution_s": 1.0,
+   "peak": -16.07833592699933
+  },
+  {
+   "event": "wire",
+   "channel": "Radiometer 4",
+   "alarm_s": null,
+   "alarm_s_k3": 34.0,
+   "alarm_after_igniter_off_s": null,
+   "baseline": -17.531005743283504,
+   "sd": 0.2665959715297785,
+   "threshold": -16.19802588563461,
+   "resolution_s": 1.0,
+   "peak": -16.70526391003435
+  },
+  {
+   "event": "wire",
+   "channel": "Cabin smoke detector: scatter",
+   "alarm_s": 23.492999999999483,
+   "alarm_s_k3": 23.492999999999483,
+   "alarm_after_igniter_off_s": 73.49799999999959,
+   "baseline": 0.024999999999999998,
+   "sd": 0.005,
+   "threshold": 0.05,
+   "resolution_s": 10.0,
+   "peak": 1.615
+  },
+  {
+   "event": "wire",
+   "channel": "Cabin smoke detector: obscuration",
+   "alarm_s": null,
+   "alarm_s_k3": null,
+   "alarm_after_igniter_off_s": null,
+   "baseline": 3.8350000000000004,
+   "sd": 0.005,
+   "threshold": 3.8600000000000003,
+   "resolution_s": 10.0,
+   "peak": 3.835
+  },
+  {
+   "event": "s2",
+   "channel": "Radiometer 1",
+   "alarm_s": null,
+   "alarm_s_k3": 107.0,
+   "alarm_after_igniter_off_s": null,
+   "baseline": -17.502441869035433,
+   "sd": 0.18086225080757481,
+   "threshold": -16.598130614997558,
+   "resolution_s": 1.0,
+   "peak": -16.89700585441979
+  },
+  {
+   "event": "s2",
+   "channel": "Radiometer 2",
+   "alarm_s": 7.0,
+   "alarm_s_k3": 7.0,
+   "alarm_after_igniter_off_s": 8.0,
+   "baseline": -17.79980514072336,
+   "sd": 0.22450477107843064,
+   "threshold": -16.67728128533121,
+   "resolution_s": 1.0,
+   "peak": -4.453810110927048
+  },
+  {
+   "event": "s2",
+   "channel": "Radiometer 3",
+   "alarm_s": null,
+   "alarm_s_k3": 127.0,
+   "alarm_after_igniter_off_s": null,
+   "baseline": -16.2409661592504,
+   "sd": 0.09356002033178473,
+   "threshold": -15.773166057591478,
+   "resolution_s": 1.0,
+   "peak": -15.84491371129779
+  },
+  {
+   "event": "s2",
+   "channel": "Radiometer 4",
+   "alarm_s": 7.0,
+   "alarm_s_k3": 7.0,
+   "alarm_after_igniter_off_s": 8.0,
+   "baseline": -17.584343134426394,
+   "sd": 0.4117984595222069,
+   "threshold": -15.52535083681536,
+   "resolution_s": 1.0,
+   "peak": -6.462509351668627
+  },
+  {
+   "event": "s2",
+   "channel": "Cabin smoke detector: scatter",
+   "alarm_s": 126.50900000000001,
+   "alarm_s_k3": 26.5029999999997,
+   "alarm_after_igniter_off_s": 126.50900000000001,
+   "baseline": 0.1475,
+   "sd": 0.04192254763250917,
+   "threshold": 0.35711273816254585,
+   "resolution_s": 10.0,
+   "peak": 0.425
+  },
+  {
+   "event": "s2",
+   "channel": "Cabin smoke detector: obscuration",
+   "alarm_s": null,
+   "alarm_s_k3": null,
+   "alarm_after_igniter_off_s": null,
+   "baseline": 3.832500000000001,
+   "sd": 0.005,
+   "threshold": 3.857500000000001,
+   "resolution_s": 10.0,
+   "peak": 3.835
+  },
+  {
+   "event": "s1",
+   "channel": "Radiometer 1",
+   "alarm_s": 7.0,
+   "alarm_s_k3": 7.0,
+   "alarm_after_igniter_off_s": 7.0,
+   "baseline": -17.54625631746156,
+   "sd": 0.19699797749720296,
+   "threshold": -16.561266429975543,
+   "resolution_s": 1.0,
+   "peak": 149.173694641483
+  },
+  {
+   "event": "s1",
+   "channel": "Radiometer 2",
+   "alarm_s": 22.0,
+   "alarm_s_k3": 17.0,
+   "alarm_after_igniter_off_s": 22.0,
+   "baseline": -17.849588768856005,
+   "sd": 0.1789823096019791,
+   "threshold": -16.95467722084611,
+   "resolution_s": 1.0,
+   "peak": 155.5248832207277
+  },
+  {
+   "event": "s1",
+   "channel": "Radiometer 3",
+   "alarm_s": 7.0,
+   "alarm_s_k3": 2.0,
+   "alarm_after_igniter_off_s": 7.0,
+   "baseline": -16.3481107828511,
+   "sd": 0.26057436050020066,
+   "threshold": -15.045238980350097,
+   "resolution_s": 1.0,
+   "peak": 148.3676150347309
+  },
+  {
+   "event": "s1",
+   "channel": "Radiometer 4",
+   "alarm_s": 22.0,
+   "alarm_s_k3": 22.0,
+   "alarm_after_igniter_off_s": 22.0,
+   "baseline": -17.481619270003055,
+   "sd": 0.3419147921312434,
+   "threshold": -15.772045309346838,
+   "resolution_s": 1.0,
+   "peak": 167.3028091561362
+  },
+  {
+   "event": "s1",
+   "channel": "Cabin smoke detector: scatter",
+   "alarm_s": 91.51699999999983,
+   "alarm_s_k3": 71.51499999999942,
+   "alarm_after_igniter_off_s": 91.51699999999983,
+   "baseline": 0.14416666666666667,
+   "sd": 0.10155868582581534,
+   "threshold": 0.6519600957957433,
+   "resolution_s": 10.0,
+   "peak": 1.805
+  },
+  {
+   "event": "s1",
+   "channel": "Cabin smoke detector: obscuration",
+   "alarm_s": null,
+   "alarm_s_k3": null,
+   "alarm_after_igniter_off_s": null,
+   "baseline": 3.831666666666667,
+   "sd": 0.005,
+   "threshold": 3.856666666666667,
+   "resolution_s": 10.0,
+   "peak": 3.835
+  }
+ ],
+ "checks": [
+  {
+   "id": "L1",
+   "what": "Negative control: no radiometer alarm during the smoke-wire puff (smoke, no flame)",
+   "result": "radiometer alarms in the smoke-wire window: 0",
+   "ok": true
+  },
+  {
+   "id": "L2",
+   "what": "The rule can fail: the Sample 1 scatter channel replaced by its own baseline",
+   "result": "alarm with flat signal: None",
+   "ok": true
+  },
+  {
+   "id": "L3",
+   "what": "Radiometer alarms are not igniter glow: alarm counted only after the igniter switches off",
+   "result": "largest shift 1 s over 6 radiometer alarms (limit 2 s)",
+   "ok": true
+  },
+  {
+   "id": "L4",
+   "what": "Every event reported on its own",
+   "result": "3 events, no averages",
+   "ok": true
+  },
+  {
+   "id": "E3",
+   "what": "Reproduces a published Saffire-III alarm time",
+   "result": "not run: no published Saffire-III smoke-detector alarm time was found (NTRS search, 14 Nov 2026)",
+   "ok": null
+  },
+  {
+   "id": "L5",
+   "what": "Threshold sensitivity, alarm time at 3 SD vs 5 SD",
+   "result": "wire scatter: [23.0, 23.0]; wire obscuration: [None, None]; s2 radiometer: [7.0, 7.0]; s2 scatter: [27.0, 127.0]; s2 obscuration: [None, None]; s1 radiometer: [7.0, 7.0]; s1 scatter: [72.0, 92.0]; s1 obscuration: [None, None]",
+   "ok": null
+  }
+ ]
+}
