@@ -244,3 +244,11 @@ dl.made{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0
 dl.made dt{font:700 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding-top:2px}
 dl.made dd{margin:0;color:var(--ink2)}
 @media (max-width:680px){dl.made{grid-template-columns:1fr}details.madeby>summary::after{float:none;display:block}}
+/* home: the one finding */
+.story{margin:10px 0 34px}
+.story>h2{font:700 clamp(26px,3.4vw,40px)/1.12 var(--display);letter-spacing:-.03em;max-width:28ch;margin:10px 0 12px}
+.story-sub{font-size:1.1rem;color:var(--ink2);max-width:62ch;margin:0 0 18px}
+.story-map{font-weight:700;color:var(--ink);margin:26px 0 10px}
+.cred{padding:2px 12px 10px}.cred-cap{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:4px 0 6px}
+.cred ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 16px}.cred li{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2)}
+.cred li b{font:400 13px var(--mono);letter-spacing:1px;color:var(--accent-ink)}.cred-why{font-size:13px;margin:6px 0 0}

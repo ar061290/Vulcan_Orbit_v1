@@ -1,7 +1,8 @@
 import { h, load, page, card, badge, fmt } from '../lib.js';
 import { hero } from '../hero.js';
+import { replayCard } from '../detect_ui.js';
 export default async function (root) {
-  const [man, inv, sm, india] = await Promise.all([load('manifest'), load('investigations'), load('smoke_sizes'), load('india')]);
+  const [man, inv, sm, india, lat] = await Promise.all([load('manifest'), load('investigations'), load('smoke_sizes'), load('india'), load('saffire_latency')]);
   const fine = (sm.materials || []).filter(m => m.Dg_nm != null).sort((a, b) => a.Dg_nm - b.Dg_nm)[0];
   const st = n => (man.files || []).find(f => f.name === n)?.status || 'missing';
   const stage = (n, id, title, text, files) => h('a', { class: 'card stage', href: `#/${id}` }, h('div', { class: 'n' }, n), h('h2', {}, title), h('p', {}, text),
@@ -30,16 +31,25 @@ export default async function (root) {
   const q = (n, id, title, text, files) => h('a', { class: 'qn', href: `#/${id}` }, h('span', { class: 'n' }, n), h('h2', {}, title), h('p', {}, text),
     h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px;margin-top:4px' }, ...files.map(f => h('span', { style: 'display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2)' }, badge(st(f[0])), f[1]))),
     h('span', { class: 'go' }, 'Open section'));
-  root.append(top,
+  // The one result to remember, computed from the telemetry file, with the replay right under it.
+  let story = null;
+  if (lat.status !== 'missing') {
+    const fires = lat.burns.filter(b => b.channels.some(c => /radiometer/i.test(c.name) && c.alarm_s != null));
+    const rad = Math.max(...fires.map(b => b.channels.find(c => /radiometer/i.test(c.name)).alarm_s));
+    const sc = fires.map(b => b.channels.find(c => /scatter/i.test(c.name))?.alarm_s).filter(v => v != null);
+    const obsNever = lat.burns.every(b => b.channels.find(c => /obscuration/i.test(c.name))?.alarm_s == null);
+    story = h('section', { class: 'story', 'aria-labelledby': 'story-h' },
+      h('p', { class: 'kicker' }, 'The finding'),
+      h('h2', { id: 'story-h' }, `On NASA's real orbital fires, a flame light sensor noticed in ${rad} seconds. The smoke detector took ${Math.min(...sc)} to ${Math.max(...sc)} seconds.`),
+      h('p', { class: 'story-sub' }, obsNever ? 'Alarm times use our own stated rule, because NASA published none. The detector\'s second smoke channel never alarmed at all. In NASA\'s later Saffire VI test, much of the hazardous gas had already been released by the time a smoke monitor reached its alarm level (ICES-2024-365). Replay it yourself:' : 'Replay it yourself:'),
+      replayCard(lat),
+      h('p', { class: 'story-map' }, 'The challenge asks teams to summarise, rank and interpret NASA\'s fire data. We do that as three questions:'));
+  }
+  root.append(top, story,
     h('nav', { class: 'qs', 'aria-label': 'The three questions' },
       q('01 · LOCATE', 'detect', 'Where is the fire?', 'Which sensor would have noticed real orbital fires first, how late, and which smoke the station detector cannot see.', [['saffire_latency', 'Saffire alarm timing'], ['smoke_sizes', 'SAME smoke sizes']]),
       q('02 · PREDICT', 'predict', 'What will it do?', 'How fast flame spreads, whether a burning droplet goes out, and where smoke drifts when nothing rises.', [['drift', 'Smoke drift'], ['models', 'Trained models']]),
       q('03 · RESPOND', 'respond', 'What puts it out?', 'What NASA found about gases that starve flames, next to our own bench trials of ion wind and fine mist.', [['flex_suppression', 'FLEX suppression'], ['response_trials', 'Bench trials']])),
-    h('section', { class: 'keyfigs', 'aria-label': 'Key figures' },
-      kf('NASA experiments indexed', fmt(n, 0), '', inv.status, 'From NASA\'s public PSI archive'),
-      kf('Studies of smoke and dust', fmt(det, 0), '', inv.status, 'The detection subset of those experiments'),
-      kf('Station airflow', '0.08–0.2', 'm/s', 'reported', 'ISS aisle requirement, 4.6–12.2 m/min (NASA NTRS 20150009509)'),
-      kf('Finest smoke measured', fine ? String(fine.Dg_nm) : '—', 'nm', sm.status, fine ? `${fine.name}, average particle size, NASA SAME-2 (AIAA 2012-3536)` : 'Waiting for smoke sizes')),
     h('details', { class: 'more' }, h('summary', {}, h('span', {}, 'How to read this site'), h('small', {}, 'What the coloured stamps on every panel mean')),
       h('p', {}, 'Every panel is stamped with where its numbers come from. Only the first two are results.'),
       h('div', { class: 'readme' },

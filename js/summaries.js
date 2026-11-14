@@ -3,10 +3,10 @@
 import { load } from './lib.js';
 const pct = (x, d = 0) => `${(100 * x).toFixed(d)}%`;
 const ok = d => d && d.status !== 'missing';
-export const KEEP = { flame: 1, detect: 1, predict: 1, respond: 2, evidence: 1, explorer: 1, locate: 1, ask: 1, about: 2, design: 3 };
+export const KEEP = { flame: 1, detect: 2, predict: 1, respond: 2, evidence: 1, explorer: 1, locate: 1, ask: 1, about: 2, design: 3 };
 export async function summary(id) {
   if (id === 'detect') {
-    const [lat, sm] = await Promise.all([load('saffire_latency'), load('smoke_sizes')]);
+    const [lat, gas] = await Promise.all([load('saffire_latency'), load('saffire_gas')]);
     const out = [];
     if (ok(lat)) {
       const burns = lat.burns.filter(b => b.channels.some(c => /radiometer/i.test(c.name) && c.alarm_s != null));
@@ -14,8 +14,9 @@ export async function summary(id) {
       if (burns.length && sc.length) out.push(`In the ${burns.length} real fires NASA lit in orbit, a flame light sensor would have noticed within ${Math.max(...rad)} s (using our alarm thresholds). The smoke detector took ${Math.min(...sc)} to ${Math.max(...sc)} s.`);
       const obs = lat.burns.every(b => b.channels.find(c => /obscuration/i.test(c.name))?.alarm_s == null);
       if (obs) out.push('The second kind of smoke detector, which looks for dimmed light, never alarmed at all.');
+      if (ok(gas)) { const n = gas.tests.filter(t => t.co_rise > gas.limits.co_smac_24h_ppm).length;
+        out.push(`That matters: in NASA's later Saffire fires, carbon monoxide passed the 24-hour crew limit in ${n} of ${gas.tests.length} tests, and a smoke monitor reached its alarm level only after much of the gas was out.`); }
     }
-    if (ok(sm)) { const k = sm.materials.find(m => m.name === 'Kapton'); if (k) out.push(`Some smoke is too fine to see: ${pct(k.mass_below['500'].unaged)} of Kapton smoke (a common spacecraft plastic) is in particles smaller than 500 nm, where light-scattering detectors are weak.`); }
     return out.length ? out : null;
   }
   if (id === 'predict') {

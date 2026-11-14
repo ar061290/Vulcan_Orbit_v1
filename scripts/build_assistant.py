@@ -78,7 +78,7 @@ ans("alarm-level", "What smoke level sets off a spacecraft smoke alarm?",
     [SRC["ices24"], SRC["iss10"]], ["alarm", "level", "threshold", "mg", "concentration", "sets", "trigger", "smoke"], "data/whatif.json alarm_mg_m3, alarm_hi_mg_m3")
 ans("smoke-clear", "How long does smoke take to clear from a spacecraft cabin?",
     f"Tuning our drift model on the Saffire-III smoke detector record gives a clearance time of {cal['clearance_s_range'][0]:.0f} to {cal['clearance_s_range'][1]:.0f} s "
-    "(the time for ventilation and filtering to remove smoke). That range comes from one detector in one vehicle.",
+    "(the time for ventilation and filtering to remove smoke). That range comes from one detector in one vehicle. The same model gets a smoke puff it was not tuned on wrong (peak about 18 s off), so it is a screening tool, not a validated one.",
     [SRC["psi100"], SRC["site"]("predict", "Predict page, flight-data check")], ["smoke", "clear", "clearance", "remove", "filter", "long", "linger"], "data/drift_calibration.json clearance_s_range")
 # ---- flames ----
 z = next(f for f in fs["flames"] if f["fuel"] == "n-heptane" and f["gravity"] == "0 g" and f["flow_m_s"] == 0 and f["X_O2"] == 0.21 and f["P_kPa"] == 101.3)
