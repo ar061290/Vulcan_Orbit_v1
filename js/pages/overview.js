@@ -1,5 +1,4 @@
 import { h, load, page, card, badge, fmt } from '../lib.js';
-import { flameLab } from '../flame.js';
 import { hero } from '../hero.js';
 export default async function (root) {
   const [man, inv, sm, india] = await Promise.all([load('manifest'), load('investigations'), load('smoke_sizes'), load('india')]);
@@ -41,14 +40,8 @@ export default async function (root) {
       kf('Studies of smoke and dust', fmt(det, 0), '', inv.status, 'The detection subset of those experiments'),
       kf('Station airflow', '0.08–0.2', 'm/s', 'reported', 'ISS aisle requirement, 4.6–12.2 m/min (NASA NTRS 20150009509)'),
       kf('Finest smoke measured', fine ? String(fine.Dg_nm) : '—', 'nm', sm.status, fine ? `${fine.name}, average particle size, NASA SAME-2 (AIAA 2012-3536)` : 'Waiting for smoke sizes')),
-    h('div', { class: 'grid g2', style: 'margin-top:20px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)' },
-      card('Play with it: where do heat and smoke go?', null, 'Switch gravity off and watch the heat and smoke. Then change the airflow.', flameLab(), h('p', { style: 'margin:10px 0 0' }, h('small', {}, 'Simplified illustration. The ', h('a', { href: '#/flame' }, 'flame simulator'), ' has the physics, real fuels and checks against NASA data.'))),
-      card('Why this is hard', null, null,
-        h('p', {}, 'On Earth, hot gas rises. Flames flicker upward, smoke gathers at the ceiling, and smoke detectors are built around both.'),
-        h('p', {}, 'In orbit there is no "up". A flame becomes a dim blue ball fed by slow mixing, and smoke goes wherever the ventilation takes it, sometimes past the detector entirely.'),
-        h('p', {}, h('b', { style: 'color:var(--ink)' }, 'So the questions change: '), 'not "is there smoke at the ceiling?" but "which sensor sees this fire first, and how late?"'))),
-    h('section', { class: 'card', style: 'margin-top:20px' }, h('h2', {}, 'How to read this site'),
-      h('p', { class: 'sub' }, 'Every panel is stamped with where its numbers come from. Only the first two are results.'),
+    h('details', { class: 'more' }, h('summary', {}, h('span', {}, 'How to read this site'), h('small', {}, 'What the coloured stamps on every panel mean')),
+      h('p', {}, 'Every panel is stamped with where its numbers come from. Only the first two are results.'),
       h('div', { class: 'readme' },
         h('div', {}, badge('real'), h('p', {}, 'From a NASA dataset we downloaded and processed ourselves.')),
         h('div', {}, badge('model'), h('p', {}, 'Our model, trained and tested on NASA data. Scores show its range.')),
@@ -61,9 +54,9 @@ function indiaCard(d) {
   const lv = { 'official': 'real', 'official via news': 'reported', 'news only': 'demo' };
   return h('section', { class: 'card india', style: 'margin-top:20px' },
     h('div', { class: 'india-head' }, h('p', { class: 'eyebrow' }, 'From Hyderabad'), h('h2', {}, 'Why this matters for India\'s own crew and station'), badge(d.status)),
-    h('div', { class: 'grid g2' }, ...d.facts.map(f => h('div', { class: 'fact' }, h('div', { class: 'fact-top' }, h('b', {}, f.topic), h('span', { class: `lvl ${lv[f.level] || ''}` }, f.level)), h('p', {}, f.text), h('small', {}, h('a', { href: f.url, target: '_blank', rel: 'noopener' }, f.source))))),
-    h('p', { style: 'margin-top:12px' }, d.link),
-    h('details', {}, h('summary', {}, 'What we looked for and did not find'), h('ul', {}, ...d.not_found.map(t => h('li', {}, t)))),
+    h('p', {}, d.link),
+    h('details', { class: 'fold' }, h('summary', {}, `The facts we checked, with sources (${d.facts.length})`), h('div', { class: 'grid g2', style: 'margin-top:10px' }, ...d.facts.map(f => h('div', { class: 'fact' }, h('div', { class: 'fact-top' }, h('b', {}, f.topic), h('span', { class: `lvl ${lv[f.level] || ''}` }, f.level)), h('p', {}, f.text), h('small', {}, h('a', { href: f.url, target: '_blank', rel: 'noopener' }, f.source)))))),
+    h('details', { class: 'fold' }, h('summary', {}, 'What we looked for and did not find'), h('ul', {}, ...d.not_found.map(t => h('li', {}, t)))),
     h('p', {}, h('small', {}, `Checked ${d.checked}. ${d.source}`)));
 }
 

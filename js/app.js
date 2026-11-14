@@ -3,16 +3,17 @@ import './theme.js';
 import { h, load } from './lib.js';
 import { annotate } from './glossary.js';
 import { banner } from './banner.js';
+import { summary, KEEP } from './summaries.js';
 import { hero } from './hero.js';
 const VISUAL = { flame: 'flame', predict: 'flame', respond: 'flame', detect: 'smoke', locate: 'smoke' };   // others: earth
 import './bg.js';
 const PAGES = [
-  ['overview', 'Overview'], ['flame', 'Flame'], ['explorer', 'Investigations'], ['detect', 'Detect'], ['locate', 'Locate'],
-  ['predict', 'Predict'], ['respond', 'Respond'], ['evidence', 'Evidence'], ['ask', 'Ask'], ['about', 'About'],
+  ['overview', 'Home'], ['detect', 'Find it'], ['predict', 'Predict it'], ['respond', 'Put it out'], ['flame', 'Flame lab'],
+  ['evidence', 'Checks'], ['ask', 'Ask'], ['explorer', 'NASA experiments'], ['locate', 'Bench rig'], ['about', 'Sources'],
 ];
-const HIDDEN = ['design'];   // reachable by link, not in the top bar
+const HIDDEN = ['design', 'explorer', 'locate', 'about'];   // reachable by link, not in the top bar
 const nav = document.getElementById('nav'), view = document.getElementById('view'), menu = document.querySelector('.menu');
-PAGES.forEach(([id, label]) => nav.append(h('a', { href: `#/${id}`, 'data-id': id }, label)));
+PAGES.filter(([id]) => !HIDDEN.includes(id)).forEach(([id, label]) => nav.append(h('a', { href: `#/${id}`, 'data-id': id }, label)));
 menu.addEventListener('click', () => { const o = nav.classList.toggle('open'); menu.setAttribute('aria-expanded', o); });
 
 async function route() {
@@ -23,7 +24,7 @@ async function route() {
   try {
     const mod = await import(`./pages/${known}.js`); const root = h('div'); await mod.default(root);
     root.querySelectorAll('.card').forEach((c, i) => c.style.setProperty('--i', Math.min(i, 10)));   // staggered reveal
-    if (known !== 'overview') pageHead(root, known);
+    if (known !== 'overview') { pageHead(root, known); await simplify(root, known); }
     annotate(root);
     // Accessibility fixes applied to every page: name every chart, make scrolling tables reachable by keyboard, fill empty headers.
     root.querySelectorAll('svg[role=img]:not([aria-label]), svg.chart:not([aria-label])').forEach(svg => {
@@ -42,22 +43,49 @@ async function route() {
 }
 addEventListener('hashchange', route);
 
+// Less at once: a three-sentence short answer first, the main figure next, everything else one click away.
+async function simplify(root, id) {
+  const page = root.firstElementChild, head = page.querySelector('.phead');
+  let lines = null; try { lines = await summary(id); } catch { lines = null; }
+  if (lines?.length) head.after(h('section', { class: 'short', 'aria-label': 'The short answer' }, h('h2', {}, 'The short answer'), h('ol', {}, ...lines.map(t => h('li', {}, t)))));
+  // inside each figure: keep the first sentence of long method text, fold the rest and the footnotes
+  page.querySelectorAll('.card').forEach(c => {
+    const sub = c.querySelector(':scope > .sub');
+    if (sub && sub.textContent.length > 150) {
+      const t = sub.textContent, m = t.match(/^.+?[.!?](\s|$)/);
+      if (m && m[0].length < t.length - 20) { sub.textContent = m[0].trim(); c.append(h('details', { class: 'fold' }, h('summary', {}, 'How this was made'), h('p', {}, t.slice(m[0].length).trim()))); }
+    }
+    const notes = [...c.querySelectorAll(':scope > p')].filter(p => p.children.length === 1 && p.firstElementChild.tagName === 'SMALL' && p.textContent === p.firstElementChild.textContent);
+    if (notes.length) { const d = h('details', { class: 'fold' }, h('summary', {}, 'Notes and sources')); notes.forEach(n => d.append(n)); c.append(d); }
+  });
+  // page level: show the main figures, fold the rest under one clear button
+  const blocks = [...page.children].filter(e => !e.matches('.phead, .short, h1, .lead, .toc, script'));
+  const keep = KEEP[id] ?? 2, rest = blocks.slice(keep);
+  const n = rest.reduce((a, b) => a + (b.matches('.card') ? 1 : b.querySelectorAll(':scope > .card').length || 1), 0);
+  if (rest.length) {
+    const more = h('details', { class: 'more' }, h('summary', {}, h('span', {}, `Show ${n} more figure${n > 1 ? 's' : ''}`), h('small', {}, 'Methods, checks and extra views for people who want the detail')));
+    rest[0].before(more); rest.forEach(r => more.append(r));
+    more.addEventListener('toggle', () => { if (more.open) dispatchEvent(new Event('resize')); });
+  }
+}
+
 // Professional page header: a full-width illustrated band with the section number, title and summary,
 // then an "On this page" index of the figures, each one linkable.
 function pageHead(root, id) {
   const h1 = root.querySelector('h1'); if (!h1) return;
   const lead = h1.nextElementSibling?.classList.contains('lead') ? h1.nextElementSibling : null;
-  const n = PAGES.findIndex(p => p[0] === id), label = n >= 0 ? PAGES[n][1] : 'Design kit';
+  const shown = PAGES.filter(([k]) => !HIDDEN.includes(k)), n = shown.findIndex(p => p[0] === id), label = PAGES.find(p => p[0] === id)?.[1] || 'Design kit';
+  const TITLE = { detect: 'Where is the fire?', predict: 'What will it do?', respond: 'What puts it out?', flame: 'A flame without gravity', evidence: 'How we checked it', explorer: 'The NASA experiments', locate: 'Our bench rig', ask: 'Ask a question', about: 'Sources and credits' };
+  if (TITLE[id]) h1.textContent = TITLE[id];
   const kind = VISUAL[id] || 'earth';
   const vis = kind === 'flame' ? hero({ g: 0 }).el : banner(kind);
   const head = h('header', { class: 'phead' }, vis, h('div', { class: 'phead-in' },
-    h('p', { class: 'kicker' }, `${n >= 0 ? String(n + 1).padStart(2, '0') : 'Kit'} / ${label}`), h1, lead));
+    h('p', { class: 'kicker' }, n >= 0 ? `${String(n).padStart(2, '0')} / ${label}` : `More / ${label}`), h1, lead));
   const figs = [...root.querySelectorAll('.card > h2')].filter(x => !x.closest('.card .card .card'));
   const items = figs.map((t, i) => { const c = t.parentElement; c.id ||= `fig-${i + 1}`; const name = t.childNodes[0]?.textContent?.trim();
     return name ? h('li', {}, h('a', { href: `#/${id}`, onclick: e => { e.preventDefault(); c.scrollIntoView({ behavior: document.documentElement.dataset.motion === 'calm' ? 'auto' : 'smooth', block: 'start' }); c.focus?.({ preventScroll: true }); } }, name)) : null; }).filter(Boolean);
   const first = root.firstElementChild;
   first.prepend(head);
-  if (items.length > 2) head.after(h('nav', { class: 'toc', 'aria-label': 'On this page' }, h('span', {}, 'On this page'), h('ol', {}, ...items)));
 }
 addEventListener('vo:rerender', () => { const y = scrollY; route().then(() => scrollTo(0, y)); });
 
