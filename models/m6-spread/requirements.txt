@@ -1,0 +1,6 @@
+# M6 build (python models/m6-spread/build.py). Tested with Python 3.14.7 on Windows 10.
+numpy==2.5.4
+pandas==3.1.1
+scipy==1.18.1          # installed with scikit-learn
+scikit-learn==1.9.1
+matplotlib==3.11.2     # check plot only
