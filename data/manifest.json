@@ -41,7 +41,7 @@
    "name": "models",
    "status": "model",
    "owner": "Karthikeya",
-   "what": "Trained models: smoke miss risk (M5), extinction, burning rate, cool flames (M7)"
+   "what": "Trained models: smoke miss risk (M5), flame spread (M6), extinction, burning rate, cool flames (M7)"
   },
   {
    "name": "drift",
@@ -144,6 +144,18 @@
    "status": "reported",
    "owner": "Dashboard",
    "what": "India angle: Gaganyaan and Bharatiya Antariksh Station facts with verification levels"
+  },
+  {
+   "name": "spread_predictor",
+   "status": "model",
+   "owner": "M6b",
+   "what": "Flame spread rate (lo, mid, hi), will-it-spread verdict and calibration label by material, flow and O2"
+  },
+  {
+   "name": "growth_examples",
+   "status": "model",
+   "owner": "M6b",
+   "what": "Growth simulation: burning area over time for three worked examples"
   }
  ]
 }

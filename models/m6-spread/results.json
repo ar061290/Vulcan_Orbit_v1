@@ -1,0 +1,227 @@
+{
+ "rows": 39,
+ "tests": 18,
+ "sessions": [
+  "GMT188",
+  "GMT192",
+  "GMT196",
+  "GMT204",
+  "GMT212",
+  "GMT213",
+  "GMT51"
+ ],
+ "points_per_session": {
+  "GMT188": 1,
+  "GMT192": 13,
+  "GMT196": 5,
+  "GMT204": 7,
+  "GMT212": 5,
+  "GMT213": 1,
+  "GMT51": 7
+ },
+ "de_ris": {
+  "T_f_21_K": 2496.97,
+  "F_range": [
+   3.8153,
+   5.1891
+  ],
+  "regime_counts": {
+   "thick": 28,
+   "thin": 11
+  },
+  "median_obs_over_pred": 0.2849,
+  "r2": -40.0264,
+  "r2_range": [
+   -224.825,
+   -11.4497
+  ],
+  "mae_mm_s": 0.1626,
+  "mae_range": [
+   0.1039,
+   0.2284
+  ]
+ },
+ "candidates": {
+  "session": {
+   "a_calibrated_deris": {
+    "r2": -0.6797,
+    "mae": 0.0329,
+    "r2_range": [
+     -3.8668,
+     -0.1401
+    ],
+    "mae_range": [
+     0.0234,
+     0.0398
+    ]
+   },
+   "b_linear": {
+    "r2": 0.2602,
+    "mae": 0.0193,
+    "r2_range": [
+     -2.2764,
+     0.5835
+    ],
+    "mae_range": [
+     0.0123,
+     0.028
+    ]
+   },
+   "c_gp": {
+    "r2": 0.0126,
+    "mae": 0.0212,
+    "r2_range": [
+     -5.1022,
+     0.7649
+    ],
+    "mae_range": [
+     0.0084,
+     0.0359
+    ]
+   },
+   "d_gbt": {
+    "r2": 0.331,
+    "mae": 0.0186,
+    "r2_range": [
+     -2.3375,
+     0.8065
+    ],
+    "mae_range": [
+     0.0119,
+     0.0258
+    ]
+   }
+  },
+  "test": {
+   "a_calibrated_deris": {
+    "r2": -0.7706,
+    "mae": 0.0342,
+    "r2_range": [
+     -3.5813,
+     -0.1954
+    ],
+    "mae_range": [
+     0.0235,
+     0.0415
+    ]
+   },
+   "b_linear": {
+    "r2": 0.4605,
+    "mae": 0.0146,
+    "r2_range": [
+     0.2223,
+     0.6519
+    ],
+    "mae_range": [
+     0.008,
+     0.0191
+    ]
+   },
+   "c_gp": {
+    "r2": 0.6586,
+    "mae": 0.0122,
+    "r2_range": [
+     0.4086,
+     0.7655
+    ],
+    "mae_range": [
+     0.0066,
+     0.016
+    ]
+   },
+   "d_gbt": {
+    "r2": 0.603,
+    "mae": 0.0132,
+    "r2_range": [
+     -0.1449,
+     0.8537
+    ],
+    "mae_range": [
+     0.0081,
+     0.0164
+    ]
+   }
+  }
+ },
+ "best": "d_gbt",
+ "final": "a_calibrated_deris",
+ "final_name": "de Ris x one fitted constant",
+ "point_range_log_quantiles": [
+  -1.1229,
+  1.0853
+ ],
+ "point_range_coverage": 0.9487,
+ "drivers": [
+  {
+   "name": "Fuel thickness",
+   "share": 0.7944
+  },
+  {
+   "name": "One or two sides burning",
+   "share": 0.2056
+  },
+  {
+   "name": "Sample width",
+   "share": 0.0
+  },
+  {
+   "name": "Opposed-flow speed",
+   "share": 0.0
+  },
+  {
+   "name": "Oxygen",
+   "share": 0.0
+  }
+ ],
+ "driver_mae_rise_mm_s": {
+  "Fuel thickness": 0.0032,
+  "Sample width": 0.0,
+  "One or two sides burning": 0.0008,
+  "Opposed-flow speed": 0.0,
+  "Oxygen": 0.0
+ },
+ "leakage": {
+  "group_disjoint_asserted_every_fold": true,
+  "inputs": [
+   "thickness_mm",
+   "width_cm",
+   "sides_burning",
+   "velocity_cm_s",
+   "o2_vol_pct"
+  ],
+  "inputs_encoding_spread_rate": [],
+  "triggered": false
+ },
+ "rules": {
+  "P1_r2_ge_0.60": {
+   "value": -0.6797,
+   "pass": false
+  },
+  "P2_beats_de_ris": {
+   "mae": [
+    0.0329,
+    0.1626
+   ],
+   "r2": [
+    -0.6797,
+    -40.0264
+   ],
+   "pass": true
+  },
+  "P3_learned_part": {
+   "pass": null,
+   "note": "not applicable: no learned shape kept"
+  },
+  "P4_range": {
+   "range": [
+    -3.8668,
+    -0.1401
+   ],
+   "weak_lower_bound": true
+  }
+ },
+ "no_spread_cases": {
+  "real": 26,
+  "reported": 17
+ }
+}

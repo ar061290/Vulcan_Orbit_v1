@@ -1,0 +1,31 @@
+# Observed no-spread cases that can be placed on the (flow, O2) plane. Built by hand from models/m6-spread/no_spread_cases.csv (M6 output, unchanged).
+# Placement rule (written in RULES.md before any verdict was computed): a case is placed only if the flow at which the outcome happened is a number
+#   in the record. "a to b" (flow changed during the test, then quenched) -> placed at b. "10 blowoff" -> 10. "5 3 2 ext" -> 2 (last number before the
+#   outcome word). "10 5 3 0ext" -> 0. "4 incr to 26.5 ... blowoff" -> 26.5. Table 2.1 "went out below x" -> the interval [0, x].
+#   "5 would not stay lit 10 15 ibid" -> three rows at 5, 10 and 15 cm/s.
+# O2: the record's reading(s) at that test; lo/hi = min/max of initial and final readings when both exist.
+# Cases NOT placed (flow at the outcome not a number; listed in DOMAIN.md): B21, O4, O6, O7, O8a, O8b, O9, O11, O12, O14, O19, P1, P5, P9, P10, P13a,
+#   P13b, P22a, P22b, P25. Excluded: Table 7.1 "Reused, did not ignite" (T23, T28a, T28b: partly burned reused samples; the report says these "provided
+#   less quantitative data") and "No blowoff" (T15, T17: these flames kept spreading).
+# geometry: film = PMMA under 0.5 mm; slab = PMMA plate 1-5 mm; rod = PMMA cylinder; fabric = SIBAL. Verdicts match material + flow direction + geometry.
+case_id,status,source,material,geometry,flow_direction,thickness_mm,width_cm,flow_lo_cm_s,flow_hi_cm_s,o2_lo_vol_pct,o2_hi_vol_pct,outcome,record_as_written
+B14,real,PSI-25 Experimental table,PMMA,film,opposed,0.2,1,2,2,15.0,15.0,ext,"Air display: 5 3 2 ext; O2 15.0 to none"
+B18,real,PSI-25 Experimental table,PMMA,film,opposed,0.2,1,10,10,17.4,17.4,blowoff,"Air display: 10 blowoff; O2 17.4 to 17.4"
+B19,real,PSI-25 Experimental table,PMMA,film,opposed,0.1,2,10,10,17.2,17.3,blowoff,"Air display: 10 blowoff; O2 17.3 to 17.2"
+M17,real,PSI-25 Experimental table,PMMA,slab,opposed,2,2,0,0,17.1,18.8,ext,"Air display: 10 5 3 0ext; O2 18.8 to 17.1"
+P8_5,real,PSI-25 Experimental table,PMMA,rod,opposed,9.525,,5,5,16.3,16.4,would not stay lit,"Air display: 5 would not stay lit 10 15 ibid; O2 16.4 to 16.3"
+P8_10,real,PSI-25 Experimental table,PMMA,rod,opposed,9.525,,10,10,16.3,16.4,would not stay lit,"(same record, 'ibid' at 10)"
+P8_15,real,PSI-25 Experimental table,PMMA,rod,opposed,9.525,,15,15,16.3,16.4,would not stay lit,"(same record, 'ibid' at 15)"
+O22,real,PSI-25 Experimental table,PMMA,rod,concurrent,12.7,,26.5,26.5,14.9,15.4,"blowoff, out","Air display: 4 incr to 26.5; fan: 49 (pot 1.1) blowoff pot 5 out at fan 87; O2 15.4 to 14.9"
+GMT45-T4,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,2.2,2.2,2.2,18.7,18.7,Quenched,"10 to 2.2 cm/s, 18.7%"
+GMT100-T13,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,2.2,2.2,2.2,17.5,17.5,Quenched,"4 to 2.2 cm/s, 17.5%"
+GMT175-T18,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,2.2,2.6,2.6,17.4,17.4,Quenched,"5 to 2.6 cm/s, 17.4%"
+GMT178-T14,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,2.2,2.8,2.8,16.9,16.9,Quenched,"4 to 2.8 cm/s, 16.9%"
+GMT190-T20,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,1.2,3,3,17.2,17.2,Quenched,"11 to 3 cm/s, 17.2%"
+GMT190-T22,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,1.2,5,5,17.1,17.1,Quenched,"10.5 to 5 cm/s, 17.1%"
+GMT175-T9,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,2.2,10,10,16.4,16.4,No ignition,"10 cm/s, 16.4%"
+GMT175-T10,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,2.2,5,5,16.4,16.4,No ignition,"5 cm/s, 16.4%"
+GMT178-T12,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,2.2,5,5,16.8,16.8,No ignition,"5 cm/s, 16.8%"
+GMT190-T21,reported,NASA/TM-20210011385 Table 7.1,SIBAL,fabric,concurrent,,1.2,47,47,17.2,17.2,Blow-off,"11 to 47 cm/s, 17.2%"
+T2.1-21,reported,NASA/TM-20210011385 Table 2.1,PMMA,film,opposed,0.1,2,0,1.0,21,21,Flame went out below this opposed-flow speed,"1.0 +/- 0.5 cm/s at 21% O2"
+T2.1-16,reported,NASA/TM-20210011385 Table 2.1,PMMA,film,opposed,0.1,2,0,3.0,16,16,Flame went out below this opposed-flow speed,"3.0 +/- 0.5 cm/s at 16% O2"
