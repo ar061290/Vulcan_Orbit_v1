@@ -82,6 +82,42 @@
    "owner": "Dashboard lane",
    "result": null,
    "state": "pending"
+  },
+  {
+   "id": "D1",
+   "what": "Drift model: Smoke mass is conserved (in cabin + left through the return = released)",
+   "ref": "engine/drift.py, run on build",
+   "limit": "0.99 to 1.01",
+   "owner": "Karthikeya",
+   "result": "Pass: 1.0",
+   "state": "pass"
+  },
+  {
+   "id": "D2",
+   "what": "Drift model: Air neither appears nor vanishes inside the cabin (max divergence / mean speed, per metre)",
+   "ref": "engine/drift.py, run on build",
+   "limit": "< 1e-3",
+   "owner": "Karthikeya",
+   "result": "Pass: 4.25e-12",
+   "state": "pass"
+  },
+  {
+   "id": "D3",
+   "what": "Drift model: With the fans off, smoke spreads evenly in every direction",
+   "ref": "engine/drift.py, run on build",
+   "limit": "spread between 4 equal-distance points < 2%",
+   "owner": "Karthikeya",
+   "result": "Pass: 0.0",
+   "state": "pass"
+  },
+  {
+   "id": "D4",
+   "what": "Drift model: Faster air carries smoke to the return sooner (0.05 vs 0.20 m/s)",
+   "ref": "engine/drift.py, run on build",
+   "limit": "ratio between 2 and 4 (4 would be pure transport)",
+   "owner": "Karthikeya",
+   "result": "Pass: 55 s vs 17 s, ratio 3.3",
+   "state": "pass"
   }
  ]
 }

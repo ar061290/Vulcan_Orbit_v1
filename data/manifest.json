@@ -45,9 +45,15 @@
   },
   {
    "name": "drift",
-   "status": "missing",
-   "owner": "Mukund",
+   "status": "model",
+   "owner": "Karthikeya",
    "what": "Smoke drift simulation frames"
+  },
+  {
+   "name": "whatif",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "What-if runs: share of fires caught by each detector layout"
   },
   {
    "name": "response_trials",
