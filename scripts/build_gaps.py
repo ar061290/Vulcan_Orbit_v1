@@ -29,7 +29,8 @@ for inv, g in P.groupby("inv"):
                        points=[[float(round(a, 2)), float(round(b, 1))] for a, b in sorted(set(zip(g.o2.round(1), g.kpa.round(0))))]))
 def near(kind, o2, kpa, do2=3, dk=10):
     g = P[P.kind == kind]; return int(((g.o2 - o2).abs() <= do2).mul((g.kpa - kpa).abs() <= dk).sum())
-probe = [("ISS cabin air", 21, 101.3), ("34% O2 at 70.3 kPa (10.2 psi)", 34, 70.3), ("26.5% O2 at 70.3 kPa (10.2 psi)", 26.5, 70.3)]
+probe = [("ISS cabin air", 21, 101.3), ("34% O2 at 70.3 kPa (10.2 psi)", 34, 70.3), ("26.5% O2 at 70.3 kPa (10.2 psi)", 26.5, 70.3),
+         ("32% O2 at 55.2 kPa (8.0 psia, NASA EAWG 2010 recommendation)", 32, 55.2)]
 grid = [dict(atmosphere=n, o2=o, kpa=k, counts={kind: near(kind, o, k) for kind in ("solids", "liquid droplets", "gas flames")}) for n, o, k in probe]
 verdicts = []
 s = [t for t in tested if t["kind"] == "solids"][0]
@@ -40,8 +41,14 @@ for g in grid:
     if missing: verdicts.append(dict(text=f"{g['atmosphere']}: no {', no '.join(missing)} tests within 3 O2 points and 10 kPa.", source="Computed from the PSI tables listed under 'tested'"))
 verdicts.append(dict(text="No combustion data at lunar or Martian gravity in these archives: Moon and Mars answers can only be bounded by the 0 g and 1 g results.",
                      source="All investigations here ran in orbit (0 g); the challenge brief notes the same gap"))
+# Large-scale flight burns outside the PSI tables, as published (status reported, drawn separately, not counted above).
+gas = json.loads((ROOT / "data/saffire_gas.json").read_text())
+reported = dict(name="Saffire IV-VI (large burns in Cygnus)", kind="solids", status="reported", source=gas["source"], source_url=gas["source_url"],
+                points=[[t["o2"], t["kPa"], t["test"]] for t in gas["tests"]])
+verdicts.append(dict(text="Saffire VI (2024) burned large cloth and acrylic samples at 54-55 kPa and 29-31% O2, the closest large-scale flight data to the 8 psia / 32% exploration atmosphere. These are 3 burns in one vehicle: a bound, not a trend.",
+                     source="ICES-2024-365 (reported); EAWG recommendation: NASA/TP-2010-216134"))
 out = dict(status="real", source="NASA PSI summary tables (FLEX PSI-69, CFI PSI-39, BASS-II PSI-25, ACME CFI-G PSI-159, ACME Flame Design PSI-10), downloaded 14 Nov 2026",
-           axes=["O2, % by volume", "Pressure, kPa"], units=dict(o2="% by volume", kpa="kPa"), tested=tested, probes=grid, verdicts=verdicts,
+           axes=["O2, % by volume", "Pressure, kPa"], units=dict(o2="% by volume", kpa="kPa"), tested=tested, reported=reported, probes=grid, verdicts=verdicts,
            note="Coverage is read from the published summary tables only. A point means a test was run there, not that it burned. Exploration atmospheres are shown as probes, not as NASA's chosen design.")
 (ROOT / "data" / "gaps.json").write_text(json.dumps(out, indent=1))
 m = json.loads((ROOT / "data/manifest.json").read_text())

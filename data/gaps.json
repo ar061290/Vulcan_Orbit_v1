@@ -1719,6 +1719,40 @@
    ]
   }
  ],
+ "reported": {
+  "name": "Saffire IV-VI (large burns in Cygnus)",
+  "kind": "solids",
+  "status": "reported",
+  "source": "Urban, Ruff, Ferkul et al., 'Saffire VI preliminary results', ICES-2024-365 (2024), Table 2 and text. Read from the NASA NTRS PDF; values as published, not checked by us against raw data.",
+  "source_url": "https://ntrs.nasa.gov/citations/20240002981",
+  "points": [
+   [
+    22.0,
+    100.0,
+    "IV-1"
+   ],
+   [
+    26.2,
+    70.7,
+    "V-2"
+   ],
+   [
+    31.0,
+    54.1,
+    "VI-2"
+   ],
+   [
+    30.3,
+    54.6,
+    "VI-3"
+   ],
+   [
+    28.8,
+    55.2,
+    "VI-4"
+   ]
+  ]
+ },
  "probes": [
   {
    "atmosphere": "ISS cabin air",
@@ -1749,6 +1783,16 @@
     "liquid droplets": 16,
     "gas flames": 0
    }
+  },
+  {
+   "atmosphere": "32% O2 at 55.2 kPa (8.0 psia, NASA EAWG 2010 recommendation)",
+   "o2": 32,
+   "kpa": 55.2,
+   "counts": {
+    "solids": 0,
+    "liquid droplets": 0,
+    "gas flames": 14
+   }
   }
  ],
  "verdicts": [
@@ -1765,8 +1809,16 @@
    "source": "Computed from the PSI tables listed under 'tested'"
   },
   {
+   "text": "32% O2 at 55.2 kPa (8.0 psia, NASA EAWG 2010 recommendation): no solids, no liquid droplets tests within 3 O2 points and 10 kPa.",
+   "source": "Computed from the PSI tables listed under 'tested'"
+  },
+  {
    "text": "No combustion data at lunar or Martian gravity in these archives: Moon and Mars answers can only be bounded by the 0 g and 1 g results.",
    "source": "All investigations here ran in orbit (0 g); the challenge brief notes the same gap"
+  },
+  {
+   "text": "Saffire VI (2024) burned large cloth and acrylic samples at 54-55 kPa and 29-31% O2, the closest large-scale flight data to the 8 psia / 32% exploration atmosphere. These are 3 burns in one vehicle: a bound, not a trend.",
+   "source": "ICES-2024-365 (reported); EAWG recommendation: NASA/TP-2010-216134"
   }
  ],
  "note": "Coverage is read from the published summary tables only. A point means a test was run there, not that it burned. Exploration atmospheres are shown as probes, not as NASA's chosen design."
