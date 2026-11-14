@@ -1,0 +1,8 @@
+# M7 build (python models/m7-extinction/build.py). Tested with Python 3.14.7 on Windows 10.
+numpy==2.5.4
+pandas==3.1.1
+scipy==1.18.1
+scikit-learn==1.9.1
+joblib==1.6.0          # installed with scikit-learn; runs the CV folds in parallel
+matplotlib==3.11.2     # check plots only
+openpyxl==3.1.5        # reads the CFI .xlsx (added with the M7 owner's approval, 14 Nov 2026)
