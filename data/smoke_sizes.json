@@ -1,0 +1,33 @@
+{
+ "status": "reported",
+ "source": "SAME-R unaged geometric mean diameters, NASA NTRS 20150010172, as summarised in our research notes",
+ "source_url": "https://ntrs.nasa.gov/citations/20150010172",
+ "note": "Sources disagree on where the station detector becomes insensitive (0.3, 0.5 or 1 micron), so the threshold is a control, not a fixed fact.",
+ "detector_thresholds_nm": [
+  300,
+  500,
+  1000
+ ],
+ "materials": [
+  {
+   "name": "Kapton",
+   "d_nm": 47
+  },
+  {
+   "name": "Teflon",
+   "d_nm": 93
+  },
+  {
+   "name": "Lamp wick",
+   "d_nm": 103
+  },
+  {
+   "name": "Silicone",
+   "d_nm": 152
+  },
+  {
+   "name": "Pyrell",
+   "d_nm": 177
+  }
+ ]
+}

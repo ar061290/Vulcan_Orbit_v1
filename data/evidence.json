@@ -1,0 +1,87 @@
+{
+ "status": "plan",
+ "note": "Pass limits are written here before any check runs. Do not change a limit after seeing a result.",
+ "checks": [
+  {
+   "id": "E1",
+   "what": "Locator error on the 25-point grid",
+   "ref": "Measured positions on the dome",
+   "limit": "Mean error and worst error reported; limit set by the team before testing",
+   "owner": "Mukund",
+   "result": null,
+   "state": "pending"
+  },
+  {
+   "id": "E2",
+   "what": "Locator: physics model vs neural net on the same held-out points",
+   "ref": "Dome data",
+   "limit": "Both scores shown, whichever wins",
+   "owner": "Mukund",
+   "result": null,
+   "state": "pending"
+  },
+  {
+   "id": "E3",
+   "what": "Detection-time extraction reproduces a published Saffire alarm time",
+   "ref": "NASA Saffire papers",
+   "limit": "Within the limit the team writes here",
+   "owner": "Karthikeya",
+   "result": null,
+   "state": "pending"
+  },
+  {
+   "id": "E4",
+   "what": "Spread model beats the textbook formula on held-out test sessions",
+   "ref": "BASS-II, grouped by session",
+   "limit": "Report both; no claim if it does not beat it",
+   "owner": "Karthikeya",
+   "result": null,
+   "state": "pending"
+  },
+  {
+   "id": "E5",
+   "what": "Extinction model on held-out FLEX sessions",
+   "ref": "FLEX, grouped by session",
+   "limit": "Report AUC with a range",
+   "owner": "Karthikeya",
+   "result": null,
+   "state": "pending"
+  },
+  {
+   "id": "E6",
+   "what": "Every model check can fail: inject a wrong value and watch it fail",
+   "ref": "Test suite",
+   "limit": "All checks fail when broken on purpose",
+   "owner": "Evidence lane",
+   "result": null,
+   "state": "pending"
+  },
+  {
+   "id": "E7",
+   "what": "Assistant scorecard: 30 questions with known answers",
+   "ref": "Gold set",
+   "limit": "Correct numbers, valid citations, correct refusals; all three reported",
+   "owner": "Assistant lane",
+   "result": null,
+   "state": "pending"
+  },
+  {
+   "id": "E8",
+   "what": "Response trials measured by sensors, before and after",
+   "ref": "Dome data",
+   "limit": "Change reported with repeat trials, not judged by eye",
+   "owner": "Mukund",
+   "result": null,
+   "state": "pending"
+  },
+  {
+   "id": "E9",
+   "what": "Site opens in a private window; share links work; phone layout usable",
+   "ref": "Live site",
+   "limit": "All pass before submission",
+   "owner": "Dashboard lane",
+   "result": null,
+   "state": "pending"
+  }
+ ]
+}
