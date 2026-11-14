@@ -1,0 +1,20 @@
+# Concurrent-flow flame spread over thin cellulose fabric in spacecraft microgravity. Status: reported (copied from a paper, not checked by us).
+# Source: Olson S.L., Ruff G.A., Ferkul P.V., Owens J.C., Easton J., Liao Y.-T., T'ien J.S., Toth B., Jomaas G., Fernandez-Pello C., Legros G.,
+#   Guibaud A., Fujita O., Smirnov N., Urban D.L., "The effect of duct size, sample size, and fuel composition on concurrent flame spread over
+#   large cellulose samples in microgravity", accepted author manuscript ("Full Length Article"; journal and year not printed in the manuscript),
+#   UCL Discovery eprint 10164340: https://discovery.ucl.ac.uk/id/eprint/10164340/ . PDF sha256 455b945bb5cb50eb (full hash in DATA notes of DOMAIN.md).
+#   "Table 1: Thin Fuel Concurrent Flow Test Matrix and Flame Measurements", PDF page 9. Transcribed by hand 14 Nov 2026.
+# Columns as printed: Flow cm/s; sample l x w cm; duct L x W x H cm; O2 % by vol (footnote +: ISS atmosphere at hatch closing for Saffire I-IV;
+#   Saffire V 26.9% O2 at 76 kPa); P kPa; Vf cm/s; Lf cm; Lp cm. Hf and thermocouple columns not copied.
+# Area density (PDF page 7): SIBAL "total area density of 18.05 mg/cm2 (13.54 mg/cm2 cotton)"; cotton "area density of 18.1 mg/cm2".
+# role: calibration = used to fit the one concurrent constant; excluded = Saffire-II rows, kept out because PSI-99 (Saffire-II) is the independent check.
+#   The paper lists Saffire-II sample 6 at 25 cm/s; NASA's PSI-99 table lists it at 20 cm/s. Conflict recorded, PSI-99 used as primary (README Decisions).
+flight,sample,material,flow_cm_s,sample_l_cm,sample_w_cm,duct_LxWxH_cm,o2_vol_pct,pressure_kpa,spread_cm_s,flame_length_cm,pyrolysis_length_cm,area_density_mg_cm2,role
+Saffire I,1,SIBAL,20,94,40.6,109x46x51,21.7,102,0.18,4,4,18.05,calibration
+Saffire II,5,SIBAL,20,29,5,109x46x51,22.1,103,0.21,4,4,18.05,excluded
+Saffire II,6,SIBAL,25,29,5,109x46x51,22.1,103,0.26,5,5,18.05,excluded
+Saffire III,1,SIBAL,25,94,40.6,109x46x51,21.2,99,0.23,5,5,18.05,calibration
+Saffire IV,4,SIBAL,20,50,40.6,109x46x30.5,23.1,99,0.36,8.5,8.5,18.05,calibration
+Saffire V,5,Cotton,20,50,40.6,109x46x30.5,26.9,76,0.34,14,10,18.1,calibration
+BASS,1,SIBAL,19,10,1.2,17x7.6x7.6,21.5,101,0.27,2.2,,18.05,calibration
+BASS,4,SIBAL,22,10,2.2,17x7.6x7.6,21.6,101,0.51,6.2,,18.05,calibration
