@@ -1,43 +1,592 @@
 {
  "status": "reported",
- "note": "Saved answers so the demo never depends on a live call. Each answer lists the rows or reports it used.",
+ "note": "Every answer is written by scripts/build_assistant.py from the data files named in its trace; the site matches questions to answers by keywords and never generates text.",
  "items": [
   {
-   "q": "Which materials make smoke that is hardest for a station smoke detector to see?",
-   "a": "In NASA's SAME-2 flight experiment, Kapton made the finest smoke of the five materials tested: a geometric mean diameter of 42 nm unaged (89 nm after 12 minutes of aging), followed by Teflon at 81 nm. Using the paper's own size spreads, about 82% of Kapton's smoke mass is in particles finer than 500 nm, against 9% for silicone. Light-scattering detectors like the station's respond weakly to particles that fine, so Kapton and Teflon smoke is the hardest to see. The paper says the small Kapton and Teflon particles will make detection challenging for light scattering devices.",
+   "id": "saffire-latency",
+   "q": "How long did the smoke detector take to notice a real fire in orbit?",
+   "a": "In Saffire-III, a real fire on an uncrewed Cygnus cargo ship, the flame radiometers responded 7 s after ignition of Sample 1. The cabin smoke detector's scatter channel crossed our alarm rule after 92 s (plus or minus 10 s; 72 s with a looser threshold). Its obscuration channel never rose. The alarm rule is ours (baseline + 5 SD), because the file holds raw counts, not the vehicle's setpoint.",
    "sources": [
     {
-     "label": "Urban et al. 2012, SAME-2 particle sizes, AIAA 2012-3536 (NASA NTRS 20130000422), Table 1",
+     "label": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",
+     "url": "https://doi.org/10.60555/040q-4h36"
+    },
+    {
+     "label": "Detect page, Blind Spot panel",
+     "url": "#/detect"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "smoke",
+    "detector",
+    "alarm",
+    "notice",
+    "slow",
+    "saffire",
+    "latency",
+    "orbit",
+    "fire",
+    "long",
+    "time",
+    "detect"
+   ],
+   "trace": "data/saffire_latency.json burns[s1].channels[radiometer, scatter, obscuration].alarm_s"
+  },
+  {
+   "id": "saffire-what",
+   "q": "What was Saffire-III?",
+   "a": "Saffire-III burned large fabric samples inside an uncrewed Cygnus cargo vehicle after it left the space station, at 30 cm/s airflow, one with the flow and one against it. Its telemetry file has 11,450-row flight telemetry file. NASA's summary table lists the two samples.",
+   "sources": [
+    {
+     "label": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",
+     "url": "https://doi.org/10.60555/040q-4h36"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "saffire",
+    "iii",
+    "cygnus",
+    "what",
+    "experiment",
+    "fabric"
+   ],
+   "trace": "data/investigations.json items[saffire3]"
+  },
+  {
+   "id": "smoke-fine",
+   "q": "Which materials make smoke that is hardest for a station smoke detector to see?",
+   "a": "In NASA's SAME-2 flight experiment, Kapton made the finest smoke: geometric mean diameter 42 nm unaged. From the paper's own size spreads, 82% of Kapton's smoke mass is in particles finer than 500 nm, against 9% for silicone. Light-scattering detectors like the station's respond weakly to particles that fine. The paper itself says the small Kapton and Teflon particles make detection challenging.",
+   "sources": [
+    {
+     "label": "Urban et al. 2012, SAME-2, AIAA 2012-3536 (NTRS 20130000422)",
      "url": "https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf"
     },
     {
-     "label": "ISS detector calibration (NASA NTRS 20170000248)",
-     "url": "https://ntrs.nasa.gov/api/citations/20170000248/downloads/20170000248.pdf"
+     "label": "Detect page, smoke miss panel",
+     "url": "#/detect"
     }
    ],
-   "kind": "answer"
+   "kind": "answer",
+   "keywords": [
+    "smoke",
+    "fine",
+    "small",
+    "particles",
+    "material",
+    "kapton",
+    "teflon",
+    "hardest",
+    "see",
+    "miss",
+    "detector"
+   ],
+   "trace": "data/smoke_sizes.json materials[Kapton, Silicone].Dg_nm, mass_below"
   },
   {
-   "q": "How fast does air move inside the space station?",
-   "a": "NASA's requirement for the space station is an effective air velocity in the cabin aisleway of 4.6 to 12.2 metres per minute, which is about 0.08 to 0.2 metres per second. With no buoyancy, smoke and heat go wherever the ventilation carries them instead of rising.",
+   "id": "smoke-airflow",
+   "q": "Does airflow change whether the detector can see the smoke?",
+   "a": "In 16 SAME-2 flight tests, faster air past the heated sample gave finer smoke. Our model ranks air velocity as the main driver (76%) of whether most smoke mass falls below 500 nm. Its score on held-out tests is AUC 0.746 (0.44 to 1.00), only level with knowing the material alone, so treat it as a trend, not a classifier.",
    "sources": [
     {
-     "label": "Link and Balistreri, ISS inter-module ventilation, ICES 2015 (NASA NTRS 20150009509), p. 10",
+     "label": "Urban et al. 2012, SAME-2, AIAA 2012-3536 (NTRS 20130000422)",
+     "url": "https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf"
+    },
+    {
+     "label": "Predict page, smoke miss model",
+     "url": "#/predict"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "airflow",
+    "air",
+    "flow",
+    "velocity",
+    "smoke",
+    "size",
+    "detector",
+    "see",
+    "change"
+   ],
+   "trace": "data/models.json models[smoke-miss].drivers, score, score_range"
+  },
+  {
+   "id": "airflow-iss",
+   "q": "How fast does air move inside the space station?",
+   "a": "NASA's requirement is an effective air velocity in the cabin aisleway of 4.6 to 12.2 metres per minute, about 0.08 to 0.2 metres per second. With no buoyancy, smoke and heat go wherever the ventilation carries them instead of rising.",
+   "sources": [
+    {
+     "label": "Link and Balistreri, ICES 2015 (NTRS 20150009509), p. 10",
      "url": "https://ntrs.nasa.gov/api/citations/20150009509/downloads/20150009509.pdf"
     }
    ],
-   "kind": "answer"
+   "kind": "answer",
+   "keywords": [
+    "air",
+    "airflow",
+    "fast",
+    "ventilation",
+    "speed",
+    "station",
+    "iss",
+    "move",
+    "cabin"
+   ],
+   "trace": "data/whatif.json varied.airflow_m_s; NTRS 20150009509 p. 10"
   },
   {
-   "q": "How fast will a fire spread on the Moon?",
-   "a": "No NASA evidence. The NASA archive we use has no combustion data taken at lunar gravity. Microgravity and Earth-gravity results can bound the answer, but we do not predict a value in between.",
+   "id": "placement",
+   "q": "Where should a smoke detector go in a spacecraft cabin?",
+   "a": "In our drift model of a ventilated cabin, a detector at the air return caught 48% of simulated fires within 2 minutes, and one on the ceiling 45%: a small difference. Fire size mattered far more than position. At an ISS-like alarm level of 10 mg/m3 the same detectors caught 2% and 1%. This is a screening model tuned on Saffire-III, not a design rule for a real module.",
    "sources": [
     {
-     "label": "Challenge brief: no partial-gravity combustion data in PSI",
-     "url": "https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/"
+     "label": "Predict page, what-if runs",
+     "url": "#/predict"
+    },
+    {
+     "label": "NASA NTRS 20170002629 (ISS detection threshold)",
+     "url": "https://ntrs.nasa.gov/api/citations/20170002629/downloads/20170002629.pdf"
+    },
+    {
+     "label": "Saffire VI, ICES-2024-365 (NTRS 20240002981)",
+     "url": "https://ntrs.nasa.gov/api/citations/20240002981/downloads/Saffire-ICES-2024-ICES-365-accepted%20final.pdf"
     }
    ],
-   "kind": "refusal"
+   "kind": "answer",
+   "keywords": [
+    "detector",
+    "place",
+    "placement",
+    "where",
+    "ceiling",
+    "return",
+    "position",
+    "put",
+    "cabin"
+   ],
+   "trace": "data/whatif.json layouts[At the air return, Ceiling].caught_120, caught_120_at_10mg"
+  },
+  {
+   "id": "alarm-level",
+   "q": "What smoke level sets off a spacecraft smoke alarm?",
+   "a": "NASA's Saffire VI paper uses 1 mg/m3 and calls it a relatively tight alarm threshold. A NASA study of smoke detection gives about 10 mg/m3 as the ISS detection threshold and 2 mg/m3 for the Space Shuttle. Our models report catch rates at both 1 and 10 mg/m3.",
+   "sources": [
+    {
+     "label": "Saffire VI, ICES-2024-365 (NTRS 20240002981)",
+     "url": "https://ntrs.nasa.gov/api/citations/20240002981/downloads/Saffire-ICES-2024-ICES-365-accepted%20final.pdf"
+    },
+    {
+     "label": "NASA NTRS 20170002629 (ISS detection threshold)",
+     "url": "https://ntrs.nasa.gov/api/citations/20170002629/downloads/20170002629.pdf"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "alarm",
+    "level",
+    "threshold",
+    "mg",
+    "concentration",
+    "sets",
+    "trigger",
+    "smoke"
+   ],
+   "trace": "data/whatif.json alarm_mg_m3, alarm_hi_mg_m3"
+  },
+  {
+   "id": "smoke-clear",
+   "q": "How long does smoke take to clear from a spacecraft cabin?",
+   "a": "Tuning our drift model on the Saffire-III smoke detector record gives a clearance time of 120 to 240 s (the time for ventilation and filtering to remove smoke). That range comes from one detector in one vehicle.",
+   "sources": [
+    {
+     "label": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",
+     "url": "https://doi.org/10.60555/040q-4h36"
+    },
+    {
+     "label": "Predict page, flight-data check",
+     "url": "#/predict"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "smoke",
+    "clear",
+    "clearance",
+    "remove",
+    "filter",
+    "long",
+    "linger"
+   ],
+   "trace": "data/drift_calibration.json clearance_s_range"
+  },
+  {
+   "id": "flame-shape",
+   "q": "Why is a flame round in space?",
+   "a": "Without gravity, hot gas does not rise, so fuel and oxygen meet only by diffusion, which is the same in every direction. In our flame model a heptane droplet flame in still air has a length-to-width ratio of 1.0 in orbit and 13.7 at Earth gravity. The shapes follow the physics; the model's absolute sizes are 2 to 3 times too large (check S1-height, failed).",
+   "sources": [
+    {
+     "label": "Flame page, simulator",
+     "url": "#/flame"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "flame",
+    "round",
+    "sphere",
+    "spherical",
+    "shape",
+    "space",
+    "gravity",
+    "why",
+    "ball"
+   ],
+   "trace": "data/flame_static.json flames[n-heptane, 0 g / Earth 1 g].aspect"
+  },
+  {
+   "id": "droplet-rate",
+   "q": "How fast does a fuel droplet burn in microgravity?",
+   "a": "NASA's FLEX experiment burned 150 methanol and 107 heptane droplets on the space station. Our d-squared-law model matches the measured burning rate within 6% for methanol and 29% for heptane on held-out tests; for heptane a single constant rate does better (22%).",
+   "sources": [
+    {
+     "label": "NASA PSI-69, FLEX (doi 10.60555/mbq8-0451)",
+     "url": "https://doi.org/10.60555/mbq8-0451"
+    },
+    {
+     "label": "Flame page, FLEX panel",
+     "url": "#/flame"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "droplet",
+    "burn",
+    "rate",
+    "fast",
+    "fuel",
+    "flex",
+    "heptane",
+    "methanol"
+   ],
+   "trace": "data/flame_static.json flex_K_stats"
+  },
+  {
+   "id": "extinction-o2",
+   "q": "At what oxygen level does a droplet flame go out?",
+   "a": "From NASA FLEX data, the M7 model gives a 3 mm heptane droplet at 1 atm a 50% chance of going out at 19.5% oxygen (18.7 to 20.9%). Replacing 20% of the nitrogen with CO2 raises that to 21.7%. These are model outputs for one droplet size, not flammability limits.",
+   "sources": [
+    {
+     "label": "NASA PSI-69, FLEX (doi 10.60555/mbq8-0451)",
+     "url": "https://doi.org/10.60555/mbq8-0451"
+    },
+    {
+     "label": "Respond page, extinction explorer",
+     "url": "#/respond"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "oxygen",
+    "o2",
+    "extinction",
+    "out",
+    "goes",
+    "droplet",
+    "level",
+    "flame",
+    "extinguish"
+   ],
+   "trace": "data/m7_explorer.json extinction.table"
+  },
+  {
+   "id": "suppressant",
+   "q": "Which gas is better at putting out a droplet flame, CO2 or helium?",
+   "a": "In the M7 model built on NASA FLEX data, adding 20% CO2 or 20% helium in place of nitrogen both raise the oxygen level a flame needs, by about 2 to 3 points. For heptane at 1 atm: 19.5% with no added gas, 21.7% with CO2. The raw FLEX extinction shares by gas reflect NASA's test plan, so they are not a fair comparison on their own.",
+   "sources": [
+    {
+     "label": "NASA PSI-69, FLEX (doi 10.60555/mbq8-0451)",
+     "url": "https://doi.org/10.60555/mbq8-0451"
+    },
+    {
+     "label": "Respond page",
+     "url": "#/respond"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "co2",
+    "helium",
+    "gas",
+    "suppressant",
+    "putting",
+    "out",
+    "better",
+    "extinguish",
+    "suppression",
+    "nitrogen"
+   ],
+   "trace": "data/m7_explorer.json extinction.table; data/flex_suppression.json"
+  },
+  {
+   "id": "cool-flame",
+   "q": "What is a cool flame and why is it dangerous?",
+   "a": "A cool flame is a low-temperature flame that can keep burning after the visible flame goes out. In NASA's CFI droplet tests the M7 model finds pressure the main driver of whether the cool flame burns the droplet away (AUC 0.82); for a 4.3 mm n-dodecane droplet in air the 50% point is about 3.2 atm. A fire that looks out may not be.",
+   "sources": [
+    {
+     "label": "NASA PSI-39, CFI (doi 10.60555/m6pj-a914)",
+     "url": "https://doi.org/10.60555/m6pj-a914"
+    },
+    {
+     "label": "NASA PSI-159, ACME CFI-G (doi 10.60555/cyt1-kh64)",
+     "url": "https://doi.org/10.60555/cyt1-kh64"
+    },
+    {
+     "label": "Respond page, cool-flame panel",
+     "url": "#/respond"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "cool",
+    "flame",
+    "invisible",
+    "dangerous",
+    "after",
+    "out",
+    "keeps",
+    "burning",
+    "low",
+    "temperature"
+   ],
+   "trace": "data/m7_explorer.json cool_flame"
+  },
+  {
+   "id": "spread",
+   "q": "How fast does fire spread over plastic in microgravity?",
+   "a": "Our de Ris-based model matches NASA BASS-II spread over thin acrylic (100 micron PMMA) within 7% (2 burns), but runs about 3 times too fast for thick acrylic (median error 190% over 39 readings), because thick samples in orbit never reached steady spread. BASS-II spread rates come from NASA's summary report.",
+   "sources": [
+    {
+     "label": "BASS-II summary report, NASA/TM-20210011385",
+     "url": "https://ntrs.nasa.gov/citations/20210011385"
+    },
+    {
+     "label": "NASA PSI-25, BASS-II (doi 10.60555/4qc4-de67)",
+     "url": "https://doi.org/10.60555/4qc4-de67"
+    },
+    {
+     "label": "Flame page, spread panel",
+     "url": "#/flame"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "spread",
+    "fire",
+    "plastic",
+    "acrylic",
+    "pmma",
+    "fast",
+    "solid",
+    "bass"
+   ],
+   "trace": "data/flame_spread.json bass_ii_groups"
+  },
+  {
+   "id": "min-oxygen",
+   "q": "What is the lowest oxygen level at which a thin sheet can burn in orbit?",
+   "a": "Our flame-spread model gives 11% oxygen at about 2.7 cm/s airflow for thin acrylic in orbit. That is probably too low: BASS-II observed spread only down to about 16 to 17%.",
+   "sources": [
+    {
+     "label": "BASS-II summary report, NASA/TM-20210011385",
+     "url": "https://ntrs.nasa.gov/citations/20210011385"
+    },
+    {
+     "label": "Flame page, survival map",
+     "url": "#/flame"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "lowest",
+    "oxygen",
+    "minimum",
+    "burn",
+    "limit",
+    "sheet",
+    "thin",
+    "flammability"
+   ],
+   "trace": "data/flame_spread.json flammability_maps[0 g, 101.3].min_O2"
+  },
+  {
+   "id": "gaps",
+   "q": "What has NASA not tested?",
+   "a": "Solid fuels (BASS-II): tested at 13.6-22.2% O2. The table records no pressure, so we place these tests at cabin pressure (101.3 kPa); that is our assumption. Either way, these archives hold no solid-fuel spread data at a known reduced pressure. 34% O2 at 70.3 kPa (10.2 psi): no solids, no gas flames tests within 3 O2 points and 10 kPa. 26.5% O2 at 70.3 kPa (10.2 psi): no solids, no gas flames tests within 3 O2 points and 10 kPa.",
+   "sources": [
+    {
+     "label": "NASA Physical Sciences Informatics",
+     "url": "https://psi.nasa.gov"
+    },
+    {
+     "label": "Predict page, gap map",
+     "url": "#/predict"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "not",
+    "tested",
+    "gap",
+    "gaps",
+    "missing",
+    "untested",
+    "never",
+    "data"
+   ],
+   "trace": "data/gaps.json verdicts"
+  },
+  {
+   "id": "efield",
+   "q": "Did NASA test electric fields on flames?",
+   "a": "NASA ran 21 test days on the space station in 2018 and ignited 230 methane and ethylene flames with up to 10 kV between the burner and a mesh above it. It measured ion current, how fast the flame responds to the field, soot, and lifted flames. NASA states the research is not aimed at space applications, and putting flames out is not among its stated objectives. Our ion-wind trial is a different question: this panel shows what NASA studied, not that electric fields extinguish fires in orbit.",
+   "sources": [
+    {
+     "label": "NASA PSI-22, ACME E-FIELD Flames (doi 10.60555/se5a-8c73)",
+     "url": "https://doi.org/10.60555/se5a-8c73"
+    },
+    {
+     "label": "Respond page",
+     "url": "#/respond"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "electric",
+    "field",
+    "ion",
+    "wind",
+    "voltage",
+    "efield",
+    "e-field"
+   ],
+   "trace": "data/efield.json finding, totals"
+  },
+  {
+   "id": "datasets",
+   "q": "Which NASA datasets does this project use?",
+   "a": "Mainly NASA Physical Sciences Informatics: Saffire-III telemetry (PSI-100), FLEX (PSI-69), CFI (PSI-39), BASS-II (PSI-25), SAME and SAME-R (PSI-102, PSI-101), Saffire-I and II (PSI-98, PSI-99), ACME E-FIELD (PSI-22), CFI-G (PSI-159) and Flame Design (PSI-10). The Investigations page lists every one with its DOI.",
+   "sources": [
+    {
+     "label": "NASA Physical Sciences Informatics",
+     "url": "https://psi.nasa.gov"
+    },
+    {
+     "label": "Investigations page",
+     "url": "#/explorer"
+    }
+   ],
+   "kind": "answer",
+   "keywords": [
+    "datasets",
+    "data",
+    "nasa",
+    "which",
+    "use",
+    "sources",
+    "psi"
+   ],
+   "trace": "data/investigations.json"
+  },
+  {
+   "id": "moon",
+   "q": "How fast will a fire spread on the Moon?",
+   "a": "No NASA evidence. The archives we use have no combustion data at lunar gravity. Microgravity and Earth results can bound the answer, but we do not predict a value in between.",
+   "sources": [
+    {
+     "label": "NASA Physical Sciences Informatics",
+     "url": "https://psi.nasa.gov"
+    }
+   ],
+   "kind": "refusal",
+   "keywords": [
+    "moon",
+    "lunar"
+   ],
+   "trace": null,
+   "hard": [
+    "moon",
+    "lunar"
+   ]
+  },
+  {
+   "id": "mars",
+   "q": "Would a fire behave differently on Mars?",
+   "a": "No NASA evidence at Martian gravity in the archives we use. Our flame model draws Mars cases only as model output between the 0 g and 1 g results, and labels them as not validated.",
+   "sources": [
+    {
+     "label": "NASA Physical Sciences Informatics",
+     "url": "https://psi.nasa.gov"
+    }
+   ],
+   "kind": "refusal",
+   "keywords": [
+    "mars",
+    "martian"
+   ],
+   "trace": null,
+   "hard": [
+    "mars",
+    "martian"
+   ]
+  },
+  {
+   "id": "safe",
+   "q": "Is a 34% oxygen cabin safe?",
+   "a": "We do not say whether any atmosphere or material is safe. The gap map shows that NASA's archives hold no solid-fuel or gas-flame tests near 34% oxygen at 70.3 kPa.",
+   "sources": [
+    {
+     "label": "NASA Physical Sciences Informatics",
+     "url": "https://psi.nasa.gov"
+    }
+   ],
+   "kind": "refusal",
+   "keywords": [
+    "safe",
+    "safety",
+    "certify",
+    "certified",
+    "34"
+   ],
+   "trace": null,
+   "hard": [
+    "safe",
+    "certify",
+    "certified"
+   ]
+  },
+  {
+   "id": "ionwind",
+   "q": "Does ion wind put out fires in space?",
+   "a": "No NASA evidence. NASA's E-FIELD experiment studied how electric fields change flames; putting flames out is not among its stated objectives, and our bench runs at Earth gravity.",
+   "sources": [
+    {
+     "label": "NASA Physical Sciences Informatics",
+     "url": "https://psi.nasa.gov"
+    }
+   ],
+   "kind": "refusal",
+   "keywords": [
+    "ion",
+    "wind",
+    "put",
+    "out",
+    "space",
+    "extinguish"
+   ],
+   "trace": null,
+   "hard": []
   }
  ]
 }

@@ -1,0 +1,187 @@
+{
+ "status": "real",
+ "source": "NASA PSI-22, ACME E-FIELD Flames (doi 10.60555/se5a-8c73): experiment table and investigation description, CC0.",
+ "finding": "NASA ran 21 test days on the space station in 2018 and ignited 230 methane and ethylene flames with up to 10 kV between the burner and a mesh above it. It measured ion current, how fast the flame responds to the field, soot, and lifted flames. NASA states the research is not aimed at space applications, and putting flames out is not among its stated objectives. Our ion-wind trial is a different question: this panel shows what NASA studied, not that electric fields extinguish fires in orbit.",
+ "units": {
+  "flames_ignited": "count",
+  "fuel_conc": "volume % fuel, diluted with nitrogen"
+ },
+ "quotes": {
+  "objective": "The objective of this investigation is to better understand the relationship between electric field voltage and chemi-ion current, analyze the dynamic response of flames to electric field changes, evaluate soot formation, and characterize stabilized near-limit lifted flames.",
+  "research_impacts": "The E-FIELD Flames research is not being conducted to serve any space applications, but it is possible that its findings could aid the development of future space-based combustion devices (e."
+ },
+ "totals": {
+  "test_days": 21,
+  "flames_ignited": 230
+ },
+ "rows": [
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-03-14",
+   "mesh_polarity": "negative",
+   "fuel": "100% CH4",
+   "fuel_conc": "100%",
+   "flames_ignited": 10
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-03-19",
+   "mesh_polarity": "negative",
+   "fuel": "100% CH4",
+   "fuel_conc": "70%",
+   "flames_ignited": 10
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-03-21",
+   "mesh_polarity": "negative",
+   "fuel": "40% CH4",
+   "fuel_conc": "40%",
+   "flames_ignited": 8
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-03-28",
+   "mesh_polarity": "negative",
+   "fuel": "100% C2H4",
+   "fuel_conc": "80%",
+   "flames_ignited": 10
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-04-02",
+   "mesh_polarity": "negative",
+   "fuel": "30% C2H4",
+   "fuel_conc": "30%",
+   "flames_ignited": 11
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-04-05",
+   "mesh_polarity": "positive",
+   "fuel": "30% C2H4",
+   "fuel_conc": "30%",
+   "flames_ignited": 10
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-04-12",
+   "mesh_polarity": "positive",
+   "fuel": "40% CH4",
+   "fuel_conc": "40%",
+   "flames_ignited": 8
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-04-16",
+   "mesh_polarity": "positive",
+   "fuel": "40% CH4",
+   "fuel_conc": "40%",
+   "flames_ignited": 13
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-04-23",
+   "mesh_polarity": "positive",
+   "fuel": "100% CH4",
+   "fuel_conc": "100%",
+   "flames_ignited": 15
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-05-10",
+   "mesh_polarity": "positive",
+   "fuel": "100% CH4",
+   "fuel_conc": "70%",
+   "flames_ignited": 13
+  },
+  {
+   "round": "First round of tests with coflow burner",
+   "date": "2018-05-17",
+   "mesh_polarity": "positive",
+   "fuel": "100% C2H4",
+   "fuel_conc": "80%",
+   "flames_ignited": 12
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-09-26",
+   "mesh_polarity": "negative",
+   "fuel": "40% CH4",
+   "fuel_conc": "40%",
+   "flames_ignited": 11
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-10-01",
+   "mesh_polarity": "negative",
+   "fuel": "30% C2H4",
+   "fuel_conc": "30%",
+   "flames_ignited": 11
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-10-09",
+   "mesh_polarity": "negative",
+   "fuel": "100% CH4",
+   "fuel_conc": "70%",
+   "flames_ignited": 13
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-10-12",
+   "mesh_polarity": "negative",
+   "fuel": "100% C2H4",
+   "fuel_conc": "100%",
+   "flames_ignited": 10
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-10-17",
+   "mesh_polarity": "negative",
+   "fuel": "100% C2H4",
+   "fuel_conc": "80%",
+   "flames_ignited": 11
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-10-25",
+   "mesh_polarity": "positive",
+   "fuel": "40% CH4",
+   "fuel_conc": "40%",
+   "flames_ignited": 9
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-10-29",
+   "mesh_polarity": "positive",
+   "fuel": "30% C2H4",
+   "fuel_conc": "30%",
+   "flames_ignited": 10
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-11-08",
+   "mesh_polarity": "positive",
+   "fuel": "100% CH4",
+   "fuel_conc": "70%",
+   "flames_ignited": 13
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-11-15",
+   "mesh_polarity": "positive",
+   "fuel": "100% C2H4",
+   "fuel_conc": "25%",
+   "flames_ignited": 11
+  },
+  {
+   "round": "Second round of tests with gas-jet burner",
+   "date": "2018-11-15",
+   "mesh_polarity": "positive",
+   "fuel": "100% C2H4",
+   "fuel_conc": "25%",
+   "flames_ignited": 11
+  }
+ ]
+}

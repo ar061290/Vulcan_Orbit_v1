@@ -127,7 +127,7 @@
    "facility": "ISS cabin",
    "focus": "detection",
    "fuel": "dust aerosol",
-   "measured": "Airborne dust measured with a modified P-Trak particle counter in the ISS cabin; relevant to false alarms",
+   "measured": "Test dust (Arizona Road Dust) counted by a modified P-Trak and a DustTrak in the ISS cabin, to check the counter SAME relied on works in microgravity",
    "rows": "2 sessions",
    "tags": [
     "detection",

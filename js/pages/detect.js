@@ -1,7 +1,8 @@
 import { h, load, page, card, empty, fmt } from '../lib.js';
 import { lineChart, dotRows, SERIES, C } from '../charts.js';
+import { replayCard, daftCard } from '../detect_ui.js';
 export default async function (root) {
-  const [lat, smoke] = await Promise.all([load('saffire_latency'), load('smoke_sizes')]);
+  const [lat, smoke, daft] = await Promise.all([load('saffire_latency'), load('smoke_sizes'), load('daft')]);
   // Blind Spot timeline
   let latCard;
   if (lat.status === 'missing') latCard = card('Blind Spot: who alarms first?', 'missing', null, empty('Waiting for Saffire-III telemetry', 'saffire_latency', 'One burn per entry, each channel scaled so 1.0 is its alarm threshold.', '{ "status":"real", "y_meaning":"...", "burns":[{ "name":"Burn 1", "t":[0,1,2], "channels":[{ "key":"radiometer", "name":"Radiometer", "values":[0,0.2,1.1], "alarm_s":2 }] }] }'));
@@ -42,5 +43,7 @@ export default async function (root) {
       holder, h('p', {}, h('small', {}, smoke.note)));
   }
   root.append(page('Detect', 'A fire you find late is a bigger fire. These panels use NASA\'s orbital burns and smoke measurements to show which sensors see a fire first and which smoke slips past.',
-    h('div', { class: 'grid g2' }, latCard, smCard)));
+    lat.status !== 'missing' ? replayCard(lat) : null,
+    h('div', { class: 'grid g2' }, latCard, smCard),
+    daft.status !== 'missing' ? daftCard(daft) : null));
 }

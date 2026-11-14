@@ -144,3 +144,17 @@ See `AI_LOG.md`.
 | NASA NTRS 20170000248 | ISS detector: forward light scattering, calibrated to alarm at 1 %/ft obscuration for smolder smoke. |
 | NASA NTRS 20150010172 | Previously cited for SAME-R particle sizes. It is a presentation with no size numbers in its record; replaced by AIAA 2012-3536 (NTRS 20130000422). |
 | PMC7918997 | Previously listed on the About page; could not be opened to verify (site blocks automated access). Removed until a person checks it. |
+
+## Added on feat/site-v2 (14 Nov 2026)
+
+| Source | Used for |
+|---|---|
+| NASA PSI-22 ACME E-FIELD Flames, doi:10.60555/se5a-8c73 | data/efield.json (test days, flames ignited, objectives quoted) |
+| NASA PSI-47 DAFT / DAFT-2, doi:10.60555/ztgj-d202 | data/daft.json (sessions, objective quote) |
+| NASA PSI-69 FLEX, PSI-39 CFI, PSI-25 BASS-II, PSI-159 CFI-G, PSI-10 Flame Design summary tables | data/gaps.json (tested oxygen and pressure points) |
+| Press Information Bureau, 18 Sep 2024, https://pib.gov.in/PressReleasePage.aspx?PRID=2055992 | India card: BAS-1 by Dec 2028, operational BAS by 2035 (official) |
+| India Science, Technology & Innovation portal, IIT Madras smoke characterisation Phase II, https://www.indiascienceandtechnology.gov.in/technologies/smoke-characteristation-flaming-and-smouldering-materials-micro-gravity-phase-ii | India card (official) |
+| Starlust, 6 Sep 2026; CXO Digital Pulse (Lok Sabha reply, 29 Jul 2026) | India card: Gaganyaan schedule (official via news) |
+| Drishti IAS summary of The Hindu, 22 May 2026 | India card: Gaganyaan smoke detectors and water mist (news only) |
+| Competitor and NASA-results research, 14 Nov 2026 | reports/Flame in Free Fall research.md (every claim cited there) |
+| Google Fonts: Instrument Serif, Inter, JetBrains Mono (SIL Open Font License) | Site typography |

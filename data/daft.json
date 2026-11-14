@@ -1,0 +1,23 @@
+{
+ "status": "real",
+ "source": "NASA PSI-47 DAFT / DAFT-2, doi:10.60555/ztgj-d202 (experimental table and i_Investigation.txt)",
+ "sessions": [
+  {
+   "session": "D1",
+   "day": "GMT 54 (2005)",
+   "hardware": "Contained the modified P-Trak with Alcohol Wick and batteries",
+   "sample": "Arizona Road Dust (ARD Fine) in combination with ISS GN2 to create an aerosol for measurement purposes.",
+   "where": "Sampled air near Express rack 4"
+  },
+  {
+   "session": "D2",
+   "day": "GMT 63 (2005)",
+   "hardware": "Contained DustTrak and batteries",
+   "sample": "Arizona Road Dust (ARD Fine) in combination with ISS GN2 to create an aerosol for measurement purposes.",
+   "where": "Sampled separated Velcro and the air near Port rack 6 and in Node 1"
+  }
+ ],
+ "objective_quote": "The focus of DAFT / DAFT-2 was to mitigate the risk for the Smoke Aerosol Measurement Experiment (SAME).",
+ "what_it_means": "DAFT checked, with test dust instead of smoke, whether the P-Trak particle counter that SAME relied on to count smoke particles works without gravity. The SAME smoke data feed our smoke-miss model.",
+ "not_in_archive": "The PSI-47 files hold no particle counts or sizes, so this site shows no dust-versus-smoke size comparison."
+}

@@ -69,9 +69,9 @@
   },
   {
    "name": "efield",
-   "status": "missing",
+   "status": "real",
    "owner": "Karthikeya",
-   "what": "NASA E-FIELD Flames results"
+   "what": "NASA ACME E-FIELD Flames test days (PSI-22), shown beside the bench ion-wind trial"
   },
   {
    "name": "flex_suppression",
@@ -81,9 +81,9 @@
   },
   {
    "name": "gaps",
-   "status": "missing",
+   "status": "real",
    "owner": "Karthikeya",
-   "what": "Conditions NASA has not tested"
+   "what": "Oxygen and pressure NASA's microgravity tests covered, and the gaps"
   },
   {
    "name": "evidence",
@@ -120,6 +120,30 @@
    "status": "model",
    "owner": "Karthikeya",
    "what": "LBM what-if runs: share of fires detected within 60 s and 180 s by detector layout"
+  },
+  {
+   "name": "m7_explorer",
+   "status": "model",
+   "owner": "M7 lane",
+   "what": "Extinction oxygen levels and cool-flame end states from the M7 models, for the interactive panels"
+  },
+  {
+   "name": "assistant_gold",
+   "status": "team",
+   "owner": "Assistant",
+   "what": "30 test questions with known answers for the assistant scorecard"
+  },
+  {
+   "name": "daft",
+   "status": "real",
+   "owner": "Dashboard",
+   "what": "DAFT dust-counter feasibility sessions (PSI-47)"
+  },
+  {
+   "name": "india",
+   "status": "reported",
+   "owner": "Dashboard",
+   "what": "India angle: Gaganyaan and Bharatiya Antariksh Station facts with verification levels"
   }
  ]
 }
