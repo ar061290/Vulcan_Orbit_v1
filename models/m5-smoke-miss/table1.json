@@ -1,0 +1,20 @@
+{
+ "status": "reported",
+ "source": "Urban et al. 2012, Particle Morphology and Size Results from the Smoke Aerosol Measurement Experiment-2, AIAA 2012-3536 (42nd ICES), Table 1 'Diameter results for baseline runs for each material'. NTRS 20130000422.",
+ "url": "https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf",
+ "units": {"diameters": "um"},
+ "conditions": "baseline runs: air flow 8 cm/s; heater set for 1 to 2 mg weight loss in 60 s (quoted from the paper)",
+ "transcription": "read through a text-extraction tool on 14 Nov 2026; check every value against the PDF by hand",
+ "rows": [
+  {"material": "Kapton",   "aged": false, "Dg": 0.042, "CMD": 0.056, "DAM": 0.101, "sigma_g": 2.154},
+  {"material": "Kapton",   "aged": true,  "Dg": 0.089, "CMD": 0.109, "DAM": 0.161, "sigma_g": 1.872},
+  {"material": "Lampwick", "aged": false, "Dg": 0.090, "CMD": 0.128, "DAM": 0.258, "sigma_g": 2.312},
+  {"material": "Lampwick", "aged": true,  "Dg": 0.229, "CMD": 0.276, "DAM": 0.398, "sigma_g": 1.834},
+  {"material": "Silicone", "aged": false, "Dg": 0.128, "CMD": 0.196, "DAM": 0.465, "sigma_g": 2.530},
+  {"material": "Silicone", "aged": true,  "Dg": 0.269, "CMD": 0.355, "DAM": 0.619, "sigma_g": 2.108},
+  {"material": "Teflon",   "aged": false, "Dg": 0.081, "CMD": 0.101, "DAM": 0.170, "sigma_g": 2.198},
+  {"material": "Teflon",   "aged": true,  "Dg": 0.070, "CMD": 0.105, "DAM": 0.232, "sigma_g": 2.442},
+  {"material": "Pyrell",   "aged": false, "Dg": 0.149, "CMD": 0.204, "DAM": 0.384, "sigma_g": 2.211},
+  {"material": "Pyrell",   "aged": true,  "Dg": 0.293, "CMD": 0.359, "DAM": 0.539, "sigma_g": 1.892}
+ ]
+}

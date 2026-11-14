@@ -29,9 +29,12 @@ export default async function (root) {
   else {
     const holder = h('div'); let thr = smoke.detector_thresholds_nm[1];
     const draw = () => {
-      const rows = [...smoke.materials].sort((a, b) => a.d_nm - b.d_nm).map(m => ({ name: m.name, value: m.d_nm, text: `${m.d_nm} nm`, label: `<b>${m.name}</b><br>${m.d_nm} nm, ${(thr / m.d_nm).toFixed(1)}x smaller than the threshold` }));
-      holder.replaceChildren(dotRows({ rows, xDom: [20, 2000], xLabel: 'Smoke particle diameter, nm (log scale)', shadeBelow: thr, refs: [{ x: thr, label: `detector sensitive above ~${thr} nm` }], colorFn: r => r.value < thr ? C.s2 : C.s3 }),
-        h('p', { style: 'margin-top:8px' }, `${rows.filter(r => r.value < thr).length} of ${rows.length} materials make smoke finer than the chosen threshold. The shaded zone is where a photoelectric detector responds weakly.`));
+      const mb = m => m.mass_below && m.mass_below[String(thr)];
+      const rows = [...smoke.materials].sort((a, b) => a.d_nm - b.d_nm).map(m => ({ name: m.name, value: m.d_nm, text: mb(m) ? `${m.d_nm} nm · ${Math.round(mb(m).unaged * 100)}% hidden` : `${m.d_nm} nm`,
+        label: `<b>${m.name}</b><br>${m.d_kind ? 'mass median ' : ''}${m.d_nm} nm` + (mb(m) ? `<br>${Math.round(mb(m).unaged * 100)}% of the smoke mass is finer than ${thr} nm (${Math.round(mb(m).aged * 100)}% after 12 min of aging)` : '') }));
+      const hidden = rows.filter(r => r.value < thr).length;
+      holder.replaceChildren(dotRows({ rows, xDom: [20, 3000], xLabel: smoke.materials[0].d_kind ? 'Mass median smoke particle diameter, nm (log scale)' : 'Smoke particle diameter, nm (log scale)', shadeBelow: thr, refs: [{ x: thr, label: `detector sensitive above ~${thr} nm` }], colorFn: r => r.value < thr ? C.s2 : C.s3 }),
+        h('p', { style: 'margin-top:8px' }, `For ${hidden} of ${rows.length} materials, most of the smoke mass is finer than the chosen limit. The shaded zone is where a light-scattering detector responds weakly.`));
     };
     draw();
     smCard = card('Smoke the detector misses', smoke.status, smoke.source,

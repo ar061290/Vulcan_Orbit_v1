@@ -1,0 +1,172 @@
+{
+ "status": "model",
+ "models": [
+  {
+   "id": "smoke-miss",
+   "name": "Will the detector miss this smoke?",
+   "question": "Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)?",
+   "data": "16 SAME-2 flight tests (Kapton, lampwick, Teflon) from Urban et al. 2012, AIAA 2012-3536, Figures 6-8, read from the PDF's vector drawing; Table 1 for the baseline",
+   "method": "Logistic regression on material and air velocity; label from the lognormal mass median diameter (Hatch-Choate, from each test's count-mean and average-mass diameters)",
+   "validation": "leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples",
+   "metric": "AUC",
+   "score": 0.746,
+   "score_range": [
+    0.436,
+    1.0
+   ],
+   "kind": "classifier",
+   "baseline_name": "Material only (Table 1)",
+   "baseline_score": null,
+   "baseline_metric_note": "material-only balanced accuracy 0.75; model balanced accuracy 0.76 [0.53, 0.94]",
+   "unit": "1 = likely missed",
+   "points": [
+    {
+     "obs": 0,
+     "pred": 0.074,
+     "x": 0,
+     "lo": null,
+     "hi": null,
+     "label": "LAM-1: Lampwick, 0 cm/s, mass median 1493 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.074,
+     "x": 0,
+     "lo": null,
+     "hi": null,
+     "label": "LAM-2: Lampwick, 0 cm/s, mass median 946 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.137,
+     "x": 2.0,
+     "lo": null,
+     "hi": null,
+     "label": "LAM-3: Lampwick, 2 cm/s, mass median 997 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.719,
+     "x": 8.1,
+     "lo": null,
+     "hi": null,
+     "label": "LAM-4: Lampwick, 8 cm/s, mass median 1030 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.405,
+     "x": 2.0,
+     "lo": null,
+     "hi": null,
+     "label": "KAP-1: Kapton, 2 cm/s, mass median 578 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.555,
+     "x": 4.0,
+     "lo": null,
+     "hi": null,
+     "label": "KAP-2: Kapton, 4 cm/s, mass median 538 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.767,
+     "x": 8.0,
+     "lo": null,
+     "hi": null,
+     "label": "KAP-3: Kapton, 8 cm/s, mass median 487 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.773,
+     "x": 8.1,
+     "lo": null,
+     "hi": null,
+     "label": "KAP-4: Kapton, 8 cm/s, mass median 165 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.773,
+     "x": 8.1,
+     "lo": null,
+     "hi": null,
+     "label": "KAP-5: Kapton, 8 cm/s, mass median 257 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.773,
+     "x": 8.1,
+     "lo": null,
+     "hi": null,
+     "label": "KAP-6: Kapton, 8 cm/s, mass median 375 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.773,
+     "x": 8.1,
+     "lo": null,
+     "hi": null,
+     "label": "KAP-7: Kapton, 8 cm/s, mass median 219 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.002,
+     "x": 0,
+     "lo": null,
+     "hi": null,
+     "label": "TEF-1: Teflon, 0 cm/s, mass median 477 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.181,
+     "x": 0,
+     "lo": null,
+     "hi": null,
+     "label": "TEF-2: Teflon, 0 cm/s, mass median 722 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.304,
+     "x": 2.0,
+     "lo": null,
+     "hi": null,
+     "label": "TEF-3: Teflon, 2 cm/s, mass median 540 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.672,
+     "x": 8.1,
+     "lo": null,
+     "hi": null,
+     "label": "TEF-4: Teflon, 8 cm/s, mass median 333 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.876,
+     "x": 8.1,
+     "lo": null,
+     "hi": null,
+     "label": "TEF-5: Teflon, 8 cm/s, mass median 565 nm"
+    }
+   ],
+   "drivers": [
+    {
+     "name": "air velocity",
+     "share": 0.76
+    },
+    {
+     "name": "material",
+     "share": 0.24
+    }
+   ],
+   "coefficients": {
+    "Kapton": 0.494,
+    "Lampwick": -0.709,
+    "Teflon": 0.214,
+    "air velocity (per cm/s)": 0.325
+   },
+   "limits": "16 tests, 3 materials, unaged smoke only, airflow 0 to 8 cm/s. A test bench result in orbit, not a detector certification. Detector limit is a choice (300/500/1000 nm reported).",
+   "checks_note": "M5-lognormal FAIL; M5-trace pass; M5-auc FAIL; M5-bacc pass; M5-base reported; M5-drivers reported; M5-sens reported. Rules in models/m5-smoke-miss/RULES.md, written before training."
+  }
+ ]
+}

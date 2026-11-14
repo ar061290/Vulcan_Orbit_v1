@@ -23,7 +23,7 @@
    "name": "smoke_sizes",
    "status": "reported",
    "owner": "Karthikeya",
-   "what": "Smoke particle sizes by material"
+   "what": "Smoke particle sizes by material (NASA SAME-2) and the share too fine for the detector (M5)"
   },
   {
    "name": "dome_locator",
@@ -39,9 +39,9 @@
   },
   {
    "name": "models",
-   "status": "missing",
+   "status": "model",
    "owner": "Karthikeya",
-   "what": "NASA-data model results"
+   "what": "Trained models: smoke miss risk (M5); spread and extinction to come"
   },
   {
    "name": "drift",

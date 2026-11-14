@@ -77,3 +77,11 @@ Dataset file checksums: `datasets/psi/MANIFEST.csv`.
 - Published smoke-detector thresholds (context only; cannot be applied to the raw PSI-100 counts):
   - ISS detector calibrated to alarm at 1 %/ft obscuration (3.3 %/m): NASA NTRS 20170000248, https://ntrs.nasa.gov/api/citations/20170000248/downloads/20170000248.pdf
   - ISS detection threshold about 10 mg/m3; Space Shuttle 2 mg/m3: NASA NTRS 20170002629, https://ntrs.nasa.gov/api/citations/20170002629/downloads/20170002629.pdf
+
+## M5 smoke miss risk (models/m5-smoke-miss)
+- Urban, D. L., Ruff, G. A., Greenberg, P. S., Fischer, D., Meyer, M., Mulholland, G., Yuan, Z., Bryg, V., Cleary, T., Yang, J. (2012).
+  Particle Morphology and Size Results from the Smoke Aerosol Measurement Experiment-2. 42nd ICES, AIAA 2012-3536. NASA NTRS 20130000422,
+  https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf . Table 1 (per-material sizes) transcribed and checked against the PDF;
+  Figures 6-8 (16 flight tests) read from the PDF's vector drawing by `extract.py`.
+- NASA PSI-101 (SAME-R test table) and PSI-102 (SAME): test conditions; no particle sizes.
+- scikit-learn 1.9.1 (logistic regression, metrics); pdfplumber (reading the PDF drawing).

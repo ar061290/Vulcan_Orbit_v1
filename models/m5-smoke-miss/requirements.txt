@@ -1,0 +1,3 @@
+numpy
+scikit-learn==1.9.1
+pdfplumber   # only for extract.py, to re-read the figures from the PDF

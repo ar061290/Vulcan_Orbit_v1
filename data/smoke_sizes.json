@@ -1,8 +1,8 @@
 {
  "status": "reported",
- "source": "SAME-R unaged geometric mean diameters, NASA NTRS 20150010172, as summarised in our research notes",
- "source_url": "https://ntrs.nasa.gov/citations/20150010172",
- "note": "Sources disagree on where the station detector becomes insensitive (0.3, 0.5 or 1 micron), so the threshold is a control, not a fixed fact.",
+ "source": "Urban et al. 2012, Particle Morphology and Size Results from the Smoke Aerosol Measurement Experiment-2, AIAA 2012-3536 (42nd ICES), Table 1 'Diameter results for baseline runs for each material'. NTRS 20130000422.",
+ "source_url": "https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf",
+ "note": "Sizes are NASA's (SAME-2 flight, baseline runs at 8 cm/s). Mass shares below each detector limit are our lognormal calculation from them. Sources disagree on where light-scattering detectors lose sensitivity, so the limit is a control (300, 500, 1000 nm), not a fixed fact.",
  "detector_thresholds_nm": [
   300,
   500,
@@ -11,23 +11,117 @@
  "materials": [
   {
    "name": "Kapton",
-   "d_nm": 47
+   "d_nm": 246,
+   "d_kind": "mass median diameter, unaged (Table 1 Dg and sigma_g, lognormal)",
+   "d_aged_nm": 289,
+   "Dg_nm": 42,
+   "sigma_g": 2.154,
+   "mass_below": {
+    "300": {
+     "unaged": 0.603,
+     "aged": 0.523
+    },
+    "500": {
+     "unaged": 0.823,
+     "aged": 0.808
+    },
+    "1000": {
+     "unaged": 0.966,
+     "aged": 0.976
+    }
+   }
   },
   {
    "name": "Teflon",
-   "d_nm": 93
+   "d_nm": 521,
+   "d_kind": "mass median diameter, unaged (Table 1 Dg and sigma_g, lognormal)",
+   "d_aged_nm": 765,
+   "Dg_nm": 81,
+   "sigma_g": 2.198,
+   "mass_below": {
+    "300": {
+     "unaged": 0.242,
+     "aged": 0.147
+    },
+    "500": {
+     "unaged": 0.479,
+     "aged": 0.317
+    },
+    "1000": {
+     "unaged": 0.796,
+     "aged": 0.618
+    }
+   }
   },
   {
-   "name": "Lamp wick",
-   "d_nm": 103
-  },
-  {
-   "name": "Silicone",
-   "d_nm": 152
+   "name": "Lampwick",
+   "d_nm": 740,
+   "d_kind": "mass median diameter, unaged (Table 1 Dg and sigma_g, lognormal)",
+   "d_aged_nm": 690,
+   "Dg_nm": 90,
+   "sigma_g": 2.312,
+   "mass_below": {
+    "300": {
+     "unaged": 0.141,
+     "aged": 0.085
+    },
+    "500": {
+     "unaged": 0.32,
+     "aged": 0.297
+    },
+    "1000": {
+     "unaged": 0.64,
+     "aged": 0.729
+    }
+   }
   },
   {
    "name": "Pyrell",
-   "d_nm": 177
+   "d_nm": 985,
+   "d_kind": "mass median diameter, unaged (Table 1 Dg and sigma_g, lognormal)",
+   "d_aged_nm": 992,
+   "Dg_nm": 149,
+   "sigma_g": 2.211,
+   "mass_below": {
+    "300": {
+     "unaged": 0.067,
+     "aged": 0.03
+    },
+    "500": {
+     "unaged": 0.196,
+     "aged": 0.141
+    },
+    "1000": {
+     "unaged": 0.508,
+     "aged": 0.505
+    }
+   }
+  },
+  {
+   "name": "Silicone",
+   "d_nm": 1697,
+   "d_kind": "mass median diameter, unaged (Table 1 Dg and sigma_g, lognormal)",
+   "d_aged_nm": 1427,
+   "Dg_nm": 128,
+   "sigma_g": 2.53,
+   "mass_below": {
+    "300": {
+     "unaged": 0.031,
+     "aged": 0.018
+    },
+    "500": {
+     "unaged": 0.094,
+     "aged": 0.08
+    },
+    "1000": {
+     "unaged": 0.284,
+     "aged": 0.317
+    }
+   }
   }
- ]
+ ],
+ "units": {
+  "d_nm": "nm",
+  "mass_below": "share of smoke mass in smaller particles"
+ }
 }
