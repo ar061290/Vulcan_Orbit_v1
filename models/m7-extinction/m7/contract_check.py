@@ -34,7 +34,8 @@ def _keys(d, keys, where):
 
 
 def check_models(doc, only_ids=None):
-    _keys(doc, ["status", "models"], "models.json")
+    # main's models.json may also carry free-text "note" and "source" keys, and a "status" on each entry
+    _keys({k: v for k, v in doc.items() if k not in ("note", "source")}, ["status", "models"], "models.json")
     _req(doc["status"] in STATUSES, f"models.json: bad status {doc['status']!r}")
     _req(isinstance(doc["models"], list) and doc["models"], "models.json: models must be a non-empty list")
     ids = [m.get("id") for m in doc["models"]]
@@ -43,7 +44,9 @@ def check_models(doc, only_ids=None):
         if only_ids and m.get("id") not in only_ids:
             continue
         w = f"models.json[{m.get('id')}]"
-        _keys(m, MODEL_KEYS, w)
+        if "status" in m:
+            _req(m["status"] in STATUSES, f"{w}.status: bad status {m['status']!r}")
+        _keys({k: v for k, v in m.items() if k != "status"}, MODEL_KEYS, w)
         for k in ("id", "name", "question", "data", "method", "validation", "metric", "baseline_name", "unit", "limits"):
             _req(isinstance(m[k], str) and m[k].strip(), f"{w}.{k}: must be a non-empty string")
         _num(m["score"], f"{w}.score")

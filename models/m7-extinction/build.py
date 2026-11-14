@@ -170,11 +170,11 @@ def main():
     supp = outputs.suppression(flex)
     log("R4 suppressant counts: " + "; ".join(f"{g['gas']}: {g['extinguished']}/{g['tests']}" for g in supp["groups"]))
     models_doc = outputs.merge_models(entries)
-    contract_check.check_models(models_doc)
+    contract_check.check_models(models_doc, only_ids=outputs.M7_IDS)   # other features (e.g. M5) may extend their own entries
     contract_check.check_suppression(supp)
     caught = contract_check.selftest(models_doc, supp, outputs.M7_IDS)
     log(f"contract: both files match CONTRACT.md; self-test rejected all {len(caught)} broken copies")
-    outputs.write(outputs.MODELS_JSON, models_doc)
+    outputs.MODELS_JSON.write_bytes(outputs.models_dumps(models_doc).encode("utf-8"))
     outputs.write(outputs.SUPPRESSION_JSON, supp)
     outputs.update_manifest()
 

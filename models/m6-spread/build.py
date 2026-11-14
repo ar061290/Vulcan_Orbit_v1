@@ -261,12 +261,14 @@ def check_entry(doc, only_id):
 
     def num(v, w):
         req(isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v), f"{w}: not a finite number")
-    req(isinstance(doc, dict) and set(doc) == {"status", "models"}, "models.json: top-level keys")
+    # main's models.json may also carry free-text "note" and "source" keys, and a "status" on each entry
+    req(isinstance(doc, dict) and set(doc) - {"note", "source"} == {"status", "models"}, "models.json: top-level keys")
     req(doc["status"] in STATUSES, "models.json: status")
     ids = [m.get("id") for m in doc["models"]]
     req(len(ids) == len(set(ids)), "models.json: duplicate ids")
     m = next(m for m in doc["models"] if m.get("id") == only_id)
-    req(set(m) == set(MODEL_KEYS), f"keys {sorted(m)}")
+    req(set(m) - {"status"} == set(MODEL_KEYS), f"keys {sorted(m)}")
+    req(m.get("status", "real") in STATUSES, "entry status")
     for k in ("id", "name", "question", "data", "method", "validation", "metric", "baseline_name", "unit", "limits"):
         req(isinstance(m[k], str) and m[k].strip(), f"{k} must be a non-empty string")
     num(m["score"], "score")
@@ -308,11 +310,22 @@ def dumps(obj):
     return json.dumps(obj, indent=1, ensure_ascii=False)
 
 
+def models_dumps(obj):
+    """data/models.json is shared with M5, whose builder reads it without naming an encoding: keep it pure ASCII
+    (unicode escapes), indent 1, no trailing newline, as on main."""
+    return json.dumps(obj, indent=1)
+
+
 def merge_models(entry):
-    """Replace only the m6 entry; keep every other entry, its content and its position."""
+    """Replace only the m6 entry; keep every other entry, its content and its position, and any extra top-level keys.
+
+    File status: 'real', or (as on main since M5 joined) 'model' with a status on every entry, in which case the m6 entry
+    carries "status": "real" (its author's label: NASA measurements, reported de Ris constants)."""
     doc = json.loads(MODELS_JSON.read_bytes().decode("utf-8")) if MODELS_JSON.exists() else {"status": "real", "models": []}
-    if doc.get("status") != "real":
-        raise SystemExit(f"data/models.json status is '{doc.get('status')}', not 'real'; agree it with the team first.")
+    if doc.get("status") not in ("real", "model"):
+        raise SystemExit(f"data/models.json status is '{doc.get('status')}', not 'real' or 'model'; agree it with the team first.")
+    if doc.get("status") != "real" or any("status" in m for m in doc["models"]):
+        entry = {"id": entry["id"], "status": "real", **{k: v for k, v in entry.items() if k != "id"}}
     models = doc["models"]
     pos = next((i for i, m in enumerate(models) if m.get("id") == M6_ID), None)
     if pos is None:
@@ -329,7 +342,7 @@ def clean():
     if MODELS_JSON.exists():
         doc = json.loads(MODELS_JSON.read_bytes().decode("utf-8"))
         doc["models"] = [m for m in doc["models"] if m.get("id") != M6_ID]
-        MODELS_JSON.write_bytes(dumps(doc).encode("utf-8"))
+        MODELS_JSON.write_bytes(models_dumps(doc).encode("utf-8"))
     say("removed M6 outputs (the m6 entry in data/models.json, bass2_clean.csv, no_spread_cases.csv, results.json, plot)")
 
 
@@ -529,11 +542,12 @@ def main():
     n_breaks = contract_selftest(doc)
     others_after = [m for m in doc["models"] if m.get("id") != M6_ID]
     assert others_before is None or others_before == others_after, "another feature's entry would change"
-    MODELS_JSON.write_bytes(dumps(doc).encode("utf-8"))
+    MODELS_JSON.write_bytes(models_dumps(doc).encode("utf-8"))
     man = json.loads(MANIFEST_JSON.read_bytes().decode("utf-8"))
     line = next(f for f in man["files"] if f["name"] == "models")
-    line["status"] = "real"
-    line["what"] = "NASA-data model results (M6 flame spread, M7 extinction and cool flames)"
+    line["status"] = doc["status"]
+    if "M6" not in line["what"]:
+        line["what"] = "NASA-data model results (M6 flame spread, M7 extinction and cool flames)"
     MANIFEST_JSON.write_bytes(dumps(man).encode("utf-8"))
     say(f"[contract] m6 entry valid; {n_breaks} broken copies rejected; other entries unchanged ({len(others_after)})")
 
