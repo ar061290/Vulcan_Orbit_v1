@@ -39,7 +39,7 @@
   },
   {
    "name": "models",
-   "status": "missing",
+   "status": "real",
    "owner": "Karthikeya",
    "what": "NASA-data model results"
   },
@@ -63,7 +63,7 @@
   },
   {
    "name": "flex_suppression",
-   "status": "missing",
+   "status": "real",
    "owner": "Karthikeya",
    "what": "FLEX extinction by suppressant gas"
   },
