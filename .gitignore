@@ -1,6 +1,5 @@
-datasets/*
-!datasets/README.md
-!datasets/MANIFEST.csv
+datasets/raw/
+*.part
 .DS_Store
 __pycache__/
 *.pyc

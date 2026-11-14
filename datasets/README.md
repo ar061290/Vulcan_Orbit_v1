@@ -1,25 +1,38 @@
-# Raw datasets
+# Datasets
 
-Raw NASA files live here on your own machine and are not committed (see .gitignore). Cleaned, small JSON goes in `data/`.
+## Get the NASA data (run on the work machine)
 
-Download list (NASA Physical Sciences Informatics, https://psi.nasa.gov/physci/repo/search?q=combustion). IDs were reported second-hand; confirm each on the site.
+```
+python scripts/download_psi.py
+```
 
-| Folder | Investigation | PSI id | What to grab first |
+About 9 MB. It pulls the summary table of every fire-safety investigation in NASA's Physical Sciences Informatics archive, the Saffire-III telemetry, and a few small analysis files, into `datasets/psi/<PSI id>/`. It writes `datasets/psi/MANIFEST.csv` with each file's DOI, source page, size and checksum; copy that into the References.
+
+- Small tables in `datasets/psi/` are committed so the whole team has the same files.
+- Anything large goes in `datasets/raw/`, which git ignores.
+- Cleaned JSON that the site reads lives in `data/` (see CONTRACT.md).
+
+## What is in the archive (checked on psi.nasa.gov, 14 Nov 2026)
+
+| PSI id | Investigation | Summary table rows | Notes |
 |---|---|---|---|
-| saffire3/ | Saffire-III | PSI-100 | 1 Hz telemetry (radiometers, smoke detector obscuration and scatter), burn summary table |
-| saffire1/, saffire2/ | Saffire-I, -II | PSI-98, PSI-99 | Burn summary tables |
-| same/, samer/ | SAME, SAME-R | PSI-102, PSI-101 | Particle size tables; SAME-R housekeeping CSVs |
-| daft/ | DAFT / DAFT-2 | PSI-47 | Dust size summary |
-| flex/ | FLEX | PSI-69 | Experimental summary table (CSV) |
-| flex2/ | FLEX-2 | PSI-68 | Summary table |
-| bass2/, bass/ | BASS-II, BASS | PSI-25, PSI-26 | Test matrix |
-| spice/ | SPICE | PSI-107 | Smoke point table |
-| efield/ | ACME E-FIELD Flames | PSI-22 | Test-level table |
-| cfig/ | ACME CFI-G | PSI-159 | Test-level table |
-| flamedesign/ | ACME Flame Design | PSI-10 | Test-level table |
+| PSI-100 | Saffire-III | 2 samples | Telemetry: 11,450 rows; 4 radiometers, 2 anemometers, smoke-detector obscuration (x2) and scatter (x2), pressure, temperature |
+| PSI-99 | Saffire-II | 15 | Nine material samples; burn length in orbit vs on Earth |
+| PSI-98 | Saffire-I | 1 | Telemetry spreadsheet available |
+| PSI-102 | SAME | 8 | |
+| PSI-101 | SAME-R | 109 | Material, airflow, ageing time per smoke test |
+| PSI-47 | DAFT | small | Dust |
+| PSI-69 | FLEX | 274 | Fuel, pressure, O2/N2/CO2/He, droplet size, extinction diameter, burning rate |
+| PSI-68 | FLEX-2 | small | |
+| PSI-39 | CFI | table | Cool flames, droplets |
+| PSI-25 | BASS-II | 129 | Material, flow, O2, CO2, CO |
+| PSI-26 | BASS | table | |
+| PSI-107 | SPICE | table | Smoke point |
+| PSI-106 | SLICE | small | |
+| PSI-22 | ACME E-FIELD Flames | 32 | Mesh polarity, fuel, flames ignited |
+| PSI-159 | ACME CFI-G | 2 tables | Normal and inverse flames |
+| PSI-10 | ACME Flame Design | 2 tables | |
+| PSI-20, 21, 23 | ACME BRE, CLD Flame, s-Flame | small | |
+| PSI-117, 142, 115, 62, 60 | Ground studies using the flight data | varies | Cool-flame analysis tables are useful |
 
-Skip raw video archives; they are very large and not needed for the first models.
-
-Challenge resource list (also NASA): the PSI combustion search above, NASA Glenn Combustion Science pages, "A Researcher's Guide to ISS Combustion Science" (2015), the ScienceCasts video, the Apollo 1 and Apollo 13 safety pages, the Mir fire history page, and three NASA Spinoff pages. Keep a copy of each PDF or page you cite in `datasets/reports/`.
-
-Record every file you download in `datasets/MANIFEST.csv`: file, source URL, date, size.
+Licence: CC0-1.0. NASA asks that each investigation be cited by its DOI.
