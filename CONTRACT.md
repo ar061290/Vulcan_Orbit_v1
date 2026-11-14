@@ -13,7 +13,8 @@ Rules
 | `dome_locator.json` | Mukund | `{status:"dome", units:"cm", method, points:[{true:[x,y,z], pred:[x,y,z]}]}` |
 | `dome_sensor_count.json` | Mukund | `{status:"dome", units:"cm", series:[{name, points:[[n_sensors, mean_error]]}]}` |
 | `response_trials.json` | Mukund | `{status:"dome", reading, unit, trials:[{method, source, before, after, repeat, note}]}` |
-| `drift.json` | Mukund | `{status:"model", nx, ny, dt_s, flow_m_s, detectors:[{x,y,name}], frames:[[nx*ny values]]}` |
+| `drift.json` | Karthikeya | written by `python engine/drift.py`: `{status:"model", nx, ny, lx_m, ly_m, frame_dt_s, flow_m_s, fire:[x,y], detectors:[{name,x,y,alarm_s}], arrows, frames:[[nx*ny values 0..255, log scale]]}` |
+| `whatif.json` | Karthikeya | written by `python engine/drift.py`: `{status:"model", runs, layouts:[{name, detectors, caught_60, caught_120, caught_300, never, map}], checks}` |
 | `saffire_latency.json` | Karthikeya | `{status, y_meaning, burns:[{name, t:[s], channels:[{key, name, values:[multiple of alarm threshold], alarm_s}]}]}` |
 | `smoke_sizes.json` | Karthikeya | `{status, source, detector_thresholds_nm:[...], materials:[{name, d_nm}]}` |
 | `models.json` | Karthikeya | `{status, models:[{id, name, question, data, method, validation, metric, score, score_range:[lo,hi], baseline_name, baseline_score, unit, points:[{obs,pred,lo,hi,label}], drivers:[{name,share}], limits}]}` |

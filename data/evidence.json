@@ -82,6 +82,96 @@
    "owner": "Dashboard lane",
    "result": null,
    "state": "pending"
+  },
+  {
+   "id": "V1",
+   "what": "Drift model: Smoke mass is conserved, with the filter letting some smoke back in",
+   "ref": "engine/drift.py, run on build",
+   "limit": "0.999 to 1.001",
+   "owner": "Karthikeya",
+   "result": "Pass: 1.0",
+   "state": "pass"
+  },
+  {
+   "id": "V2",
+   "what": "Drift model: Air neither appears nor vanishes inside the cabin (max divergence / mean speed)",
+   "ref": "engine/drift.py, run on build",
+   "limit": "< 1e-6",
+   "owner": "Karthikeya",
+   "result": "Pass: 1.8e-11",
+   "state": "pass"
+  },
+  {
+   "id": "V3",
+   "what": "Drift model: With the fans off, smoke spreads evenly in every direction",
+   "ref": "engine/drift.py, run on build",
+   "limit": "difference between 4 equal-distance points < 1%",
+   "owner": "Karthikeya",
+   "result": "Pass: 0.00115",
+   "state": "pass"
+  },
+  {
+   "id": "V4",
+   "what": "Drift model: Matches the exact answer for a smoke puff drifting and spreading in a duct (error vs exact)",
+   "ref": "engine/drift.py, run on build",
+   "limit": "< 3%",
+   "owner": "Karthikeya",
+   "result": "Pass: 1.6% (old first-order scheme: 16.7%)",
+   "state": "pass"
+  },
+  {
+   "id": "V5",
+   "what": "Drift model: Same alarm times with cells half the size (worst difference, 12 fire-detector pairs)",
+   "ref": "engine/drift.py, run on build",
+   "limit": "< 10% and 12/12",
+   "owner": "Karthikeya",
+   "result": "Fail: 10%, 12/12 agree on alarm vs no alarm",
+   "state": "fail"
+  },
+  {
+   "id": "V6",
+   "what": "Drift model: Four times faster air reaches the return sooner, by less than four times (mixing also moves smoke)",
+   "ref": "engine/drift.py, run on build",
+   "limit": "ratio between 2 and 4",
+   "owner": "Karthikeya",
+   "result": "Pass: 47 s vs 14 s, ratio 3.2",
+   "state": "pass"
+  },
+  {
+   "id": "V7",
+   "what": "Drift model: Model tuned on the Saffire-III burn reproduces the detector record",
+   "ref": "NASA PSI-100 Saffire-III flight telemetry",
+   "limit": "R2 > 0.8",
+   "owner": "Karthikeya",
+   "result": "Pass: R2 0.90",
+   "state": "pass"
+  },
+  {
+   "id": "V8",
+   "what": "Drift model: Held-out test: timing of the smoke-wire puff at the flight detector (never used for tuning)",
+   "ref": "NASA PSI-100 Saffire-III flight telemetry (held out)",
+   "limit": "typical peak-time error within one reading (10 s)",
+   "owner": "Karthikeya",
+   "result": "Fail: observed peak 43 s; model 12 to 48 s, typical error 18 s, shape R2 0.05",
+   "state": "fail"
+  },
+  {
+   "id": "R1",
+   "what": "Drift model: Moving the detector from the ceiling to the air return catches at least 5 points more fires, in all three cabin layouts",
+   "ref": "engine/drift.py, three cabin layouts",
+   "limit": "3/3 layouts, otherwise the placement claim is dropped",
+   "owner": "Karthikeya",
+   "result": "Fail: A: 44% -> 49%; B: 45% -> 49%; C: 44% -> 48%",
+   "state": "fail"
+  },
+  {
+   "id": "R2",
+   "what": "Drift model: Fire size matters more than detector position: big fires (over 0.5 mg/s) are caught far more often than average",
+   "ref": "engine/drift.py, run on build",
+   "limit": "at least 20 points more, 3/3 layouts",
+   "owner": "Karthikeya",
+   "result": "Pass: A: 100% vs 49%; B: 100% vs 49%; C: 100% vs 48%",
+   "state": "pass"
   }
  ]
 }
