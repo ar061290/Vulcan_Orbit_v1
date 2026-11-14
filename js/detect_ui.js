@@ -1,6 +1,6 @@
 // #24 Saffire-III replay and #7 DAFT card. Data: saffire_latency.json (real), daft.json (real).
 import { h, card } from './lib.js';
-import { SERIES, C } from './charts.js';
+import { SERIES, C, SCREEN } from './charts.js';
 export function replayCard(lat) {
   const sel = h('select', { 'aria-label': 'Event' }, ...lat.burns.map((b, i) => h('option', { value: i }, b.name)));
   const cv = h('canvas', { class: 'replay', width: 1280, height: 420, role: 'img', 'aria-label': 'Replay of sensor signals after ignition' });
@@ -24,7 +24,7 @@ export function replayCard(lat) {
       const xe = X(b.t[Math.max(0, k - 1)]); ctx.lineTo(xe, mid); ctx.closePath(); ctx.fillStyle = g; ctx.globalAlpha = 0.35; ctx.fill(); ctx.globalAlpha = 1;
       ctx.beginPath(); for (let j = 0; j < k; j++) { const x = X(b.t[j]), y = mid - Math.max(-0.5, Math.min(2, c.values[j] ?? 0)) * sc; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
       ctx.strokeStyle = SERIES[i]; ctx.lineWidth = 3; ctx.shadowColor = SERIES[i]; ctx.shadowBlur = 12; ctx.stroke(); ctx.shadowBlur = 0;
-      ctx.fillStyle = C.mute; ctx.fillText(c.name, pad + 8, y0 + 26);
+      ctx.fillStyle = SCREEN.mute; ctx.fillText(c.name, pad + 8, y0 + 26);
       if (c.alarm_s != null && now >= c.alarm_s) { ctx.fillStyle = SERIES[i]; ctx.beginPath(); ctx.arc(X(c.alarm_s), mid - sc, 9, 0, 7); ctx.fill(); }
       lamps.children[i]?.classList.toggle('on', c.alarm_s != null && now >= c.alarm_s);
     });

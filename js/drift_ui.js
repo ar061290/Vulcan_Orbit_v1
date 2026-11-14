@@ -1,6 +1,6 @@
 // Panels for the smoke drift model: an animated concentration map and the what-if results.
 import { h, card, badge, tip, untip, fmt } from './lib.js';
-import { C, lineChart } from './charts.js';
+import { C, lineChart, SCREEN } from './charts.js';
 
 // Sequential single-hue ramp on the dark surface: surface -> deep blue -> pale blue.
 const RAMP = [[26, 26, 25], [16, 66, 129], [37, 106, 191], [109, 167, 236], [205, 226, 251]];
@@ -11,29 +11,30 @@ export function driftCard(d, title = 'Where the smoke goes', sub = null) {
   const cv = h('canvas', { width: W, height: H, style: 'width:100%;height:auto;border-radius:8px;border:1px solid var(--grid);display:block', 'aria-label': 'Animated map of smoke concentration in the cabin' });
   const ctx = cv.getContext('2d'), off = document.createElement('canvas'); off.width = d.nx; off.height = d.ny; const octx = off.getContext('2d'), img = octx.createImageData(d.nx, d.ny);
   const tOut = h('b', { style: 'font-family:var(--mono);min-width:64px;display:inline-block' }, '0 s');
-  const slider = h('input', { type: 'range', min: 0, max: d.frames.length - 1, value: 0, step: 1, style: 'flex:1', 'aria-label': 'Time' });
+  const slider = h('input', { type: 'range', min: 0, max: d.frames.length - 1, value: Math.floor(d.frames.length * 0.35), step: 1, style: 'flex:1', 'aria-label': 'Time' });
   const btn = h('button', { class: 'chip' }, 'Play');
   const rows = h('div', { class: 'grid g3', style: 'margin-top:10px' });
-  let k = 0, playing = false, timer = 0;
+  let k = Math.floor(d.frames.length * 0.35), playing = false, timer = 0;   // open on a frame with smoke in it
   function draw() {
     const fr = d.frames[k], t = k * d.frame_dt_s;
     for (let p = 0; p < fr.length; p++) { const [r, g, b] = ramp(fr[p] / 255); img.data[p * 4] = r; img.data[p * 4 + 1] = g; img.data[p * 4 + 2] = b; img.data[p * 4 + 3] = 255; }
-    octx.putImageData(img, 0, 0); ctx.imageSmoothingEnabled = true; ctx.drawImage(off, 0, 0, W, H);
+    octx.putImageData(img, 0, 0); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(off, 0, 0, W, H);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.filter = 'blur(10px)'; ctx.globalAlpha = 0.45; ctx.drawImage(off, 0, 0, W, H); ctx.restore(); ctx.filter = 'none';   // soft glow so the plume reads as gas; colours still follow the scale
     ctx.strokeStyle = 'rgba(240,239,236,.22)'; ctx.lineWidth = 1;                         // airflow arrows
     for (const [x, y, u, v] of d.arrows) { const s = 140, x0 = X(x), y0 = Y(y), x1 = x0 + u * s, y1 = y0 - v * s, a = Math.atan2(y1 - y0, x1 - x0); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineTo(x1 - 5 * Math.cos(a - .5), y1 - 5 * Math.sin(a - .5)); ctx.moveTo(x1, y1); ctx.lineTo(x1 - 5 * Math.cos(a + .5), y1 - 5 * Math.sin(a + .5)); ctx.stroke(); }
     ctx.fillStyle = '#2f2f2c'; ctx.strokeStyle = '#4a4a46'; ctx.lineWidth = 1;
     for (const [x0, x1, y0, y1] of d.racks || []) { ctx.fillRect(X(x0), Y(y1), X(x1) - X(x0), Y(y0) - Y(y1)); ctx.strokeRect(X(x0), Y(y1), X(x1) - X(x0), Y(y0) - Y(y1)); }
     const opening = (wall, [a, b], label) => {
       ctx.fillStyle = C.s3; ctx.font = '12px system-ui';
-      if (wall === 'top' || wall === 'bottom') { const y = wall === 'top' ? 0 : H - 5; ctx.fillRect(X(a), y, X(b) - X(a), 5); ctx.fillStyle = C.ink; ctx.fillText(label, X(a), wall === 'top' ? 18 : H - 10); }
-      else { const x = wall === 'right' ? W - 5 : 0; ctx.fillRect(x, Y(b), 5, Y(a) - Y(b)); ctx.fillStyle = C.ink; ctx.save(); ctx.translate(wall === 'right' ? W - 10 : 16, Y(a) - 4); ctx.rotate(-Math.PI / 2); ctx.fillText(label, 0, 0); ctx.restore(); }
+      if (wall === 'top' || wall === 'bottom') { const y = wall === 'top' ? 0 : H - 5; ctx.fillRect(X(a), y, X(b) - X(a), 5); ctx.fillStyle = SCREEN.ink; ctx.fillText(label, X(a), wall === 'top' ? 18 : H - 10); }
+      else { const x = wall === 'right' ? W - 5 : 0; ctx.fillRect(x, Y(b), 5, Y(a) - Y(b)); ctx.fillStyle = SCREEN.ink; ctx.save(); ctx.translate(wall === 'right' ? W - 10 : 16, Y(a) - 4); ctx.rotate(-Math.PI / 2); ctx.fillText(label, 0, 0); ctx.restore(); }
     };
     opening(d.supply_wall || 'top', d.supply, 'air supply'); opening(d.return_wall || 'right', d.ret, 'air return');
-    ctx.fillStyle = C.s2; ctx.beginPath(); ctx.arc(X(d.fire[0]), Y(d.fire[1]), 6, 0, 6.283); ctx.fill(); ctx.strokeStyle = C.surface; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = C.ink; ctx.fillText('fire', X(d.fire[0]) + 10, Y(d.fire[1]) + 4);
+    ctx.fillStyle = C.s2; ctx.beginPath(); ctx.arc(X(d.fire[0]), Y(d.fire[1]), 6, 0, 6.283); ctx.fill(); ctx.strokeStyle = SCREEN.surface; ctx.lineWidth = 2; ctx.stroke(); ctx.fillStyle = SCREEN.ink; ctx.fillText('fire', X(d.fire[0]) + 10, Y(d.fire[1]) + 4);
     d.detectors.forEach((det, i) => {
       const on = det.alarm_s != null && t >= det.alarm_s, x = Math.min(W - 12, Math.max(12, X(det.x))), y = Math.min(H - 12, Math.max(12, Y(det.y)));
-      ctx.beginPath(); ctx.arc(x, y, 8, 0, 6.283); ctx.fillStyle = on ? C.warn : 'rgba(0,0,0,.55)'; ctx.fill(); ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.stroke();
-      ctx.fillStyle = on ? '#0b0b0b' : C.ink; ctx.font = '600 11px system-ui'; ctx.textAlign = 'center'; ctx.fillText(String(i + 1), x, y + 4); ctx.textAlign = 'left'; ctx.font = '12px system-ui';
+      ctx.beginPath(); ctx.arc(x, y, 8, 0, 6.283); ctx.fillStyle = on ? C.warn : 'rgba(0,0,0,.55)'; ctx.fill(); ctx.strokeStyle = SCREEN.ink; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = on ? '#0b0b0b' : SCREEN.ink; ctx.font = '600 11px system-ui'; ctx.textAlign = 'center'; ctx.fillText(String(i + 1), x, y + 4); ctx.textAlign = 'left'; ctx.font = '12px system-ui';
     });
     tOut.textContent = t + ' s'; slider.value = k;
     rows.replaceChildren(...d.detectors.map((det, i) => { const on = det.alarm_s != null && t >= det.alarm_s; return h('div', {}, h('small', {}, `${i + 1}. ${det.name}`), h('div', { class: 'stat', style: `font-size:20px;color:${on ? 'var(--warn)' : 'var(--ink)'}` }, det.alarm_s == null ? 'no alarm' : on ? `alarm at ${fmt(det.alarm_s, 0)} s` : 'quiet')); }));

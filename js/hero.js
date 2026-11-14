@@ -7,7 +7,7 @@ in vec2 p; out vec2 uv; void main(){ uv = p * .5 + .5; gl_Position = vec4(p, 0.,
 const FS = `#version 300 es
 precision highp float;
 in vec2 uv; out vec4 o;
-uniform vec2 res; uniform float t, g, yaw, pitch;
+uniform vec2 res; uniform float t, g, yaw, pitch, fit;
 float h3(vec3 p){ p = fract(p * .3183099 + .1); p *= 17.; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
 float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3. - 2. * f);
   return mix(mix(mix(h3(i), h3(i + vec3(1,0,0)), f.x), mix(h3(i + vec3(0,1,0)), h3(i + vec3(1,1,0)), f.x), f.y),
@@ -31,7 +31,7 @@ vec3 stars(vec3 d){
   return c;
 }
 void main(){
-  vec2 sp = (uv * res - .5 * res) / res.y; if (res.x > res.y * 1.2) sp.x -= .42; else { sp *= 1.9; sp.y -= .7; }
+  vec2 sp = (uv * res - .5 * res) / res.y; if (fit > .5) { sp *= 1.2; sp.y += .34 * g; } else if (res.x > res.y * 1.2) sp.x -= .42; else { sp *= 1.9; sp.y -= .7; }
   float cy = cos(yaw), sy = sin(yaw), cp = cos(pitch), spp = sin(pitch);
   vec3 ro = vec3(sy * cp, spp, cy * cp) * 4.6;
   vec3 fw = normalize(-ro), rt = normalize(cross(vec3(0,1,0), fw)), up = cross(fw, rt);
@@ -92,8 +92,8 @@ export function hero(opts = {}) {
   const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr); gl.useProgram(pr);
   const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const U = n => gl.getUniformLocation(pr, n), uRes = U('res'), uT = U('t'), uG = U('g'), uYaw = U('yaw'), uPitch = U('pitch');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const U = n => gl.getUniformLocation(pr, n), uRes = U('res'), uT = U('t'), uG = U('g'), uYaw = U('yaw'), uPitch = U('pitch'), uFit = U('fit');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'calm';
   let g = opts.g ?? 0, gT = g, yaw = .5, pitch = .12, vy = 0, drag = null, scale = Math.min(devicePixelRatio || 1, 2), visible = true, raf = 0, slow = 0, start = performance.now();
   const size = () => { const r = cv.getBoundingClientRect(); const w = Math.round(r.width * scale), h = Math.round(r.height * scale); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } gl.viewport(0, 0, w, h); };
   let lastT = 0;
@@ -105,7 +105,7 @@ export function hero(opts = {}) {
     g += (gT - g) * Math.min(1, dt * 2.2);
     if (!drag) { yaw += (reduce ? 0 : .06) * dt + vy; vy *= .94; }
     size();
-    gl.uniform2f(uRes, cv.width, cv.height); gl.uniform1f(uT, reduce ? 3 : (now - start) / 1000); gl.uniform1f(uG, g); gl.uniform1f(uYaw, yaw); gl.uniform1f(uPitch, pitch);
+    gl.uniform2f(uRes, cv.width, cv.height); gl.uniform1f(uT, reduce ? 3 : (now - start) / 1000); gl.uniform1f(uG, g); gl.uniform1f(uYaw, yaw); gl.uniform1f(uPitch, pitch); gl.uniform1f(uFit, opts.fit === 'center' ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (!reduce || Math.abs(gT - g) > .002 || drag) raf = requestAnimationFrame(frame);
   };
