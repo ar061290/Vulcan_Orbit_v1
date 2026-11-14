@@ -4,6 +4,7 @@ import { h, load } from './lib.js';
 import { annotate } from './glossary.js';
 import { banner } from './banner.js';
 import { summary, KEEP } from './summaries.js';
+import { provenance } from './provenance.js';
 import { hero } from './hero.js';
 const VISUAL = { flame: 'flame', predict: 'flame', respond: 'flame', detect: 'smoke', locate: 'smoke' };   // others: earth
 import './bg.js';
@@ -24,6 +25,7 @@ async function route() {
   try {
     const mod = await import(`./pages/${known}.js`); const root = h('div'); await mod.default(root);
     root.querySelectorAll('.card').forEach((c, i) => c.style.setProperty('--i', Math.min(i, 10)));   // staggered reveal
+    provenance(root);
     if (known !== 'overview') { pageHead(root, known); await simplify(root, known); }
     annotate(root);
     // Accessibility fixes applied to every page: name every chart, make scrolling tables reachable by keyboard, fill empty headers.
