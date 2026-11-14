@@ -37,6 +37,7 @@ export function replayCard(lat) {
   btn.onclick = () => { if (playing) return stop(); if (f >= 1) f = 0; playing = true; last = 0; btn.textContent = '❚❚ Pause'; btn.setAttribute('aria-pressed', 'true'); raf = requestAnimationFrame(tick); };
   slider.oninput = () => { stop(); f = slider.value / 1000; draw(); };
   sel.onchange = () => { stop(); setup(); };
+  sel.value = String(Math.max(0, lat.burns.findIndex(b => /Sample 1/.test(b.name))));   // open on a real fire, not the smoke-wire puff
   setup();
   return card('Replay an orbital fire', lat.status, 'Saffire-III telemetry, replayed at about 14 seconds per event. Each lane is one sensor, scaled so the dashed line is its alarm threshold. A dot marks the moment it would alarm.',
     h('div', { class: 'row' }, h('label', {}, 'Event ', sel), btn, clock), cv, slider, lamps,
@@ -47,4 +48,41 @@ export function daftCard(d) {
     h('p', {}, `“${d.objective_quote}” `, d.what_it_means),
     h('div', { class: 'timeline' }, ...d.sessions.map(s => h('div', { class: 'tl-item' }, h('b', {}, `${s.session} · ${s.day}`), h('span', {}, s.hardware), h('small', {}, s.where)))),
     h('p', {}, h('small', {}, d.not_in_archive)));
+}
+
+// Alarm vs toxic gas: Saffire IV-VI cabin gas rise against crew limits (data/saffire_gas.json, reported).
+export function gasCard(g) {
+  const NS = 'http://www.w3.org/2000/svg', s = (t, a = {}, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const panel = (title, key, max, lines, unit) => {
+    const W = 520, rowH = 30, m = { l: 150, r: 20, t: 26, b: 30 }, H = m.t + g.tests.length * rowH + m.b, X = v => m.l + v / max * (W - m.l - m.r);
+    const svg = s('svg', { viewBox: `0 0 ${W} ${H}`, class: 'chart', role: 'img', 'aria-label': `${title}, by test, with crew limits` });
+    svg.append(s('text', { x: m.l, y: 14, style: `fill:${C.ink};font-weight:700` }, title));
+    g.tests.forEach((t, i) => {
+      const y = m.t + i * rowH, v = t[key], over = lines.some(([l]) => v > l);
+      svg.append(s('text', { x: m.l - 8, y: y + 18, 'text-anchor': 'end' }, `${t.test} · ${t.material.split(',')[0]}`));
+      svg.append(s('rect', { x: m.l, y: y + 6, width: Math.max(2, X(v) - m.l), height: 16, rx: 3, fill: over ? C.s2 : C.s1 }));
+      svg.append(s('text', { x: X(v) + 6, y: y + 18, style: `fill:${C.ink}` }, `${v} ${unit}`));
+    });
+    for (const [l, lab] of lines) { svg.append(s('line', { x1: X(l), x2: X(l), y1: m.t - 4, y2: H - m.b + 4, stroke: C.warn, 'stroke-width': 2, 'stroke-dasharray': '4 3' }), s('text', { x: X(l), y: H - 8, 'text-anchor': 'middle', style: `fill:${C.ink}` }, lab)); }
+    return svg;
+  };
+  const L = g.limits;
+  return card('The alarm can come after the gas', g.status, 'NASA\'s Saffire IV-VI fires in empty Cygnus cargo ships: how much the cabin carbon monoxide and carbon dioxide rose, against crew exposure limits.',
+    h('div', { class: 'grid g2' }, panel('Carbon monoxide rise', 'co_rise', 460, [[L.co_smac_24h_ppm, '24 h limit'], [L.co_smac_1h_ppm, '1 h limit']], 'ppm'),
+      panel('Carbon dioxide rise', 'co2_rise_mmHg', 4, [[L.co2_1h_mmHg, '1 h limit']], 'mmHg')),
+    h('p', {}, g.takeaway),
+    h('p', {}, h('b', {}, `Timing: `), g.alarm.note),
+    h('p', {}, h('small', {}, `Bars over a limit are orange. ${g.source} Limits: ${L.source}.`)));
+}
+
+// Rate-of-rise vs fixed alarm level on the same Saffire-III smoke channels (data/rate_of_rise.json).
+export function rateCard(r) {
+  const sc = r.events.filter(e => /scatter/.test(e.channel));
+  const fmtT = v => v == null ? 'never' : typeof v === 'string' ? v : `${Math.round(v)} s`;
+  return card('Would a "fast rise" alarm be quicker?', r.status, 'NASA has proposed alarms that trigger on how fast smoke rises, not how high it gets. We tested that idea on the real Saffire-III smoke detector, with the pass rule written first.',
+    h('div', { class: 'scroll' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, 'Event'), h('th', {}, 'Fixed level alarm'), h('th', {}, 'Fast-rise alarm'))),
+      h('tbody', {}, ...sc.map(e => h('tr', {}, h('td', {}, e.event), h('td', {}, fmtT(e.fixed_alarm_s)), h('td', {}, fmtT(e.rate_alarm_s))))))),
+    h('p', { style: 'margin-top:10px' }, h('b', {}, r.result.text)),
+    h('p', {}, 'Why: in a ventilated cabin the smoke reaching the detector builds up slowly, so its rise rate never stands out from normal noise, while its level eventually does. One detector, three events: this says nothing about other designs.'),
+    h('p', {}, h('small', {}, `${r.rule} Source: ${r.source}.`)));
 }

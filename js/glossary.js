@@ -29,7 +29,7 @@ export const TERMS = {
 };
 const KEYS = Object.keys(TERMS).sort((a, b) => b.length - a.length);
 const RX = new RegExp(`(^|[^\\w-])(${KEYS.map(k => k.replace(/[.*+?^${}()|[\]\\²]/g, m => m === '²' ? '²' : '\\' + m)).join('|')})(?![\\w-])`, 'i');
-const SKIP = 'a,button,code,pre,svg,script,style,input,select,textarea,label,.term,.badge,.lvl,th,h1,.hero-gl,.stat,.gloss';
+const SKIP = 'a,button,summary,code,pre,svg,script,style,input,select,textarea,label,.term,.badge,.lvl,th,h1,.hero-gl,.stat,.gloss';
 const pop = Object.assign(document.createElement('div'), { className: 'gloss', id: 'gloss', hidden: true });
 pop.setAttribute('role', 'tooltip'); document.body.append(pop);
 let owner = null;

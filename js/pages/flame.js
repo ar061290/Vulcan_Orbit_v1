@@ -32,7 +32,7 @@ function spreadCard(sp) {
   const fuels = [...new Set(sp.rates.map(r => r.fuel))], st = { fuel: fuels[0], o2: 0.21, p: 101.3 }; const holder = h('div');
   function draw() {
     const rs = sp.rates.filter(r => r.fuel === st.fuel && r.X_O2 === st.o2 && r.P_kPa === st.p);
-    const order = ['0 g', 'Moon 0.16 g', 'Mars 0.38 g', 'Earth 1 g'];
+    const order = ['0 g', 'Earth 1 g'];   // Moon and Mars left out: no NASA data to check them
     const series = order.map(g => rs.find(r => r.gravity === g)).filter(Boolean).map(r => ({ name: GNAME[r.gravity], color: GCOL[r.gravity], points: r.flow_m_s.map((f, i) => [f, r.rate_mm_s[i] ?? 0]) }));
     holder.replaceChildren(series.length ? lineChart({ series, xLabel: 'Opposed airflow, m/s', yLabel: 'Spread rate, mm/s', unit: ' mm/s' }) : h('p', {}, 'No case for this combination.'),
       h('div', { class: 'legend' }, ...series.map(s => h('span', {}, h('i', { style: `background:${s.color}` }), s.name))));
@@ -80,7 +80,7 @@ function mapCard(sp) {
   }
   draw();
   return card('Where a flame can survive', 'model', 'Thin acrylic sheet, both sides burning. Too little airflow starves the flame of oxygen; too much blows it off.',
-    chips('Gravity', ['0 g', 'Moon 0.16 g', 'Mars 0.38 g', 'Earth 1 g'], st.g, v => { st.g = v; draw(); }, o => GNAME[o]), chips('Pressure', [101.3, 70.3], st.p, v => { st.p = v; draw(); }, o => `${o} kPa`),
+    chips('Gravity', ['0 g', 'Earth 1 g'], st.g, v => { st.g = v; draw(); }, o => GNAME[o]), chips('Pressure', [101.3, 70.3], st.p, v => { st.p = v; draw(); }, o => `${o} kPa`),
     holder, h('p', {}, h('small', {}, 'Limits are set by a Damköhler-number criterion tuned on one BASS-II blow-off and one quench point, so treat the edges as approximate. BASS-II saw spread down to about 16–17% O2; the model\'s 11% minimum in orbit is probably too low.')));
 }
 
@@ -108,5 +108,5 @@ export default async function (root) {
     h('div', { class: 'grid g2', style: 'margin-top:14px' }, mapCard(sp), frontCard(sp)),
     h('div', { style: 'margin-top:14px' }, checksCard([...(fs.checks || []), ...(sp.checks || [])])),
     h('div', { style: 'margin-top:14px' }, card('Limits', null, null, h('ul', { style: 'margin:0;padding-left:18px;color:var(--ink2)' }, ...[...(fs.limits || []), ...(sp.limits || []),
-      'Moon and Mars cases are model only: NASA has no flame data between 0 g and 1 g.', 'No output here says any material or atmosphere is safe.'].map(t => h('li', { style: 'margin-bottom:4px' }, t)))))));
+      'Moon and Mars are not shown: NASA has no flame data between 0 g and 1 g, so nothing could check them.', 'No output here says any material or atmosphere is safe.'].map(t => h('li', { style: 'margin-bottom:4px' }, t)))))));
 }

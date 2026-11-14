@@ -1,0 +1,102 @@
+{
+ "status": "real",
+ "source": "NASA Saffire-III flight telemetry, PSI-100 (doi 10.60555/040q-4h36), file datasets/psi/PSI-100/PSI-100_Raw Data_Saffire_Data_Table2017.161.00.42.03-EU.csv",
+ "rule": "Rise rate over 30 s; alarm when it exceeds the 300 s pre-event mean + 5 SD of rise rates (3 SD as low end). Ours, not a NASA setting.",
+ "units": {
+  "time": "s after the event's igniter or smoke wire switched on"
+ },
+ "events": [
+  {
+   "event": "Smoke wire: an 11 s puff of smoke, no flame",
+   "channel": "Smoke detector: scatter",
+   "rate_alarm_s": 23.492999999999483,
+   "rate_alarm_s_k3": 23.492999999999483,
+   "fixed_alarm_s": 23.0,
+   "baseline": {
+    "mean": 5.555555518524526e-06,
+    "sd": 0.00016666666666666666,
+    "threshold": 0.0008388888888518578
+   }
+  },
+  {
+   "event": "Sample 2 burn (SIBAL fabric, opposed flow)",
+   "channel": "Smoke detector: scatter",
+   "rate_alarm_s": null,
+   "rate_alarm_s_k3": null,
+   "fixed_alarm_s": 127.0,
+   "baseline": {
+    "mean": 0.0003554442745598622,
+    "sd": 0.013900499393432839,
+    "threshold": 0.06985794124172405
+   }
+  },
+  {
+   "event": "Sample 1 burn (SIBAL fabric, concurrent flow)",
+   "channel": "Smoke detector: scatter",
+   "rate_alarm_s": null,
+   "rate_alarm_s_k3": null,
+   "fixed_alarm_s": 92.0,
+   "baseline": {
+    "mean": 0.00021099649832502515,
+    "sd": 0.014470200011945563,
+    "threshold": 0.07256199655805284
+   }
+  },
+  {
+   "event": "Smoke wire: an 11 s puff of smoke, no flame",
+   "channel": "Smoke detector: obscuration",
+   "rate_alarm_s": null,
+   "rate_alarm_s_k3": null,
+   "fixed_alarm_s": null,
+   "baseline": {
+    "mean": 5.555000055550435e-06,
+    "sd": 0.00016666666666666666,
+    "threshold": 0.0008388883333888838
+   }
+  },
+  {
+   "event": "Sample 2 burn (SIBAL fabric, opposed flow)",
+   "channel": "Smoke detector: obscuration",
+   "rate_alarm_s": null,
+   "rate_alarm_s_k3": null,
+   "fixed_alarm_s": null,
+   "baseline": {
+    "mean": -5.554444555544325e-06,
+    "sd": 0.00016666666666666666,
+    "threshold": 0.0008277788887777889
+   }
+  },
+  {
+   "event": "Sample 1 burn (SIBAL fabric, concurrent flow)",
+   "channel": "Smoke detector: obscuration",
+   "rate_alarm_s": null,
+   "rate_alarm_s_k3": null,
+   "fixed_alarm_s": null,
+   "baseline": {
+    "mean": 1.6664629836760945e-09,
+    "sd": 0.00016666666666666666,
+    "threshold": 0.0008333349997963169
+   }
+  }
+ ],
+ "quiet": [
+  {
+   "channel": "Smoke detector: scatter",
+   "quiet_readings": 441,
+   "false_alarms": 0,
+   "threshold_from": "300 s before the first event"
+  },
+  {
+   "channel": "Smoke detector: obscuration",
+   "quiet_readings": 441,
+   "false_alarms": 0,
+   "threshold_from": "300 s before the first event"
+  }
+ ],
+ "result": {
+  "scatter_events_earlier": 0,
+  "false_alarms": 0,
+  "passed": false,
+  "text": "Fail: rate-of-rise was earlier than the fixed level in 0 of 3 events on the scatter channel, with 0 false alarms in quiet stretches."
+ }
+}

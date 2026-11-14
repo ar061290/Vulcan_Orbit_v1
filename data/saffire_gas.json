@@ -1,0 +1,90 @@
+{
+ "status": "reported",
+ "source": "Urban, Ruff, Ferkul et al., 'Saffire VI preliminary results', ICES-2024-365 (2024), Table 2 and text. Read from the NASA NTRS PDF; values as published, not checked by us against raw data.",
+ "source_url": "https://ntrs.nasa.gov/citations/20240002981",
+ "units": {
+  "co_rise": "ppm",
+  "co2_rise_mmHg": "mmHg",
+  "co2_rise_ppm": "ppm",
+  "duration": "s",
+  "peak_hrr": "W",
+  "total_heat": "kJ",
+  "pressure": "kPa",
+  "o2": "mol %"
+ },
+ "tests": [
+  {
+   "test": "IV-1",
+   "material": "SIBAL cloth",
+   "kPa": 100.0,
+   "o2": 22.0,
+   "duration": 130,
+   "peak_hrr": 3150,
+   "total_heat": 409,
+   "co2_rise_ppm": 1390,
+   "co2_rise_mmHg": 1.03,
+   "co_rise": 80
+  },
+  {
+   "test": "V-2",
+   "material": "Cotton jersey",
+   "kPa": 70.7,
+   "o2": 26.2,
+   "duration": 200,
+   "peak_hrr": 2800,
+   "total_heat": 560,
+   "co2_rise_ppm": 2360,
+   "co2_rise_mmHg": 1.26,
+   "co_rise": 83
+  },
+  {
+   "test": "VI-2",
+   "material": "SIBAL cloth",
+   "kPa": 54.1,
+   "o2": 31.0,
+   "duration": 112,
+   "peak_hrr": 3217,
+   "total_heat": 580,
+   "co2_rise_ppm": 2800,
+   "co2_rise_mmHg": 1.15,
+   "co_rise": 120
+  },
+  {
+   "test": "VI-3",
+   "material": "PMMA, 1 cm thick, 2-sided",
+   "kPa": 54.6,
+   "o2": 30.3,
+   "duration": 780,
+   "peak_hrr": 3080,
+   "total_heat": 1280,
+   "co2_rise_ppm": 8539,
+   "co2_rise_mmHg": 3.51,
+   "co_rise": 308
+  },
+  {
+   "test": "VI-4",
+   "material": "PMMA, 0.5 cm, 1-sided",
+   "kPa": 55.2,
+   "o2": 28.8,
+   "duration": 1200,
+   "peak_hrr": 1507,
+   "total_heat": 830,
+   "co2_rise_ppm": 8117,
+   "co2_rise_mmHg": 3.37,
+   "co_rise": 320
+  }
+ ],
+ "limits": {
+  "co_smac_1h_ppm": 425,
+  "co_smac_24h_ppm": 100,
+  "co2_1h_mmHg": 3.0,
+  "source": "As cited in ICES-2024-365 (NASA SMACs; NASA-STD-3001)"
+ },
+ "alarm": {
+  "test": "VI-3",
+  "level_mg_m3": 1.0,
+  "time_s": 981,
+  "note": "Far-field smoke monitor reached its 1 mg/m³ level at 981 s. The paper says much of the hazardous gas release had already occurred by then. It does not state what time zero is, so this is not an ignition-to-alarm delay."
+ },
+ "takeaway": "CO rose above the 24-hour crew limit in three of the five tests, and in both acrylic burns the CO2 rise passed the 1-hour limit. The authors conclude that gases, not heat, are the main hazard."
+}

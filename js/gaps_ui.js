@@ -17,15 +17,21 @@ export function gapCard(g) {
     c.addEventListener('pointermove', e => tip(e, `<b>${t.inv}</b><br>${t.kind}<br>${o}% O₂, ${p} kPa${t.pressure_assumed ? '<br><span>pressure assumed (not in the table)</span>' : ''}`)); c.addEventListener('pointerleave', untip);
     svg.append(c);
   }
+  if (g.reported) for (const [o, p, lab] of g.reported.points) {   // published large-scale burns, drawn as diamonds
+    const d = s('path', { d: `M${X(o)} ${Y(p) - 7}l7 7-7 7-7-7z`, fill: C.s4, stroke: C.surface, 'stroke-width': 1.5 });
+    d.addEventListener('pointermove', e => tip(e, `<b>${g.reported.name}, ${lab}</b><br>${o}% O₂, ${p} kPa<br><span>published (reported), not in the PSI tables</span>`)); d.addEventListener('pointerleave', untip);
+    svg.append(d);
+  }
+  const SHORT = a => a.replace(/ \(.*NASA EAWG.*\)/, ' (NASA proposal)').replace(/ at /, ' / ').replace(/ \((10\.2|8\.0) psi[a]?\)/, '').replace('ISS cabin air', 'ISS air');
+  const POS = [[16, -16, 'start'], [18, -16, 'start'], [-16, 30, 'end'], [18, 30, 'start']];
   g.probes.forEach((p, k) => {
-    const empty = Object.values(p.counts).some(v => v === 0), x = X(p.o2), y = Y(p.kpa), ly = y + (k % 2 ? 30 : -22);
+    const empty = Object.values(p.counts).some(v => v === 0), x = X(p.o2), y = Y(p.kpa), [dx, dy, anchor] = POS[k % POS.length];
     svg.append(s('rect', { x: x - 9, y: y - 9, width: 18, height: 18, rx: 3, fill: 'none', stroke: empty ? C.warn : C.ink, 'stroke-width': 2 }));
-    svg.append(s('line', { x1: x, x2: x + 18, y1: y + (k % 2 ? 9 : -9), y2: ly - 4, stroke: C.mute }));
-    const t = s('text', { x: x + 20, y: ly, style: `fill:${C.ink};font-size:12px` }, p.atmosphere);
-    svg.append(t);
+    svg.append(s('line', { x1: x + Math.sign(dx) * 9, x2: x + dx * 0.8, y1: y + Math.sign(dy) * 9, y2: y + dy * 0.7, stroke: C.mute }));
+    svg.append(s('text', { x: x + dx, y: y + dy, 'text-anchor': anchor, style: `fill:${C.ink};font-size:12px;font-weight:600` }, SHORT(p.atmosphere)));
   });
   const el = card('What NASA has not tested', g.status, 'Every oxygen and pressure combination in the summary tables of five NASA microgravity combustion experiments. Squares are cabin atmospheres we probe for gaps.',
-    svg, h('div', { class: 'legend' }, ...Object.entries(KIND).map(([k, c]) => h('span', {}, h('i', { style: `background:${c};border-radius:50%` }), k)), h('span', {}, h('i', { style: `border:2px solid ${C.warn};background:none` }), 'Gap for at least one fuel type')),
+    svg, h('div', { class: 'legend' }, ...Object.entries(KIND).map(([k, c]) => h('span', {}, h('i', { style: `background:${c};border-radius:50%` }), k)), h('span', {}, h('i', { style: `border:2px solid ${C.warn};background:none` }), 'Gap for at least one fuel type'), g.reported ? h('span', {}, h('i', { style: `background:${C.s4};transform:rotate(45deg)` }), 'Saffire IV-VI large burns (reported)') : null),
     h('ul', { style: 'margin:10px 0 0;padding-left:18px' }, ...g.verdicts.map(v => h('li', { style: 'margin-bottom:6px' }, v.text, ' ', h('small', {}, v.source)))),
     h('p', {}, h('small', {}, g.note + ' ' + g.source)));
   el.style.gridColumn = '1 / -1';

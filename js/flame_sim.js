@@ -4,7 +4,8 @@
 // Hot-gas tracers move with the model's own effective flow (forced air + buoyant rise), slowed down for viewing.
 import { h, card, badge, fmt } from './lib.js';
 
-const GRAV = [['0 g', 'Orbit', '0 g'], ['Moon 0.16 g', 'Moon', '0.16 g'], ['Mars 0.38 g', 'Mars', '0.38 g'], ['Earth 1 g', 'Earth', '1 g']];
+// Moon and Mars are not offered: NASA has no flame data at those gravities to check the model against.
+const GRAV = [['0 g', 'Orbit', '0 g'], ['Earth 1 g', 'Earth', '1 g']];
 const FUELS = ['methane', 'ethylene', 'propane', 'n-heptane', 'ethanol'];
 const T_TOP = 2700;                                                            // colour scale top, K (same for every case)
 // Incandescence-style ramp for gas temperature: ambient -> dark red -> orange -> yellow -> near white.

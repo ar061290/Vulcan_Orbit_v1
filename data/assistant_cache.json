@@ -198,7 +198,7 @@
   {
    "id": "smoke-clear",
    "q": "How long does smoke take to clear from a spacecraft cabin?",
-   "a": "Tuning our drift model on the Saffire-III smoke detector record gives a clearance time of 120 to 240 s (the time for ventilation and filtering to remove smoke). That range comes from one detector in one vehicle.",
+   "a": "Tuning our drift model on the Saffire-III smoke detector record gives a clearance time of 120 to 240 s (the time for ventilation and filtering to remove smoke). That range comes from one detector in one vehicle. The same model gets a smoke puff it was not tuned on wrong (peak about 18 s off), so it is a screening tool, not a validated one.",
    "sources": [
     {
      "label": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",

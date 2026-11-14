@@ -23,3 +23,18 @@ Data: Saffire-III flight telemetry, NASA PSI-100 (doi 10.60555/040q-4h36), file
 | L4 | Every event is reported on its own | 3 events in the output, no averages across them |
 | E3 | Reproduces a published Saffire-III alarm time | within one reading interval; if no published time is found: not run |
 | L5 | Threshold sensitivity | reported, no pass rule: k = 3 vs k = 5 alarm times for every channel and event |
+
+## Extension: rate-of-rise alarm (written 14 Nov 2026, before rate_of_rise.py was run)
+
+Question: on the same Saffire-III smoke channels, would an alarm on how fast the signal rises fire earlier than M4's fixed
+level alarm? NASA has proposed rate-of-rise logic for light-scattering detectors; we test it, we do not claim it.
+
+- Channels: smoke scatter and smoke obscuration (the radiometers are flame sensors and stay as they are).
+- Rise rate at each reading: (x(t) - x(t - 30 s)) / 30 s, using the nearest earlier reading at least 30 s back.
+- Baseline: rise rates in the 300 s before the event starts (fewer than 8 values: the event is reported as "not enough baseline").
+- Alarm: first reading after the event starts whose rise rate exceeds baseline mean + 5 SD (3 SD reported as the low end).
+  SD floor: the M4 smoke floor (0.005) divided by 30 s.
+- False alarms: the same rule run over every quiet stretch (more than 120 s before any event and not within 600 s after one);
+  every crossing there is counted and reported.
+- Pass (stated now): rate-of-rise alarms earlier than the fixed level in at least 2 of the 3 events AND has 0 false alarms in the
+  quiet stretches. Each event is reported on its own; no averages. If it fails, the site says so.

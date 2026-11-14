@@ -178,3 +178,12 @@ See `AI_LOG.md`.
 | Drishti IAS summary of The Hindu, 22 May 2026 | India card: Gaganyaan smoke detectors and water mist (news only) |
 | Competitor and NASA-results research, 14 Nov 2026 | reports/Flame in Free Fall research.md (every claim cited there) |
 | Google Fonts: Instrument Serif, Inter, JetBrains Mono (SIL Open Font License) | Site typography |
+
+## Added 14 Nov 2026 (evening)
+
+| Source | Used for |
+|---|---|
+| Urban, Ruff, Ferkul et al., Saffire VI preliminary results, ICES-2024-365, https://ntrs.nasa.gov/citations/20240002981 | data/saffire_gas.json (gas rise, heat release, 981 s alarm; reported); Saffire IV-VI points on the gap map |
+| NASA Exploration Atmospheres Working Group, NASA/TP-2010-216134 | 8.0 psia / 32% O2 probe on the gap map |
+| NASA-STD-7009A, Standard for Models and Simulations | Credibility factors in the "Made by" boxes (self-assessed) |
+| Rate-of-rise smoke alarm logic proposed for spacecraft light-scattering detectors (see reports/Elevating Vulcan Orbit for judges.md for the citation) | Idea tested in models/m4-latency/rate_of_rise.py |
