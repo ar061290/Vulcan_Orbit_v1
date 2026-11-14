@@ -1,0 +1,126 @@
+{
+ "status": "team",
+ "note": "Fixed test set written with the answers; the Ask page runs every question through the same matcher and reports the score.",
+ "items": [
+  {
+   "q": "how long did the smoke alarm take in saffire",
+   "expect": "saffire-latency"
+  },
+  {
+   "q": "when did the detector notice the orbital fire",
+   "expect": "saffire-latency"
+  },
+  {
+   "q": "what was the saffire 3 experiment",
+   "expect": "saffire-what"
+  },
+  {
+   "q": "which smoke particles are too small for the detector",
+   "expect": "smoke-fine"
+  },
+  {
+   "q": "is kapton smoke hard to detect",
+   "expect": "smoke-fine"
+  },
+  {
+   "q": "does faster airflow make smoke harder to see",
+   "expect": "smoke-airflow"
+  },
+  {
+   "q": "how fast is the air on the iss",
+   "expect": "airflow-iss"
+  },
+  {
+   "q": "what is the cabin ventilation speed",
+   "expect": "airflow-iss"
+  },
+  {
+   "q": "where should i put the smoke detector",
+   "expect": "placement"
+  },
+  {
+   "q": "is the ceiling a good place for a detector in orbit",
+   "expect": "placement"
+  },
+  {
+   "q": "what concentration triggers the smoke alarm",
+   "expect": "alarm-level"
+  },
+  {
+   "q": "how long does smoke linger in the cabin",
+   "expect": "smoke-clear"
+  },
+  {
+   "q": "why are flames spherical in microgravity",
+   "expect": "flame-shape"
+  },
+  {
+   "q": "why is the flame a ball in space",
+   "expect": "flame-shape"
+  },
+  {
+   "q": "how fast do heptane droplets burn",
+   "expect": "droplet-rate"
+  },
+  {
+   "q": "what oxygen level makes a droplet flame go out",
+   "expect": "extinction-o2"
+  },
+  {
+   "q": "is co2 or helium better to extinguish a flame",
+   "expect": "suppressant"
+  },
+  {
+   "q": "what is a cool flame",
+   "expect": "cool-flame"
+  },
+  {
+   "q": "how fast does flame spread over acrylic",
+   "expect": "spread"
+  },
+  {
+   "q": "what is the minimum oxygen to burn a thin sheet",
+   "expect": "min-oxygen"
+  },
+  {
+   "q": "what conditions has nasa never tested",
+   "expect": "gaps"
+  },
+  {
+   "q": "did nasa study electric fields and flames",
+   "expect": "efield"
+  },
+  {
+   "q": "which datasets do you use",
+   "expect": "datasets"
+  },
+  {
+   "q": "how will fire spread on the moon",
+   "expect": "refuse"
+  },
+  {
+   "q": "what about fire on mars",
+   "expect": "refuse"
+  },
+  {
+   "q": "is a high oxygen cabin safe",
+   "expect": "refuse"
+  },
+  {
+   "q": "can ion wind extinguish a fire in space",
+   "expect": "refuse"
+  },
+  {
+   "q": "what is the best pizza in hyderabad",
+   "expect": "refuse"
+  },
+  {
+   "q": "who will win the cricket match",
+   "expect": "refuse"
+  },
+  {
+   "q": "write me a poem about rockets",
+   "expect": "refuse"
+  }
+ ]
+}

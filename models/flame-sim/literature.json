@@ -1,0 +1,21 @@
+{
+ "status": "reported",
+ "note": "Literature values for the stage 2 checks (RULES.md S2-rate, S2-standoff), written before the stage 2 code was first run. Burning fluxes in g/m2/s; where a paper gives a regression rate in mm/min it is converted with the PMMA density the paper itself states (1.19 g/cm3). 'avg' = average over the plate from the leading edge to x_m (load-cell value); otherwise a local value at x_m. Forced-flow experiments on horizontal plates are compared with the g = 0 forced solution (buoyancy acts across the plate, which the Emmons model does not include). Range [lo, hi] = the reported value(s); the pass rule widens it by a factor of 2 each side.",
+ "pmma": [
+  {"kind": "rate", "x_m": 0.06, "flow_m_s": 0.60, "g": 0.0, "X_O2": 0.21, "range": [4.0, 4.0],
+   "source": "Ananth, Ndubizu & Tatem, 'Flow past a burning solid surface', NRL/NIST, https://www.nist.gov/document/r0201328pdf: 'r0 falls from about 1mm/min near the leading edge to about 0.2 mm/min at 6 cm from the leading edge' (U = 60 cm/s); 0.2 mm/min x 1.19 g/cm3 = 4.0 g/m2/s"},
+  {"kind": "rate", "x_m": 0.003, "flow_m_s": 0.84, "g": 0.0, "X_O2": 0.21, "range": [18.2, 18.2],
+   "source": "Ndubizu, Ananth & Tatem, Halon Options Technical Working Conference 2001, https://www.nist.gov/document/r0200517pdf: 'The base case peak regression rate of 0.92 mm/min occurred 3 mm from the leading edge' (U = 84 cm/s); x 1.19 g/cm3 = 18.2 g/m2/s"},
+  {"kind": "rate", "avg": true, "x_m": 0.10, "flow_m_s": 0.79, "g": 0.0, "X_O2": 0.21, "range": [5.99, 5.99],
+   "source": "Singh, PhD thesis, Univ. of Maryland 2015, Table 8 (load cell), https://api.drum.lib.umd.edu/server/api/core/bitstreams/dc935834-a7f4-4787-8cfb-16932639be3f/content: PMMA 5.99 g/m2 s at 0.79 m/s, 10 cm sample"},
+  {"kind": "rate", "avg": true, "x_m": 0.10, "flow_m_s": 2.06, "g": 0.0, "X_O2": 0.21, "range": [7.84, 7.84],
+   "source": "Singh, PhD thesis 2015, Table 8: PMMA 7.84 g/m2 s at 2.06 m/s, 10 cm sample"},
+  {"kind": "rate", "avg": true, "x_m": 0.08, "flow_m_s": 0.0, "g": 1.0, "X_O2": 0.21, "range": [8.9, 8.9],
+   "source": "Singh, PhD thesis 2015, Ch. 5 (vertical wall, free convection, 8 cm tall): 'mass-burning rate evaluated though the load cell data was found to be ... 8.9 g/m2s for ... PMMA'"}
+ ],
+ "standoff_note": "No measured PMMA flame standoff distance in mm was found in text or tables (only in figures: Singh 2015 Figs. 5.4 and 6.10; Ananth et al. Fig. 2 dimensionless). S2-standoff is therefore 'not run: no data'. Reported scalings for comparison: standoff 'almost proportional to x^0.5' in forced flow and 'proportional to x^0.34' (non-dimensional) on a vertical wall (Singh 2015).",
+ "other_reported": {
+  "PMMA_B": [{"value": 1.3, "source": "Singh 2015 Table 6 (citing Ndubizu); Ananth et al. used B = 1.3"}, {"value": 1.6, "source": "Zhang et al. 2014 Table 1 (Ahmad and Faeth)"}],
+  "PMMA_heat_of_gasification_kJ_g": [{"value": 1.59, "source": "Ananth et al. (NRL)"}, {"value": 1.63, "source": "Singh 2015 Table 13"}, {"value": 1.6, "source": "Zhang et al. 2014 Table 1"}, {"value": 1.7, "source": "BASS-II TM-20210011385 Ch. 6"}]
+ }
+}

@@ -1,0 +1,829 @@
+{
+ "repeats": 20,
+ "decisions": [
+  "FLEX: read as cp1252; cells holding an en dash (byte 0x96) or text such as '~6' are treated as missing.",
+  "FLEX: test C11M201 (#114) lists ambient pressure 0 mmHg; treated as missing, so the burn is left out of the models (it still counts in flex_suppression.json).",
+  "FLEX: identifier 193F001 appears 2 times (#70, #73) with the same date and time; kept #70, dropped #73.",
+  "FLEX: 13 burns lack pressure or initial diameter and are left out of the models (no values are filled in).",
+  "CFI: pressure is taken from the 'Master Sheet' text (e.g. '.5 atm'); it agrees with 'Pressure (atm)' in the DATA sheet wherever both are filled in.",
+  "CFI: cool-flame model uses burns with 'Completed Analysis? = Yes', a recorded initial diameter, a recorded hot-flame extinction diameter and a recorded cool-flame extinction diameter. Label = droplet fully consumed ('Dext,cool' recorded as 0) versus cool flame went out leaving fuel ('Dext,cool' > 0).",
+  "CFI: a missing 'kcool' is NOT read as 'no cool flame'. The crew comments show many such burns drifted out of the camera view during the cool flame (e.g. FLEX-1214, 1216, 1229), so presence/absence of a cool flame is not modelled."
+ ],
+ "extinction": {
+  "rows": 260,
+  "positives": 178,
+  "sessions": 80,
+  "atmospheres": 47,
+  "headline": {
+   "auc_median": 0.898979,
+   "auc_repeat_range": [
+    0.883521,
+    0.918738
+   ],
+   "auc_session_bootstrap_95": [
+    0.842541,
+    0.946907
+   ]
+  },
+  "chosen_counts": {
+   "LR physics features (C=10)": 69,
+   "Gaussian-process classifier": 15,
+   "LR raw+fuel interactions (C=10)": 14,
+   "LR physics features (C=0.1)": 1,
+   "LR raw+fuel interactions (C=1)": 1
+  },
+  "baseline_single": {
+   "auc_median": 0.806128,
+   "auc_repeat_range": [
+    0.799762,
+    0.817085
+   ],
+   "auc_session_bootstrap_95": [
+    0.711606,
+    0.884028
+   ]
+  },
+  "baseline_majority_auc": 0.485253,
+  "single_variable_on_all_rows": "x_o2",
+  "candidates_fixed": {
+   "LR raw+fuel interactions (C=1)": {
+    "auc_median": 0.894937,
+    "auc_repeat_range": [
+     0.877453,
+     0.903698
+    ],
+    "auc_session_bootstrap_95": [
+     0.835718,
+     0.93915
+    ]
+   },
+   "LR physics features (C=1)": {
+    "auc_median": 0.895725,
+    "auc_repeat_range": [
+     0.887361,
+     0.903292
+    ],
+    "auc_session_bootstrap_95": [
+     0.838036,
+     0.940301
+    ]
+   },
+   "Gaussian-process classifier": {
+    "auc_median": 0.890895,
+    "auc_repeat_range": [
+     0.876627,
+     0.905364
+    ],
+    "auc_session_bootstrap_95": [
+     0.830501,
+     0.938634
+    ]
+   }
+  },
+  "brier_model": 0.111407,
+  "brier_no_skill": 0.215999,
+  "S1_drop_disruption": {
+   "rows": 205,
+   "auc_median": 0.891178,
+   "auc_repeat_range": [
+    0.863285,
+    0.917156
+   ],
+   "auc_session_bootstrap_95": [
+    0.799702,
+    0.955756
+   ]
+  },
+  "S2_label_dext_gt0": {
+   "rows": 195,
+   "positives": 187,
+   "auc_median": 0.925134,
+   "auc_repeat_range": [
+    0.829679,
+    0.960578
+   ],
+   "auc_session_bootstrap_95": [
+    0.780527,
+    0.993427
+   ]
+  },
+  "atmosphere_held_out": {
+   "auc_median": 0.900863,
+   "auc_repeat_range": [
+    0.87796,
+    0.909761
+   ],
+   "auc_session_bootstrap_95": [
+    0.837223,
+    0.950815
+   ]
+  },
+  "single_input_auc": {
+   "Oxygen": 0.816731,
+   "CO2": 0.575329,
+   "Helium": 0.556968,
+   "Pressure": 0.51264,
+   "Initial droplet size": 0.561078,
+   "Fuel": 0.653672
+  },
+  "inputs": [
+   "Oxygen",
+   "CO2",
+   "Helium",
+   "Pressure",
+   "Initial droplet size",
+   "Fuel"
+  ],
+  "excluded_columns": [
+   "Visible flame extinction diameter",
+   "Burning rate",
+   "Burn time",
+   "Test end",
+   "FLEX Identifier",
+   "Test Date",
+   "Test GMT"
+  ],
+  "label_permutation_fast": {
+   "model": "LR physics features (C=1), repeat-0 split, 20 shuffles",
+   "auc_mean": 0.477326,
+   "auc_max": 0.570019
+  },
+  "leakage_triggered": false,
+  "pass": true,
+  "final_model": "LR physics features (C=10)",
+  "o2_at_half_table": [
+   {
+    "fuel": "methanol",
+    "p_atm": 0.7,
+    "added_gas": "no added gas",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.224305,
+    "o2_at_p_half_95": [
+     0.199897,
+     0.242038
+    ],
+    "bootstrap_fits_without_crossing": 0,
+    "p_ext_at_o2_0.12": 0.999733,
+    "p_ext_at_o2_0.34": 0.031651
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 0.7,
+    "added_gas": "20% CO2",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.249478,
+    "o2_at_p_half_95": [
+     0.228825,
+     0.268696
+    ],
+    "bootstrap_fits_without_crossing": 0,
+    "p_ext_at_o2_0.12": 0.999968,
+    "p_ext_at_o2_0.34": 0.061837
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 0.7,
+    "added_gas": "20% He",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.265279,
+    "o2_at_p_half_95": [
+     0.238418,
+     0.31693
+    ],
+    "bootstrap_fits_without_crossing": 5,
+    "p_ext_at_o2_0.12": 0.999881,
+    "p_ext_at_o2_0.34": 0.149066
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 1.0,
+    "added_gas": "no added gas",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.216737,
+    "o2_at_p_half_95": [
+     0.20266,
+     0.233993
+    ],
+    "bootstrap_fits_without_crossing": 0,
+    "p_ext_at_o2_0.12": 0.999678,
+    "p_ext_at_o2_0.34": 0.018825
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 1.0,
+    "added_gas": "20% CO2",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.240368,
+    "o2_at_p_half_95": [
+     0.22435,
+     0.282373
+    ],
+    "bootstrap_fits_without_crossing": 0,
+    "p_ext_at_o2_0.12": 0.999962,
+    "p_ext_at_o2_0.34": 0.03725
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 1.0,
+    "added_gas": "20% He",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.252387,
+    "o2_at_p_half_95": [
+     0.228091,
+     0.308837
+    ],
+    "bootstrap_fits_without_crossing": 12,
+    "p_ext_at_o2_0.12": 0.999856,
+    "p_ext_at_o2_0.34": 0.093242
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 0.7,
+    "added_gas": "no added gas",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.20096,
+    "o2_at_p_half_95": [
+     0.178139,
+     0.216134
+    ],
+    "bootstrap_fits_without_crossing": 0,
+    "p_ext_at_o2_0.12": 0.999179,
+    "p_ext_at_o2_0.34": 0.010501
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 0.7,
+    "added_gas": "20% CO2",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.224008,
+    "o2_at_p_half_95": [
+     0.204757,
+     0.240008
+    ],
+    "bootstrap_fits_without_crossing": 0,
+    "p_ext_at_o2_0.12": 0.999903,
+    "p_ext_at_o2_0.34": 0.020952
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 0.7,
+    "added_gas": "20% He",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.231461,
+    "o2_at_p_half_95": [
+     0.207573,
+     0.268909
+    ],
+    "bootstrap_fits_without_crossing": 0,
+    "p_ext_at_o2_0.12": 0.999634,
+    "p_ext_at_o2_0.34": 0.053815
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 1.0,
+    "added_gas": "no added gas",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.195384,
+    "o2_at_p_half_95": [
+     0.187007,
+     0.208601
+    ],
+    "bootstrap_fits_without_crossing": 0,
+    "p_ext_at_o2_0.12": 0.999009,
+    "p_ext_at_o2_0.34": 0.006191
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 1.0,
+    "added_gas": "20% CO2",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.217238,
+    "o2_at_p_half_95": [
+     0.208142,
+     0.237948
+    ],
+    "bootstrap_fits_without_crossing": 0,
+    "p_ext_at_o2_0.12": 0.999883,
+    "p_ext_at_o2_0.34": 0.012406
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 1.0,
+    "added_gas": "20% He",
+    "d0_mm": 3.0,
+    "o2_at_p_half": 0.222569,
+    "o2_at_p_half_95": [
+     0.206443,
+     0.268995
+    ],
+    "bootstrap_fits_without_crossing": 3,
+    "p_ext_at_o2_0.12": 0.999558,
+    "p_ext_at_o2_0.34": 0.032307
+   }
+  ],
+  "drivers": [
+   {
+    "name": "Oxygen",
+    "share": 0.5633
+   },
+   {
+    "name": "Initial droplet size",
+    "share": 0.192483
+   },
+   {
+    "name": "Fuel",
+    "share": 0.149939
+   },
+   {
+    "name": "CO2",
+    "share": 0.048725
+   },
+   {
+    "name": "Helium",
+    "share": 0.04528
+   },
+   {
+    "name": "Pressure",
+    "share": 0.000273
+   }
+  ],
+  "importance_raw": {
+   "Oxygen": 0.276728,
+   "CO2": 0.023937,
+   "Helium": 0.022244,
+   "Pressure": 0.000134,
+   "Initial droplet size": 0.09456,
+   "Fuel": 0.073659
+  }
+ },
+ "burning_rate": {
+  "rows": 256,
+  "sessions": 80,
+  "k_range": [
+   0.05,
+   1.06
+  ],
+  "headline": {
+   "mae_median": 0.051648,
+   "mae_repeat_range": [
+    0.050096,
+    0.053854
+   ],
+   "mae_session_bootstrap_95": [
+    0.043404,
+    0.061732
+   ],
+   "r2_median": 0.671387
+  },
+  "chosen_counts": {
+   "d2 law x ridge (alpha=10)": 100
+  },
+  "baseline_d2_scaled": {
+   "mae_median": 0.079085,
+   "mae_repeat_range": [
+    0.077466,
+    0.080072
+   ],
+   "mae_session_bootstrap_95": [
+    0.067128,
+    0.093075
+   ],
+   "r2_median": 0.393566
+  },
+  "baseline_fuel_mean": {
+   "mae_median": 0.104437,
+   "mae_repeat_range": [
+    0.102515,
+    0.106877
+   ],
+   "mae_session_bootstrap_95": [
+    0.089056,
+    0.121309
+   ],
+   "r2_median": 0.023442
+  },
+  "d2_textbook_no_fit": {
+   "mae_median": 0.603599,
+   "mae_repeat_range": [
+    0.603599,
+    0.603599
+   ],
+   "mae_session_bootstrap_95": [
+    0.504914,
+    0.709993
+   ],
+   "r2_median": -29.312097
+  },
+  "repeats_model_beats_both": 20,
+  "pass": true,
+  "consistency": {
+   "rows": 155,
+   "median_measured_over_d2": 1.052308,
+   "iqr": [
+    1.029186,
+    1.088671
+   ]
+  },
+  "point_interval_log_resid": [
+   -0.321904,
+   0.321565
+  ],
+  "point_interval_coverage": 0.949219,
+  "drivers": [
+   {
+    "name": "Oxygen",
+    "share": 0.550704
+   },
+   {
+    "name": "Helium",
+    "share": 0.20695
+   },
+   {
+    "name": "Initial droplet size",
+    "share": 0.165689
+   },
+   {
+    "name": "CO2",
+    "share": 0.06534
+   },
+   {
+    "name": "Pressure",
+    "share": 0.011318
+   },
+   {
+    "name": "Fuel",
+    "share": 0.0
+   }
+  ],
+  "importance_raw": {
+   "Oxygen": 0.066373,
+   "CO2": 0.007875,
+   "Helium": 0.024943,
+   "Pressure": 0.001364,
+   "Initial droplet size": 0.01997,
+   "Fuel": -0.002541
+  },
+  "final_model": "d2 law x ridge (alpha=10)",
+  "d2_constants_all_rows": {
+   "methanol": 6697.778005,
+   "heptane": 4315.268052
+  }
+ },
+ "cool_flame": {
+  "rows": 117,
+  "used_up": 48,
+  "left_fuel": 69,
+  "sessions": 39,
+  "sessions_used_up": 22,
+  "sessions_left_fuel": 30,
+  "fit_condition_met": true,
+  "observed": {
+   "analysed_burns": 145,
+   "kcool_recorded": 124,
+   "d0_range_mm": [
+    3.793,
+    6.447
+   ],
+   "dext_hot_range_mm": [
+    2.773,
+    6.415
+   ],
+   "k_cool_range": [
+    0.021,
+    0.806
+   ],
+   "conditions": {
+    "p_atm": [
+     0.5,
+     0.75,
+     1.0,
+     1.25,
+     2.0,
+     3.0,
+     5.0
+    ],
+    "x_o2": [
+     0.17,
+     0.21
+    ],
+    "x_he": [
+     0.0,
+     0.29,
+     0.59
+    ],
+    "fuels": [
+     "60%/40% n-dodecane/iso-dodecane",
+     "75%/25% n-dodecane/iso-dodecane",
+     "n-dodecane"
+    ]
+   },
+   "end_state_by_pressure_and_helium": [
+    {
+     "p_atm": 0.5,
+     "x_he": 0.0,
+     "burns": 8,
+     "used_up": 0,
+     "median_cool_ext_diameter_mm_when_left": 3.391,
+     "median_k_cool": 0.2715
+    },
+    {
+     "p_atm": 0.75,
+     "x_he": 0.0,
+     "burns": 9,
+     "used_up": 0,
+     "median_cool_ext_diameter_mm_when_left": 0.902,
+     "median_k_cool": 0.337
+    },
+    {
+     "p_atm": 1.0,
+     "x_he": 0.0,
+     "burns": 22,
+     "used_up": 3,
+     "median_cool_ext_diameter_mm_when_left": 0.524,
+     "median_k_cool": 0.3645
+    },
+    {
+     "p_atm": 1.0,
+     "x_he": 0.29,
+     "burns": 7,
+     "used_up": 0,
+     "median_cool_ext_diameter_mm_when_left": 3.916,
+     "median_k_cool": 0.28
+    },
+    {
+     "p_atm": 1.0,
+     "x_he": 0.59,
+     "burns": 3,
+     "used_up": 0,
+     "median_cool_ext_diameter_mm_when_left": 2.536,
+     "median_k_cool": 0.531
+    },
+    {
+     "p_atm": 1.25,
+     "x_he": 0.0,
+     "burns": 10,
+     "used_up": 4,
+     "median_cool_ext_diameter_mm_when_left": 0.455,
+     "median_k_cool": 0.381
+    },
+    {
+     "p_atm": 2.0,
+     "x_he": 0.0,
+     "burns": 11,
+     "used_up": 9,
+     "median_cool_ext_diameter_mm_when_left": 1.5585,
+     "median_k_cool": 0.403
+    },
+    {
+     "p_atm": 3.0,
+     "x_he": 0.0,
+     "burns": 22,
+     "used_up": 18,
+     "median_cool_ext_diameter_mm_when_left": 0.8895,
+     "median_k_cool": 0.3965
+    },
+    {
+     "p_atm": 3.0,
+     "x_he": 0.29,
+     "burns": 5,
+     "used_up": 4,
+     "median_cool_ext_diameter_mm_when_left": 0.382,
+     "median_k_cool": 0.497
+    },
+    {
+     "p_atm": 3.0,
+     "x_he": 0.59,
+     "burns": 5,
+     "used_up": 3,
+     "median_cool_ext_diameter_mm_when_left": 3.208,
+     "median_k_cool": 0.611
+    },
+    {
+     "p_atm": 5.0,
+     "x_he": 0.0,
+     "burns": 7,
+     "used_up": 6,
+     "median_cool_ext_diameter_mm_when_left": 0.188,
+     "median_k_cool": 0.505
+    },
+    {
+     "p_atm": 5.0,
+     "x_he": 0.29,
+     "burns": 4,
+     "used_up": 1,
+     "median_cool_ext_diameter_mm_when_left": 1.554,
+     "median_k_cool": 0.6195
+    },
+    {
+     "p_atm": 5.0,
+     "x_he": 0.59,
+     "burns": 4,
+     "used_up": 0,
+     "median_cool_ext_diameter_mm_when_left": 0.2625,
+     "median_k_cool": 0.5725
+    }
+   ],
+   "end_state_by_fuel": [
+    {
+     "fuel": "60%/40% n-dodecane/iso-dodecane",
+     "burns": 33,
+     "used_up": 19
+    },
+    {
+     "fuel": "75%/25% n-dodecane/iso-dodecane",
+     "burns": 26,
+     "used_up": 15
+    },
+    {
+     "fuel": "n-dodecane",
+     "burns": 58,
+     "used_up": 14
+    }
+   ]
+  },
+  "cfig": {
+   "rows": 179,
+   "cool_flame_column_filled": 8,
+   "cool_flame_yes": 7,
+   "yes_conditions": {
+    "fuel": [
+     "30% butane"
+    ],
+    "p_bar": [
+     2.0266
+    ],
+    "x_o2_before": [
+     0.389263,
+     0.3993
+    ],
+    "fuel_flow_mg_s": [
+     0.75,
+     1.0,
+     1.5
+    ],
+    "tests": [
+     "21174 C3",
+     "21174 C4",
+     "21174 D1",
+     "21174 F1",
+     "21174 C6",
+     "21291 A1",
+     "21291 C1"
+    ]
+   },
+   "report_quote": "A total of 280 hot diffusion flames were observed. Among them, 189 flames experienced radiative extinction ... Of those that extinguished radiatively, 15 subsequently reignited as cool diffusion flames. These cool flames were observed only with the following conditions: a) concentrations of 30 vol% n-butane and 40 vol% O2, b) normal flames, c) a pressure of 2.03 bar, and d) mass flow rates between 0.75 - 1.5 mg/s."
+  },
+  "headline": {
+   "auc_median": 0.823671,
+   "auc_repeat_range": [
+    0.786073,
+    0.860266
+   ],
+   "auc_session_bootstrap_95": [
+    0.697886,
+    0.915915
+   ]
+  },
+  "chosen_counts": {
+   "LR (C=1)": 50,
+   "LR (C=10)": 45,
+   "LR (C=0.1)": 5
+  },
+  "baseline_single": {
+   "auc_median": 0.780571,
+   "auc_repeat_range": [
+    0.749302,
+    0.800691
+   ],
+   "auc_session_bootstrap_95": [
+    0.631673,
+    0.905866
+   ]
+  },
+  "baseline_majority_auc": 0.5,
+  "single_variable_on_all_rows": "p_atm",
+  "S3_drop_extrapolated": {
+   "rows": 85,
+   "auc_median": 0.845444,
+   "auc_repeat_range": [
+    0.794666,
+    0.871165
+   ],
+   "auc_session_bootstrap_95": [
+    0.687474,
+    0.963603
+   ]
+  },
+  "single_input_auc": {
+   "Pressure": 0.80314,
+   "Oxygen": 0.550272,
+   "Helium": 0.563406,
+   "Initial droplet size": 0.518267,
+   "Fuel blend (n-dodecane share)": 0.672856,
+   "Support fibre": 0.597826
+  },
+  "inputs": [
+   "Pressure",
+   "Oxygen",
+   "Helium",
+   "Initial droplet size",
+   "Fuel blend (n-dodecane share)",
+   "Support fibre"
+  ],
+  "excluded_columns": [
+   "Dext, hot",
+   "khot",
+   "kcool",
+   "Dext,cool (defines the label)",
+   "Reignitions",
+   "Extrap CF?",
+   "HF Burn Time",
+   "radiometer columns",
+   "Actual D",
+   "Comments"
+  ],
+  "label_permutation_fast": {
+   "model": "LR (C=1), repeat-0 split, 20 shuffles",
+   "auc_mean": 0.460719,
+   "auc_max": 0.600845
+  },
+  "leakage_triggered": false,
+  "pass": true,
+  "final_model": "LR (C=10)",
+  "final_standardised_coefficients": {
+   "Pressure": 1.849487,
+   "Oxygen": 0.052681,
+   "Helium": -0.845724,
+   "Initial droplet size": -0.842233,
+   "Fuel blend (n-dodecane share)": -1.436107,
+   "Support fibre": 0.257837
+  },
+  "pressure_at_half_air_4.3mm_dodecane_free": 3.22,
+  "drivers": [
+   {
+    "name": "Pressure",
+    "share": 0.508774
+   },
+   {
+    "name": "Fuel blend (n-dodecane share)",
+    "share": 0.336723
+   },
+   {
+    "name": "Initial droplet size",
+    "share": 0.089676
+   },
+   {
+    "name": "Helium",
+    "share": 0.050821
+   },
+   {
+    "name": "Support fibre",
+    "share": 0.014006
+   },
+   {
+    "name": "Oxygen",
+    "share": 0.0
+   }
+  ],
+  "importance_raw": {
+   "Pressure": 0.19101,
+   "Oxygen": -0.007132,
+   "Helium": 0.01908,
+   "Initial droplet size": 0.033667,
+   "Fuel blend (n-dodecane share)": 0.126417,
+   "Support fibre": 0.005258
+  }
+ },
+ "suppression": {
+  "status": "real",
+  "source": "NASA FLEX experimental table, PSI-69 (doi:10.60555/mbq8-0451), all burns. A burn counts as extinguished when NASA's 'Test end' is 'Extinction'. FLEX chose near-limit conditions on purpose, so these shares reflect the test plan and are not a controlled comparison of the gases.",
+  "groups": [
+   {
+    "gas": "None (O2/N2 only)",
+    "tests": 100,
+    "extinguished": 57
+   },
+   {
+    "gas": "CO2",
+    "tests": 123,
+    "extinguished": 88
+   },
+   {
+    "gas": "He",
+    "tests": 50,
+    "extinguished": 40
+   }
+  ]
+ },
+ "contract_selftest_rejected": [
+  "models: extra key",
+  "models: missing drivers",
+  "models: NaN score",
+  "models: pred outside range",
+  "models: shares not summing to 1",
+  "models: bad status",
+  "suppression: extra key",
+  "suppression: count as text",
+  "suppression: more extinguished than tests"
+ ]
+}

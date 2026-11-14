@@ -1,3 +1,6 @@
-numpy
-scipy
-numba
+numpy==2.5.4
+scipy==1.18.1
+numba==0.68.1
+llvmlite==0.50.0
+cantera==3.2.0
+scikit-learn==1.9.1

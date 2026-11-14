@@ -6,7 +6,7 @@ const size = () => { dpr = Math.min(devicePixelRatio || 1, 1.5); W = cv.width = 
 const seed = () => { M = Array.from({ length: Math.round(Math.min(90, innerWidth / 16)) }, () => ({ x: Math.random() * W, y: Math.random() * H, r: (0.6 + Math.random() * 1.8) * dpr, p: Math.random() * 6.28, a: 0.08 + Math.random() * 0.22, warm: Math.random() < 0.18, vx: 0, vy: 0 })); };
 function frame(t) {
   const dt = Math.min(0.05, (t - last) / 1000 || 0.016); last = t;
-  if (!document.hidden) {
+  if (!document.hidden && document.documentElement.dataset.motion !== 'calm') {
     ctx.clearRect(0, 0, W, H);
     for (const m of M) {
       const fx = (10 + 6 * Math.sin(m.y / H * 6.28 + t / 9000)) * dpr, fy = 5 * Math.sin(m.x / W * 9 + m.p + t / 7000) * dpr;   // slow, curving airflow

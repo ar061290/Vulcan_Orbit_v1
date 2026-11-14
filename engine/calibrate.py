@@ -90,7 +90,7 @@ def main():
     band_b, band_p = np.array(band_b), np.array(band_p)
     clear = sorted({r["clearance_s"] for r in keep})
     out = dict(
-        status="model", source="engine/calibrate.py", data="NASA PSI-100 Saffire-III flight telemetry, Cygnus F2 smoke detector (scatter channel)",
+        status="model", source="engine/calibrate.py", units=dict(time="s", D="m2/s", length="m", detector="raw scatter counts (gain fitted per event)"), data="NASA PSI-100 Saffire-III flight telemetry, Cygnus F2 smoke detector (scatter channel)",
         cabin=CAB, tuned_on="Sample 1 burn (flame seen by radiometers %.0f to %.0f s after T0)" % (b0, b1), held_out="Smoke-wire puff (wire on %.0f to %.0f s)" % (w0, w1),
         best=best, settings_kept=len(keep), settings_tried=len(rows),
         clearance_s_range=[min(clear), max(clear)], delay_s_range=[float(min(r["delay_s"] for r in keep)), float(max(r["delay_s"] for r in keep))],

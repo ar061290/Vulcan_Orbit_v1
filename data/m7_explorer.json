@@ -1,0 +1,324 @@
+{
+ "status": "model",
+ "source": "models/m7-extinction (results.json), trained on NASA FLEX (PSI-69, doi 10.60555/mbq8-0451) and CFI (PSI-39, doi 10.60555/m6pj-a914)",
+ "units": {
+  "o2": "mole fraction",
+  "p_atm": "atm",
+  "d0_mm": "mm"
+ },
+ "extinction": {
+  "question": "At what oxygen level does a 3 mm droplet flame have a 50% chance of going out?",
+  "rows": 260,
+  "model": "LR physics features (C=10)",
+  "headline": {
+   "auc_median": 0.898979,
+   "auc_repeat_range": [
+    0.883521,
+    0.918738
+   ],
+   "auc_session_bootstrap_95": [
+    0.842541,
+    0.946907
+   ]
+  },
+  "drivers": [
+   {
+    "name": "Oxygen",
+    "share": 0.5633
+   },
+   {
+    "name": "Initial droplet size",
+    "share": 0.192483
+   },
+   {
+    "name": "Fuel",
+    "share": 0.149939
+   },
+   {
+    "name": "CO2",
+    "share": 0.048725
+   },
+   {
+    "name": "Helium",
+    "share": 0.04528
+   },
+   {
+    "name": "Pressure",
+    "share": 0.000273
+   }
+  ],
+  "note": "Model output for a 3 mm droplet, with a 95% range from 200 session-bootstrap refits. Not a flammability limit.",
+  "table": [
+   {
+    "fuel": "methanol",
+    "p_atm": 0.7,
+    "added_gas": "no added gas",
+    "o2_half": 0.2243,
+    "o2_half_range": [
+     0.1999,
+     0.242
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.032
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 0.7,
+    "added_gas": "20% CO2",
+    "o2_half": 0.2495,
+    "o2_half_range": [
+     0.2288,
+     0.2687
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.062
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 0.7,
+    "added_gas": "20% He",
+    "o2_half": 0.2653,
+    "o2_half_range": [
+     0.2384,
+     0.3169
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.149
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 1.0,
+    "added_gas": "no added gas",
+    "o2_half": 0.2167,
+    "o2_half_range": [
+     0.2027,
+     0.234
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.019
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 1.0,
+    "added_gas": "20% CO2",
+    "o2_half": 0.2404,
+    "o2_half_range": [
+     0.2243,
+     0.2824
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.037
+   },
+   {
+    "fuel": "methanol",
+    "p_atm": 1.0,
+    "added_gas": "20% He",
+    "o2_half": 0.2524,
+    "o2_half_range": [
+     0.2281,
+     0.3088
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.093
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 0.7,
+    "added_gas": "no added gas",
+    "o2_half": 0.201,
+    "o2_half_range": [
+     0.1781,
+     0.2161
+    ],
+    "p_out_at_12": 0.999,
+    "p_out_at_34": 0.011
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 0.7,
+    "added_gas": "20% CO2",
+    "o2_half": 0.224,
+    "o2_half_range": [
+     0.2048,
+     0.24
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.021
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 0.7,
+    "added_gas": "20% He",
+    "o2_half": 0.2315,
+    "o2_half_range": [
+     0.2076,
+     0.2689
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.054
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 1.0,
+    "added_gas": "no added gas",
+    "o2_half": 0.1954,
+    "o2_half_range": [
+     0.187,
+     0.2086
+    ],
+    "p_out_at_12": 0.999,
+    "p_out_at_34": 0.006
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 1.0,
+    "added_gas": "20% CO2",
+    "o2_half": 0.2172,
+    "o2_half_range": [
+     0.2081,
+     0.2379
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.012
+   },
+   {
+    "fuel": "heptane",
+    "p_atm": 1.0,
+    "added_gas": "20% He",
+    "o2_half": 0.2226,
+    "o2_half_range": [
+     0.2064,
+     0.269
+    ],
+    "p_out_at_12": 1.0,
+    "p_out_at_34": 0.032
+   }
+  ]
+ },
+ "cool_flame": {
+  "question": "After the visible flame goes out, does a cool flame keep burning until the fuel is gone?",
+  "rows": 117,
+  "model": "LR (C=10)",
+  "headline": {
+   "auc_median": 0.823671,
+   "auc_repeat_range": [
+    0.786073,
+    0.860266
+   ],
+   "auc_session_bootstrap_95": [
+    0.697886,
+    0.915915
+   ]
+  },
+  "drivers": [
+   {
+    "name": "Pressure",
+    "share": 0.508774
+   },
+   {
+    "name": "Fuel blend (n-dodecane share)",
+    "share": 0.336723
+   },
+   {
+    "name": "Initial droplet size",
+    "share": 0.089676
+   },
+   {
+    "name": "Helium",
+    "share": 0.050821
+   },
+   {
+    "name": "Support fibre",
+    "share": 0.014006
+   },
+   {
+    "name": "Oxygen",
+    "share": 0.0
+   }
+  ],
+  "pressure_at_half_atm": 3.22,
+  "pressure_at_half_case": "air, 4.3 mm n-dodecane droplet, free-floating",
+  "observed": [
+   {
+    "p_atm": 0.5,
+    "x_he": 0.0,
+    "burns": 8,
+    "used_up": 0
+   },
+   {
+    "p_atm": 0.75,
+    "x_he": 0.0,
+    "burns": 9,
+    "used_up": 0
+   },
+   {
+    "p_atm": 1.0,
+    "x_he": 0.0,
+    "burns": 22,
+    "used_up": 3
+   },
+   {
+    "p_atm": 1.0,
+    "x_he": 0.29,
+    "burns": 7,
+    "used_up": 0
+   },
+   {
+    "p_atm": 1.0,
+    "x_he": 0.59,
+    "burns": 3,
+    "used_up": 0
+   },
+   {
+    "p_atm": 1.25,
+    "x_he": 0.0,
+    "burns": 10,
+    "used_up": 4
+   },
+   {
+    "p_atm": 2.0,
+    "x_he": 0.0,
+    "burns": 11,
+    "used_up": 9
+   },
+   {
+    "p_atm": 3.0,
+    "x_he": 0.0,
+    "burns": 22,
+    "used_up": 18
+   },
+   {
+    "p_atm": 3.0,
+    "x_he": 0.29,
+    "burns": 5,
+    "used_up": 4
+   },
+   {
+    "p_atm": 3.0,
+    "x_he": 0.59,
+    "burns": 5,
+    "used_up": 3
+   },
+   {
+    "p_atm": 5.0,
+    "x_he": 0.0,
+    "burns": 7,
+    "used_up": 6
+   },
+   {
+    "p_atm": 5.0,
+    "x_he": 0.29,
+    "burns": 4,
+    "used_up": 1
+   },
+   {
+    "p_atm": 5.0,
+    "x_he": 0.59,
+    "burns": 4,
+    "used_up": 0
+   }
+  ],
+  "cfig_quote": "A total of 280 hot diffusion flames were observed. Among them, 189 flames experienced radiative extinction ... Of those that extinguished radiatively, 15 subsequently reignited as cool diffusion flames. These cool flames were observed only with the following conditions: a) concentrations of 30 vol% n-butane and 40 vol% O2, b) normal flames, c) a pressure of 2.03 bar, and d) mass flow rates between 0.75 - 1.5 mg/s.",
+  "cfig_source": "ACME CFI-G final report (2022), NASA PSI-159 (doi 10.60555/cyt1-kh64)"
+ }
+}

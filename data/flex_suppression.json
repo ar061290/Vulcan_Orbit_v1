@@ -1,0 +1,21 @@
+{
+ "status": "real",
+ "source": "NASA FLEX experimental table, PSI-69 (doi:10.60555/mbq8-0451), all burns. A burn counts as extinguished when NASA's 'Test end' is 'Extinction'. FLEX chose near-limit conditions on purpose, so these shares reflect the test plan and are not a controlled comparison of the gases.",
+ "groups": [
+  {
+   "gas": "None (O2/N2 only)",
+   "tests": 100,
+   "extinguished": 57
+  },
+  {
+   "gas": "CO2",
+   "tests": 123,
+   "extinguished": 88
+  },
+  {
+   "gas": "He",
+   "tests": 50,
+   "extinguished": 40
+  }
+ ]
+}

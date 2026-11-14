@@ -1,0 +1,153 @@
+{
+ "labels_500nm": {
+  "LAM-1": 0,
+  "LAM-2": 0,
+  "LAM-3": 0,
+  "LAM-4": 0,
+  "KAP-1": 0,
+  "KAP-2": 0,
+  "KAP-3": 1,
+  "KAP-4": 1,
+  "KAP-5": 1,
+  "KAP-6": 1,
+  "KAP-7": 1,
+  "TEF-1": 1,
+  "TEF-2": 0,
+  "TEF-3": 0,
+  "TEF-4": 1,
+  "TEF-5": 0
+ },
+ "mmd_um": {
+  "LAM-1": 1.4933,
+  "LAM-2": 0.9458,
+  "LAM-3": 0.9972,
+  "LAM-4": 1.0299,
+  "KAP-1": 0.5783,
+  "KAP-2": 0.5378,
+  "KAP-3": 0.4874,
+  "KAP-4": 0.1648,
+  "KAP-5": 0.2573,
+  "KAP-6": 0.3748,
+  "KAP-7": 0.2193,
+  "TEF-1": 0.4765,
+  "TEF-2": 0.7224,
+  "TEF-3": 0.5398,
+  "TEF-4": 0.3328,
+  "TEF-5": 0.5649
+ },
+ "loo_prob": {
+  "LAM-1": 0.074,
+  "LAM-2": 0.074,
+  "LAM-3": 0.137,
+  "LAM-4": 0.719,
+  "KAP-1": 0.405,
+  "KAP-2": 0.555,
+  "KAP-3": 0.767,
+  "KAP-4": 0.773,
+  "KAP-5": 0.773,
+  "KAP-6": 0.773,
+  "KAP-7": 0.773,
+  "TEF-1": 0.002,
+  "TEF-2": 0.181,
+  "TEF-3": 0.304,
+  "TEF-4": 0.672,
+  "TEF-5": 0.876
+ },
+ "material_baseline": {
+  "LAM-1": 0,
+  "LAM-2": 0,
+  "LAM-3": 0,
+  "LAM-4": 0,
+  "KAP-1": 1,
+  "KAP-2": 1,
+  "KAP-3": 1,
+  "KAP-4": 1,
+  "KAP-5": 1,
+  "KAP-6": 1,
+  "KAP-7": 1,
+  "TEF-1": 0,
+  "TEF-2": 0,
+  "TEF-3": 0,
+  "TEF-4": 0,
+  "TEF-5": 0
+ },
+ "table1_crosscheck": "Kapton, the 4 tests drawn at the same 8 cm/s position: mean CMD 0.056 vs Table 1 0.056; mean DAM 0.101 vs 0.101 um",
+ "sensitivity": {
+  "300 nm": {
+   "note": null,
+   "missed": 3,
+   "seen": 13,
+   "auc": 0.85,
+   "balanced_accuracy": 0.81,
+   "material_baseline": 0.85
+  },
+  "1000 nm": {
+   "note": "fewer than 3 cases in one class: scores not meaningful",
+   "missed": 14,
+   "seen": 2,
+   "auc": 0.0,
+   "balanced_accuracy": 0.43,
+   "material_baseline": 0.5
+  }
+ },
+ "coefficients": {
+  "Kapton": 0.494,
+  "Lampwick": -0.709,
+  "Teflon": 0.214,
+  "air velocity (per cm/s)": 0.325
+ },
+ "drivers": [
+  {
+   "name": "air velocity",
+   "share": 0.76
+  },
+  {
+   "name": "material",
+   "share": 0.24
+  }
+ ],
+ "checks": [
+  {
+   "id": "M5-lognormal",
+   "what": "Table 1's count mean and average-mass diameters reproduced from its Dg and sigma_g (limit: every one within 10%)",
+   "result": "9 of 10 rows within 10% (9 within 1%); worst: Teflon unaged, +9.4% and +20.8%",
+   "ok": false
+  },
+  {
+   "id": "M5-trace",
+   "what": "Extraction error: tick labels vs fitted axes, and each test's Dg and sigma_g rebuilt from its own moments (limit: under 3% of the axis range)",
+   "result": "axis fit worst 0.017% of range; Dg/sigma_g rebuilt within 0.05% (median); read from the PDF's vector drawing, not traced by hand",
+   "ok": true
+  },
+  {
+   "id": "M5-auc",
+   "what": "Logistic model, leave-one-test-out (limit: AUC >= 0.75)",
+   "result": "AUC 0.746 [0.44, 1.00] on 16 flight tests",
+   "ok": false
+  },
+  {
+   "id": "M5-bacc",
+   "what": "Balanced accuracy at 0.5 (limit: >= 0.70 and not below the material-only baseline)",
+   "result": "0.762 [0.53, 0.94]; material-only baseline 0.746; majority class 0.50",
+   "ok": true
+  },
+  {
+   "id": "M5-base",
+   "what": "Baselines beside the score",
+   "result": "majority class: AUC 0.50, balanced accuracy 0.50; material-only (Table 1): balanced accuracy 0.75",
+   "ok": null
+  },
+  {
+   "id": "M5-drivers",
+   "what": "Permutation importance (AUC drop when an input is shuffled)",
+   "result": "air velocity 76%, material 24%",
+   "ok": null
+  },
+  {
+   "id": "M5-sens",
+   "what": "Same model at a 300 nm and a 1000 nm detector limit",
+   "result": "{\"300 nm\": {\"note\": null, \"missed\": 3, \"seen\": 13, \"auc\": 0.85, \"balanced_accuracy\": 0.81, \"material_baseline\": 0.85}, \"1000 nm\": {\"note\": \"fewer than 3 cases in one class: scores not meaningful\", \"missed\": 14, \"seen\": 2, \"auc\": 0.0, \"balanced_accuracy\": 0.43, \"material_baseline\": 0.5}}",
+   "ok": null
+  }
+ ]
+}

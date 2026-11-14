@@ -13,10 +13,11 @@ Model (2D side view of a cabin section, solver in drift_core.py):
   * Detector: samples a 0.2 m patch of air and alarms when the average reaches ALARM_MG_M3, after a delay.
 Where each setting comes from:
   * Clearance time, mixing D and detector delay: tuned on the Saffire-III flight record (data/drift_calibration.json).
-  * Airflow 0.05 to 0.20 m/s: station ventilation requirement range (NASA NTRS 20150009509).
+  * Airflow 0.077 to 0.203 m/s: ISS cabin aisleway requirement of 4.6 to 12.2 m/min (NASA NTRS 20150009509, p. 10).
   * Release rate 0.02 to 2 mg/s: low end from SAME flight weight-loss rates (1 to 2 mg/min, PSI-102); high end assumed.
   * Fire duration: burn times measured in Saffire-I and Saffire-II (PSI-98, PSI-99).
-  * Alarm level 1 mg/m3: the threshold used in NASA's Saffire analysis (ICES-2024-365, via our research notes).
+  * Alarm level 1 mg/m3: called 'a relatively tight alarm threshold' in NASA's Saffire VI paper (ICES-2024-365, NTRS 20240002981).
+    The ISS detection threshold is about 10 mg/m3 (NTRS 20170002629), so catch rates are also reported at 10 mg/m3.
 This is a screening model. It is not a full fluid-dynamics simulation of a real module.
 """
 import csv, json, math, re, time
@@ -28,7 +29,8 @@ import evidence
 ROOT = Path(__file__).resolve().parents[1]
 ALARM_MG_M3 = 1.0
 T_END = 360.0                 # long enough to score alarms up to 5 minutes, including the detector delay
-FLOWS = [0.05, 0.10, 0.20]
+FLOWS = [0.077, 0.10, 0.15, 0.203]        # m/s, inside the NTRS 20150009509 range
+ALARM_HI_MG_M3 = 10.0                      # ISS detection threshold, NTRS 20170002629
 PATCH = 1                     # detector averages a 3 x 3 cell patch (0.2 m square)
 CABINS = {
     "A": dict(inlet=("top", 0.4 / 3, 2.0 / 3), outlet=("right", 0.8 / 3, 0.8), label="Supply overhead at one end, return low at the other"),
@@ -143,14 +145,15 @@ def main():
         s_idx = rng.integers(0, len(srcs), N); f_idx = rng.integers(0, len(FLOWS), N); p_idx = rng.integers(0, len(PSETS), N)
         rate = 10 ** rng.uniform(math.log10(RATE[0]), math.log10(RATE[1]), N)
         dur = rng.choice(BURNS, N); delay = rng.uniform(DELAY[0], DELAY[1], N)
-        T = np.full((N, len(cands)), np.nan)
+        T = np.full((N, len(cands)), np.nan); T10 = np.full((N, len(cands)), np.nan)
         for n in range(N):
             times, arr = lib[(name, FLOWS[f_idx[n]], *PSETS[p_idx[n]])]
             u = arr[s_idx[n]]; k = int(round(dur[n] / (times[1] - times[0])))
             c = u.copy()
             if k < len(times): c[k:] -= u[:len(times) - k]          # the fire stops after its measured burn time
             T[n] = first_cross(times, c * rate[n], ALARM_MG_M3) + delay[n]
-        return dict(s=s_idx, f=f_idx, p=p_idx, rate=rate, dur=dur, T=np.where(np.isnan(T), np.inf, T))
+            T10[n] = first_cross(times, c * rate[n], ALARM_HI_MG_M3) + delay[n]
+        return dict(s=s_idx, f=f_idx, p=p_idx, rate=rate, dur=dur, T=np.where(np.isnan(T), np.inf, T), T10=np.where(np.isnan(T10), np.inf, T10))
 
     def stats(W, cols, srcs):
         t = W["T"][:, cols].min(axis=1)
@@ -164,7 +167,8 @@ def main():
         bands = [(0, 0.1), (0.1, 0.5), (0.5, 10)]
         by_rate = [dict(lo=lo, hi=hi, caught_120=round(float(np.mean(t[(W["rate"] >= lo) & (W["rate"] < hi)] <= 120)), 3)) for lo, hi in bands]
         by_mix = [dict(D=PSETS[k][0], clearance_s=PSETS[k][1], caught_120=round(float(np.mean(t[W["p"] == k] <= 120)), 3)) for k in range(len(PSETS))]
-        return dict(by_rate=by_rate, by_mix=by_mix, caught_60=round(float(np.mean(t <= 60)), 3), caught_120=round(float(np.mean(t <= 120)), 3), caught_300=round(float(np.mean(t <= 300)), 3),
+        t10 = W["T10"][:, cols].min(axis=1)
+        return dict(caught_120_at_10mg=round(float(np.mean(t10 <= 120)), 3), caught_300_at_10mg=round(float(np.mean(t10 <= 300)), 3), by_rate=by_rate, by_mix=by_mix, caught_60=round(float(np.mean(t <= 60)), 3), caught_120=round(float(np.mean(t <= 120)), 3), caught_300=round(float(np.mean(t <= 300)), 3),
                     caught_120_range=[round(float(np.percentile(boot, 2.5)), 3), round(float(np.percentile(boot, 97.5)), 3)],
                     caught_120_model_range=[round(min(per_p), 3), round(max(per_p), 3)],
                     never=round(float(np.mean(~np.isfinite(t))), 3), median_s=None if not len(fin) else round(float(np.median(fin)), 0), map=grid), t
@@ -187,7 +191,7 @@ def main():
                            ceiling_big=ce["by_rate"][2]["caught_120"], return_big=rt["by_rate"][2]["caught_120"], ceiling_120=ce["caught_120"],
                            return_120=res["At the air return"]["caught_120"], pair_120=res["Best pair found"]["caught_120"],
                            best_single=xy(cab, *cands[b1]), best_pair=[xy(cab, *cands[b1]), xy(cab, *cands[b2])]))
-        print(f"cabin {name}: " + "  ".join(f"{k}: {v['caught_120']:.0%} ({v['caught_120_model_range'][0]:.0%}-{v['caught_120_model_range'][1]:.0%}) by rate {[b['caught_120'] for b in v['by_rate']]} by mix {[b['caught_120'] for b in v['by_mix']]}" for k, v in res.items()), flush=True)
+        print(f"cabin {name}: " + "  ".join(f"{k}: {v['caught_120']:.0%} (10 mg/m3: {v['caught_120_at_10mg']:.0%}) ({v['caught_120_model_range'][0]:.0%}-{v['caught_120_model_range'][1]:.0%}) by rate {[b['caught_120'] for b in v['by_rate']]} by mix {[b['caught_120'] for b in v['by_mix']]}" for k, v in res.items()), flush=True)
     won = sum(r["return_120"] - r["ceiling_120"] > 0.05 for r in robust)
     add("R1", "Moving the detector from the ceiling to the air return catches at least 5 points more fires, in all three cabin layouts",
         "; ".join(f"{r['cabin']}: {r['ceiling_120']:.0%} -> {r['return_120']:.0%}" for r in robust), "3/3 layouts, otherwise the placement claim is dropped", won == 3)
@@ -206,7 +210,7 @@ def main():
     uc, vc = (A.u1[:, 1:] + A.u1[:, :-1]) / 2 * show_flow, (A.v1[1:, :] + A.v1[:-1, :]) / 2 * show_flow
     arrows = [[*A.xy(i, j), round(float(uc[j, i]), 4), round(float(vc[j, i]), 4)] for j in range(1, A.ny, 6) for i in range(1, A.nx, 6)]
     ia, ib = A.cells(A.inlet)[1:]; oa, ob = A.cells(A.outlet)[1:]
-    drift = dict(status="model", source="engine/drift.py", nx=A.nx, ny=A.ny, lx_m=A.lx, ly_m=A.ly, frame_dt_s=10, flow_m_s=show_flow, D_m2_s=show_D,
+    drift = dict(status="model", source="engine/drift.py", units=dict(length="m", time="s", flow="m/s", D="m2/s", rate="mg/s", concentration="mg/m3", frames="0-255, log scale (see scale)"), nx=A.nx, ny=A.ny, lx_m=A.lx, ly_m=A.ly, frame_dt_s=10, flow_m_s=show_flow, D_m2_s=show_D,
                  rate_mg_s=show_rate, clearance_s=round(show_Tc), detector_delay_s=round(dly), alarm_mg_m3=ALARM_MG_M3, scale_max_mg_m3=cmax,
                  scale="value = 255 * log10(1 + 99*c/scale_max) / 2", fire=A.xy(*show_src), supply=[ia * A.dx, ib * A.dx], ret=[oa * A.dx, ob * A.dx],
                  detectors=[dict(name=n, x=A.xy(*c)[0], y=A.xy(*c)[1], alarm_s=None if np.isnan(a) else round(float(a), 1)) for (n, c), a in zip(named.items(), alarms)],
@@ -216,7 +220,8 @@ def main():
                               f"Alarm times include a {dly:.0f} s detector delay tuned on the same record", "Supply and return positions are illustrative",
                               "Screening model, not a full fluid-dynamics simulation"])
     mA = meta["A"]
-    whatif = dict(status="model", source="engine/drift.py", runs=N, seed=42, alarm_mg_m3=ALARM_MG_M3, t_end_s=T_END, lx_m=A.lx, ly_m=A.ly,
+    whatif = dict(status="model", source="engine/drift.py", units=dict(time="s", share="0-1 of simulated fires", alarm="mg/m3", flow="m/s", length="m"), alarm_hi_mg_m3=ALARM_HI_MG_M3,
+                  sources=["Airflow: NASA NTRS 20150009509 p. 10 (4.6-12.2 m/min)", "Alarm 1 mg/m3: NASA ICES-2024-365 (NTRS 20240002981)", "Alarm 10 mg/m3: NASA NTRS 20170002629", "Burn times: NASA PSI-98, PSI-99", "Low release rate: NASA PSI-102 (SAME)", "Tuning: NASA PSI-100 (Saffire-III)"], runs=N, seed=42, alarm_mg_m3=ALARM_MG_M3, t_end_s=T_END, lx_m=A.lx, ly_m=A.ly,
                   varied=dict(fire_position=f"{len(mA['srcs'])} positions on a grid", airflow_m_s=FLOWS, mixing_D_m2_s=kept_D, clearance_s=CLEAR,
                               release_mg_s=f"{RATE[0]:.2f} to {RATE[1]:.0f}, log-uniform (low end: SAME flight weight-loss rate)",
                               fire_duration_s=BURNS, detector_delay_s=DELAY),

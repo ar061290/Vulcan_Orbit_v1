@@ -1,0 +1,28 @@
+name,value,unit,source,url,note
+methanol_T_boil,337.63,K,NIST WebBook fluid properties (isobar 0.101325 MPa),https://webbook.nist.gov/cgi/fluid.cgi?Action=Data&Wide=on&ID=C67561&Type=IsoBar&P=0.101325&TLow=336&THigh=339&TInc=1&Digits=5&RefState=DEF&TUnit=K&PUnit=MPa&DUnit=kg%2Fm3&HUnit=kJ%2Fkg&WUnit=m%2Fs&VisUnit=uPa%2As&STUnit=N%2Fm,saturation row at 0.10133 MPa; retrieved 2026-11-14
+methanol_rho_liquid,748.36,kg/m3,NIST WebBook fluid properties (isobar 0.101325 MPa),same as methanol_T_boil,saturated liquid at T_boil
+methanol_h_fg,1101.1,kJ/kg,NIST WebBook fluid properties (isobar 0.101325 MPa),same as methanol_T_boil,vapor enthalpy 1101.1 minus liquid enthalpy 0.0 at T_boil
+methanol_dHc_liquid,-725.7,kJ/mol,"NIST WebBook condensed phase thermochemistry, Chao and Rossini 1965",https://webbook.nist.gov/cgi/cbook.cgi?ID=C67561&Units=SI&Mask=2,"-725.7 +/- 0.1 kJ/mol; higher heating value (liquid water)"
+heptane_T_boil,371.55,K,NIST WebBook fluid properties (isobar 0.101325 MPa),https://webbook.nist.gov/cgi/fluid.cgi?Action=Data&Wide=on&ID=C142825&Type=IsoBar&P=0.101325&TLow=370&THigh=373&TInc=1&Digits=5&RefState=DEF&TUnit=K&PUnit=MPa&DUnit=kg%2Fm3&HUnit=kJ%2Fkg&WUnit=m%2Fs&VisUnit=uPa%2As&STUnit=N%2Fm,saturation row at 0.10132 MPa; retrieved 2026-11-14
+heptane_rho_liquid,613.53,kg/m3,NIST WebBook fluid properties (isobar 0.101325 MPa),same as heptane_T_boil,saturated liquid at T_boil
+heptane_h_fg,316.69,kJ/kg,NIST WebBook fluid properties (isobar 0.101325 MPa),same as heptane_T_boil,vapor enthalpy 316.69 minus liquid enthalpy 0.0 at T_boil
+heptane_dHc_liquid,-4817,kJ/mol,"NIST WebBook condensed phase thermochemistry, average of 7 values",https://webbook.nist.gov/cgi/cbook.cgi?ID=C142825&Units=SI&Mask=2,"-4817 +/- 8 kJ/mol; higher heating value (liquid water)"
+water_h_fg_298,2441.67,kJ/kg,NIST WebBook fluid properties (isotherm 298.15 K),https://webbook.nist.gov/cgi/fluid.cgi?Action=Data&Wide=on&ID=C7732185&Type=IsoTherm&T=298.15&PLow=0.001&PHigh=0.01&PInc=0.009&Digits=5&RefState=DEF&TUnit=K&PUnit=MPa&DUnit=kg%2Fm3&HUnit=kJ%2Fkg&WUnit=m%2Fs&VisUnit=uPa%2As&STUnit=N%2Fm,saturated vapor 2546.5 minus saturated liquid 104.83 at 298.15 K; converts higher to lower heating value
+N2_k_800K,0.055514,W/(m K),NIST WebBook fluid properties (isobar 0.101325 MPa),https://webbook.nist.gov/cgi/fluid.cgi?Action=Data&Wide=on&ID=C7727379&Type=IsoBar&P=0.101325&TLow=800&THigh=800&TInc=1&Digits=5&RefState=DEF&TUnit=K&PUnit=MPa&DUnit=kg%2Fm3&HUnit=kJ%2Fkg&WUnit=m%2Fs&VisUnit=uPa%2As&STUnit=N%2Fm,800 K
+N2_cp_800K,1.1223,J/(g K),NIST WebBook fluid properties (isobar 0.101325 MPa),same as N2_k_800K,800 K
+N2_mu_800K,35.887,uPa s,NIST WebBook fluid properties (isobar 0.101325 MPa),same as N2_k_800K,800 K
+O2_k_800K,0.060019,W/(m K),NIST WebBook fluid properties (isobar 0.101325 MPa),https://webbook.nist.gov/cgi/fluid.cgi?Action=Data&Wide=on&ID=C7782447&Type=IsoBar&P=0.101325&TLow=800&THigh=800&TInc=1&Digits=5&RefState=DEF&TUnit=K&PUnit=MPa&DUnit=kg%2Fm3&HUnit=kJ%2Fkg&WUnit=m%2Fs&VisUnit=uPa%2As&STUnit=N%2Fm,800 K
+O2_cp_800K,1.0545,J/(g K),NIST WebBook fluid properties (isobar 0.101325 MPa),same as O2_k_800K,800 K
+O2_mu_800K,42.331,uPa s,NIST WebBook fluid properties (isobar 0.101325 MPa),same as O2_k_800K,800 K
+CO2_k_800K,0.056437,W/(m K),NIST WebBook fluid properties (isobar 0.101325 MPa),https://webbook.nist.gov/cgi/fluid.cgi?Action=Data&Wide=on&ID=C124389&Type=IsoBar&P=0.101325&TLow=800&THigh=800&TInc=1&Digits=5&RefState=DEF&TUnit=K&PUnit=MPa&DUnit=kg%2Fm3&HUnit=kJ%2Fkg&WUnit=m%2Fs&VisUnit=uPa%2As&STUnit=N%2Fm,800 K
+CO2_cp_800K,1.1692,J/(g K),NIST WebBook fluid properties (isobar 0.101325 MPa),same as CO2_k_800K,800 K
+CO2_mu_800K,34.943,uPa s,NIST WebBook fluid properties (isobar 0.101325 MPa),same as CO2_k_800K,800 K
+He_k_800K,0.30852,W/(m K),NIST WebBook fluid properties (isobar 0.101325 MPa),https://webbook.nist.gov/cgi/fluid.cgi?Action=Data&Wide=on&ID=C7440597&Type=IsoBar&P=0.101325&TLow=800&THigh=800&TInc=1&Digits=5&RefState=DEF&TUnit=K&PUnit=MPa&DUnit=kg%2Fm3&HUnit=kJ%2Fkg&WUnit=m%2Fs&VisUnit=uPa%2As&STUnit=N%2Fm,800 K
+He_cp_800K,5.1931,J/(g K),NIST WebBook fluid properties (isobar 0.101325 MPa),same as He_k_800K,800 K
+He_mu_800K,39.431,uPa s,NIST WebBook fluid properties (isobar 0.101325 MPa),same as He_k_800K,800 K
+M_C,12.011,g/mol,IUPAC standard atomic weights (abridged),https://iupac.qmul.ac.uk/AtWt/,conventional value
+M_H,1.008,g/mol,IUPAC standard atomic weights (abridged),https://iupac.qmul.ac.uk/AtWt/,conventional value
+M_O,15.999,g/mol,IUPAC standard atomic weights (abridged),https://iupac.qmul.ac.uk/AtWt/,conventional value
+M_N,14.007,g/mol,IUPAC standard atomic weights (abridged),https://iupac.qmul.ac.uk/AtWt/,conventional value
+M_He,4.0026,g/mol,IUPAC standard atomic weights,https://iupac.qmul.ac.uk/AtWt/,
+T_ambient,298.15,K,"PSI-68 FLEX-2 experimental table, column 'Ambient Temperature (C)' = 25 for the same MDCA chamber",datasets/psi/PSI-68/PSI-68_Experimental table_Flex2.csv,FLEX (PSI-69) does not list ambient temperature; FLEX-2 used the same chamber. Only enters the small sensible-heat term of B.

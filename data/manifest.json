@@ -3,7 +3,7 @@
  "files": [
   {
    "name": "investigations",
-   "status": "reported",
+   "status": "real",
    "owner": "Dashboard",
    "what": "List of NASA investigations"
   },
@@ -15,15 +15,15 @@
   },
   {
    "name": "saffire_latency",
-   "status": "demo",
+   "status": "real",
    "owner": "Karthikeya",
-   "what": "Sensor alarm timing from Saffire-III telemetry"
+   "what": "Alarm timing per sensor for each Saffire-III orbital event (M4)"
   },
   {
    "name": "smoke_sizes",
    "status": "reported",
    "owner": "Karthikeya",
-   "what": "Smoke particle sizes by material"
+   "what": "Smoke particle sizes by material (NASA SAME-2) and the share too fine for the detector (M5)"
   },
   {
    "name": "dome_locator",
@@ -39,9 +39,9 @@
   },
   {
    "name": "models",
-   "status": "missing",
+   "status": "model",
    "owner": "Karthikeya",
-   "what": "NASA-data model results"
+   "what": "Trained models: smoke miss risk (M5), extinction, burning rate, cool flames (M7)"
   },
   {
    "name": "drift",
@@ -69,21 +69,21 @@
   },
   {
    "name": "efield",
-   "status": "missing",
+   "status": "real",
    "owner": "Karthikeya",
-   "what": "NASA E-FIELD Flames results"
+   "what": "NASA ACME E-FIELD Flames test days (PSI-22), shown beside the bench ion-wind trial"
   },
   {
    "name": "flex_suppression",
-   "status": "missing",
+   "status": "real",
    "owner": "Karthikeya",
    "what": "FLEX extinction by suppressant gas"
   },
   {
    "name": "gaps",
-   "status": "missing",
+   "status": "real",
    "owner": "Karthikeya",
-   "what": "Conditions NASA has not tested"
+   "what": "Oxygen and pressure NASA's microgravity tests covered, and the gaps"
   },
   {
    "name": "evidence",
@@ -96,6 +96,54 @@
    "status": "reported",
    "owner": "Assistant lane",
    "what": "Saved assistant answers"
+  },
+  {
+   "name": "flame_static",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "Flame sim stages 1-2: droplet burning, flame shapes, flame on a plate (Moon/Mars cases model only)"
+  },
+  {
+   "name": "flame_spread",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "Flame sim stage 3: spread rates, flammability map, front over time (checked vs BASS-II)"
+  },
+  {
+   "name": "drift_lbm",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "LBM smoke drift frames for one cabin scenario (same shape as drift)"
+  },
+  {
+   "name": "drift_whatif",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "LBM what-if runs: share of fires detected within 60 s and 180 s by detector layout"
+  },
+  {
+   "name": "m7_explorer",
+   "status": "model",
+   "owner": "M7 lane",
+   "what": "Extinction oxygen levels and cool-flame end states from the M7 models, for the interactive panels"
+  },
+  {
+   "name": "assistant_gold",
+   "status": "team",
+   "owner": "Assistant",
+   "what": "30 test questions with known answers for the assistant scorecard"
+  },
+  {
+   "name": "daft",
+   "status": "real",
+   "owner": "Dashboard",
+   "what": "DAFT dust-counter feasibility sessions (PSI-47)"
+  },
+  {
+   "name": "india",
+   "status": "reported",
+   "owner": "Dashboard",
+   "what": "India angle: Gaganyaan and Bharatiya Antariksh Station facts with verification levels"
   }
  ]
 }

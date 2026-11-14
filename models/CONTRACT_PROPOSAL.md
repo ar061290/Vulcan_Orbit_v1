@@ -1,0 +1,22 @@
+# Contract proposal: flame simulation and LBM smoke drift
+
+Proposed by the flame-sim / M3 lane (feat/sims). **Not yet agreed.** CONTRACT.md is unchanged. The team agrees these rows (or
+changes them), then the lead adds them to CONTRACT.md. The files below are already written in these shapes so that the panels
+can be built against real output. Every file has `status: "model"` and a `units` field. Any case at Moon or Mars gravity carries
+`gravity_label: "model only, not validated; lies between NASA's microgravity and Earth results"`.
+
+| File | Owner | Shape |
+|---|---|---|
+| `flame_static.json` | Karthikeya | `{status:"model", source, units, gravity_note, label_meaning, chemistry:[{fuel, check_only, X_O2, P_kPa, T_ad_K, Z_st, LHV_MJ_kg, B, K_mm2_s, standoff_ratio, burnout_s:{d0_mm:s}, critical_diameter_mm, note}], radiative_extinction:{G, T_lim_K, ...}, flex_comparison:[{test, id, date, half, fuel, P_kPa, X:{O2,N2,CO2,HE}, d0_mm, K_meas_mm2_s, K_model_mm2_s, d_ext_meas_mm, end, d_crit_model_mm}], flex_K_stats:{fuel:{...}}, roper_check:[{fuel, model_mm, roper_mm, ratio}], flames:[{fuel, X_O2, P_kPa, gravity, g_m_s2, gravity_label, flow_m_s, source:{type, d0_mm or Q_F_cm3_s, m_dot_mg_s}, T_flame_K, Z_st, flame_radius_no_flow_mm, U_buoy_m_s, length_mm, width_mm, aspect, tilt_deg_from_vertical, contour_mm:[[x,z]], grid:{x_mm:[...], z_mm:[...], T_K:[[...]]}}], plates:[{fuel, X_O2, P_kPa, gravity, g_m_s2, gravity_label, flow_m_s, B, x_cm:[...], m_g_m2_s:[...], standoff_mm:[...], U_eff_m_s:[...]}], checks:[{id, ok, result}], limits:[...]}` |
+| `flame_spread.json` | Karthikeya | `{status:"model", source, units, gravity_note, constants, bass_ii_comparison:[{group, test, thickness_mm, sides, X_O2, flow_cm_s, g, reported_mm_s, model_mm_s, baseline_mm_s, err_pct, base_err_pct, band, regime}], bass_ii_groups:{name:{n, median_abs_err_pct, baseline_median_abs_err_pct, signed_err_5_95_pct}}, quench_supplementary:[...], rates:[{fuel, P_kPa, X_O2, gravity, g_m_s2, gravity_label, flow_m_s:[...], rate_mm_s:[...]}], flammability_maps:[{fuel, P_kPa, gravity, g_m_s2, gravity_label, O2:[...], flow_m_s:[...], burning:[[0/1 per O2 row, per flow column]], quench_m_s:[...], blowoff_m_s:[...], min_O2, min_O2_flow_m_s}], fronts:[{case, spread_mm_s, burning_length_cm, mean_flux_g_m2_s, t_s:[...], front_cm:[...], burning_area_cm2:[...], t_burn_s, burnout_s}], growth_for_smoke:{case, t_s:[...], burning_area_cm2:[...], front_cm:[...]}, checks, limits}` |
+| `drift_lbm.json` | Karthikeya | Same shape as `drift.json` (`{status:"model", nx, ny, lx_m, ly_m, frame_dt_s, flow_m_s, fire:[x,y], detectors:[{name,x,y,alarm_s}], arrows, frames}`) plus `solver, units, racks:[[x0,x1,y0,y1]], supply_wall, supply:[a,b], return_wall, ret:[a,b], gravity_m_s2, D_m2_s, nu_eff_m2_s, assumptions`. A panel that reads `drift.json` can read this file unchanged. |
+| `drift_whatif.json` | Karthikeya | `{status:"model", source, runs, seed, gravity_m_s2, units, alarm_mg_m3, detector_delay_s, t_end_s, D_m2_s, varied:{...}, sensitivity:{D_m2_s, detector_delay_s}, candidates:[[x,y]], layouts:[{name, detectors:[[x,y]], caught_60, caught_60_range:[lo,hi], caught_60_model_range:[lo,hi], caught_180, caught_180_range, caught_180_model_range, never_300}], by_rate:[{rate_mg_s, best_caught_180, hero_caught_180}], by_flow:[{flow_m_s, best_caught_60, best_caught_180}], map_xy:[[x,y]], map_median_alarm_s_best:[s or null], growing_source:{case, peak_rate_mg_s, smoke_yield_mg_per_cm2:null, detectors:[{name, alarm_s, constant_source_alarm_s}]} or null, checks, note}` |
+| `dome_heat.json` | Mukund (dome) | `{status:"dome", units:"m, W, s, K", box_m:[w,h], depth_m, source_xy_m:[x,y], source_size_m, source_W, t_end_s, sensors:[{name, xy_m:[x,y], rise_K, rise_K_range:[lo,hi]}]}`. Read by `models/m3-drift/dome_check.py`; see `models/m3-drift/dome_check.md`. |
+
+Notes for the team:
+
+- `drift_whatif.json` counts `caught_180` (3 minutes). The existing `whatif.json` counts 60, 120 and 300 s. They are different
+  files from different models. Do not merge their numbers in one chart without saying which model each comes from.
+- `flame_static.json` is about 3 to 4 MB, mostly the 320 temperature grids. A panel can load the chemistry and checks first.
+- `gravity_label: "validated"` means NASA or Earth data exist at that gravity and the checks in the REPORT apply. Several of those
+  checks fail. The panel must link to the check list, not show a green tick.

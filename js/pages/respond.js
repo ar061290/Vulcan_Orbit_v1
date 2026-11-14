@@ -1,7 +1,8 @@
 import { h, load, page, card, empty, fmt } from '../lib.js';
 import { bars, C } from '../charts.js';
+import { extinctionCard, coolFlameCard, evidenceCard } from '../respond_ui.js';
 export default async function (root) {
-  const [tr, ef, fx] = await Promise.all([load('response_trials'), load('efield'), load('flex_suppression')]);
+  const [tr, ef, fx, m7, gaps, inv] = await Promise.all([load('response_trials'), load('efield'), load('flex_suppression'), load('m7_explorer'), load('gaps'), load('investigations')]);
   const trials = tr.status === 'missing'
     ? card('Bench trials: ion wind and fine mist', 'missing', 'Each trial is measured by the dome\'s own sensors, before and after.', empty('Waiting for dome trials', 'response_trials', 'One entry per trial. Use the same sensor reading before and after so the change is measured, not judged by eye.', '{ "status":"dome", "reading":"Peak thermopile temperature", "unit":"C",\n  "trials":[{ "method":"Ion wind", "source":"tea light", "before":212, "after":148, "repeat":1, "note":"flame deflected 30 deg" }] }'))
     : card('Bench trials: ion wind and fine mist', tr.status, `${tr.reading}, before and after each response. Earth gravity.`,
@@ -16,6 +17,8 @@ export default async function (root) {
     ? card('NASA: which gas puts a droplet flame out', 'missing', 'Share of FLEX tests that ended in extinction, by added gas.', empty('Waiting for the FLEX table', 'flex_suppression', 'Counts per suppressant gas from the FLEX summary table.', '{ "status":"real", "source":"PSI-69", "groups":[{ "gas":"CO2", "tests":40, "extinguished":31 }] }'))
     : card('NASA: which gas puts a droplet flame out', fx.status, fx.source, bars({ yLabel: 'Tests ending in extinction, %', unit: '%', groups: fx.groups.map(g => ({ name: g.gas, values: [{ key: `${g.extinguished} of ${g.tests} tests`, value: Math.round(g.extinguished / g.tests * 100), color: C.s3 }] })) }));
   root.append(page('Respond', 'What NASA\'s experiments say about putting a fire out without gravity, next to what our bench rig measured. The two are shown together and never merged.',
+    gaps.status === 'missing' ? null : h('div', { style: 'margin-bottom:14px' }, evidenceCard(gaps, inv)),
+    m7.status === 'missing' ? null : h('div', { class: 'grid g2', style: 'margin-bottom:14px' }, extinctionCard(m7), coolFlameCard(m7)),
     h('div', { class: 'grid g2' }, trials, efield, flex,
       card('Reading the comparison', null, null,
         h('p', {}, 'Our trials happen at Earth gravity, where hot gas rises and feeds the flame fresh air. A result on the bench shows a method can disturb a flame; it does not show it would work in orbit.'),

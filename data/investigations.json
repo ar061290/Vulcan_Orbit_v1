@@ -1,7 +1,6 @@
 {
- "status": "reported",
- "source": "NASA Physical Sciences Informatics, psi.nasa.gov; challenge brief",
- "note": "IDs, DOIs and row counts were taken from other teams' write-ups and a research summary on 14 Nov 2026. Confirm each on psi.nasa.gov before submission.",
+ "status": "real",
+ "source": "NASA Physical Sciences Informatics (psi.nasa.gov): each id, DOI and count read from the investigation metadata and summary tables downloaded on 14 Nov 2026 into datasets/psi/.",
  "items": [
   {
    "id": "saffire3",
@@ -11,8 +10,8 @@
    "facility": "Cygnus cargo vehicle",
    "focus": "flammability",
    "fuel": "solid",
-   "measured": "Large-scale burn; 1 Hz telemetry: radiometers, airflow, temperature, pressure, smoke-detector obscuration and scatter",
-   "rows": "13 burns; ~1.76M telemetry points",
+   "measured": "Two SIBAL fabric samples burned at 30 cm/s (concurrent and opposed flow); flight telemetry: radiometers, anemometers, pressure, and the Cygnus cabin smoke detector (obscuration and scatter)",
+   "rows": "2 samples in the summary table; 11,450-row flight telemetry file",
    "tags": [
     "flammability",
     "detection",
@@ -30,8 +29,8 @@
    "facility": "Cygnus cargo vehicle",
    "focus": "flammability",
    "fuel": "solid",
-   "measured": "Several material samples burned in a flow duct",
-   "rows": null,
+   "measured": "Nine samples (silicone, SIBAL fabric, PMMA, Nomex) burned in a 20 cm/s flow duct; burn times and spread rates in the summary table",
+   "rows": "9 samples",
    "tags": [
     "flammability",
     "solids",
@@ -47,8 +46,8 @@
    "facility": "Cygnus cargo vehicle",
    "focus": "flammability",
    "fuel": "solid",
-   "measured": "One large fabric sample burned in a flow duct",
-   "rows": null,
+   "measured": "Two large SIBAL fabric samples (40.6 x 94 cm) burned at 20 cm/s, concurrent and opposed flow",
+   "rows": "2 samples",
    "tags": [
     "flammability",
     "solids",
@@ -64,8 +63,8 @@
    "facility": "Microgravity Science Glovebox, SPICE flow duct",
    "focus": "flammability",
    "fuel": "solid",
-   "measured": "Flame spread and extinction over PMMA rods and fabric versus airflow and oxygen",
-   "rows": "181",
+   "measured": "Flame spread and extinction over PMMA rods and sheets and SIBAL fabric versus airflow and oxygen; the summary table holds test conditions, not spread rates",
+   "rows": "129 tests",
    "tags": [
     "flammability",
     "suppression",
@@ -82,7 +81,7 @@
    "focus": "flammability",
    "fuel": "solid",
    "measured": "Burning and suppression of solid samples; burn outcomes and crew notes",
-   "rows": "121",
+   "rows": "122 tests",
    "tags": [
     "flammability",
     "suppression",
@@ -99,7 +98,7 @@
    "focus": "detection",
    "fuel": "smoke aerosol",
    "measured": "Smoke particle size from overheated spacecraft materials",
-   "rows": "154 (SAME and SAME-R)",
+   "rows": "8 rows (sample conditions)",
    "tags": [
     "detection",
     "smoke"
@@ -113,8 +112,8 @@
    "facility": "Microgravity Science Glovebox",
    "focus": "detection",
    "fuel": "smoke aerosol",
-   "measured": "Reflight of SAME with improved diagnostics; 44 runs of housekeeping data",
-   "rows": "44 runs",
+   "measured": "Reflight of SAME: Kapton, silicone, lampwick, Teflon and Pyrell heated in 0 to 8.1 cm/s flow, smoke aged up to 1,923 s; the table holds conditions, not particle sizes",
+   "rows": "109 tests (conditions only, no particle sizes)",
    "tags": [
     "detection",
     "smoke"
@@ -128,8 +127,8 @@
    "facility": "ISS cabin",
    "focus": "detection",
    "fuel": "dust aerosol",
-   "measured": "Airborne dust, measured with a SAME instrument; relevant to false alarms",
-   "rows": null,
+   "measured": "Test dust (Arizona Road Dust) counted by a modified P-Trak and a DustTrak in the ISS cabin, to check the counter SAME relied on works in microgravity",
+   "rows": "2 sessions",
    "tags": [
     "detection",
     "dust"
@@ -144,7 +143,7 @@
    "focus": "suppression",
    "fuel": "liquid droplet",
    "measured": "Methanol and heptane droplets: extinction and burning rate versus O2, CO2, He, N2, pressure and droplet size",
-   "rows": "274",
+   "rows": "274 tests",
    "tags": [
     "suppression",
     "droplets",
@@ -160,7 +159,7 @@
    "focus": "suppression",
    "fuel": "liquid droplet",
    "measured": "Follow-on droplet tests; condition ranges only in the summary table",
-   "rows": "8",
+   "rows": "8 rows",
    "tags": [
     "suppression",
     "droplets"
@@ -169,13 +168,13 @@
   {
    "id": "cfi",
    "name": "Cool Flames Investigation (droplets)",
-   "psi": null,
-   "doi": null,
+   "psi": "PSI-39",
+   "doi": "10.60555/m6pj-a914",
    "facility": "Combustion Integrated Rack, MDCA",
    "focus": "flammability",
    "fuel": "liquid droplet",
    "measured": "Low-temperature 'cool flames' that persist after the visible flame goes out",
-   "rows": null,
+   "rows": "87 tests",
    "tags": [
     "flammability",
     "droplets"
@@ -190,7 +189,7 @@
    "focus": "detection",
    "fuel": "gas jet",
    "measured": "Smoke point: flame length at which a gas flame starts to emit soot, versus fuel, burner size and co-flow",
-   "rows": "55",
+   "rows": "469 tests",
    "tags": [
     "detection",
     "gases",
@@ -206,8 +205,8 @@
    "facility": "Microgravity Science Glovebox, SPICE flow duct",
    "focus": "flammability",
    "fuel": "gas jet",
-   "measured": "Lifted gas-jet flames; large archive",
-   "rows": null,
+   "measured": "Lifted and attached gas-jet flames in co-flow",
+   "rows": "12 test days",
    "tags": [
     "flammability",
     "gases",
@@ -218,12 +217,12 @@
    "id": "efield",
    "name": "ACME E-FIELD Flames",
    "psi": "PSI-22",
-   "doi": null,
+   "doi": "10.60555/se5a-8c73",
    "facility": "Combustion Integrated Rack, ACME insert",
    "focus": "suppression",
    "fuel": "gas",
-   "measured": "Gas flames under an applied electric field; the field moves the flame much as weak gravity would",
-   "rows": "32",
+   "measured": "Gas flames under an applied electric field (electric-field effects on laminar diffusion flames)",
+   "rows": "32 rows",
    "tags": [
     "suppression",
     "gases",
@@ -234,12 +233,12 @@
    "id": "cfig",
    "name": "ACME CFI-G",
    "psi": "PSI-159",
-   "doi": null,
+   "doi": "10.60555/cyt1-kh64",
    "facility": "Combustion Integrated Rack, ACME insert",
    "focus": "flammability",
    "fuel": "gas",
    "measured": "Cool flames with gaseous fuels; oxygen up to 85% in inverse flames",
-   "rows": null,
+   "rows": "333 tests (154 inverse + 179 normal flames)",
    "tags": [
     "flammability",
     "gases",
@@ -250,12 +249,12 @@
    "id": "flamedesign",
    "name": "ACME Flame Design",
    "psi": "PSI-10",
-   "doi": null,
+   "doi": "10.60555/w4zy-bt45",
    "facility": "Combustion Integrated Rack, ACME insert",
    "focus": "flammability",
    "fuel": "gas",
-   "measured": "Soot-free and sooty spherical gas flames near their extinction limits",
-   "rows": null,
+   "measured": "Normal and inverse ethylene and propane flames, studied for soot-free flame design",
+   "rows": "327 tests (120 inverse + 207 normal flames)",
    "tags": [
     "flammability",
     "gases",
@@ -265,13 +264,13 @@
   {
    "id": "bre",
    "name": "ACME BRE",
-   "psi": null,
-   "doi": null,
+   "psi": "PSI-20",
+   "doi": "10.60555/vb93-3y72",
    "facility": "Combustion Integrated Rack, ACME insert",
    "focus": "flammability",
    "fuel": "gas (emulating solids and liquids)",
    "measured": "Burning Rate Emulator: gas burner that mimics the flammability of condensed fuels",
-   "rows": null,
+   "rows": "18 test days",
    "tags": [
     "flammability",
     "gases",

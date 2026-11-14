@@ -23,10 +23,10 @@
   {
    "id": "E3",
    "what": "Detection-time extraction reproduces a published Saffire alarm time",
-   "ref": "NASA Saffire papers",
+   "ref": "NASA PSI-100 Saffire-III telemetry; NTRS search",
    "limit": "Within the limit the team writes here",
    "owner": "Karthikeya",
-   "result": null,
+   "result": "Not run: no published Saffire-III smoke-detector alarm time found (NTRS search, 14 Nov 2026)",
    "state": "pending"
   },
   {
@@ -82,6 +82,78 @@
    "owner": "Dashboard lane",
    "result": null,
    "state": "pending"
+  },
+  {
+   "id": "L1",
+   "what": "Detection latency: Negative control: no radiometer alarm during the smoke-wire puff (smoke, no flame)",
+   "ref": "NASA PSI-100 Saffire-III telemetry, models/m4-latency/build.py",
+   "limit": "no radiometer alarm",
+   "owner": "Karthikeya",
+   "result": "Pass: radiometer alarms in the smoke-wire window: 0",
+   "state": "pass"
+  },
+  {
+   "id": "L2",
+   "what": "Detection latency: The rule can fail: the Sample 1 scatter channel replaced by its own baseline",
+   "ref": "NASA PSI-100 Saffire-III telemetry, models/m4-latency/build.py",
+   "limit": "no alarm on a flat signal",
+   "owner": "Karthikeya",
+   "result": "Pass: alarm with flat signal: None",
+   "state": "pass"
+  },
+  {
+   "id": "L3",
+   "what": "Detection latency: Radiometer alarms are not igniter glow: alarm counted only after the igniter switches off",
+   "ref": "NASA PSI-100 Saffire-III telemetry, models/m4-latency/build.py",
+   "limit": "shift at most 2 s",
+   "owner": "Karthikeya",
+   "result": "Pass: largest shift 1 s over 6 radiometer alarms (limit 2 s)",
+   "state": "pass"
+  },
+  {
+   "id": "L4",
+   "what": "Detection latency: Every event reported on its own",
+   "ref": "NASA PSI-100 Saffire-III telemetry, models/m4-latency/build.py",
+   "limit": "3 events reported",
+   "owner": "Karthikeya",
+   "result": "Pass: 3 events, no averages",
+   "state": "pass"
+  },
+  {
+   "id": "M5-lognormal",
+   "what": "Smoke miss risk: Table 1's count mean and average-mass diameters reproduced from its Dg and sigma_g (limit: every one within 10%)",
+   "ref": "Urban et al. 2012 (AIAA 2012-3536), models/m5-smoke-miss/build.py",
+   "limit": "see RULES.md",
+   "owner": "Karthikeya",
+   "result": "Fail: 9 of 10 rows within 10% (9 within 1%); worst: Teflon unaged, +9.4% and +20.8%",
+   "state": "fail"
+  },
+  {
+   "id": "M5-trace",
+   "what": "Smoke miss risk: Extraction error: tick labels vs fitted axes, and each test's Dg and sigma_g rebuilt from its own moments (limit: under 3% of the axis range)",
+   "ref": "Urban et al. 2012 (AIAA 2012-3536), models/m5-smoke-miss/build.py",
+   "limit": "see RULES.md",
+   "owner": "Karthikeya",
+   "result": "Pass: axis fit worst 0.017% of range; Dg/sigma_g rebuilt within 0.05% (median); read from the PDF's vector drawing, not traced by hand",
+   "state": "pass"
+  },
+  {
+   "id": "M5-auc",
+   "what": "Smoke miss risk: Logistic model, leave-one-test-out (limit: AUC >= 0.75)",
+   "ref": "Urban et al. 2012 (AIAA 2012-3536), models/m5-smoke-miss/build.py",
+   "limit": "see RULES.md",
+   "owner": "Karthikeya",
+   "result": "Fail: AUC 0.746 [0.44, 1.00] on 16 flight tests",
+   "state": "fail"
+  },
+  {
+   "id": "M5-bacc",
+   "what": "Smoke miss risk: Balanced accuracy at 0.5 (limit: >= 0.70 and not below the material-only baseline)",
+   "ref": "Urban et al. 2012 (AIAA 2012-3536), models/m5-smoke-miss/build.py",
+   "limit": "see RULES.md",
+   "owner": "Karthikeya",
+   "result": "Pass: 0.762 [0.53, 0.94]; material-only baseline 0.746; majority class 0.50",
+   "state": "pass"
   },
   {
    "id": "V1",
@@ -161,7 +233,7 @@
    "ref": "engine/drift.py, three cabin layouts",
    "limit": "3/3 layouts, otherwise the placement claim is dropped",
    "owner": "Karthikeya",
-   "result": "Fail: A: 44% -> 49%; B: 45% -> 49%; C: 44% -> 48%",
+   "result": "Fail: A: 45% -> 48%; B: 45% -> 49%; C: 45% -> 48%",
    "state": "fail"
   },
   {
@@ -170,7 +242,7 @@
    "ref": "engine/drift.py, run on build",
    "limit": "at least 20 points more, 3/3 layouts",
    "owner": "Karthikeya",
-   "result": "Pass: A: 100% vs 49%; B: 100% vs 49%; C: 100% vs 48%",
+   "result": "Pass: A: 100% vs 48%; B: 100% vs 49%; C: 100% vs 48%",
    "state": "pass"
   }
  ]
