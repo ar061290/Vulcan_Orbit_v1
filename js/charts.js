@@ -34,7 +34,11 @@ export function lineChart({ series, xLabel, yLabel, markers = [], yDom, unit = '
   const xs = series.flatMap(d => d.points.map(p => p[0])), ys = series.flatMap(d => d.points.map(p => p[1]));
   const f = frame({ xDom: [Math.min(...xs), Math.max(...xs)], yDom: yDom || [Math.min(0, ...ys), ext(ys)[1]], xLabel, yLabel });
   for (const mk of markers) f.svg.append(s('line', { x1: f.X(mk.x), x2: f.X(mk.x), y1: f.m.t, y2: f.m.t + f.ih, stroke: mk.color, 'stroke-dasharray': '3 3' }), txt(f.X(mk.x) + 4, f.m.t + 10 + (mk.dy || 0), mk.label, { fill: C.ink }));
-  for (const d of series) f.svg.append(s('path', { d: d.points.map((p, i) => (i ? 'L' : 'M') + f.X(p[0]).toFixed(1) + ' ' + f.Y(p[1]).toFixed(1)).join(''), fill: 'none', stroke: d.color, 'stroke-width': 2, 'stroke-linejoin': 'round' }));
+  for (const d of series) {
+    if (d.band) f.svg.append(s('path', { d: d.band.map((p, i) => (i ? 'L' : 'M') + f.X(p[0]).toFixed(1) + ' ' + f.Y(p[2]).toFixed(1)).join('') + d.band.slice().reverse().map(p => 'L' + f.X(p[0]).toFixed(1) + ' ' + f.Y(p[1]).toFixed(1)).join('') + 'Z', fill: d.color, opacity: 0.22, stroke: 'none' }));
+    if (d.dots) for (const p of d.points) f.svg.append(s('circle', { cx: f.X(p[0]), cy: f.Y(p[1]), r: 4, fill: d.color, stroke: C.surface, 'stroke-width': 2 }));
+    else f.svg.append(s('path', { d: d.points.map((p, i) => (i ? 'L' : 'M') + f.X(p[0]).toFixed(1) + ' ' + f.Y(p[1]).toFixed(1)).join(''), fill: 'none', stroke: d.color, 'stroke-width': 2, 'stroke-linejoin': 'round' }));
+  }
   const cross = s('line', { y1: f.m.t, y2: f.m.t + f.ih, stroke: C.mute, visibility: 'hidden' });
   const hit = s('rect', { x: f.m.l, y: f.m.t, width: f.iw, height: f.ih, fill: 'transparent' });
   const base = series[0].points;
@@ -42,7 +46,7 @@ export function lineChart({ series, xLabel, yLabel, markers = [], yDom, unit = '
     const r = f.svg.getBoundingClientRect(), px = (e.clientX - r.left) / r.width * 640;
     let i = 0, best = 1e9; base.forEach((p, k) => { const dd = Math.abs(f.X(p[0]) - px); if (dd < best) { best = dd; i = k; } });
     cross.setAttribute('x1', f.X(base[i][0])); cross.setAttribute('x2', f.X(base[i][0])); cross.setAttribute('visibility', 'visible');
-    tip(e, `<b>${base[i][0]} ${xLabel ? xLabel.split(' ').pop() : ''}</b><br>` + series.map(d => `<span style="color:${d.color}">&#9632;</span> ${d.name}: <b>${(d.points[i] || [])[1]?.toFixed(2) ?? 'n/a'}</b>${unit}`).join('<br>'));
+    tip(e, `<b>${base[i][0]} ${xLabel ? xLabel.split(' ').pop() : ''}</b><br>` + series.map(d => { const x0 = base[i][0]; const q = d.points.reduce((a, p) => Math.abs(p[0] - x0) < Math.abs(a[0] - x0) ? p : a, d.points[0]); return `<span style="color:${d.color}">&#9632;</span> ${d.name}: <b>${q && Math.abs(q[0] - x0) <= (d.near ?? Infinity) ? q[1].toFixed(2) : 'n/a'}</b>${unit}`; }).join('<br>'));
   });
   hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); untip(); });
   f.svg.append(cross, hit); return f.svg;

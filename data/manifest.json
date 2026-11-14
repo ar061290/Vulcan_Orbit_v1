@@ -56,6 +56,12 @@
    "what": "What-if runs: share of fires caught by each detector layout"
   },
   {
+   "name": "drift_calibration",
+   "status": "model",
+   "owner": "Karthikeya",
+   "what": "Drift model tuned and tested on Saffire-III flight smoke-detector data"
+  },
+  {
    "name": "response_trials",
    "status": "missing",
    "owner": "Mukund",

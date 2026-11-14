@@ -1,6 +1,6 @@
 // Panels for the smoke drift model: an animated concentration map and the what-if results.
 import { h, card, badge, tip, untip, fmt } from './lib.js';
-import { C } from './charts.js';
+import { C, lineChart } from './charts.js';
 
 // Sequential single-hue ramp on the dark surface: surface -> deep blue -> pale blue.
 const RAMP = [[26, 26, 25], [16, 66, 129], [37, 106, 191], [109, 167, 236], [205, 226, 251]];
@@ -49,7 +49,7 @@ export function whatifCard(w) {
     const bars = h('div', { style: 'display:grid;gap:10px;margin:6px 0 14px' }, ...w.layouts.map((L, i) => h('button', { class: 'q', 'aria-pressed': i === sel, style: 'margin:0', onclick: () => { sel = i; draw(); } },
       h('div', { style: 'display:flex;justify-content:space-between;gap:10px' }, h('span', {}, L.name), h('b', { style: 'font-family:var(--mono)' }, Math.round(L[win] * 100) + '%')),
       h('div', { class: 'track', style: 'margin-top:6px' }, h('i', { style: `width:${L[win] * 100}%` })),
-      h('small', {}, `never reaches alarm level: ${Math.round(L.never * 100)}%` + (win === 'caught_120' ? `; range ${Math.round(L.caught_120_range[0] * 100)} to ${Math.round(L.caught_120_range[1] * 100)}%` : '')))));
+      h('small', {}, `not caught within ${Math.round(w.t_end_s / 60)} min: ${Math.round(L.never * 100)}%` + (win === 'caught_120' ? `; ${Math.round((L.caught_120_model_range || L.caught_120_range)[0] * 100)} to ${Math.round((L.caught_120_model_range || L.caught_120_range)[1] * 100)}% across the settings the flight data allows` : '')))));
     const L = w.layouts[sel], cw = 100 / w.map_nx, vals = L.map.filter(v => v != null), vmax = Math.max(60, ...vals);
     const cells = h('div', { style: `position:relative;aspect-ratio:${w.lx_m}/${w.ly_m};border:1px solid var(--grid);border-radius:8px;overflow:hidden;background:var(--page)` },
       ...L.map.map((v, idx) => {
@@ -64,5 +64,40 @@ export function whatifCard(w) {
   }
   draw();
   const chips = h('div', { class: 'row' }, h('label', {}, 'Count a fire as caught if the alarm comes'), ...Object.keys(label).map(kx => h('button', { class: 'chip', 'aria-pressed': kx === win, onclick: e => { win = kx; e.target.parentNode.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === e.target)); draw(); } }, label[kx])));
-  return card('What if the fire starts somewhere else?', w.status, `${fmt(w.runs, 0)} simulated fires: random position, airflow ${w.varied.airflow_m_s.join(', ')} m/s, smoke release ${w.varied.release_mg_s} mg/s.`, chips, holder, h('p', {}, h('small', {}, w.note)));
+  return card('What if the fire starts somewhere else?', w.status, `${fmt(w.runs, 0)} simulated fires: random position, airflow ${w.varied.airflow_m_s.join(', ')} m/s, smoke release ${w.varied.release_mg_s} mg/s` + (w.varied.fire_duration_s ? `, burning for times measured on Saffire-I and II (${Math.min(...w.varied.fire_duration_s)} to ${Math.max(...w.varied.fire_duration_s)} s).` : '.'), chips, holder, h('p', {}, h('small', {}, w.note)));
+}
+
+/** Model vs the Saffire-III flight smoke detector: tuned on the burn, tested on the held-out smoke-wire puff. */
+export function calibrationCard(c) {
+  const band = cv => cv.t.map((t, i) => [t, cv.lo[i], cv.hi[i]]);
+  const pts = (t, y) => t.map((x, i) => [x, y[i]]);
+  const burn = lineChart({ xLabel: 'Seconds after T0', yLabel: 'Detector signal', markers: [{ x: c.burn_curve.flame[0], label: 'flame on', color: C.s2 }, { x: c.burn_curve.flame[1], label: 'flame out', color: C.s2, dy: 14 }],
+    series: [{ name: 'Model (best fit)', color: C.s1, points: pts(c.burn_curve.t, c.burn_curve.best), band: band(c.burn_curve) },
+             { name: 'Flight detector', color: C.s4, dots: true, near: 6, points: pts(c.burn_curve.obs_t, c.burn_curve.obs) }] });
+  const p = c.pulse;
+  const pulse = lineChart({ xLabel: 'Seconds after T0', yLabel: 'Detector signal', markers: [{ x: c.pulse_curve.wire[0], label: 'smoke wire on', color: C.s2 }],
+    series: [{ name: 'Model, never tuned on this', color: C.s1, points: pts(c.pulse_curve.t, c.pulse_curve.best), band: band(c.pulse_curve) },
+             { name: 'Flight detector', color: C.s4, dots: true, near: 6, points: pts(c.pulse_curve.obs_t, c.pulse_curve.obs) }] });
+  const lg = h('div', { class: 'legend' }, h('span', {}, h('i', { style: `background:${C.s1}` }), 'Model, best setting'), h('span', {}, h('i', { style: `background:${C.s1};opacity:.3` }), 'Every setting the record cannot rule out'), h('span', {}, h('i', { style: `background:${C.s4};border-radius:50%` }), 'Flight detector reading'));
+  return card('Checked against a real spacecraft fire', c.status, `Saffire-III flew a real fire inside a Cygnus cargo ship. We tuned the drift model on the burn and tested it on a smoke puff it never saw.`,
+    h('div', { class: 'grid g3', style: 'margin-bottom:8px' },
+      h('div', {}, h('small', {}, 'Fit to the burn (R²)'), h('div', { class: 'stat' }, c.best.burn_r2.toFixed(2))),
+      h('div', {}, h('small', {}, 'Smoke cleared in'), h('div', { class: 'stat' }, `${c.clearance_s_range[0]}–${c.clearance_s_range[1]} s`)),
+      h('div', {}, h('small', {}, 'Held-out puff: peak'), h('div', { class: 'stat' }, `${Math.round(p.observed_peak_s)} s`, h('small', {}, `model ${Math.round(p.model_peak_s_range[0])}–${Math.round(p.model_peak_s_range[2])} s`)))),
+    h('h3', {}, 'Tuned on: Sample 1 burn'), burn, h('h3', { style: 'margin-top:10px' }, 'Tested on: smoke-wire puff (held out)'), pulse, lg,
+    h('p', { style: 'margin-top:8px' }, h('small', {}, `${c.settings_kept} of ${c.settings_tried} settings fit the burn equally well; all of them feed the what-if runs. Detector delay ${c.delay_s_range[0]}–${c.delay_s_range[1]} s. ` + c.limits.join(' ') + ' Source: NASA PSI-100, CC0.')));
+}
+
+export function robustCard(w) {
+  if (!w.robustness) return null;
+  const pct = v => Math.round(v * 100) + '%', rng = r => r ? h('small', {}, ` ${pct(r[0])}–${pct(r[1])}`) : null;
+  const A = w.layouts.find(L => L.name === 'At the air return'), Cl = w.layouts.find(L => L.name.startsWith('Ceiling'));
+  const sizeRows = A && A.by_rate ? A.by_rate.map((b, k) => h('tr', {}, h('td', {}, k === 2 ? `over ${b.lo} mg/s` : `${b.lo}–${b.hi} mg/s`), h('td', {}, pct(Cl.by_rate[k].caught_120)), h('td', {}, pct(b.caught_120)))) : [];
+  return card('What actually decides if a fire is caught?', w.status, 'Share of simulated fires caught within 2 minutes. Small ranges: across the settings the flight data cannot rule out.',
+    h('h3', {}, 'Detector position, in three different cabins'),
+    h('div', { class: 'scroll' }, h('table', {}, h('thead', {}, h('tr', {}, ...['Cabin', 'Ceiling, mid-cabin', 'At the air return', 'Best pair'].map(t => h('th', {}, t)))),
+      h('tbody', {}, ...w.robustness.map(r => h('tr', {}, h('td', {}, h('b', {}, r.cabin), ' ', h('small', {}, r.label)), h('td', {}, pct(r.ceiling_120), rng(r.ceiling_range)), h('td', {}, pct(r.return_120), rng(r.return_range)), h('td', {}, pct(r.pair_120))))))),
+    sizeRows.length ? h('h3', { style: 'margin-top:12px' }, 'How much smoke the fire makes (cabin A)') : null,
+    sizeRows.length ? h('div', { class: 'scroll' }, h('table', {}, h('thead', {}, h('tr', {}, ...['Smoke release', 'Ceiling', 'Air return'].map(t => h('th', {}, t)))), h('tbody', {}, ...sizeRows))) : null,
+    h('p', { style: 'margin-top:8px' }, h('small', {}, 'Once the air is recirculated and mixed the way the flight data says it is, where the detector sits matters less than how much smoke the fire makes. Small smouldering sources often never reach the alarm level anywhere: that is the case for sensing closer to the source.')));
 }
