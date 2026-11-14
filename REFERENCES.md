@@ -12,8 +12,11 @@ Every dataset, paper, library and outside idea used in Vulcan Orbit. Add yours u
 | PSI-68 | Flame Extinguishment Experiment - 2 (FLEX-2) | [10.60555/byp8-h018](https://doi.org/10.60555/byp8-h018) | M7 | Ambient chamber temperature (25 °C) for the d-squared law; test-matrix context |
 | PSI-117 | Effect of External Thermo-Convective Perturbation on Cool Flame Dynamics | [10.60555/gz0q-b577](https://doi.org/10.60555/gz0q-b577) | M7 | Reviewed as context only |
 | PSI-142 | Quantitative Studies of Cool Flame Transitions at Radiation/Stretch Extinction Using Counterflow Flames | [10.60555/80qf-vj95](https://doi.org/10.60555/80qf-vj95) | M7 | Reviewed as context only |
+| PSI-25 | Burning and Suppression of Solids - II (BASS-II) | [10.60555/4qc4-de67](https://doi.org/10.60555/4qc4-de67) | M6 | Experimental table (sessions, O2, flow text for the no-spread cases); ReadMe for column meanings; BASS-II Summary Report (Table 5.1 spread rates, Tables 2.1 and 7.1) |
+| PSI-26 | Burning and Suppression of Solids (BASS) | [10.60555/58h4-dy80](https://doi.org/10.60555/58h4-dy80) | M6 | Reviewed: no spread rates in its table |
+| PSI-99 | Saffire-II | [10.60555/2chp-m469](https://doi.org/10.60555/2chp-m469) | M6 | Reviewed: two fabric spread rates, not used |
 
-File names, sizes and sha256: `datasets/psi/MANIFEST.csv`. Documents in `datasets/raw/` are listed in `models/m7-extinction/DATA.md`.
+File names, sizes and sha256: `datasets/psi/MANIFEST.csv`. Documents in `datasets/raw/` are listed in `models/m7-extinction/DATA.md` and `models/m6-spread/DATA.md`.
 
 ## NASA reports and papers
 
@@ -21,6 +24,10 @@ File names, sizes and sha256: `datasets/psi/MANIFEST.csv`. Documents in `dataset
 - *ACME/CFI-G Final Report (2022)*, 21 November 2022. PSI-159 file `PSI-159_Reports_FinalRpt_ACME.CFI-G.pdf`. (M7)
 - Nayagam V., Dietrich D. L., Hicks M. C., Williams F. A., "Cool-flame extinction during n-alkane droplet combustion in microgravity", Spring Technical Meeting of the Central States Section of the Combustion Institute, 2014. NASA NTRS [20140006750](https://ntrs.nasa.gov/citations/20140006750). Quoted for the unit of K and for "disruptively extinguished". (M7)
 - Nayagam V., Dietrich D. L., Hicks M. C., Williams F. A., "Methanol droplet combustion in oxygen-inert environments in microgravity", 8th US National Combustion Meeting, 2013. NASA NTRS [20130014061](https://ntrs.nasa.gov/citations/20130014061). Unit of K; limiting oxygen index quoted as context (`reported`). (M7)
+- Olson S. L., Ferkul P. V., Bhattacharjee S., Miller F. J., Fernandez-Pello C., Link S., T'ien J. S., Wichman I., *Burning and Suppression of Solids-II (BASS-II) Summary Report*, NASA/TM-20210011385, 2021. PSI-25 file `PSI-25_Reports_BASS-II Summary Report.pdf`; also NASA NTRS [20210011385](https://ntrs.nasa.gov/citations/20210011385). Table 5.1 (spread rates, transcribed), Table 2.1 and Table 7.1 (no-spread cases, `reported`), T∞ = 300 K (§1.5), T_v = 673 K (§2.2). (M6)
+- Ferkul P. V., Bhattacharjee S., Fernandez-Pello C., Miller F., Olson S. L., Takahashi F., T'ien J. S., *Combustion of Solids in Microgravity: Results from the BASS-II Experiment*, NASA NTRS [20160000593](https://ntrs.nasa.gov/citations/20160000593). Context only. (M6)
+- Bhattacharjee S., Laue M., Carmignani L., Ferkul P. V., Olson S. L., "Opposed-flow flame spread: a comparison of microgravity and normal gravity experiments to establish the thermal regime", *Fire Safety Journal* 79 (2016) 111–118, doi:[10.1016/j.firesaf.2015.11.011](https://doi.org/10.1016/j.firesaf.2015.11.011). de Ris thin and thick coefficients (Eq. 6) and flame coefficient F_adb = 4.89 (Eq. 7), `reported`. (M6)
+- Bhattacharjee S., Simsek A., Olson S., Ferkul P., "The critical flow velocity for radiative extinction in opposed-flow flame spread in a microgravity environment: a comparison of experimental, computational, and theoretical results", *Combustion and Flame* 163 (2016) 472–477, doi:[10.1016/j.combustflame.2015.10.023](https://doi.org/10.1016/j.combustflame.2015.10.023). Vaporization temperature 673 K, `reported`. (M6)
 
 ## Physical constants and formulas
 
@@ -29,22 +36,23 @@ File names, sizes and sha256: `datasets/psi/MANIFEST.csv`. Documents in `dataset
 - Law C. K., *Combustion Physics*, Cambridge University Press, 2006, ch. 6 (quasi-steady droplet burning, d-squared law). (M7)
 - Turns S. R., *An Introduction to Combustion*, 3rd ed., McGraw-Hill, 2012, sec. 10.5 (droplet burning-rate constant and transfer number). (M7)
 - Poling B. E., Prausnitz J. M., O'Connell J. P., *The Properties of Gases and Liquids*, 5th ed., McGraw-Hill, 2001, eqs. 10-6.1 and 10-6.2 (Wassiljewa equation with Mason-Saxena coefficients for gas-mixture conductivity). (M7)
+- de Ris J. N., "Spread of a laminar diffusion flame", *Twelfth Symposium (International) on Combustion*, The Combustion Institute, 1969: the thin- and thick-fuel opposed-flow spread formulas, used in the coefficient form of Bhattacharjee et al. (2016). (M6)
 
 ## Libraries
 
 | Library | Version | Licence | Used by |
 |---|---|---|---|
-| NumPy | 2.5.4 | BSD-3-Clause | M7 |
-| pandas | 3.1.1 | BSD-3-Clause | M7 |
-| SciPy | 1.18.1 | BSD-3-Clause | M7 |
-| scikit-learn (Pedregosa et al., JMLR 12, 2011) | 1.9.1 | BSD-3-Clause | M7 |
+| NumPy | 2.5.4 | BSD-3-Clause | M6, M7 |
+| pandas | 3.1.1 | BSD-3-Clause | M6, M7 |
+| SciPy | 1.18.1 | BSD-3-Clause | M6, M7 |
+| scikit-learn (Pedregosa et al., JMLR 12, 2011) | 1.9.1 | BSD-3-Clause | M6, M7 |
 | joblib | 1.6.0 | BSD-3-Clause | M7 |
-| Matplotlib | 3.11.2 | Matplotlib licence (PSF-based) | M7 (check plots) |
+| Matplotlib | 3.11.2 | Matplotlib licence (PSF-based) | M6, M7 (check plots) |
 | openpyxl | 3.1.5 | MIT | M7 (reads the CFI .xlsx) |
 
 ## Ideas from other teams
 
-None used by M7.
+None used by M7 or M6. The R² 0.6–0.7 expectation for spread models is the plan's note on a competitor (`docs/plan.md`), used only to set the M6 target.
 
 ## AI assistance
 
