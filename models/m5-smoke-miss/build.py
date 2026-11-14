@@ -130,7 +130,7 @@ def main():
                       "Sources disagree on where light-scattering detectors lose sensitivity, so the limit is a control (300, 500, 1000 nm), not a fixed fact.",
                  detector_thresholds_nm=[300, 500, 1000], materials=mats, units=dict(d_nm="nm", mass_below="share of smoke mass in smaller particles"))
     pts = [dict(obs=int(y[i]), pred=round(float(p[i]), 3), x=round(max(0, r["v"]), 1), lo=None, hi=None, label=f"{r['test']}: {r['material']}, {max(0, r['v']):.0f} cm/s, mass median {r['MMD']*1000:.0f} nm") for i, r in enumerate(rows)]
-    entry = dict(id="smoke-miss", name="Will the detector miss this smoke?", question="Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)?",
+    entry = dict(id="smoke-miss", status="model", name="Will the detector miss this smoke?", question="Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)?",
                  data="16 SAME-2 flight tests (Kapton, lampwick, Teflon) from Urban et al. 2012, AIAA 2012-3536, Figures 6-8, read from the PDF's vector drawing; Table 1 for the baseline",
                  method="Logistic regression on material and air velocity; label from the lognormal mass median diameter (Hatch-Choate, from each test's count-mean and average-mass diameters)",
                  validation="leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples", metric="AUC", score=round(float(auc), 3), score_range=auc_r, kind="classifier",
