@@ -56,6 +56,21 @@ to claim. The flame and Earth images are computer illustrations, labelled as suc
 
 Backup: a 60 s screen capture of the same path, in case the 2026 limit is longer.
 
+### Alternative 30 s video with the history opening ("No up", recommended by the storytelling research)
+
+| Time | On screen | Caption |
+|---|---|---|
+| 0-4 s | History page title card | "February 1997. Space station Mir. Six crew. An oxygen canister catches fire." |
+| 4-9 s | Mir plaque quote | "'I've never seen smoke spread like it did on Mir.' Astronaut Jerry Linenger" |
+| 9-12 s | Home porthole, gravity switched to orbit | "In orbit, smoke doesn't rise. There is no 'up'." |
+| 12-19 s | Ticking clock running | "Our analysis of NASA's orbital fire data: flame sensor 7 s. Smoke detector 92-127 s." |
+| 19-24 s | "The alarm can come after the gas" figure | "NASA found that by smoke-alarm level, much of the hazardous gas was already out." |
+| 24-30 s | Gap map | "Vulcan Orbit: which sensor speaks first, and which air NASA hasn't tested yet." |
+
+Rules for the history part: names first, no accident photos, no last words, no blame, and never say this project "would have saved"
+anyone (Apollo 1 was a ground test with a different cause). No one has died in a fire in orbit; the page says so. Use NASA images
+only with "Image: NASA" credit and never the NASA logo. Captions only, no team faces or voices.
+
 ## Claims to avoid (from AGENTS.md and the research)
 
 - Smoke drift R² 0.90 is the fit to the burn it was tuned on, not validation (held-out puff: shape R² 0.05).

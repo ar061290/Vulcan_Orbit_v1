@@ -1,6 +1,6 @@
 import { h, load, page, card, badge, fmt } from '../lib.js';
 import { hero } from '../hero.js';
-import { replayCard } from '../detect_ui.js';
+import { ticking } from '../clock.js';
 export default async function (root) {
   const [man, inv, sm, india, lat] = await Promise.all([load('manifest'), load('investigations'), load('smoke_sizes'), load('india'), load('saffire_latency')]);
   const fine = (sm.materials || []).filter(m => m.Dg_nm != null).sort((a, b) => a.Dg_nm - b.Dg_nm)[0];
@@ -41,8 +41,9 @@ export default async function (root) {
     story = h('section', { class: 'story', 'aria-labelledby': 'story-h' },
       h('p', { class: 'kicker' }, 'The finding'),
       h('h2', { id: 'story-h' }, `On NASA's real orbital fires, a flame light sensor noticed in ${rad} seconds. The smoke detector took ${Math.min(...sc)} to ${Math.max(...sc)} seconds.`),
-      h('p', { class: 'story-sub' }, obsNever ? 'Alarm times use our own stated rule, because NASA published none. The detector\'s second smoke channel never alarmed at all. In NASA\'s later Saffire VI test, much of the hazardous gas had already been released by the time a smoke monitor reached its alarm level (ICES-2024-365). Replay it yourself:' : 'Replay it yourself:'),
-      replayCard(lat),
+      h('p', { class: 'story-sub' }, obsNever ? 'Alarm times use our own stated rule, because NASA published none. The detector\'s second smoke channel never alarmed at all. In NASA\'s later Saffire VI test, much of the hazardous gas had already been released by the time a smoke monitor reached its alarm level (ICES-2024-365).' : ''),
+      ticking(lat),
+      h('p', { class: 'story-links' }, h('a', { href: '#/detect' }, 'Replay the real sensor data'), ' · ', h('a', { href: '#/memory' }, 'Why seconds matter: sixty years of fire')),
       h('p', { class: 'story-map' }, 'The challenge asks teams to summarise, rank and interpret NASA\'s fire data. We do that as three questions:'));
   }
   root.append(top, story,

@@ -9,7 +9,7 @@ import { hero } from './hero.js';
 const VISUAL = { flame: 'flame', predict: 'flame', respond: 'flame', detect: 'smoke', locate: 'smoke' };   // others: earth
 import './bg.js';
 const PAGES = [
-  ['overview', 'Home'], ['detect', 'Find it'], ['predict', 'Predict it'], ['respond', 'Put it out'], ['flame', 'Flame lab'],
+  ['overview', 'Home'], ['memory', 'History'], ['detect', 'Find it'], ['predict', 'Predict it'], ['respond', 'Put it out'], ['flame', 'Flame lab'],
   ['evidence', 'Checks'], ['ask', 'Ask'], ['explorer', 'NASA experiments'], ['locate', 'Bench rig'], ['about', 'Sources'],
 ];
 const HIDDEN = ['design', 'explorer', 'locate', 'about'];   // reachable by link, not in the top bar
@@ -26,7 +26,7 @@ async function route() {
     const mod = await import(`./pages/${known}.js`); const root = h('div'); await mod.default(root);
     root.querySelectorAll('.card').forEach((c, i) => c.style.setProperty('--i', Math.min(i, 10)));   // staggered reveal
     provenance(root);
-    if (known !== 'overview') { pageHead(root, known); await simplify(root, known); }
+    if (known !== 'overview' && known !== 'memory') { pageHead(root, known); await simplify(root, known); }
     annotate(root);
     // Accessibility fixes applied to every page: name every chart, make scrolling tables reachable by keyboard, fill empty headers.
     root.querySelectorAll('svg[role=img]:not([aria-label]), svg.chart:not([aria-label])').forEach(svg => {
@@ -35,7 +35,7 @@ async function route() {
     });
     root.querySelectorAll('.scroll').forEach((s, i) => { const t = s.closest('.card')?.querySelector(':scope > h2')?.childNodes[0]?.textContent?.trim(); s.tabIndex = 0; s.setAttribute('role', 'region'); s.setAttribute('aria-label', `Table ${i + 1}${t ? ': ' + t : ''}`); });
     root.querySelectorAll('th').forEach(th => { if (!th.textContent.trim()) th.append(h('span', { class: 'sr' }, 'Item')); });
-    document.title = (known === 'overview' ? '' : (PAGES.find(p => p[0] === known)?.[1] || 'Design kit') + ' · ') + 'Vulcan Orbit';
+    document.title = (known === 'overview' ? '' : (known === 'memory' ? 'Sixty years of fire' : PAGES.find(p => p[0] === known)?.[1] || 'Design kit') + ' · ') + 'Vulcan Orbit';
     const swap = () => view.replaceChildren(root);
     if (document.startViewTransition && document.documentElement.dataset.motion !== 'calm') document.startViewTransition(swap); else swap();
   }

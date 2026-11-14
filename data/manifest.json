@@ -156,6 +156,12 @@
    "status": "real",
    "owner": "M4",
    "what": "Rate-of-rise vs fixed alarm on Saffire-III smoke channels (M4 extension)"
+  },
+  {
+   "name": "memory",
+   "status": "reported",
+   "owner": "Dashboard",
+   "what": "Sixty years of fire: history page entries with sources"
   }
  ]
 }
