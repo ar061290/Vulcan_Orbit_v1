@@ -1,5 +1,6 @@
 // Router and shell. Each page is one module in js/pages/ exporting default async (root) => void.
 import { h, load } from './lib.js';
+import './bg.js';
 const PAGES = [
   ['overview', 'Overview'], ['explorer', 'Investigations'], ['detect', 'Detect'], ['locate', 'Locate'],
   ['predict', 'Predict'], ['respond', 'Respond'], ['evidence', 'Evidence'], ['ask', 'Ask'], ['about', 'About'],
@@ -13,8 +14,12 @@ async function route() {
   const known = PAGES.some(p => p[0] === id) ? id : 'overview';
   nav.querySelectorAll('a').forEach(a => a.dataset.id === known ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   nav.classList.remove('open'); document.getElementById('tip').hidden = true;
-  view.replaceChildren(h('p', {}, 'Loading...'));
-  try { const mod = await import(`./pages/${known}.js`); const root = h('div'); await mod.default(root); view.replaceChildren(root); }
+  try {
+    const mod = await import(`./pages/${known}.js`); const root = h('div'); await mod.default(root);
+    root.querySelectorAll('.card').forEach((c, i) => c.style.setProperty('--i', Math.min(i, 10)));   // staggered reveal
+    const swap = () => view.replaceChildren(root);
+    if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(swap); else swap();
+  }
   catch (e) { console.error(e); view.replaceChildren(h('div', { class: 'empty' }, h('h3', {}, 'This page failed to load'), h('pre', {}, String(e.stack || e)))); }
   view.focus({ preventScroll: true }); scrollTo(0, 0);
 }

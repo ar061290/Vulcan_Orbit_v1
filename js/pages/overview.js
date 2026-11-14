@@ -1,4 +1,5 @@
 import { h, load, page, card, badge, fmt } from '../lib.js';
+import { flameLab } from '../flame.js';
 export default async function (root) {
   const [man, inv] = await Promise.all([load('manifest'), load('investigations')]);
   const st = n => (man.files || []).find(f => f.name === n)?.status || 'missing';
@@ -7,7 +8,8 @@ export default async function (root) {
   const n = (inv.items || []).length, det = (inv.items || []).filter(i => i.focus === 'detection').length;
   root.append(page('A fire in orbit does not rise. It hides.',
     'Vulcan Orbit turns NASA\'s microgravity combustion experiments into three answers a mission designer needs: where is the fire, what will it do next, and what puts it out. A bench rig tests the same questions with real sensors.',
-    h('div', { class: 'grid g3' },
+    card('See it: the same flame, with and without gravity', null, 'Switch gravity off and watch where the heat and smoke go. Then change the airflow.', flameLab()),
+    h('div', { class: 'grid g3', style: 'margin-top:14px' },
       stage('01', 'detect', 'Detect and locate', 'When each kind of sensor would have alarmed in real orbital burns, which smoke the detector misses, and where the source is.', [['saffire_latency', 'Alarm timing from Saffire'], ['smoke_sizes', 'Smoke sizes from SAME'], ['dome_locator', 'Dome locator']]),
       stage('02', 'predict', 'Predict', 'How fast flame spreads, whether it goes out, and where smoke drifts when nothing rises.', [['models', 'Models trained on NASA tables'], ['drift', 'Smoke drift simulation']]),
       stage('03', 'respond', 'Respond', 'What the evidence says about suppression, next to our bench trials of ion wind and fine mist.', [['flex_suppression', 'Suppressant gases from FLEX'], ['efield', 'NASA electric-field flames'], ['response_trials', 'Bench trials']])),
