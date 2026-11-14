@@ -1,0 +1,43 @@
+{
+ "status": "reported",
+ "note": "Saved answers so the demo never depends on a live call. Each answer lists the rows or reports it used.",
+ "items": [
+  {
+   "q": "Which materials make smoke that is hardest for a station smoke detector to see?",
+   "a": "In the SAME-R experiment, smoke from overheated Kapton had the smallest particles of the five materials tested, about 47 nm in diameter, followed by Teflon at about 93 nm. The station's photoelectric detector is most sensitive to much larger particles (sources give 300 to 1000 nm), so these two are the hardest to see. A published analysis of SAME found the detector would not have alarmed in over half of the Kapton tests and two thirds of the Teflon tests.",
+   "sources": [
+    {
+     "label": "NASA NTRS 20150010172 (SAME-R particle sizes)",
+     "url": "https://ntrs.nasa.gov/citations/20150010172"
+    },
+    {
+     "label": "Analysis of SAME results, PMC7918997",
+     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7918997/"
+    }
+   ],
+   "kind": "answer"
+  },
+  {
+   "q": "How fast does air move inside the space station?",
+   "a": "Station requirements call for cabin airflow of roughly 0.05 to 0.2 metres per second. With no buoyancy, smoke and heat travel at about this speed in whatever direction the ventilation carries them, instead of rising.",
+   "sources": [
+    {
+     "label": "NASA NTRS 20150009509 (ventilation requirement)",
+     "url": "https://ntrs.nasa.gov/citations/20150009509"
+    }
+   ],
+   "kind": "answer"
+  },
+  {
+   "q": "How fast will a fire spread on the Moon?",
+   "a": "No NASA evidence. The NASA archive we use has no combustion data taken at lunar gravity. Microgravity and Earth-gravity results can bound the answer, but we do not predict a value in between.",
+   "sources": [
+    {
+     "label": "Challenge brief: no partial-gravity combustion data in PSI",
+     "url": "https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/"
+    }
+   ],
+   "kind": "refusal"
+  }
+ ]
+}

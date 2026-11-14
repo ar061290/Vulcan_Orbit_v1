@@ -1,0 +1,89 @@
+{
+ "status": "real",
+ "files": [
+  {
+   "name": "investigations",
+   "status": "reported",
+   "owner": "Dashboard",
+   "what": "List of NASA investigations"
+  },
+  {
+   "name": "ranking_weights",
+   "status": "team",
+   "owner": "Team",
+   "what": "Mission relevance weights"
+  },
+  {
+   "name": "saffire_latency",
+   "status": "demo",
+   "owner": "Karthikeya",
+   "what": "Sensor alarm timing from Saffire-III telemetry"
+  },
+  {
+   "name": "smoke_sizes",
+   "status": "reported",
+   "owner": "Karthikeya",
+   "what": "Smoke particle sizes by material"
+  },
+  {
+   "name": "dome_locator",
+   "status": "missing",
+   "owner": "Mukund",
+   "what": "Locator results on the grid"
+  },
+  {
+   "name": "dome_sensor_count",
+   "status": "missing",
+   "owner": "Mukund",
+   "what": "Locator error against number of sensors"
+  },
+  {
+   "name": "models",
+   "status": "missing",
+   "owner": "Karthikeya",
+   "what": "NASA-data model results"
+  },
+  {
+   "name": "drift",
+   "status": "missing",
+   "owner": "Mukund",
+   "what": "Smoke drift simulation frames"
+  },
+  {
+   "name": "response_trials",
+   "status": "missing",
+   "owner": "Mukund",
+   "what": "Ion wind and mist trials, before and after"
+  },
+  {
+   "name": "efield",
+   "status": "missing",
+   "owner": "Karthikeya",
+   "what": "NASA E-FIELD Flames results"
+  },
+  {
+   "name": "flex_suppression",
+   "status": "missing",
+   "owner": "Karthikeya",
+   "what": "FLEX extinction by suppressant gas"
+  },
+  {
+   "name": "gaps",
+   "status": "missing",
+   "owner": "Karthikeya",
+   "what": "Conditions NASA has not tested"
+  },
+  {
+   "name": "evidence",
+   "status": "plan",
+   "owner": "Evidence lane",
+   "what": "Checks and pass limits"
+  },
+  {
+   "name": "assistant_cache",
+   "status": "reported",
+   "owner": "Assistant lane",
+   "what": "Saved assistant answers"
+  }
+ ]
+}

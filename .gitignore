@@ -1,0 +1,8 @@
+datasets/*
+!datasets/README.md
+!datasets/MANIFEST.csv
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+node_modules/
