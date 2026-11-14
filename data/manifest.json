@@ -96,6 +96,18 @@
    "status": "reported",
    "owner": "Assistant lane",
    "what": "Saved assistant answers"
+  },
+  {
+   "name": "spread_predictor",
+   "status": "model",
+   "owner": "M6b",
+   "what": "Flame spread rate (lo, mid, hi), will-it-spread verdict and calibration label by material, flow and O2"
+  },
+  {
+   "name": "growth_examples",
+   "status": "model",
+   "owner": "M6b",
+   "what": "Growth simulation: burning area over time for three worked examples"
   }
  ]
 }
