@@ -2,7 +2,7 @@
 import { h, load } from './lib.js';
 import './bg.js';
 const PAGES = [
-  ['overview', 'Overview'], ['explorer', 'Investigations'], ['detect', 'Detect'], ['locate', 'Locate'],
+  ['overview', 'Overview'], ['flame', 'Flame'], ['explorer', 'Investigations'], ['detect', 'Detect'], ['locate', 'Locate'],
   ['predict', 'Predict'], ['respond', 'Respond'], ['evidence', 'Evidence'], ['ask', 'Ask'], ['about', 'About'],
 ];
 const nav = document.getElementById('nav'), view = document.getElementById('view'), menu = document.querySelector('.menu');

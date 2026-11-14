@@ -8,10 +8,10 @@ export default async function (root) {
   const n = (inv.items || []).length, det = (inv.items || []).filter(i => i.focus === 'detection').length;
   root.append(page('A fire in orbit does not rise. It hides.',
     'Vulcan Orbit turns NASA\'s microgravity combustion experiments into three answers a mission designer needs: where is the fire, what will it do next, and what puts it out. A bench rig tests the same questions with real sensors.',
-    card('See it: the same flame, with and without gravity', null, 'Switch gravity off and watch where the heat and smoke go. Then change the airflow.', flameLab()),
+    card('See it: the same flame, with and without gravity', null, 'Switch gravity off and watch where the heat and smoke go. Then change the airflow.', flameLab(), h('p', { style: 'margin:10px 0 0' }, h('small', {}, 'This is an illustration. For the physics model with real fuels, oxygen levels and checks against NASA data, open the '), h('a', { href: '#/flame' }, 'flame simulator →'))),
     h('div', { class: 'grid g3', style: 'margin-top:14px' },
       stage('01', 'detect', 'Detect and locate', 'When each kind of sensor would have alarmed in real orbital burns, which smoke the detector misses, and where the source is.', [['saffire_latency', 'Alarm timing from Saffire'], ['smoke_sizes', 'Smoke sizes from SAME'], ['dome_locator', 'Dome locator']]),
-      stage('02', 'predict', 'Predict', 'How fast flame spreads, whether it goes out, and where smoke drifts when nothing rises.', [['models', 'Models trained on NASA tables'], ['drift', 'Smoke drift simulation']]),
+      stage('02', 'predict', 'Predict', 'How fast flame spreads, whether it goes out, and where smoke drifts when nothing rises.', [['flame_static', 'Flame simulator'], ['flame_spread', 'Flame spread and survival'], ['drift', 'Smoke drift, tuned on Saffire-III'], ['drift_lbm', 'Cabin air model with racks']]),
       stage('03', 'respond', 'Respond', 'What the evidence says about suppression, next to our bench trials of ion wind and fine mist.', [['flex_suppression', 'Suppressant gases from FLEX'], ['efield', 'NASA electric-field flames'], ['response_trials', 'Bench trials']])),
     h('div', { class: 'grid g4', style: 'margin-top:14px' },
       card('Investigations', inv.status, 'NASA experiments indexed', h('div', { class: 'stat' }, fmt(n, 0))),

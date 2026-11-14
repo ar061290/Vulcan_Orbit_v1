@@ -1,8 +1,8 @@
 import { h, load, page, card, empty, fmt } from '../lib.js';
 import { scatter, C } from '../charts.js';
-import { driftCard, whatifCard, calibrationCard, robustCard } from '../drift_ui.js';
+import { driftCard, whatifCard, calibrationCard, robustCard, lbmWhatifCard } from '../drift_ui.js';
 export default async function (root) {
-  const [m, drift, gaps, wi, cal] = await Promise.all([load('models'), load('drift'), load('gaps'), load('whatif'), load('drift_calibration')]);
+  const [m, drift, gaps, wi, cal, lbm, lwi] = await Promise.all([load('models'), load('drift'), load('gaps'), load('whatif'), load('drift_calibration'), load('drift_lbm'), load('drift_whatif')]);
   const schema = '{ "status":"real", "models":[{\n   "id":"spread", "name":"Flame spread over PMMA", "question":"How fast does it spread?",\n   "data":"BASS-II (PSI-25)", "method":"de Ris formula + learned correction", "validation":"leave one session out",\n   "metric":"R2", "score":0.58, "score_range":[0.41,0.70], "baseline_name":"de Ris formula", "baseline_score":0.44,\n   "unit":"mm/s", "points":[{ "obs":1.2, "pred":1.1, "lo":0.8, "hi":1.5, "label":"21% O2, 10 cm/s" }],\n   "drivers":[{ "name":"Oxygen", "share":0.5 }], "limits":"..." }] }';
   const modelCards = m.status === 'missing'
     ? [card('Models trained on NASA tables', 'missing', 'Spread, extinction and cool-flame models appear here as they are trained.', empty('Waiting for model results', 'models', 'One entry per model. Predictions come from test sessions the model never saw.', schema))]
@@ -23,6 +23,9 @@ export default async function (root) {
   root.append(page('Predict', 'Small models fitted to NASA\'s own tables, each compared with the textbook formula and tested on sessions it never saw. Every prediction carries a range.',
     h('div', { class: 'grid g2' }, dCard, wiCard),
     cal.status === 'missing' ? null : h('div', { class: 'grid g2', style: 'margin-top:14px' }, calibrationCard(cal), robustCard(wi)),
+    lbm.status === 'missing' ? null : h('div', { class: 'grid g2', style: 'margin-top:14px' },
+      driftCard(lbm, 'Second opinion: a cabin with racks', `Independent lattice Boltzmann air model, ${lbm.lx_m} × ${lbm.ly_m} m module cross-section with racks, airflow ${lbm.flow_m_s} m/s, no buoyancy. It agrees with the model above on alarm vs no alarm for 94% of fire-detector pairs.`),
+      lwi.status === 'missing' ? null : lbmWhatifCard(lwi, lbm.lx_m, lbm.ly_m)),
     h('div', { class: 'grid g2', style: 'margin-top:14px' }, ...modelCards, gapCard),
     h('div', { style: 'margin-top:14px' }, card('Moon and Mars', null, null, h('p', {}, 'NASA\'s archive holds no combustion data taken at lunar or Martian gravity. We show microgravity and Earth-gravity results as the two ends of the range and do not invent a value in between.')))));
 }
