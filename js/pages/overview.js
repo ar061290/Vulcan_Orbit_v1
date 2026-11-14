@@ -1,7 +1,8 @@
 import { h, load, page, card, badge, fmt } from '../lib.js';
 import { flameLab } from '../flame.js';
 export default async function (root) {
-  const [man, inv] = await Promise.all([load('manifest'), load('investigations')]);
+  const [man, inv, sm] = await Promise.all([load('manifest'), load('investigations'), load('smoke_sizes')]);
+  const fine = (sm.materials || []).filter(m => m.Dg_nm != null).sort((a, b) => a.Dg_nm - b.Dg_nm)[0];
   const st = n => (man.files || []).find(f => f.name === n)?.status || 'missing';
   const stage = (n, id, title, text, files) => h('a', { class: 'card stage', href: `#/${id}` }, h('div', { class: 'n' }, n), h('h2', {}, title), h('p', {}, text),
     h('div', {}, ...files.map(f => h('div', { style: 'margin-top:6px;font-size:13px;color:var(--ink2)' }, badge(st(f[0])), ' ', f[1]))));
@@ -16,8 +17,8 @@ export default async function (root) {
     h('div', { class: 'grid g4', style: 'margin-top:14px' },
       card('Investigations', inv.status, 'NASA experiments indexed', h('div', { class: 'stat' }, fmt(n, 0))),
       card('On detection', inv.status, 'Smoke and dust studies', h('div', { class: 'stat' }, fmt(det, 0))),
-      card('Station airflow', 'reported', 'What carries smoke in orbit', h('div', { class: 'stat' }, '0.05–0.2', h('small', {}, 'm/s'))),
-      card('Finest smoke', 'reported', 'Kapton, SAME-R', h('div', { class: 'stat' }, '47', h('small', {}, 'nm')))),
+      card('Station airflow', 'reported', 'ISS aisleway requirement, 4.6–12.2 m/min (NASA NTRS 20150009509)', h('div', { class: 'stat' }, '0.08–0.2', h('small', {}, 'm/s'))),
+      card('Finest smoke', sm.status, fine ? `${fine.name}, geometric mean size, NASA SAME-2 (AIAA 2012-3536)` : 'Waiting for smoke sizes', h('div', { class: 'stat' }, fine ? String(fine.Dg_nm) : '—', h('small', {}, 'nm')))),
     h('div', { class: 'grid g2', style: 'margin-top:14px' },
       card('Why this is hard', null, null,
         h('p', {}, 'On Earth, hot gas rises. Flames flicker, smoke collects at the ceiling, and detectors are built around both. In orbit there is no "up": a flame becomes a dim blue ball fed by slow diffusion, and smoke goes wherever the ventilation takes it.'),

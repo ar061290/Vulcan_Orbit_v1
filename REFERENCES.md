@@ -120,3 +120,27 @@ File names, sizes and sha256: `datasets/psi/MANIFEST.csv`. Documents in `dataset
 None used by M7.
 ## AI assistance
 See `AI_LOG.md`.
+
+## More NASA PSI datasets used (audit, 14 Nov 2026)
+| PSI | Title | DOI | Used for |
+|---|---|---|---|
+| PSI-98 | Spacecraft Fire Safety Experiment-I | [10.60555/0t15-1z43](https://doi.org/10.60555/0t15-1z43) | Saffire-I: burn times for the drift what-if runs (engine/drift.py); Investigations page |
+| PSI-99 | Spacecraft Fire Experiment-II | [10.60555/2chp-m469](https://doi.org/10.60555/2chp-m469) | Saffire-II: burn times for the drift what-if runs (engine/drift.py); Investigations page |
+| PSI-101 | Smoke Aerosol Measurement Experiment-Reflight | [10.60555/2np7-jv14](https://doi.org/10.60555/2np7-jv14) | SAME-R: test conditions (no sizes); Investigations page; M5 context |
+| PSI-22 | Advanced Combustion via Microgravity Experiments Electric-Field Effects on Laminar Diffusion Flames | [10.60555/se5a-8c73](https://doi.org/10.60555/se5a-8c73) | ACME E-FIELD Flames: Investigations page |
+| PSI-26 | Burning and Suppression of Solids | [10.60555/58h4-dy80](https://doi.org/10.60555/58h4-dy80) | BASS: Investigations page |
+| PSI-47 | Dust and Aerosol Measurement Feasibility Test / Dust and Aerosol Measurement Feasibility Test-2 | [10.60555/ztgj-d202](https://doi.org/10.60555/ztgj-d202) | DAFT / DAFT-2: Investigations page |
+| PSI-106 | Structure and Liftoff In Combustion Experiment | [10.60555/pm12-rg61](https://doi.org/10.60555/pm12-rg61) | SLICE: Investigations page |
+| PSI-107 | Smoke Point In Co-flow Experiment | [10.60555/9kbh-e962](https://doi.org/10.60555/9kbh-e962) | SPICE: Investigations page |
+| PSI-10 | Advanced Combustion via Microgravity Experiments / Flame Design | [10.60555/w4zy-bt45](https://doi.org/10.60555/w4zy-bt45) | ACME Flame Design: Investigations page |
+| PSI-20 | Advanced Combustion via Microgravity Experiments - Burning Rate Emulator | [10.60555/vb93-3y72](https://doi.org/10.60555/vb93-3y72) | ACME BRE: Investigations page |
+
+## Sources checked in the audit (14 Nov 2026)
+| Source | What we took from it |
+|---|---|
+| Link & Balistreri, ICES 2015, NASA NTRS 20150009509, p. 10, https://ntrs.nasa.gov/api/citations/20150009509/downloads/20150009509.pdf | "an effective atmosphere velocity in the cabin aisleway must be maintained between 4.6 and 12.2 meters per minute" = 0.077 to 0.203 m/s. Both drift models now use this range; the earlier 0.05 m/s low end had no source and was removed. |
+| "Preliminary Results from the Saffire VI Experiment", ICES-2024-365, NASA NTRS 20240002981 | 1 mg/m3 called "a relatively tight alarm threshold"; far-field detector reached it at 981 s in Saffire VI-3. Used as the headline alarm level in both drift models. |
+| NASA NTRS 20170002629 (smoke detection and air filtration) | ISS detection threshold about 10 mg/m3; Space Shuttle 2 mg/m3. Drift what-if results now also reported at 10 mg/m3. |
+| NASA NTRS 20170000248 | ISS detector: forward light scattering, calibrated to alarm at 1 %/ft obscuration for smolder smoke. |
+| NASA NTRS 20150010172 | Previously cited for SAME-R particle sizes. It is a presentation with no size numbers in its record; replaced by AIAA 2012-3536 (NTRS 20130000422). |
+| PMC7918997 | Previously listed on the About page; could not be opened to verify (site blocks automated access). Removed until a person checks it. |

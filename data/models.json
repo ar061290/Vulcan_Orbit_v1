@@ -4576,6 +4576,7 @@
   },
   {
    "id": "smoke-miss",
+   "status": "model",
    "name": "Will the detector miss this smoke?",
    "question": "Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)?",
    "data": "16 SAME-2 flight tests (Kapton, lampwick, Teflon) from Urban et al. 2012, AIAA 2012-3536, Figures 6-8, read from the PDF's vector drawing; Table 1 for the baseline",
@@ -4739,8 +4740,8 @@
     "air velocity (per cm/s)": 0.325
    },
    "limits": "16 tests, 3 materials, unaged smoke only, airflow 0 to 8 cm/s. A test bench result in orbit, not a detector certification. Detector limit is a choice (300/500/1000 nm reported).",
-   "checks_note": "M5-lognormal FAIL; M5-trace pass; M5-auc FAIL; M5-bacc pass; M5-base reported; M5-drivers reported; M5-sens reported. Rules in models/m5-smoke-miss/RULES.md, written before training.",
-   "status": "model"
+   "checks_note": "M5-lognormal FAIL; M5-trace pass; M5-auc FAIL; M5-bacc pass; M5-base reported; M5-drivers reported; M5-sens reported. Rules in models/m5-smoke-miss/RULES.md, written before training."
   }
- ]
+ ],
+ "source": "Trained by the scripts in models/m5-smoke-miss and models/m7-extinction on NASA PSI data and published NASA results; each entry names its data."
 }

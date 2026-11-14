@@ -3,7 +3,7 @@
  "files": [
   {
    "name": "investigations",
-   "status": "reported",
+   "status": "real",
    "owner": "Dashboard",
    "what": "List of NASA investigations"
   },

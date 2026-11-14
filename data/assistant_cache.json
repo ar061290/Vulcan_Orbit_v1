@@ -4,26 +4,26 @@
  "items": [
   {
    "q": "Which materials make smoke that is hardest for a station smoke detector to see?",
-   "a": "In the SAME-R experiment, smoke from overheated Kapton had the smallest particles of the five materials tested, about 47 nm in diameter, followed by Teflon at about 93 nm. The station's photoelectric detector is most sensitive to much larger particles (sources give 300 to 1000 nm), so these two are the hardest to see. A published analysis of SAME found the detector would not have alarmed in over half of the Kapton tests and two thirds of the Teflon tests.",
+   "a": "In NASA's SAME-2 flight experiment, Kapton made the finest smoke of the five materials tested: a geometric mean diameter of 42 nm unaged (89 nm after 12 minutes of aging), followed by Teflon at 81 nm. Using the paper's own size spreads, about 82% of Kapton's smoke mass is in particles finer than 500 nm, against 9% for silicone. Light-scattering detectors like the station's respond weakly to particles that fine, so Kapton and Teflon smoke is the hardest to see. The paper says the small Kapton and Teflon particles will make detection challenging for light scattering devices.",
    "sources": [
     {
-     "label": "NASA NTRS 20150010172 (SAME-R particle sizes)",
-     "url": "https://ntrs.nasa.gov/citations/20150010172"
+     "label": "Urban et al. 2012, SAME-2 particle sizes, AIAA 2012-3536 (NASA NTRS 20130000422), Table 1",
+     "url": "https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf"
     },
     {
-     "label": "Analysis of SAME results, PMC7918997",
-     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7918997/"
+     "label": "ISS detector calibration (NASA NTRS 20170000248)",
+     "url": "https://ntrs.nasa.gov/api/citations/20170000248/downloads/20170000248.pdf"
     }
    ],
    "kind": "answer"
   },
   {
    "q": "How fast does air move inside the space station?",
-   "a": "Station requirements call for cabin airflow of roughly 0.05 to 0.2 metres per second. With no buoyancy, smoke and heat travel at about this speed in whatever direction the ventilation carries them, instead of rising.",
+   "a": "NASA's requirement for the space station is an effective air velocity in the cabin aisleway of 4.6 to 12.2 metres per minute, which is about 0.08 to 0.2 metres per second. With no buoyancy, smoke and heat go wherever the ventilation carries them instead of rising.",
    "sources": [
     {
-     "label": "NASA NTRS 20150009509 (ventilation requirement)",
-     "url": "https://ntrs.nasa.gov/citations/20150009509"
+     "label": "Link and Balistreri, ISS inter-module ventilation, ICES 2015 (NASA NTRS 20150009509), p. 10",
+     "url": "https://ntrs.nasa.gov/api/citations/20150009509/downloads/20150009509.pdf"
     }
    ],
    "kind": "answer"

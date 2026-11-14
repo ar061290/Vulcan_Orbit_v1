@@ -50,11 +50,12 @@ export function driftCard(d, title = 'Where the smoke goes', sub = null) {
 
 export function whatifCard(w) {
   let win = 'caught_120', sel = 1; const holder = h('div');
-  const label = { caught_60: 'within 60 s', caught_120: 'within 2 min', caught_300: 'within 5 min' };
+  const label = { caught_60: 'within 60 s', caught_120: 'within 2 min', caught_300: 'within 5 min' };   // 10 mg/m3 shares exist for 2 and 5 min
   function draw() {
     const bars = h('div', { style: 'display:grid;gap:10px;margin:6px 0 14px' }, ...w.layouts.map((L, i) => h('button', { class: 'q', 'aria-pressed': i === sel, style: 'margin:0', onclick: () => { sel = i; draw(); } },
       h('div', { style: 'display:flex;justify-content:space-between;gap:10px' }, h('span', {}, L.name), h('b', { style: 'font-family:var(--mono)' }, Math.round(L[win] * 100) + '%')),
       h('div', { class: 'track', style: 'margin-top:6px' }, h('i', { style: `width:${L[win] * 100}%` })),
+      L[win + '_at_10mg'] != null ? h('small', { style: 'display:block;color:var(--warn)' }, `At the ISS-like 10 mg/m³ alarm level: ${Math.round(L[win + '_at_10mg'] * 100)}%`) : null,
       h('small', {}, `not caught within ${Math.round(w.t_end_s / 60)} min: ${Math.round(L.never * 100)}%` + (win === 'caught_120' ? `; ${Math.round((L.caught_120_model_range || L.caught_120_range)[0] * 100)} to ${Math.round((L.caught_120_model_range || L.caught_120_range)[1] * 100)}% across the settings the flight data allows` : '')))));
     const L = w.layouts[sel], cw = 100 / w.map_nx, vals = L.map.filter(v => v != null), vmax = Math.max(60, ...vals);
     const cells = h('div', { style: `position:relative;aspect-ratio:${w.lx_m}/${w.ly_m};border:1px solid var(--grid);border-radius:8px;overflow:hidden;background:var(--page)` },
