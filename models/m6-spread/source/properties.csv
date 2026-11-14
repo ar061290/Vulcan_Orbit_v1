@@ -1,0 +1,19 @@
+# Property values for the de Ris opposed-flow spread baseline. All are status "reported": taken from papers, not checked by us.
+# FSJ2016 = Bhattacharjee S., Laue M., Carmignani L., Ferkul P., Olson S., "Opposed-flow flame spread: a comparison of microgravity and
+#           normal gravity experiments to establish the thermal regime", Fire Safety Journal 79 (2016) 111-118, doi:10.1016/j.firesaf.2015.11.011
+# CNF2016 = Bhattacharjee S., Simsek A., Olson S., Ferkul P., "The critical flow velocity for radiative extinction in opposed-flow flame spread
+#           in a microgravity environment", Combustion and Flame 163 (2016) 472-477, doi:10.1016/j.combustflame.2015.10.023
+# TM2021  = Olson S.L. et al., "Burning and Suppression of Solids-II (BASS-II) Summary Report", NASA/TM-20210011385 (PSI-25 file)
+# Individual properties (solid density, solid specific heat, gas conductivity, gas density, gas specific heat) are NOT printed with values in
+# FSJ2016; the paper gives them only grouped into the two coefficients below, so the individual values are left null and the grouped
+# coefficients are used exactly as published.
+name,value,unit,status,source,quote
+c_thin,2.34e-8,m^2/s,reported,"FSJ2016 Eq. (6), p. 116","Vf,thin = (pi/4) lambda_g F/(rho_s c_s tau) = 2.34 x 10^-8 F/tau"
+c_thick,9.72e-5,dimensionless,reported,"FSJ2016 Eq. (6), p. 116","Vf,thick = lambda_g rho_g c_g/(rho_s c_s lambda_s) Vg F^2 = 9.72 x 10^-5 Vg F^2"
+F_adb_21,4.89,dimensionless,reported,"FSJ2016 Eq. (7), p. 116","Fadb = (Tf,adb - Tv)/(Tv - Tinf) = 4.89 (air, 21% O2)"
+T_v,673,K,reported,"CNF2016 p. 6; TM2021 p. 27","a vaporization temperature of 673 K"
+T_inf,300,K,reported,"TM2021 section 1.5, p. 11","pressure P = 1 atm ... and temperature T = 300 K (MSG working volume)"
+rho_s,,kg/m^3,null,"FSJ2016 nomenclature lists the symbol without a value","only the grouped coefficients are given"
+c_s,,kJ/(kg K),null,"FSJ2016 nomenclature lists the symbol without a value","only the grouped coefficients are given"
+lambda_g,,kW/(m K),null,"FSJ2016 nomenclature lists the symbol without a value","only the grouped coefficients are given"
+T_f_adb_21,,K,derived,"computed in build.py from F_adb_21, T_v and T_inf","Tf = Tv + F (Tv - Tinf)"
