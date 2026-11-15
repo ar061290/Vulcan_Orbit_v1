@@ -65,7 +65,9 @@ export function renderPill(btn, pop, manifest, SCRAPPED, MANIFEST_WHAT, badge) {
     const p = doc.createElement('span'); p.textContent = it.what + (it.optional ? ' (optional)' : '');
     li.append(badge(it.status), code, p); ul.append(li);
   }
-  const head = doc.createElement('p'); head.className = 'pop-h'; head.textContent = 'Data status';
+  const head = doc.createElement('p'); head.className = 'pop-h';
+  const nm = items.filter(i => i.status === 'missing').length, nd = items.filter(i => i.status === 'demo').length;
+  head.textContent = [nm ? `${nm} data file${plural(nm, ' is', 's are')} still to come` : '', nd ? `${nd} hold${plural(nd, 's', '')} placeholder numbers` : ''].filter(Boolean).join('; ') || 'Data status';
   const note = doc.createElement('p'); note.className = 'pop-note';
   const demo = items.some(i => i.status === 'demo'), miss = items.some(i => i.status === 'missing');
   note.textContent = (n ? (demo && miss ? 'Affected panels are labelled “Demo data” or “No data yet”.' : demo ? 'Every affected panel is labelled “Demo data”.' : 'Every affected panel is labelled “No data yet”.')

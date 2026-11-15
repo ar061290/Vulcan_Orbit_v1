@@ -46,6 +46,7 @@ async function loadPlaywright() {
 }
 
 function chromiumPath() {
+  if (process.env.CHROME) return process.env.CHROME;   // e.g. a system Chrome on Windows
   const base = path.join(os.homedir(), '.cache/ms-playwright');
   try {
     for (const d of fs.readdirSync(base).sort().reverse()) {
