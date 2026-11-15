@@ -1,1 +1,34 @@
-/* Page CSS for #/respond. Every rule is scoped under #view[data-page="respond"] (site/REBUILD_PLAN.md §0 rule 9). Created empty in phase 1. */
+/* Page CSS for #/respond (package P4-D). Every rule is scoped under #view[data-page="respond"] (site/REBUILD_PLAN.md §0 rule 9).
+   Class prefix fr- = js/fig_respond.js. The bench mist card uses only shared component classes, so it also works on Bench rig. */
+
+#view[data-page="respond"] .seg-row{margin-bottom:8px}
+
+/* 1 evidence coverage */
+#view[data-page="respond"] .fr-cov-grid{margin:6px 0 10px;align-items:start}
+#view[data-page="respond"] .fr-cov .statbox{min-width:0}
+#view[data-page="respond"] .fr-gap{margin:6px 0 0;font-size:14px;color:var(--ink)}
+#view[data-page="respond"] .fr-gap b{color:var(--crit)}
+#view[data-page="respond"] .fr-inv,#view[data-page="respond"] .fr-ours{margin:6px 0 8px;padding-left:18px}
+#view[data-page="respond"] .fr-inv li,#view[data-page="respond"] .fr-ours li{margin:0 0 4px;overflow-wrap:anywhere}
+#view[data-page="respond"] .fr-inv small{color:var(--mute)}
+
+/* chart captions and quotes */
+#view[data-page="respond"] .fr-cap{margin-top:6px}
+#view[data-page="respond"] .fr-quote{margin:12px 0;padding:8px 14px;border-left:3px solid var(--accent);background:var(--raise);border-radius:0 var(--r,8px) var(--r,8px) 0}
+#view[data-page="respond"] .fr-quote p{margin:0 0 4px;color:var(--ink)}
+#view[data-page="respond"] .fr-quote footer{font-size:12.5px;color:var(--mute)}
+
+/* FLEX beside the M7 points */
+#view[data-page="respond"] .fr-beside{margin-top:12px}
+#view[data-page="respond"] .fr-beside h3{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+#view[data-page="respond"] .fr-beside table{font-size:13px}
+#view[data-page="respond"] .fr-beside td{white-space:nowrap}
+#view[data-page="respond"] .fr-beside td:first-child{white-space:normal;min-width:9em}
+#view[data-page="respond"] .card h3 .badge,#view[data-page="respond"] th .badge{margin-left:4px;vertical-align:middle}
+
+/* E-FIELD totals */
+#view[data-page="respond"] .fr-stats{margin:10px 0}
+
+@media (max-width:520px){
+  #view[data-page="respond"] .fr-quote{padding:6px 10px}
+}

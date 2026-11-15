@@ -14,9 +14,10 @@ export const SCRAPPED = {
   simChecks: ['D-dome'],           // drift_whatif dome heat check (thermopile/thermistor rig)
 };
 
-export const MANIFEST_WHAT = {     // display text for manifest rows whose `what` mentions ion wind
+export const MANIFEST_WHAT = {     // display text for manifest rows whose `what` mentions ion wind (or prints a bare "null")
   response_trials: 'Bench mist trial, before and after (optional)',
   efield: 'NASA ACME E-FIELD Flames test days (PSI-22), shown as NASA context',
+  assistant_config: 'AI assistant switch: a Worker URL, or none (saved answers only)',
 };
 // "Where each number comes from": rows for SCRAPPED.files keep their manifest `what` but show badge('scrapped') instead of
 // 'No data yet' (when approved; before that, 'missing'), so nothing scrapped reads as "still to come".

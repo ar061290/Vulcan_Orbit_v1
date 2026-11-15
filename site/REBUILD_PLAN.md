@@ -427,7 +427,7 @@ Rules (`data/risk_rules.json`, status `team`):
 | fig_spread.js | `spreadCard(sp, opts)`, `growthCard(examples)`, `m6bCard(sp, res)`, `m6bSpreadChartCard(sp, opts)` |
 | fig_models.js | `modelCard(entry)` (the stamp is `entry.status`, fixing main's bug), `m6Card(entry, m6res)` (findings first) |
 | fig_gaps.js | `gapCard(g)`, `nextExperimentCard(g)`, `moonMarsCard()` |
-| fig_respond.js | `coverageCard(gaps)`, `extinctionCard(m7)`, `coolFlameCard(m7)`, `flexCard(flex, m7)`, `efieldCard(ef)`, `mistTrialCard(tr)`, `readingCard()` |
+| fig_respond.js | `coverageCard(gaps, inv?)` (optional `investigations.json` for DOIs; added in phase 4), `extinctionCard(m7)`, `coolFlameCard(m7)`, `flexCard(flex, m7)`, `efieldCard(ef)`, `mistTrialCard(tr)`, `readingCard()`; also `mistRows(tr)` (phase 4, reused by On Earth) |
 | fig_response.js | `responseEvidenceCard(data, store, ctx)` (C4) |
 | fig_assess.js | `inputsCard(store, data, ctx)`, `cameraCard(store, data)`, `outputsCard(result)`, `listsCard(result)`, `riskCard(result, rules)` |
 | flame_sim.js | `flameSimCard(fs, gaps, ctx, {showMM})` |

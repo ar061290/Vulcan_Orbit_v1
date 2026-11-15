@@ -1,1 +1,45 @@
-/* Page CSS for #/detect. Every rule is scoped under #view[data-page="detect"] (site/REBUILD_PLAN.md §0 rule 9). Created empty in phase 1. */
+/* Page CSS for #/detect. Every rule is scoped under #view[data-page="detect"] (site/REBUILD_PLAN.md §0 rule 9).
+   Owner: P4-A. Replay canvas, timeline and lamp values ported from main's css/freefall.css. */
+
+/* replay: the canvas always sits on the dark instrument screen, whatever the page theme */
+#view[data-page="detect"] canvas.replay{display:block;width:100%;height:auto;aspect-ratio:1280/420;margin:8px 0 10px;background:var(--screen);color:var(--screen-ink);border:1px solid var(--line);border-radius:12px}
+#view[data-page="detect"] canvas.replay:focus{outline:none}
+#view[data-page="detect"] canvas.replay:focus-visible{outline:3px solid var(--oxy);outline-offset:3px}
+#view[data-page="detect"] .replay-ctl label,
+#view[data-page="detect"] .replay-time label{font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="detect"] .replay-ctl select{max-width:100%;min-width:0}
+#view[data-page="detect"] .replay-time{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 12px;align-items:center;margin:0 0 4px}
+#view[data-page="detect"] .replay-time input[type=range]{width:100%;min-width:0;accent-color:var(--accent)}
+#view[data-page="detect"] .clock{font:600 15px var(--mono);color:var(--accent-ink);white-space:nowrap}
+#view[data-page="detect"] .replay-sum{font-size:14px;color:var(--ink2);margin:4px 0 6px;max-width:var(--measure)}
+@media (max-width:560px){
+  #view[data-page="detect"] .replay-time{grid-template-columns:1fr auto}
+  #view[data-page="detect"] .replay-time input[type=range]{grid-column:1 / -1;grid-row:2}
+}
+
+/* Blind Spot: per-channel alarm times */
+#view[data-page="detect"] .det-stats{gap:10px;margin-bottom:10px}
+#view[data-page="detect"] .det-stats .stat{font-size:1.7rem}
+#view[data-page="detect"] .det-ch{display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:.02em}
+#view[data-page="detect"] .det-sw{flex:none}
+#view[data-page="detect"] .det-ymean{margin:-4px 0 10px}
+#view[data-page="detect"] .det-gap,
+#view[data-page="detect"] .det-count{margin-top:8px}
+
+/* results and links */
+#view[data-page="detect"] .det-result{margin-top:10px}
+#view[data-page="detect"] .det-link{margin:10px 0 4px;font-weight:600}
+#view[data-page="detect"] .det-link a{color:var(--accent-ink)}
+
+/* DAFT sessions */
+#view[data-page="detect"] .timeline{display:grid;gap:12px;margin:14px 0;border-left:2px solid var(--accent);padding:0 0 0 18px;list-style:none}
+#view[data-page="detect"] .tl-item{display:grid;gap:2px;position:relative;margin:0}
+#view[data-page="detect"] .tl-item::before{content:"";position:absolute;left:-25px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+#view[data-page="detect"] .tl-item span{color:var(--ink2);font-size:14px}
+
+/* the 5 SD column of the sensitivity table */
+#view[data-page="detect"] th.sel{background:var(--oxy-soft)}
+
+/* grid items may shrink below their tables' width (the tables scroll inside .scroll); base.css's narrow-screen
+   rule uses 1fr (= minmax(auto,1fr)), which lets a wide table push the page sideways at 320 px */
+#view[data-page="detect"] .grid > *{min-width:0}
