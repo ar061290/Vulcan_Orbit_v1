@@ -1,0 +1,37 @@
+{
+ "status": "model",
+ "what": "Label-permutation tests: could each model's score be luck?",
+ "method": "Shuffle labels, rerun the same grouped validation, p = (C+1)/(n+1). Seed 20261115.",
+ "rows": [
+  {
+   "id": "smoke-miss",
+   "name": "Smoke miss (M5)",
+   "real_auc": 0.746,
+   "n_perm": 2000,
+   "null_mean": 0.427,
+   "null_95": 0.715,
+   "p": 0.0385,
+   "split": "leave one test out (16 tests)"
+  },
+  {
+   "id": "m7-extinction",
+   "name": "Droplet flame goes out (M7)",
+   "real_auc": 0.897,
+   "n_perm": 1000,
+   "null_mean": 0.495,
+   "null_95": 0.575,
+   "p": 0.001,
+   "split": "whole test days held out, first grouped split, fixed reference model"
+  },
+  {
+   "id": "m7-cool-flame",
+   "name": "Cool flame (M7)",
+   "real_auc": 0.864,
+   "n_perm": 1000,
+   "null_mean": 0.496,
+   "null_95": 0.605,
+   "p": 0.001,
+   "split": "whole test days held out, first grouped split, fixed reference model"
+  }
+ ]
+}

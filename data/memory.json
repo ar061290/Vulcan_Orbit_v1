@@ -113,6 +113,21 @@
    ]
   },
   {
+   "year": "2020-21",
+   "date": "2020 to 2021",
+   "title": "Saffire IV and V: the flame that came back",
+   "kind": "research",
+   "where": "In orbit, inside empty Cygnus cargo ships (NG-13 and NG-14)",
+   "text": "In one cotton-fabric test the fan stayed off for 70 seconds. When the airflow returned, the flame grew back and burned for another 150 seconds. Two other samples showed small explosions from fuel vapour that had built up.",
+   "changed": "A fire that seems to have gone out may not have. This is why our site has a page on cool flames and why the alarm timing matters.",
+   "sources": [
+    [
+     "Urban et al., ICES-2021-266",
+     "https://ntrs.nasa.gov/api/citations/20210011521/downloads/ICES%202021-266%200503-2021%20final.pdf"
+    ]
+   ]
+  },
+  {
    "year": "Next",
    "date": "Artemis and beyond",
    "title": "The air the next crews will breathe",

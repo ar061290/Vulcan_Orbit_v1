@@ -1,0 +1,89 @@
+{
+ "status": "real",
+ "source": "NASA PSI-100 Saffire-III telemetry (doi 10.60555/040q-4h36); rule as in models/m4-latency/build.py",
+ "units": {
+  "time": "s after the event's igniter or smoke wire current switches on"
+ },
+ "t0": "Igniter (or smoke-wire) current onset in the telemetry",
+ "resolution": "radiometers ~1 s; smoke channels ~10 s (+/- 10 s)",
+ "ks": [
+  3,
+  4,
+  5,
+  6
+ ],
+ "rows": [
+  {
+   "event": "Smoke wire puff",
+   "channel": "Flame radiometers (first of 4)",
+   "k3": 34.0,
+   "k4": null,
+   "k5": null,
+   "k6": null
+  },
+  {
+   "event": "Smoke wire puff",
+   "channel": "Smoke detector: scatter",
+   "k3": 23.5,
+   "k4": 23.5,
+   "k5": 23.5,
+   "k6": 23.5
+  },
+  {
+   "event": "Smoke wire puff",
+   "channel": "Smoke detector: obscuration",
+   "k3": null,
+   "k4": null,
+   "k5": null,
+   "k6": null
+  },
+  {
+   "event": "Sample 2 burn (opposed)",
+   "channel": "Flame radiometers (first of 4)",
+   "k3": 7.0,
+   "k4": 7.0,
+   "k5": 7.0,
+   "k6": 7.0
+  },
+  {
+   "event": "Sample 2 burn (opposed)",
+   "channel": "Smoke detector: scatter",
+   "k3": 26.5,
+   "k4": 126.5,
+   "k5": 126.5,
+   "k6": 126.5
+  },
+  {
+   "event": "Sample 2 burn (opposed)",
+   "channel": "Smoke detector: obscuration",
+   "k3": null,
+   "k4": null,
+   "k5": null,
+   "k6": null
+  },
+  {
+   "event": "Sample 1 burn (concurrent)",
+   "channel": "Flame radiometers (first of 4)",
+   "k3": 2.0,
+   "k4": 7.0,
+   "k5": 7.0,
+   "k6": 7.0
+  },
+  {
+   "event": "Sample 1 burn (concurrent)",
+   "channel": "Smoke detector: scatter",
+   "k3": 71.5,
+   "k4": 81.5,
+   "k5": 91.5,
+   "k6": 91.5
+  },
+  {
+   "event": "Sample 1 burn (concurrent)",
+   "channel": "Smoke detector: obscuration",
+   "k3": null,
+   "k4": null,
+   "k5": null,
+   "k6": null
+  }
+ ]
+}

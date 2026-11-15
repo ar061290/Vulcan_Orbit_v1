@@ -36,7 +36,7 @@
   {
    "id": "saffire-what",
    "q": "What was Saffire-III?",
-   "a": "Saffire-III burned large fabric samples inside an uncrewed Cygnus cargo vehicle after it left the space station, at 30 cm/s airflow, one with the flow and one against it. Its telemetry file has 11,450-row flight telemetry file. NASA's summary table lists the two samples.",
+   "a": "Saffire-III burned large fabric samples inside an uncrewed Cygnus cargo vehicle after it left the space station, at about 25 cm/s airflow (NASA's flight paper; the PSI-100 record lists 30 cm/s), one with the flow and one against it. Its telemetry file has 11,450-row flight telemetry file. NASA's summary table lists the two samples.",
    "sources": [
     {
      "label": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",

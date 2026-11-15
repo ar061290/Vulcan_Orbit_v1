@@ -187,3 +187,17 @@ See `AI_LOG.md`.
 | NASA Exploration Atmospheres Working Group, NASA/TP-2010-216134 | 8.0 psia / 32% O2 probe on the gap map |
 | NASA-STD-7009A, Standard for Models and Simulations | Credibility factors in the "Made by" boxes (self-assessed) |
 | Rate-of-rise smoke alarm logic proposed for spacecraft light-scattering detectors (see reports/Elevating Vulcan Orbit for judges.md for the citation) | Idea tested in models/m4-latency/rate_of_rise.py |
+
+## Added 15 Nov 2026 (verification pass)
+
+| Source | Used for |
+|---|---|
+| Urban et al., ICES-2021-266 (Saffire IV-V), https://ntrs.nasa.gov/api/citations/20210011521/downloads/ICES%202021-266%200503-2021%20final.pdf | Saffire-III flow as flown (25 cm/s, Table 2); Saffire V "flame came back" plaque |
+| Meyer et al., Fire Safety Journal 98:74-81 (2018), doi:10.1016/j.firesaf.2018.04.004 | ISS detector would not have alarmed for over half of Kapton and two thirds of Teflon smoke tests |
+| NASA Glenn BASS-II page, https://www1.grc.nasa.gov/space/iss-research/msg/bass-2/ | "Models predict higher spread rates than observed" (cross-check with M6) |
+| NASA NTRS 20160000593 | BASS-II low-oxygen spread limits (cross-check with M6b) |
+| Dietrich et al. 2014, Microgravity Sci. Technol. 26:65-76; Nayagam et al., NTRS 20130014061 | FLEX limiting oxygen (cross-check with M7) |
+| Kim et al., Proc. Combust. Inst. 39 (2023) | Cool diffusion flames not seen below 2 bar (cross-check with M7 cool flame) |
+| scikit-learn User Guide 3.1.5 and permutation_test_score | Method for scripts/permutation_tests.py |
+| Mitchell et al., Model Cards for Model Reporting (2019), arXiv:1810.03993 | Model cards page |
+| Rival public projects reviewed 15 Nov 2026 (see Competitor intel report) | Ideas only: judge mode, cross-check table, data fingerprints; no code copied |

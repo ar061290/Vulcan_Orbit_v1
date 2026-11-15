@@ -13,7 +13,7 @@
   {
    "id": "qa-saffire-what",
    "title": "What was Saffire-III?",
-   "text": "Saffire-III burned large fabric samples inside an uncrewed Cygnus cargo vehicle after it left the space station, at 30 cm/s airflow, one with the flow and one against it. Its telemetry file has 11,450-row flight telemetry file. NASA's summary table lists the two samples.",
+   "text": "Saffire-III burned large fabric samples inside an uncrewed Cygnus cargo vehicle after it left the space station, at about 25 cm/s airflow (NASA's flight paper; the PSI-100 record lists 30 cm/s), one with the flow and one against it. Its telemetry file has 11,450-row flight telemetry file. NASA's summary table lists the two samples.",
    "source": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",
    "url": "https://doi.org/10.60555/040q-4h36",
    "file": "data/investigations.json items[saffire3]"
@@ -236,6 +236,14 @@
   },
   {
    "id": "history-6",
+   "title": "2020 to 2021: Saffire IV and V: the flame that came back",
+   "text": "In orbit, inside empty Cygnus cargo ships (NG-13 and NG-14). In one cotton-fabric test the fan stayed off for 70 seconds. When the airflow returned, the flame grew back and burned for another 150 seconds. Two other samples showed small explosions from fuel vapour that had built up. What changed: A fire that seems to have gone out may not have. This is why our site has a page on cool flames and why the alarm timing matters.",
+   "source": "Urban et al., ICES-2021-266",
+   "url": "https://ntrs.nasa.gov/api/citations/20210011521/downloads/ICES%202021-266%200503-2021%20final.pdf",
+   "file": "data/memory.json"
+  },
+  {
+   "id": "history-7",
    "title": "Artemis and beyond: The air the next crews will breathe",
    "text": "Moon landers, habitats and Gateway. NASA has studied lower-pressure, oxygen-richer cabin air for exploration, around 8 psi with about a third oxygen. Saffire VI came close, but no large-scale fire test has been run at those conditions yet. What changed: Our ask: pair flame-light sensors with smoke detectors in future fire tests, and test that air before crews breathe it.",
    "source": "NASA/TP-2010-216134, Exploration Atmospheres Working Group",
@@ -341,7 +349,7 @@
   {
    "id": "inv-saffire3",
    "title": "Saffire-III",
-   "text": "id: saffire3 name: Saffire-III psi: PSI-100 doi: 10.60555/040q-4h36 facility: Cygnus cargo vehicle focus: flammability fuel: solid measured: Two SIBAL fabric samples burned at 30 cm/s (concurrent and opposed flow); flight telemetry: radiometers, anemometers, pressure, and the Cygnus cabin smoke detector (obscuration and scatter) rows: 2 samples in the summary table; 11,450-row flight telemetry file",
+   "text": "id: saffire3 name: Saffire-III psi: PSI-100 doi: 10.60555/040q-4h36 facility: Cygnus cargo vehicle focus: flammability fuel: solid measured: Two SIBAL fabric samples burned at about 25 cm/s as flown (ICES-2021-266; the PSI-100 record lists 30 cm/s) (concurrent and opposed flow); flight telemetry: radiometers, anemometers, pressure, and the Cygnus cabin smoke detector (obscuration and scatter) rows: 2 samples in the summary table; 11,450-row flight telemetry file",
    "source": "10.60555/040q-4h36",
    "url": "https://doi.org/10.60555/040q-4h36",
    "file": "data/investigations.json"

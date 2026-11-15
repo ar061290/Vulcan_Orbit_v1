@@ -44,7 +44,7 @@ ans("saffire-latency", "How long did the smoke detector take to notice a real fi
     [SRC["psi100"], SRC["site"]("detect", "Detect page, Blind Spot panel")], ["smoke", "detector", "alarm", "notice", "slow", "saffire", "latency", "orbit", "fire", "long", "time", "detect"],
     "data/saffire_latency.json burns[s1].channels[radiometer, scatter, obscuration].alarm_s")
 ans("saffire-what", "What was Saffire-III?",
-    "Saffire-III burned large fabric samples inside an uncrewed Cygnus cargo vehicle after it left the space station, at 30 cm/s airflow, one with the flow and one against it. "
+    "Saffire-III burned large fabric samples inside an uncrewed Cygnus cargo vehicle after it left the space station, at about 25 cm/s airflow (NASA's flight paper; the PSI-100 record lists 30 cm/s), one with the flow and one against it. "
     f"Its telemetry file has {inv['items'][0]['rows'].split(';')[-1].strip()}. NASA's summary table lists the two samples.",
     [SRC["psi100"]], ["saffire", "iii", "cygnus", "what", "experiment", "fabric"], "data/investigations.json items[saffire3]")
 k = next(m for m in sizes["materials"] if m["name"] == "Kapton"); si = next(m for m in sizes["materials"] if m["name"] == "Silicone")
