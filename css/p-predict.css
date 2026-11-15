@@ -1,64 +1,115 @@
-/* Page CSS for #/predict. Every rule is scoped under #view[data-page="predict"] (site/REBUILD_PLAN.md §0 rule 9).
-   Owner: P4-C (spread, model cards, gap map). The .sp- rules are ported from main's css/freefall.css. */
+/* Page CSS for #/predict (v3). Every rule is scoped under #view[data-page="predict"] (site/REBUILD_PLAN.md §0 rule 9).
+   Sizes come only from the scales in css/tokens.css. The .sp- rules started from main's css/freefall.css.
+   Layout: .pr-pair = two figures side by side, top-aligned (no stretched empty panels); .pr-stack = full-width figures whose
+   stat rows and tables need the room; .pr-models = one model card per row, with its chart held beside the long fact list. */
+#view[data-page="predict"]{--pr-sticky:calc(var(--bar-h) + var(--s4))}
 
-/* "Will it spread, and how fast?": controls beside the heatmap (tour stop 4 targets .sp-grid) */
-#view[data-page="predict"] .sp-grid{display:grid;grid-template-columns:minmax(240px,1fr) minmax(0,1.6fr);gap:22px;align-items:start}
+/* ---------- figure grids ---------- */
+#view[data-page="predict"] .pr-pair{align-items:start}
+#view[data-page="predict"] .pr-stack,
+#view[data-page="predict"] .pr-models{grid-template-columns:minmax(0,1fr)}
+/* a half-width figure's inner two-column block (cabin with racks: alarm shares beside "smoke release decides it") stacks */
+#view[data-page="predict"] .pr-pair .drift-g2{grid-template-columns:minmax(0,1fr)}
+#view[data-page="predict"] .pr-pair .drift-dets{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* model cards: header, stats and findings run full width; on wide screens the chart stays in view beside the fact list */
+@media (min-width:1100px){
+  #view[data-page="predict"] .pr-models > .card{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);column-gap:var(--s6)}
+  #view[data-page="predict"] .pr-models > .card > *{grid-column:1 / -1}
+  #view[data-page="predict"] .pr-models > .card > .chart-wrap{grid-column:1;position:sticky;top:var(--pr-sticky);align-self:start}
+  #view[data-page="predict"] .pr-models > .card > .mc-kv{grid-column:2;margin-top:0}
+}
+
+/* "Checked against a real spacecraft fire": the tuned and the held-out charts side by side on wide screens.
+   Rows are pinned for the header items so the two chart headings share one row; later items (legend, folds) flow after. */
+@media (min-width:1100px){
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--s6)}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats)::before{grid-column:1 / -1;grid-row:1}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats) > *{grid-column:1 / -1}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats) > h2{grid-row:2}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats) > .sub{grid-row:3}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats) > .madeby{grid-row:4}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats) > .drift-stats{grid-row:5}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats) > h3:not(.drift-h3){grid-column:1;grid-row:6}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats) > h3:not(.drift-h3) + .chart-wrap{grid-column:1;grid-row:7}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats) > h3.drift-h3{grid-column:2;grid-row:6}
+  #view[data-page="predict"] .pr-stack > .card:has(> .drift-stats) > h3.drift-h3 + .chart-wrap{grid-column:2;grid-row:7}
+}
+
+/* ---------- big numbers ---------- */
+#view[data-page="predict"] .m6b-stats,
+#view[data-page="predict"] .mc-stats,
+#view[data-page="predict"] .drift-stats{gap:var(--s5);margin-bottom:var(--s4)}
+#view[data-page="predict"] .m6b-stats .stat,
+#view[data-page="predict"] .mc-stats .stat,
+#view[data-page="predict"] .drift-stats .stat{overflow-wrap:anywhere}
+#view[data-page="predict"] .stat small{display:block;margin:var(--s2) 0 0;font-size:var(--t2);line-height:1.45}
+
+/* ---------- "Will it spread, and how fast?": controls beside the heatmap (tour stop 4 targets .sp-grid) ---------- */
+#view[data-page="predict"] .sp-grid{display:grid;grid-template-columns:minmax(240px,1fr) minmax(0,1.6fr);gap:var(--s6);align-items:start}
 #view[data-page="predict"] .sp-grid > *{min-width:0}
-#view[data-page="predict"] .sp-ctl{display:grid;gap:4px;margin-bottom:12px;font-size:14px}
+#view[data-page="predict"] .sp-ctl{display:grid;gap:var(--s1);margin-bottom:var(--s3);font-size:var(--t2)}
 #view[data-page="predict"] .sp-ctl label{font-weight:700;color:var(--ink)}
 #view[data-page="predict"] .sp-ctl select{width:100%;max-width:100%;min-width:0}
-#view[data-page="predict"] .sp-ctl b{font:600 14px var(--mono);color:var(--ink)}
-#view[data-page="predict"] .sp-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 22px;align-items:end}
-#view[data-page="predict"] .sp-cell{font-size:13px;color:var(--mute);margin:0 0 8px}
-#view[data-page="predict"] .sp-out{margin-top:6px}
-#view[data-page="predict"] .sp-big{font:600 2.2rem/1 var(--mono);color:var(--ink);overflow-wrap:anywhere}
-#view[data-page="predict"] .sp-big small{font:500 14px var(--font);color:var(--mute)}
+#view[data-page="predict"] .sp-ctl b{font:600 var(--t2) var(--mono);color:var(--ink)}
+#view[data-page="predict"] .sp-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s1) var(--s5);align-items:end}
+#view[data-page="predict"] .sp-cell{font-size:var(--t2);color:var(--mute);margin:0 0 var(--s2)}
+#view[data-page="predict"] .sp-out{margin-top:var(--s4);padding-top:var(--s4);border-top:1px solid var(--line-2)}
+#view[data-page="predict"] .sp-big{font:600 var(--t5)/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--ink);overflow-wrap:anywhere}
+#view[data-page="predict"] .sp-big small{font:500 var(--t2) var(--mono);color:var(--mute);letter-spacing:0}
 #view[data-page="predict"] .sp-big.out{color:var(--mute)}
-#view[data-page="predict"] .sp-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
-#view[data-page="predict"] .sp-warn{font-size:13.5px;color:var(--accent-ink);background:var(--accent-soft);padding:8px 10px;border-radius:8px}
+#view[data-page="predict"] .sp-tags{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s3) 0}
+#view[data-page="predict"] .sp-warn{font-size:var(--t2);color:var(--ink);border-left:2px solid var(--warn);padding:var(--s1) 0 var(--s1) var(--s3)}
 #view[data-page="predict"] .sp-note,
 #view[data-page="predict"] .sp-sum,
-#view[data-page="predict"] .gap-sum{font-size:13.5px;color:var(--ink2);max-width:var(--measure)}
-#view[data-page="predict"] .sp-run{font-size:14px;margin:8px 0 0}
+#view[data-page="predict"] .gap-sum{font-size:var(--t2);color:var(--ink-2);max-width:var(--measure)}
+#view[data-page="predict"] .sp-run{font-size:var(--t2);margin:var(--s2) 0 0}
 
 /* heatmap: cells are drawn by fig_spread.js; text, outline and pick ring use the theme tokens */
 #view[data-page="predict"] svg.sp-heat rect{cursor:pointer}
 #view[data-page="predict"] svg.sp-heat .sp-mark{fill:var(--ink);font-size:13px;font-weight:700}
 #view[data-page="predict"] svg.sp-heat .sp-box{stroke:var(--ink);stroke-width:.8;opacity:.55}
 #view[data-page="predict"] svg.sp-heat .sp-pick{stroke:var(--ink);stroke-width:2.5}
-#view[data-page="predict"] .sp-legend > span{display:inline-flex;align-items:center;gap:6px}
+#view[data-page="predict"] .sp-legend > span{display:inline-flex;align-items:center;gap:var(--s2)}
 #view[data-page="predict"] .sp-sw{display:inline-block;width:14px;height:12px;border-radius:2px;flex:none}
 #view[data-page="predict"] .sp-sw-box{border:1.5px solid var(--ink);opacity:.7;background:none}
 #view[data-page="predict"] .sp-sw-faint{opacity:.35}
 #view[data-page="predict"] .sp-sw-pick{border:2.5px solid var(--ink);background:none}
 
-/* growth runs and M6b score tables */
-#view[data-page="predict"] .m6b-stats,
-#view[data-page="predict"] .mc-stats{gap:10px;margin-bottom:10px}
-#view[data-page="predict"] .m6b-stats .stat,
-#view[data-page="predict"] .mc-stats .stat{font-size:1.6rem;overflow-wrap:anywhere}
-#view[data-page="predict"] .m6b-rules{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px}
-#view[data-page="predict"] .m6b-rules b{margin-right:4px}
-#view[data-page="predict"] .m6b-disclose{font-size:14px;color:var(--ink2);border-left:3px solid var(--warn);padding:4px 0 4px 10px;max-width:var(--measure)}
-#view[data-page="predict"] .m6b-verdicts td:last-child{font:12.5px var(--mono);color:var(--mute)}
+/* ---------- growth runs and M6b score tables ---------- */
+#view[data-page="predict"] .m6b-rules{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;font-size:var(--t2)}
+#view[data-page="predict"] .m6b-rules b{margin-right:var(--s1)}
+#view[data-page="predict"] .m6b-disclose{font-size:var(--t2);color:var(--ink-2);border-left:2px solid var(--warn);padding:var(--s1) 0 var(--s1) var(--s3);max-width:var(--measure)}
+#view[data-page="predict"] .m6b-verdicts td:last-child{font:var(--t1) var(--mono);color:var(--mute)}
 
-/* model cards */
-#view[data-page="predict"] .mc-h{font-size:15px;margin:4px 0 6px}
-#view[data-page="predict"] .mc-findings{margin:0 0 10px;padding-left:18px}
-#view[data-page="predict"] .mc-findings li{margin-bottom:6px}
-#view[data-page="predict"] .mc-next{font-size:14px;margin:0 0 12px}
-#view[data-page="predict"] .mc-fail{font-size:14px;color:var(--ink2);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-#view[data-page="predict"] .mc-kv{margin-top:10px}
+/* ---------- model cards ---------- */
+#view[data-page="predict"] .mc-h{font-size:var(--t3);margin:var(--s1) 0 var(--s2)}
+#view[data-page="predict"] .mc-findings{margin:0 0 var(--s3);padding-left:var(--s5);max-width:var(--measure)}
+#view[data-page="predict"] .mc-findings li{margin-bottom:var(--s2)}
+#view[data-page="predict"] .mc-next{font-size:var(--t2);margin:0 0 var(--s3)}
+#view[data-page="predict"] .mc-fail{font-size:var(--t2);color:var(--ink-2);display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center}
+#view[data-page="predict"] .mc-kv{margin-top:var(--s3);grid-template-columns:minmax(7.5em,auto) minmax(0,1fr);row-gap:var(--s3)}
+#view[data-page="predict"] .mc-kv dt{font:600 var(--t1)/1.9 var(--mono);letter-spacing:.06em;text-transform:uppercase}
 
-/* gap map and the next experiment */
+/* ---------- gap map and the next experiment ---------- */
 #view[data-page="predict"] svg.gap-map .gap-lab{font-size:12px;font-weight:600}
 #view[data-page="predict"] .gap-legend .gap-sw{flex:none}
-#view[data-page="predict"] .gap-verdicts{margin:10px 0 0;padding-left:18px}
-#view[data-page="predict"] .gap-verdicts li{margin-bottom:6px}
-#view[data-page="predict"] .nx-top{font-size:15px;color:var(--ink);max-width:var(--measure)}
-#view[data-page="predict"] .nx-rule{font-size:14px;color:var(--ink2);max-width:var(--measure)}
+#view[data-page="predict"] .gap-verdicts{margin:var(--s3) 0 0;padding-left:var(--s5);max-width:var(--measure)}
+#view[data-page="predict"] .gap-verdicts li{margin-bottom:var(--s2)}
+#view[data-page="predict"] .nx-top{font-size:var(--t3);color:var(--ink);max-width:var(--measure)}
+#view[data-page="predict"] .nx-rule{font-size:var(--t2);color:var(--ink-2);max-width:var(--measure)}
 
+@media (max-width:1100px){
+  #view[data-page="predict"] .pr-pair{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="predict"] .pr-pair .drift-g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 @media (max-width:820px){
   #view[data-page="predict"] .sp-grid,
-  #view[data-page="predict"] .sp-row{grid-template-columns:1fr}
+  #view[data-page="predict"] .sp-row,
+  #view[data-page="predict"] .pr-pair .drift-g2{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:680px){
+  #view[data-page="predict"] .mc-kv{grid-template-columns:minmax(0,1fr);row-gap:var(--s1)}
+  #view[data-page="predict"] .mc-kv dd{margin-bottom:var(--s3)}
+  #view[data-page="predict"] .pr-pair .drift-dets{grid-template-columns:minmax(0,1fr)}
 }
