@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vulcan Orbit · Demo</title>
+<meta name="description" content="Vulcan Orbit prototype demo: detect, simulate, assess. NASA Space Apps 2026, Flame in Freefall.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='11' fill='none' stroke='%23EDE8DF' stroke-width='1.5'/%3E%3Ccircle cx='14' cy='14' r='3.5' fill='none' stroke='%237AA2FF' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/demo.css">
+<style>
+/* demo v2 additions: same tokens as css/demo.css */
+.hero2{padding:clamp(40px,7vw,88px) 0 28px;display:flex;flex-direction:column;gap:20px}
+.hero2 h1{font-size:clamp(52px,8vw,112px);line-height:.88}.hero2 h1 em{font-style:normal;color:var(--fire)}
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:12px;color:var(--mute)}.flow b{color:var(--ink);font-weight:600}.flow i{font-style:normal;color:var(--fire)}
+.stats4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:8px 0 8px}
+.sub-h{font-size:12px;color:var(--fire);margin:0 0 12px}
+.feed{position:relative;aspect-ratio:16/9;background:#03040a;border:1px dashed rgba(255,255,255,.18);border-radius:2px;display:grid;place-items:center;overflow:hidden;margin-bottom:16px}
+.feed::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px);pointer-events:none}
+.feed p{margin:0;text-align:center;font-size:11px;color:var(--mute);line-height:1.8}.feed p b{display:block;color:var(--ink);font-size:13px}
+.feed .rec{position:absolute;top:10px;left:12px;font-size:10px;color:var(--mute)}.feed .rec::before{content:'●';color:var(--dim);margin-right:6px}
+.kv .wait{color:var(--dim)}
+.llm{margin-top:20px;padding:16px;border:1px dashed rgba(255,255,255,.18);border-radius:2px;font-size:14px;color:var(--mute)}
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:24px}
+.gallery figure{margin:0;background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.gallery img{width:100%;display:block;border-radius:4px}.gallery figcaption{font-size:11px;color:var(--mute);margin-top:10px}
+.feed video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+@media (max-width:860px){.stats4{grid-template-columns:1fr 1fr}.gallery{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the demo</a>
+<header class="bar">
+  <a class="brand" href="demo2.html">
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="11" fill="none" stroke="#EDE8DF" stroke-width="1.5"/><circle cx="14" cy="14" r="3.5" fill="none" stroke="#7AA2FF" stroke-width="2"/><ellipse cx="14" cy="14" rx="12.5" ry="4" transform="rotate(-24 14 14)" fill="none" stroke="#FF7A3D" stroke-width="1.6"/></svg>
+    <span><b>Vulcan Orbit</b><small class="mono">Prototype demo</small></span>
+  </a>
+  <nav class="mono" aria-label="Demo steps">
+    <a href="#detect"><i>01</i> Detect</a><a href="#simulate"><i>02</i> Simulate</a><a href="#assess"><i>03</i> Assess</a>
+  </nav>
+  <a class="mono ghost" href="index.html">Full project ↗</a>
+</header>
+
+<main id="main">
+  <section class="hero2 hero">
+    <p class="kicker mono"><span></span>NASA Space Apps 2026 · Flame in Freefall</p>
+    <h1 class="disp">Detect. Simulate.<br><em>Assess.</em></h1>
+    <p class="flow mono"><b>Camera + depth</b><i>+</i><b>Optical smoke sensor</b><i>→</i><b>Flame spread simulation</b><i>→</i><b>Risk assessment</b></p>
+  </section>
+
+  <section class="stats4" aria-label="Key numbers" id="stats"></section>
+
+  <section class="step" id="detect" aria-labelledby="detect-h">
+    <header><p class="num mono">01</p><h2 class="disp" id="detect-h">Detect</h2><p class="one">Two sensors find the fire: a camera that sees the flame in 3D, and an optical sensor that reads the smoke.</p></header>
+    <div class="grid2">
+      <div class="panel" id="camera"></div>
+      <div class="panel" id="smoke"></div>
+    </div>
+  </section>
+
+  <section class="step" id="simulate" aria-labelledby="sim-h">
+    <header><p class="num mono">02</p><h2 class="disp" id="sim-h">Simulate</h2><p class="one">The fire's fuel, size and position go into our microgravity spread model. Change the air and watch it react.</p></header>
+    <div class="controls" id="controls"></div>
+    <div class="grid2">
+      <div class="panel hud" id="curve"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+      <div class="panel" id="simnums"></div>
+    </div>
+    <div class="gallery">
+      <figure><img src="media/sim1_flame.png" alt="Flame sheet around a fuel droplet at 0 g (sphere) and 1 g (teardrop), and flame spread rate over acrylic against airflow" loading="lazy"><figcaption class="mono">Flame simulation · sphere in orbit, teardrop on Earth</figcaption></figure>
+      <figure><img src="media/sim2_smoke_drift_grid.png" alt="Smoke spreading through a ventilated cabin with no buoyancy at 30, 120 and 300 seconds" loading="lazy"><figcaption class="mono">Smoke drift · no buoyancy, fans decide</figcaption></figure>
+      <figure><img src="media/sim3_smoke_drift_lbm.png" alt="Air speed around racks from a lattice Boltzmann model, and smoke after 60 seconds" loading="lazy"><figcaption class="mono">Cabin airflow around racks · lattice Boltzmann</figcaption></figure>
+      <figure><img src="media/sim5_droplet_m7.png" alt="Droplet shrinking over time, and chance a droplet flame goes out against oxygen level" loading="lazy"><figcaption class="mono">Droplet flame · when it goes out (NASA FLEX)</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="step" id="assess" aria-labelledby="assess-h">
+    <header><p class="num mono">03</p><h2 class="disp" id="assess-h">Assess</h2><p class="one">How big, how fast, how soon it is seen: one risk level.</p></header>
+    <div class="panel risk" id="risk" aria-live="polite"></div>
+  </section>
+
+  <section class="end">
+    <a class="cta mono" href="index.html">Full project ↗</a>
+  </section>
+</main>
+<footer class="foot mono">Vulcan Orbit · NASA Space Apps 2026 · Data: NASA PSI-100, PSI-25, PSI-99, PSI-69 · <a href="https://github.com/ar061290/Vulcan_Orbit_v1">Code</a></footer>
+<script type="module" src="js/demo_bg.js"></script>
+<script type="module">
+// Demo v2: the prototype only. Every number comes from a data file or from the growth model run on the inputs,
+// except the camera model's precision, which is reported from its own training run (labelled "reported").
+import { load, isMissing } from './js/lib.js';
+import { loadAssessData, computeAssessment } from './js/assess_core.js';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const n = (v, d = 0) => (v == null || !Number.isFinite(+v) ? '—' : (+v).toFixed(d));
+const sig = (v, k = 2) => (v == null || !Number.isFinite(+v) ? '—' : Number((+v).toPrecision(k)).toString());
+const badge = s => `<span class="badge b-${esc(s || 'missing')}">${esc(s || 'no data yet')}</span>`;
+const corners = '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>';
+const stat = (lab, val, unit, sub, c) => `<div class="stat"><p class="lab mono" style="margin:0${c ? ';color:' + c : ''}">${lab}</p><p class="val" style="margin:0">${val}<small> ${unit}</small></p><p class="sub mono" style="margin:0">${sub}</p></div>`;
+
+// Camera model precision: final epoch of the YOLO training run (FIRE-LOCALIZATION-AND-VOLUME-ESTIMATION, train/results.csv),
+// on its own validation images of Earth flames. Reported by the run, not re-checked by us.
+const CV = { precision: 0.8672, recall: 0.78617, source: 'YOLO training run, validation set, Earth flames' };
+
+const D = await loadAssessData();
+const [lat, sp, models, example] = await Promise.all([load('saffire_latency'), load('spread_predictor'), load('models'), load('cv_example')]);
+const burn = !isMissing(lat) ? (lat.burns || []).find(b => b.key === 's1') || (lat.burns || [])[0] : null;
+const ch = re => burn ? (burn.channels || []).find(c => re.test(`${c.key} ${c.name}`)) : null;
+const RAD = ch(/radiometer|rad/i), SCA = ch(/scatter|sca/i);
+const gap = RAD?.alarm_s != null && SCA ? (SCA.alarm_s_range?.[0] ?? SCA.alarm_s) - RAD.alarm_s : null;
+const m7 = !isMissing(models) ? (models.models || []).find(m => m.id === 'm7-extinction') : null;
+
+// ---------- key numbers ----------
+$('stats').innerHTML = [
+  stat('Flame detection precision', n(CV.precision * 100, 1), '%', `camera model · ${badge('reported')}`, 'var(--fire)'),
+  stat('Spread model error', sig(sp?.scores?.opposed_heldout_mae_mm_s, 2), 'mm/s', `NASA flights it never saw · ${badge('model')}`, 'var(--fire)'),
+  stat('Flame vs smoke alarm', '≥ ' + n(gap), 's', `earlier, real orbital fire · ${badge(lat?.status)}`, 'var(--orbit)'),
+  stat('Flame-out prediction', m7 ? n(m7.score, 2) : '—', 'AUC', `NASA droplet tests · ${badge('model')}`, 'var(--orbit)'),
+].join('');
+
+// ---------- 01 detect: camera + depth (placeholder feed) ----------
+const cvReal = !isMissing(D.cv);
+const cam = cvReal ? D.cv : (!isMissing(example) ? example : null);
+const v = (x, unit, k = 3) => x == null ? '<span class="wait">waiting for feed</span>' : `${sig(x, k)} ${unit}`;
+$('camera').innerHTML = `
+  <p class="sub-h mono">A · Flame camera + depth model</p>
+  <div class="feed" data-clip="media/cv_demo.mp4"><span class="rec mono">Camera feed</span><p class="mono"><b>Live camera feed</b>plugs in here</p></div>
+  <p class="ptitle mono"><span>Reading</span>${badge(cvReal ? D.cv.status : 'demo')}</p>
+  <dl class="kv">
+    <dt>Flame</dt><dd>${cam ? 'detected' : '<span class="wait">waiting for feed</span>'}</dd>
+    <dt>Size</dt><dd>${v(cam?.area_cm2, 'cm²')}</dd>
+    <dt>Volume</dt><dd>${v(cam?.flame_volume_cm3, 'cm³')}</dd>
+    <dt>Position</dt><dd>${cam?.centroid_cm ? `${sig(cam.centroid_cm[0], 3)}, ${sig(cam.centroid_cm[1], 3)} cm` : '<span class="wait">waiting for feed</span>'}</dd>
+    <dt>Distance</dt><dd>${v(cam?.distance_from_sensor_cm, 'cm')}</dd>
+  </dl>
+  <p class="pending">Trained on Earth flames today (precision ${n(CV.precision * 100, 1)}%, recall ${n(CV.recall * 100, 1)}%). Retrains on microgravity flames when that dataset exists.${cvReal ? '' : ' Reading shown: example, until the live feed is connected.'}</p>`;
+
+// ---------- 01 detect: optical smoke sensor (placeholder) ----------
+const wait = '<span class="wait">waiting for sensor</span>';
+$('smoke').innerHTML = `
+  <p class="sub-h mono">B · Optical smoke sensor</p>
+  <div class="feed" data-clip="media/smoke_sensor.mp4"><span class="rec mono">Optical flow + scattered light</span><p class="mono"><b>Live sensor feed</b>plugs in here</p></div>
+  <p class="ptitle mono"><span>Reading</span>${badge('missing')}</p>
+  <dl class="kv">
+    <dt>Smoke flow</dt><dd>${wait}</dd>
+    <dt>Scattered light</dt><dd>${wait}</dd>
+    <dt>Smoke type</dt><dd>${wait}</dd>
+    <dt>Likely fuel</dt><dd>${wait}</dd>
+    <dt>Smoke or dust</dt><dd>${wait}</dd>
+  </dl>
+  <p class="pending">Reads how fast the smoke moves and how it scatters light, to tell the smoke type, the likely fuel, and smoke from lunar dust.</p>`;
+
+// ---------- 02 simulate ----------
+const ex = !isMissing(D.examples) ? D.examples.examples || [] : [];
+const st = { i: 0, flow: null, o2: null };
+const flowSteps = !isMissing(D.sp) ? D.sp.flow_cm_s : [0, 50], o2Steps = !isMissing(D.sp) ? D.sp.o2_vol_pct : [15, 35];
+function controls() {
+  const short = ['Fabric panel', 'Acrylic slab', 'Low airflow'];
+  $('controls').innerHTML = `
+    <div class="presets" role="group" aria-label="Fuel">${ex.map((e, i) => `<button type="button" class="chip" data-i="${i}" aria-pressed="${i === st.i}" title="${esc(e.title)}">${esc(short[i] || e.id)}</button>`).join('')}</div>
+    <div class="slider"><label class="mono" for="flow">Airflow <b id="flowv"></b></label><input id="flow" type="range" min="${Math.min(...flowSteps)}" max="${Math.max(...flowSteps)}" step="1"></div>
+    <div class="slider"><label class="mono" for="o2">Oxygen <b id="o2v"></b></label><input id="o2" type="range" min="${Math.min(...o2Steps)}" max="${Math.max(...o2Steps)}" step="0.5"></div>`;
+  $('controls').querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => { st.i = +b.dataset.i; st.flow = st.o2 = null; sync(); run(); }));
+  let tmr; const deb = () => { clearTimeout(tmr); tmr = setTimeout(run, 180); };
+  $('flow').addEventListener('input', e => { st.flow = +e.target.value; $('flowv').textContent = `${st.flow} cm/s`; deb(); });
+  $('o2').addEventListener('input', e => { st.o2 = +e.target.value; $('o2v').textContent = `${st.o2}%`; deb(); });
+}
+function inputs() {
+  const e = ex[st.i]; if (!e) return null;
+  const c = { ...e.inputs.conditions }; if (st.flow != null) c.flow_cm_s = st.flow; if (st.o2 != null) c.o2_vol_pct = st.o2;
+  const flame = cvReal && D.cv.flame_type === 'surface' && st.i === 0 ? D.cv : e.inputs.flame_state;
+  return { flame, fuel: e.inputs.fuel, conditions: c };
+}
+function sync() {
+  const inp = inputs(); if (!inp) return;
+  document.querySelectorAll('#controls .chip').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.i === st.i)));
+  $('flow').value = inp.conditions.flow_cm_s; $('flowv').textContent = `${inp.conditions.flow_cm_s} cm/s`;
+  $('o2').value = inp.conditions.o2_vol_pct; $('o2v').textContent = `${inp.conditions.o2_vol_pct}%`;
+}
+let runId = 0;
+async function run() {
+  const id = ++runId, inp = inputs(); if (!inp) return;
+  $('simnums').innerHTML = '<p class="mono" style="color:var(--mute);font-size:11px">Running the spread model…</p>';
+  let res;
+  try { res = await computeAssessment(inp, D); } catch (e) { $('simnums').textContent = `The model could not run: ${e.message}`; return; }
+  if (id !== runId) return;
+  drawSim(res, inp); drawRisk(res);
+}
+function drawSim(res, inp) {
+  const g = res.growth;
+  if (!g) {
+    $('curve').innerHTML = `${corners}<p class="ptitle mono"><span>Burning area over time</span>${badge('model')}</p><p>${esc(res.error || (res.sentences || [])[0] || 'No spread under these conditions.')}</p>`;
+    $('simnums').innerHTML = ''; return;
+  }
+  const W = 640, H = 260, T = g.t_s, A = g.area_cm2, maxA = Math.max(1e-9, ...A.hi, ...A.mid, ...A.lo), maxT = Math.max(1e-9, ...T);
+  const X = s => s / maxT * W, Y = a => H - a / maxA * H;
+  const line = arr => 'M' + T.map((s, i) => `${X(s).toFixed(1)},${Y(arr[i]).toFixed(1)}`).join(' L');
+  const ticks = [0, .25, .5, .75, 1].map(f => `<text x="${X(f * maxT)}" y="${H + 18}" text-anchor="middle" font-size="10" fill="#8C8A93">${n(f * maxT)} s</text>`).join('');
+  $('curve').innerHTML = `${corners}
+    <p class="ptitle mono"><span>Burning area over time · ${esc(inp.fuel.material)} · microgravity</span>${badge('model')}</p>
+    <svg viewBox="-8 -8 ${W + 16} ${H + 30}" width="100%" role="img" aria-label="Burning area over time: peak ${sig(g.summary.mid.max_area_cm2, 3)} square centimetres (middle estimate), flame out by ${n(g.summary.mid.t_end_s)} seconds">
+      <line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="rgba(255,255,255,.25)"/>${ticks}
+      <path d="${line(A.lo)}" fill="none" stroke="#FF7A3D" stroke-opacity=".4" stroke-width="1.2" stroke-dasharray="3 4"/>
+      <path d="${line(A.hi)}" fill="none" stroke="#FF7A3D" stroke-opacity=".4" stroke-width="1.2" stroke-dasharray="8 5"/>
+      <path d="${line(A.mid)}" fill="none" stroke="#FF7A3D" stroke-width="2.6"/>
+    </svg>
+    <div class="legend mono"><span style="--c:#FF7A3D">middle estimate</span><span style="--c:rgba(255,122,61,.4)">slow and fast estimates</span></div>`;
+  const s = g.summary;
+  $('simnums').innerHTML = `<div class="big">
+    <div class="read" style="--c:var(--fire)"><p class="lab mono" style="margin:0">Peak size</p><p class="val" style="margin:0">${sig(s.mid.max_area_cm2, 3)} <small class="mono" style="font-size:14px;color:var(--mute)">cm²</small></p><p class="sub" style="margin:0">range ${sig(s.lo.max_area_cm2, 3)}–${sig(s.hi.max_area_cm2, 3)}</p></div>
+    <div class="read" style="--c:var(--fire)"><p class="lab mono" style="margin:0">Reaches peak</p><p class="val" style="margin:0">${n(s.mid.t_max_s)} <small class="mono" style="font-size:14px;color:var(--mute)">s</small></p><p class="sub" style="margin:0">after the camera saw it</p></div>
+    <div class="read" style="--c:var(--orbit)"><p class="lab mono" style="margin:0">Burns out</p><p class="val" style="margin:0">${n(s.mid.t_end_s)} <small class="mono" style="font-size:14px;color:var(--mute)">s</small></p><p class="sub" style="margin:0">${esc(s.mid.stop_reason)}</p></div>
+  </div>`;
+}
+
+// ---------- 03 assess ----------
+function drawRisk(res) {
+  const k = res.risk || {}, lv = k.level || 'Unknown';
+  $('risk').innerHTML = `
+    <div><p class="ptitle mono"><span>Risk level</span>${badge(k.status || 'team')}</p><p class="level lv-${esc(lv)}" style="margin:0">${esc(lv)}</p></div>
+    <div><p style="margin:0;font-size:18px">${esc((k.fired?.reason || '').split(/(?<=\.)\s/)[0])}</p>
+      <div class="llm mono" style="font-size:11px">LLM risk explanation · plugs in here</div></div>`;
+}
+
+// drop a clip at media/cv_demo.mp4 or media/smoke_sensor.mp4 and it plays in the feed box
+document.querySelectorAll('.feed[data-clip]').forEach(f => {
+  const vid = document.createElement('video');
+  Object.assign(vid, { muted: true, loop: true, autoplay: true, playsInline: true, preload: 'metadata' });
+  vid.setAttribute('aria-label', 'Recording of the sensor running');
+  vid.addEventListener('loadeddata', () => { f.prepend(vid); f.querySelector('p')?.remove(); f.style.borderStyle = 'solid'; });
+  vid.src = f.dataset.clip;
+});
+
+controls(); sync(); run();
+</script>
+</body>
+</html>
