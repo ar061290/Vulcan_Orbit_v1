@@ -47,7 +47,7 @@ async function slot(id, clip, fallbackHTML, label) {
 // ---------- 01 detect ----------
 await slot('detect-media', 'detect.mp4',
   `<img src="media/cv/yolo_val_predictions.jpg" alt="Our YOLO model's boxes and confidence scores on 16 validation photos of fires: campfires, candles, fire pits and a building fire" loading="lazy" width="1200" height="1200">
-   <figcaption class="mono">Our model's own detections on validation photos · ${badge(isMissing(cvs) ? 'missing' : cvs.status)}</figcaption>`, 'Flame detection');
+   <figcaption class="mono">Our model's own detections on validation photos · ${badge(isMissing(cvs) ? 'missing' : cvs.status)}</figcaption>`, 'Live YOLO flame detection on our bench camera');
 $('detect-nums').innerHTML = isMissing(cvs) ? '<p>Scores file missing.</p>' : `
   <div class="big">
     <div class="read" style="--c:var(--fire)"><p class="lab mono" style="margin:0">Precision</p><p class="val" style="margin:0">${n(cvs.precision * 100, 1)}%</p><p class="sub" style="margin:0">boxes it draws that really are fire</p></div>
@@ -60,7 +60,7 @@ $('detect-nums').innerHTML = isMissing(cvs) ? '<p>Scores file missing.</p>' : `
 // ---------- 02 locate ----------
 await slot('locate-media', 'depth.mp4',
   `<video src="media/cv/depth_model.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Depth model output on the bench: near objects warm, far objects cool"></video>
-   <figcaption class="mono">Depth Anything V2 on our bench camera · warm = near, cool = far · ${badge('model')}</figcaption>`, '3D location');
+   <figcaption class="mono">Depth Anything V2 on our bench camera · warm = near, cool = far · ${badge('model')}</figcaption>`, 'Live 3D localisation: camera + depth map + distance readout');
 $('locate-text').innerHTML = `
   <ol class="how">
     <li><b>Box</b><span>YOLO gives the flame's box in the frame.</span></li>
