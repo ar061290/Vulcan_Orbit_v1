@@ -128,14 +128,15 @@ export function spreadCard(sp, opts = {}) {
     const r = at(c, 'rate_mm_s', i, j), lo = at(c, 'lo', i, j), hi = at(c, 'hi', i, j), v = at(c, 'verdict', i, j), dom = at(c, 'in_domain', i, j), cal = at(c, 'calibration', i, j);
     map?.markPick();
     cellNote.textContent = `Cell shown: ${O2[i]}% O₂, ${FL[j]} cm/s (the grid steps are ${stepOf(O2)}% and ${stepOf(FL)} cm/s; a typed value uses the nearest cell).`;
-    out.replaceChildren(
+    // replaceChildren() prints a null argument as the text "null", so absent parts are filtered out first
+    out.replaceChildren(...[
       r == null ? h('div', { class: 'sp-big' }, '—', h('small', {}, ' no data and no model here'))
         : h('div', { class: `sp-big${dom ? '' : ' out'}` }, f2(r), h('small', {}, ` mm/s  [${f2(lo)}–${f2(hi)}]`)),
       h('div', { class: 'sp-tags' },
         h('span', { class: `lvl${v === 0 ? '' : ' demo'}` }, VERD(v)),
         h('span', { class: `lvl ${dom ? 'real' : 'demo'}` }, dom ? 'Inside NASA\'s data' : 'Outside NASA\'s data: extrapolation'),
         cal ? h('span', { class: 'lvl' }, cal) : null),
-      !dom && r != null ? h('p', { class: 'sp-warn' }, 'These conditions are outside the range NASA tested for this fuel. The number is the model carried beyond its data: treat it as a guess, not a result.') : null);
+      !dom && r != null ? h('p', { class: 'sp-warn' }, 'These conditions are outside the range NASA tested for this fuel. The number is the model carried beyond its data: treat it as a guess, not a result.') : null].filter(Boolean));
     if (!live || !from) return;
     setParams({ fuel: c.id, o2: O2[i], flow: FL[j] });
     // one announcement when the verdict or the in/out flag changes (key steps are already read by keyNav)
@@ -181,14 +182,14 @@ export function growthCard(g) {
     ].filter(Boolean);
     const S = e.summary?.mid || e.summary?.hi;
     const runs = ['lo', 'mid', 'hi'].filter(k => e.summary?.[k]);
-    box.replaceChildren(
+    box.replaceChildren(...[
       lineChart({ title: `Burning area over time: ${e.title}`, series, xLabel: 'Seconds after the flame state', yLabel: 'Burning area, cm²', unit: ' cm²' }),
       S ? h('p', { class: 'sp-note' }, `Middle run: largest burning area ${S.max_area_cm2} cm² at ${S.t_max_s} s; stops at ${S.t_end_s} s (${S.stop_reason}). The slow and fast runs bound it: an envelope, not a confidence interval.`) : null,
       runs.length ? table(['Run', 'Largest area (cm²)', 'At (s)', 'Stops at (s)', 'Why it stops'],
         runs.map(k => { const q = e.summary[k]; return [{ lo: 'Slow', mid: 'Middle', hi: 'Fast' }[k], String(q.max_area_cm2), String(q.t_max_s), String(q.t_end_s), q.stop_reason]; }), { caption: 'Each run in numbers', cls: 'sp-runs' }) : null,
       fold('What is calibrated, extrapolated and assumed', h('ul', {},
         [...(e.calibrated || []).map(x => ['Calibrated', x]), ...(e.extrapolated || []).map(x => ['Extrapolated', x]), ...(e.assumed || []).map(x => ['Assumed', x])].map(([k, x]) => h('li', {}, h('b', {}, k + ': '), x)))),
-      e.id ? h('p', { class: 'sp-run' }, h('a', { href: `#/assess?pre=${encodeURIComponent(e.id)}` }, 'Run your own on Assess →'), ' ', h('small', {}, 'Start from this example and change the flame, fuel or cabin.')) : null);
+      e.id ? h('p', { class: 'sp-run' }, h('a', { href: `#/assess?pre=${encodeURIComponent(e.id)}` }, 'Run your own on Assess →'), ' ', h('small', {}, 'Start from this example and change the flame, fuel or cabin.')) : null].filter(Boolean));
     why.textContent = e.why || '';
   };
   sel.addEventListener('change', draw); draw();

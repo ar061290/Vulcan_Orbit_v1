@@ -193,3 +193,71 @@ The hand-backs for these packages were not relayed to the integrator of this run
 - Phase 7 "safe" grep allowlist (requests from P3-B and P4-C): add the data-file negations "Says nothing about whether a material or atmosphere is safe." (growth_examples.json and the growth.py limits literal in js/growth.js), models.json "does not make an atmosphere safe", and spread_predictor.json `verdict_meaning` "…or that anything is safe".
 - Browser checks in these phases ran with WebGL off (`--disable-webgl --disable-3d-apis`) and a thermal pause between page loads (user caps: CPU 92 °C, GPU 85 °C). A first run with software WebGL put the CPU at 91 °C and was stopped. WebGL-on rendering was checked by P4-B (3D cabin) in its own run.
 - Commit grouping: phase 3 = ff9ac99, phase 4 = 3dc15f0, phase 5 = e00454c, phase 6 = the commit that adds this line. `js/pages/overview.js` and `css/p-overview.css` (P3-D) went into the phase 5 commit, because P5-G edited overview.js to import `js/i18n.js` and a phase 3 commit of it would not load; phases 3 and 4 keep the Home stub. `js/pages/respond.js` (P3-C, then P4-D) is in phase 4. The phase 3 commit carries a manifest with only the risk_rules and cv_example lines and a SHA256SUMS for those 35 files (checked: `sha256sum -c` and `check_data.py` OK: 34 on that tree); phase 5 adds earth_apps and i18n (OK: 36, 37 sums). The integration edits to js/lib.js are in phase 3, js/overlays.js and REBUILD_PLAN §2.12 in phase 4, and DECISIONS, CONTRACT_PROPOSAL, AI_LOG and REFERENCES in phase 6.
+
+## Phase 7 (commit "Site v2 phase 7", 15 Nov 2026)
+
+Phase 7 built the checking tools (P7-A to P7-E), then three fix packages by file owner, then the lead integrated. The human decisions Q1 to Q10 in the table at the top stayed in force for the whole phase (the lead's defaults, none confirmed by the human yet): Q1 `SCRAPPED.approved=false` with the pre-approval banner wording; Q2 M6b trust dots keep main's values labelled draft; Q3 spec folds; Q4 ion wind kept in the Ask matcher, its gold question hidden with a footnote, the sentence stripped from the E-FIELD answer at display time; Q5 `cv_example` demo counted in the banner; Q6 the 9 growth vectors in `tests/fixtures/growth_vectors.json`; Q7 `reviewed:false`; Q8 E-FIELD panel kept as NASA context; Q9 SHA256SUMS regenerated only by `scripts/hash_data.py` (phase 7 changed no data file, so it was not regenerated; `sha256sum -c` passes); Q10 other Assess bounds derived from data files.
+
+### P7-A parity (site/tools/parity.mjs, site/PARITY.md)
+
+- The tool was found untracked from an earlier, interrupted attempt; it was reviewed, kept and extended (link REPL rules that must find their replacement link, whitespace-insensitive link matching, interaction states).
+- RENAMED is its own class, not a failure: the Model cards sections now named by model (§3.10), Design kit "Colour · Day theme" → "Colour and contrast" (§3.14), and two search inputs with new accessible names ("Type a question", "Search"). Each RENAMED row must find its new title, or it becomes a FAILURE.
+- Stamp changes are listed, not failed: CHANGED (models.json entries stamped from their own status, §2.12; `team` now labelled "Team choice") and ADDED (§0 rule 4). Only a missing stamp fails.
+- The crawl runs in Calm, at 1280 px, in the Day theme, with every `<details>` opened; the fold state of each matched figure is recorded.
+- One interaction state is driven: Explorer with two investigations picked ("Side by side"). Main's Predict fallback "Models trained on NASA tables" shows only when models.json is missing, so it is not counted.
+
+### P7-B screenshots (site/tools/shots.mjs, site/shots/)
+
+- The page list is read from `js/site.js`; the five parts (shots, layout, calm, flash, nogl) run on their own with `--only`. playwright-core is loaded from outside the repo.
+- 200 % zoom is emulated as a 640 CSS px viewport at deviceScaleFactor 2. Layout checks open every `<details>` first and measure text nodes too, which is how the Bench rig path overflow was found.
+- Flash check: in the test page only, WebGL contexts get `preserveDrawingBuffer:true` so a read returns the frame on screen. The first run's "flashes" on the Earth banner were this measuring error, not the site.
+
+### P7-C reachability (site/tools/reach.mjs, site/REACH.md)
+
+- Targets: PARITY.md titles marked PRESENT or MOVED, its "Figures only in the new site" table, and every figure title each route renders at default parameters. DROP/REPL titles are not targets; FAILURE rows are parity failures, not reach misses.
+- A title counts as reached only when its card is visible on arrival or after clicking a fold summary.
+- D5.1 menu depth is counted from Home using header links only; the phone "Menu" toggle is not counted, "More" is. Up to 3 parameter variants per page are crawled. Calm and `--disable-gpu` keep heat down.
+
+### P7-D accessibility (site/tools/axe.mjs, site/tools/keyboard.mjs, site/A11Y.md)
+
+- axe runs with every fold open, Calm motion, and Google Fonts blocked so runs repeat offline (colours do not depend on the font).
+- The keyboard tool uses Escape only where the spec asks (dock, More menu, tooltip); page changes go through the top menu by Tab and Enter. Each journey part starts from a fresh load.
+- Owning files are a best guess from class/id literals and CSS selectors. The proposed Night red is a design colour, not a data number.
+
+### P7-E coverage (site/tools/made_check.mjs, site/tools/ranges_check.mjs, site/PLAN_COVERAGE.md)
+
+- Plan v2 "Skip" verdicts (SPICA glovebox, samuelakosa offline Q&A, AFAQ archive pipeline, Fire-X enclosure) and the parked ultrasound idea are `scrapped`, because C10 allows only done / pending data / planned / scrapped. Under Q1, E1/E2/E8 are row C7-scrap with status `planned`.
+- B3 is split: B3 done (attributes held plus the gaps.json tested range) and B3-gap pending data (goals, sample shape, variables show "Not in our table yet"). Feature 13 "Ranges on everything" is `pending data`: the site shows every range its files hold; the gaps are in model outputs the site may not edit.
+- "Not for: … calling a material safe" (main's verbatim Model cards scope text) is an allowed negation, listed in the table.
+- ranges_check exempts the Assess verdict "Will it spread here?" as categorical; it exits 1 only on site-owned misses, `--strict` also fails on data-side gaps. made_check presses each `aria-expanded=false` button one at a time and cross-checks done rows against REACH.md.
+
+### Fix package: shell and shared modules (index.html, css/tokens.css, base.css, components.css, js/charts.js, lib.js, passes.js, prefs.js)
+
+- Night `--crit` itself changed from main's #d03b3b to #ef6464 (5.89:1 on --surface #0e1320) instead of adding a separate `--crit-ink` token: it fixes every red text use without editing other groups' files. Day #b91c1c is unchanged. Canvas charts keep `charts.js` `C.crit` #d03b3b. It also lightens Night red dots, borders and the `.ch-shade` tint.
+- `table()` and `numbers()` create their `.scroll` wrapper as a focusable named region (`tabindex=0`, `role=region`, provisional `aria-label`, `data-autolabel=1`); the passes.js a11y pass replaces a provisional label with its unique "Table N: <figure title>", so labels stay unique on pages with repeated captions.
+- `.empty{overflow-wrap:anywhere}` fixes the Bench rig path overflow at 320 px / A++ for every empty state.
+- Noto Sans Telugu and Noto Sans Devanagari load from a second Google Fonts link (unicode-range, downloaded only where the scripts appear) and sit in the `--font` and `--display` stacks.
+- Under 680 px the dock toggle is a 48×48 "Aa" button with a visually hidden "Read your way" label; `html` gets `scroll-padding-bottom:80px`. A "Read your way" link beside the skip link (A11Y 4.2) was not added.
+- `.term:focus-visible` gets a 3 px outline (main's `.term{all:unset}` removed the ring).
+
+### Fix package: Find it, Assess, Predict, Model cards (js/fig_assess.js, fig_spread.js, fig_drift.js)
+
+- Night contrast on Assess and Model cards is fixed by the token change only; temporary page-local overrides in p-assess.css and p-models.css were reverted so the colour has one source.
+- `fig_assess.js` `setBody()` calls `scrollStops(card)`, so late-filled tables get keyboard scroll stops whether or not the shared-module change lands; it never overwrites an existing label.
+- `fig_drift.js`: the racks-cabin drift card captions its table "Smoke at each detector, every frame: <title>", so the two table regions on Predict have distinct names; the main card's caption is unchanged.
+- `fig_spread.js`: both `replaceChildren` calls filter out null parts (the DOM printed a null argument as the text "null").
+
+### Fix package: Put it out, Flame lab, Checks, Ask, Explorer, illustrations (css/fx-response.css, css/p-respond.css)
+
+- This package added Night-only `color-mix(--crit 75 %, --ink)` rules for the "Gap:" text. The lead reverted both files (see below) because the token change already passes 4.5:1 there.
+
+### Lead (integration of phase 7)
+
+- css/fx-response.css and css/p-respond.css reverted to their phase 6 state: with Night `--crit` #ef6464 the extra colour-mix rules were redundant, and one colour source is easier to keep right. No `--crit-ink` token was added.
+- js/fig_detect.js: each "Replay an orbital fire" trace is clipped to its own lane (`g.save(); g.rect(lane); g.clip()`). Main's display clamp (-0.5 to 2 alarm margins, detect_ui.js) let a value near 2 rise into the lane above and run lane 1 off the canvas (P7-B). The clamp, the alarm line and the alarm dot are unchanged; readings above about 1.2 margins are now drawn flat at the lane top, and the "Show the numbers" table still lists the raw values.
+- P7-A's question on mixed cards ("Checks" stamped "Plan, not built" from its file status, "Where each number comes from" stamped "NASA data"): kept as built, because both follow §0 rule 4. Left for the human to confirm.
+- site/shots/*.png (60 files, about 48 MB) are regenerated locally but not committed: together they are over the 20 MB limit set for this commit. They stay in the working tree for the team to look at; `.gitignore` is not edited, so the human decides whether to keep them, commit a few, or move them out of the repo.
+- site/tools/reach.mjs: figures that site/PARITY.md lists under "Interaction states" (shown only after pressing a control that is not a fold or a link, today Explorer's "Side by side") count as reached when their page is reached, and are listed in their own REACH.md section. Before this, the rerun against the new PARITY.md failed 96 of 97 on that one title, because reach.mjs presses no such control; parity.mjs does press it and finds the figure.
+- site/A11Y.md gets a section 0 with the rerun after the fixes (0 axe violations, keyboard 14 of 14, 0 stops without a focus ring); the first-run findings stay below as the record.
+- Plan v2 "Results so far" was checked against the data files the site reads (drift_whatif, saffire_latency, models.json, spread_predictor, models/m6b-predictor/results.json, flame_static, flame_spread, drift_calibration): no disagreement found.
+- `CONTRACT.md`, `data/`, `models/`, `engine/`, `scripts/` and `worker/` are unchanged in phase 7.

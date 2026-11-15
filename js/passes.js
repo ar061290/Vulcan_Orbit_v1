@@ -126,7 +126,9 @@ function a11y(pg) {
   });
   pg.querySelectorAll('.scroll').forEach((s, i) => {
     const c = s.closest('.card'), t = c ? titleOf(c) : '';
-    s.tabIndex = 0; s.setAttribute('role', 'region'); if (!s.hasAttribute('aria-label')) s.setAttribute('aria-label', `Table ${i + 1}${t ? ': ' + t : ''}`);
+    s.tabIndex = 0; s.setAttribute('role', 'region');
+    // the provisional label set by table()/numbers() (data-autolabel) gives way to this unique, figure-titled one
+    if (!s.hasAttribute('aria-label') || s.dataset.autolabel) { s.setAttribute('aria-label', `Table ${i + 1}${t ? ': ' + t : ''}`); delete s.dataset.autolabel; }
   });
   pg.querySelectorAll('th').forEach(th => { if (!th.textContent.trim()) th.append(h('span', { class: 'sr' }, 'Item')); });
   pg.querySelectorAll('canvas, svg').forEach(el => {

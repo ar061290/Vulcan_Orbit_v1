@@ -4,7 +4,7 @@ Written by the lead agent for the site rebuild (plan `site/REBUILD_PLAN.md` §5 
 
 Shapes use the same notation as `CONTRACT.md`. No example numbers are given: every number in these files must come from a dataset, a model run or a measurement (AGENTS.md hard rule 1).
 
-Status of this file: phases 3 to 6. The four new data files now exist (P3-A: `risk_rules`, `cv_example`; P5-F: `earth_apps`; P5-G: `i18n`), and the rows in §1 give the shapes as written. If a builder changes a shape, the lead updates the row here in the same phase commit.
+Status of this file: phases 3 to 7 (phase 7 changed no shape; it built checks and fixes only). The four new data files now exist (P3-A: `risk_rules`, `cv_example`; P5-F: `earth_apps`; P5-G: `i18n`), and the rows in §1 give the shapes as written. If a builder changes a shape, the lead updates the row here in the same phase commit.
 
 ## 1. Four new data files (allowed by the spec)
 

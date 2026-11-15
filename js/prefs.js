@@ -75,7 +75,7 @@ export function dock() {
     row('motion', 'Motion', [['full', 'Full'], ['calm', 'Calm']]),
     listenBtn);
   const toggle = h('button', { type: 'button', class: 'dock-toggle', 'aria-expanded': 'false', 'aria-controls': 'dock-panel' },
-    h('span', { 'aria-hidden': 'true' }, 'Aa'), 'Read your way');
+    h('span', { 'aria-hidden': 'true' }, 'Aa'), h('span', { class: 'dock-label' }, 'Read your way'));
   const setOpen = open => { panel.hidden = !open; toggle.setAttribute('aria-expanded', String(open)); };
   toggle.addEventListener('click', () => { const open = panel.hidden; setOpen(open); if (open) panel.querySelector('button').focus(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); toggle.focus(); } });

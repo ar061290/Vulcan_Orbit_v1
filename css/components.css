@@ -153,6 +153,7 @@ dl.made dd{margin:0;color:var(--ink2);overflow-wrap:anywhere}
 
 /* ---------- empty state ---------- */
 .empty{border:1px dashed var(--axis);border-radius:12px;padding:22px;color:var(--ink2);background:repeating-linear-gradient(135deg,transparent 0 10px,color-mix(in srgb,var(--raise) 60%,transparent) 10px 11px)}
+.empty{overflow-wrap:anywhere}  /* long file paths in empty states wrap at 320 px and A++ (P7-B) */
 .empty h3{margin-bottom:6px}
 .empty pre{margin:10px 0 0;font:12px/1.5 var(--mono);color:var(--ink2);white-space:pre-wrap;overflow-wrap:anywhere}
 
@@ -161,6 +162,7 @@ dl.made dd{margin:0;color:var(--ink2);overflow-wrap:anywhere}
 .tip b,.tip span{color:inherit;font-weight:600}
 .term{all:unset;cursor:help;border-bottom:2px dotted var(--oxy);color:inherit}
 .term:hover,.term:focus-visible{background:var(--oxy-soft);border-bottom-style:solid}
+.term:focus-visible{outline:3px solid var(--oxy);outline-offset:2px;border-radius:3px}  /* all:unset drops the site ring (P7-D 4.1) */
 html[data-terms=off] .term{border:0;cursor:inherit;background:none}
 .gloss{position:fixed;z-index:60;max-width:300px;background:var(--surface);color:var(--ink);border:1.5px solid var(--ink);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;box-shadow:6px 6px 0 var(--ink)}
 .gloss b{display:block;font:700 15px var(--display);margin-bottom:2px}
@@ -228,6 +230,9 @@ html[data-terms=off] .term{border:0;cursor:inherit;background:none}
  .tc-row{grid-template-columns:1fr 64px}.tc-row .tc-track{grid-column:1/-1;order:3}
  .short{padding:18px 18px}
  .dock{right:12px;bottom:12px}
+ /* small screens: the toggle shrinks to a 48 px "Aa" button so it covers less text; its name stays "Read your way" (P7-B, WCAG 2.4.11) */
+ .dock>button.dock-toggle{width:48px;height:48px;padding:0;justify-content:center}
+ .dock-toggle .dock-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
  .tour{bottom:76px}
  .nf-row{grid-template-columns:minmax(0,1fr) 5.5em}
 }

@@ -5,8 +5,9 @@
    Special Elite and Libre Caslon Text (History page only).
    The theme blocks match ANY element with data-theme, not only <html>, so the Design kit can measure both themes at once. */
 :root{
- --font:"Atkinson Hyperlegible","Atkinson Hyperlegible Next",system-ui,sans-serif;
- --display:"Bricolage Grotesque",system-ui,sans-serif;
+ /* Noto Sans Telugu / Devanagari: per-glyph fallback for the Home te/hi switch (the Latin fonts have no Indic glyphs) */
+ --font:"Atkinson Hyperlegible","Atkinson Hyperlegible Next","Noto Sans Telugu","Noto Sans Devanagari",system-ui,sans-serif;
+ --display:"Bricolage Grotesque","Noto Sans Telugu","Noto Sans Devanagari",system-ui,sans-serif;
  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
  --caslon:"Libre Caslon Text",Georgia,serif;
  --elite:"Special Elite",var(--mono);
@@ -14,8 +15,10 @@
  --flame:#c2410c;--soot:#57534e;--ice:#0e7490;
  /* chart series (fixed order: blue, orange, green, amber) and status colours that are the same in both themes */
  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--serious:#ec835a;
- /* the night values of good/warn/crit come from main's app.css base (never overridden there for Night) */
- --good:#0ca30c;--warn:#fab219;--crit:#d03b3b;
+ /* the night values of good/warn come from main's app.css base (never overridden there for Night).
+    Night --crit was main's #d03b3b (3.85:1 as text on --surface); it is lightened to #ef6464 (5.89:1 on #0e1320,
+    6.29:1 on #070a12, 5.51:1 on #141a2b, WCAG 1.4.3) because pages use it as a text colour (P7-D, site/A11Y.md 2.1). */
+ --good:#0ca30c;--warn:#fab219;--crit:#ef6464;
  --gutter:24px;--maxw:1240px;
 }
 [data-theme=day]{color-scheme:light;
@@ -28,7 +31,7 @@
  --page:#070a12;--surface:#0e1320;--raise:#161c2c;--ink:#eef1f7;--ink2:#bcc3d1;--mute:#8d96a8;--grid:#1e2638;--axis:#2c3550;
  --accent:#ff7a3d;--accent-ink:#ffb089;--accent-soft:#2a160c;--oxy:#7aa2ff;--oxy-soft:#121c35;--line:#232c41;
  --shadow:0 20px 50px -30px rgba(0,0,0,.9);
- --screen:#05070e;--screen-ink:#eef1f7;--good:#0ca30c;--warn:#fab219;--crit:#d03b3b;
+ --screen:#05070e;--screen-ink:#eef1f7;--good:#0ca30c;--warn:#fab219;--crit:#ef6464;
 }
 /* before prefs.js runs (no data-theme yet) the page follows the system theme */
 :root:not([data-theme]){color-scheme:light;
@@ -39,7 +42,7 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme]){color-scheme:dark;
  --page:#070a12;--surface:#0e1320;--raise:#161c2c;--ink:#eef1f7;--ink2:#bcc3d1;--mute:#8d96a8;--grid:#1e2638;--axis:#2c3550;
  --accent:#ff7a3d;--accent-ink:#ffb089;--accent-soft:#2a160c;--oxy:#7aa2ff;--oxy-soft:#121c35;--line:#232c41;
- --shadow:0 20px 50px -30px rgba(0,0,0,.9);--screen:#05070e;--screen-ink:#eef1f7;--good:#0ca30c;--warn:#fab219;--crit:#d03b3b;}}
+ --shadow:0 20px 50px -30px rgba(0,0,0,.9);--screen:#05070e;--screen-ink:#eef1f7;--good:#0ca30c;--warn:#fab219;--crit:#ef6464;}}
 /* text-size steps (Read your way: A / A+ / A++) */
 html[data-size="1"]{--fs:18px}
 html[data-size="2"]{--fs:20px}

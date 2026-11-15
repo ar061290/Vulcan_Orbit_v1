@@ -66,6 +66,9 @@ export function replayCard(lat, params = {}, ctx = {}) {
       g.beginPath(); g.moveTo(pad, mid - sc); g.lineTo(W - 20, mid - sc); g.stroke(); g.setLineDash([]);
       const grad = g.createLinearGradient(0, mid - sc * 2, 0, mid); grad.addColorStop(0, col); grad.addColorStop(1, 'transparent');
       let k = 0;
+      // keep each trace inside its own lane: at the top of main's clamp (2 alarm margins) the line rose into the lane above,
+      // and lane 1 ran off the canvas (P7-B shots); the alarm line and dot sit well inside the band
+      g.save(); g.beginPath(); g.rect(pad, y0, W - pad - 20, rowH - 8); g.clip();
       g.beginPath(); g.moveTo(X(T0), mid);
       for (; k < b.t.length && b.t[k] <= now; k++) g.lineTo(X(b.t[k]), mid - clampV(c.values[k]) * sc);
       g.lineTo(X(b.t[Math.max(0, k - 1)]), mid); g.closePath();
@@ -74,6 +77,7 @@ export function replayCard(lat, params = {}, ctx = {}) {
       for (let j = 0; j < k; j++) { const x = X(b.t[j]), y = mid - clampV(c.values[j]) * sc; j ? g.lineTo(x, y) : g.moveTo(x, y); }
       // each lane is named on the canvas and in its lamp, so colour is never the only cue
       g.strokeStyle = col; g.lineWidth = 3; g.shadowColor = col; g.shadowBlur = 12; g.stroke(); g.shadowBlur = 0;
+      g.restore();
       g.fillStyle = SCREEN.mute; g.fillText(c.name, pad + 8, y0 + 26);
       const on = c.alarm_s != null && now >= c.alarm_s;
       if (on) { g.fillStyle = col; g.beginPath(); g.arc(X(c.alarm_s), mid - sc, 9, 0, 7); g.fill(); }

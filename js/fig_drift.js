@@ -166,7 +166,8 @@ export function driftCard(d, { title = 'Where the smoke goes', sub = null, file 
       h('span', { class: 'lg-item' }, h('i', { class: 'drift-sw drift-sw-dot', style: `background:${C.warn}` }), `Detector in alarm (${fmt(d.alarm_mg_m3, 2)} mg/m³)`),
       h('span', { class: 'lg-item' }, h('i', { class: 'drift-sw drift-sw-dot', style: `background:${C.s2}` }), 'Fire'),
       h('span', { class: 'lg-item' }, h('i', { class: 'drift-sw', style: `background:${C.s3}` }), 'Supply and return')),
-    rows, summary, driftNumbers(d),
+    // a second drift card on the page (the racks cabin) names itself, so the two table regions have distinct labels
+    rows, summary, driftNumbers(d, title === 'Where the smoke goes' ? undefined : `Smoke at each detector, every frame: ${title}`),
     Array.isArray(d.assumptions) && d.assumptions.length ? h('p', {}, h('small', {}, d.assumptions.join('. ') + '.')) : null);
 }
 

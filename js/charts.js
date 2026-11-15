@@ -139,7 +139,8 @@ export function numbers(caption, headers, rows, note) {
   };
   return hd('details', { class: 'numbers' },
     hd('summary', {}, 'Show the numbers'),
-    hd('div', { class: 'scroll' }, hd('table', {},
+    // focusable, named region at creation, so a table built after the passes.js a11y pass can still be scrolled by keyboard (P7-D)
+    hd('div', { class: 'scroll', tabindex: '0', role: 'region', 'aria-label': caption ? `Table: ${caption}` : 'Table: the numbers behind this figure', 'data-autolabel': '1' }, hd('table', {},
       caption ? hd('caption', {}, caption) : null,
       hd('thead', {}, hd('tr', {}, headers.map(x => x === '' || x == null ? hd('th', { scope: 'col' }, hd('span', { class: 'sr' }, 'Item')) : hd('th', { scope: 'col' }, x)))),
       hd('tbody', {}, rows.map(r => hd('tr', {}, r.map((v, k) => cell(k === 0 ? 'th' : 'td', v))))))),

@@ -105,7 +105,16 @@ const boxesOf = r => (Array.isArray(r?.boxes) ? r.boxes : []);
 const boxText = b => `${n4(b.lo)}–${n4(b.hi)}${fieldUnit(b.field) ? ' ' + fieldUnit(b.field) : ''}`;
 
 const body = cls => h('div', { class: `as-body ${cls || ''}`.trim(), 'aria-busy': 'true' }, h('p', { class: 'as-wait' }, 'Running the spread predictor for these inputs…'));
-function setBody(el, ...kids) { const b = el.querySelector(':scope > .as-body'); b.replaceChildren(); add(b, ...kids); b.setAttribute('aria-busy', 'false'); }
+// The passes.js a11y pass labels every .scroll once, at render; these bodies are filled later (after each run), so each
+// new table wrapper gets the same keyboard scroll stop here (WCAG 2.1.1; site/A11Y.md §2.2).
+function scrollStops(el) {
+  const t = el.dataset?.title || '';
+  el.querySelectorAll('.scroll').forEach((s, i) => {
+    s.tabIndex = 0; s.setAttribute('role', 'region');
+    if (!s.hasAttribute('aria-label')) s.setAttribute('aria-label', `Table ${i + 1}${t ? ': ' + t : ''}`);
+  });
+}
+function setBody(el, ...kids) { const b = el.querySelector(':scope > .as-body'); b.replaceChildren(); add(b, ...kids); scrollStops(el); b.setAttribute('aria-busy', 'false'); }
 export function setBusy(cards, busy) { for (const c of cards) c?.querySelector(':scope > .as-body')?.setAttribute('aria-busy', String(!!busy)); }
 /** Replace each card's live body with one plain note (used when the page is rendered detached for the site map). */
 export function idle(cards, text) { for (const c of cards) if (c?.querySelector(':scope > .as-body')) setBody(c, h('p', { class: 'as-note' }, text)); }

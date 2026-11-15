@@ -188,7 +188,8 @@ export function table(headers, rows, { caption, cls } = {}) {
     caption ? h('caption', {}, caption) : null,
     h('thead', {}, h('tr', {}, headers.map(x => h('th', { scope: 'col' }, x === '' ? h('span', { class: 'sr' }, 'Item') : x)))),
     h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, c))))));
-  return h('div', { class: 'scroll' }, t);
+  // focusable, named region at creation, so a table built after the passes.js a11y pass can still be scrolled by keyboard (P7-D)
+  return h('div', { class: 'scroll', tabindex: '0', role: 'region', 'aria-label': caption ? `Table: ${caption}` : 'Table', 'data-autolabel': '1' }, t);
 }
 export const fold = (summary, ...body) => h('details', { class: 'fold' }, h('summary', {}, summary), ...body);
 

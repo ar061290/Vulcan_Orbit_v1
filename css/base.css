@@ -1,7 +1,7 @@
 /* Base: reset, type scale, page layout, grids, header and navigation (incl. More), banner, footer, skip link, focus ring.
    Values carried over from main's css/app.css + css/freefall.css unless noted. */
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--top-h,72px) + 12px)}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--top-h,72px) + 12px);scroll-padding-bottom:80px}  /* bottom: room for the fixed dock toggle, so focus scrolled into view is not under it (WCAG 2.4.11) */
 body{margin:0;font:1rem/1.62 var(--font);background:var(--page);color:var(--ink);-webkit-font-smoothing:antialiased;min-width:0}
 html[data-theme=day] body{background:var(--page) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M32 0H0v32' fill='none' stroke='%23e6e0d3' stroke-width='1'/%3E%3C/svg%3E")}
 html[data-theme=night] body{background:radial-gradient(1100px 600px at 80% -10%,rgba(122,162,255,.10),transparent 60%),radial-gradient(800px 500px at 0 30%,rgba(255,122,61,.06),transparent 60%),var(--page);background-attachment:fixed}
