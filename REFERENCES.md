@@ -201,3 +201,12 @@ See `AI_LOG.md`.
 | scikit-learn User Guide 3.1.5 and permutation_test_score | Method for scripts/permutation_tests.py |
 | Mitchell et al., Model Cards for Model Reporting (2019), arXiv:1810.03993 | Model cards page |
 | Rival public projects reviewed 15 Nov 2026 (see Competitor intel report) | Ideas only: judge mode, cross-check table, data fingerprints; no code copied |
+
+## Added 15 Nov 2026 (site v2, phase 1+2)
+
+| Source | Used for |
+|---|---|
+| Google Fonts: Atkinson Hyperlegible, Bricolage Grotesque, IBM Plex Mono, Special Elite, Libre Caslon Text (SIL Open Font License) | Site typography (carried over from main, which did not list them) |
+| models/m6b-predictor/growth.py and GROWTH_API.md (inside this repo) | js/growth.js is a line-for-line JavaScript port; constants are read from data/spread_predictor.json |
+| WCAG 2.2 contrast ratio and large-text definitions (W3C Recommendation, https://www.w3.org/TR/WCAG22/) | Design kit "Colour and contrast" verdicts (4.5:1 text, 3:1 large text and graphics) |
+| playwright-core 1.56.1 (Apache-2.0), headless Chromium | Agents' browser checks only, installed outside the repo; not a site dependency |

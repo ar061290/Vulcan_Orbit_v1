@@ -1,0 +1,51 @@
+/* FREEFALL tokens: Vulcan Orbit's own design system (values verbatim from main's css/app.css + css/freefall.css).
+   Idea: a field manual for fire in orbit. Pages are paper (Day) or the dark side of orbit (Night);
+   every chart is a numbered figure; live instruments sit in dark "screens".
+   Type: Bricolage Grotesque (display), Atkinson Hyperlegible (body, designed for low-vision readers), IBM Plex Mono (numbers),
+   Special Elite and Libre Caslon Text (History page only).
+   The theme blocks match ANY element with data-theme, not only <html>, so the Design kit can measure both themes at once. */
+:root{
+ --font:"Atkinson Hyperlegible","Atkinson Hyperlegible Next",system-ui,sans-serif;
+ --display:"Bricolage Grotesque",system-ui,sans-serif;
+ --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+ --caslon:"Libre Caslon Text",Georgia,serif;
+ --elite:"Special Elite",var(--mono);
+ --r:14px;--fs:16px;--measure:68ch;
+ --flame:#c2410c;--soot:#57534e;--ice:#0e7490;
+ /* chart series (fixed order: blue, orange, green, amber) and status colours that are the same in both themes */
+ --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--serious:#ec835a;
+ /* the night values of good/warn/crit come from main's app.css base (never overridden there for Night) */
+ --good:#0ca30c;--warn:#fab219;--crit:#d03b3b;
+ --gutter:24px;--maxw:1240px;
+}
+[data-theme=day]{color-scheme:light;
+ --page:#f3f0e8;--surface:#fffdf8;--raise:#ece7dc;--ink:#121722;--ink2:#353c4a;--mute:#596171;--grid:#e3ddd0;--axis:#c9c1b0;
+ --accent:#c2410c;--accent-ink:#9a3412;--accent-soft:#fde9dc;--oxy:#1d4ed8;--oxy-soft:#e3eafd;--line:#d8d1c2;
+ --shadow:0 1px 0 #fff inset,0 18px 40px -28px rgba(40,30,10,.35);
+ --screen:#0b1020;--screen-ink:#eef1f7;--warn:#8a5a00;--good:#166534;--crit:#b91c1c;
+}
+[data-theme=night]{color-scheme:dark;
+ --page:#070a12;--surface:#0e1320;--raise:#161c2c;--ink:#eef1f7;--ink2:#bcc3d1;--mute:#8d96a8;--grid:#1e2638;--axis:#2c3550;
+ --accent:#ff7a3d;--accent-ink:#ffb089;--accent-soft:#2a160c;--oxy:#7aa2ff;--oxy-soft:#121c35;--line:#232c41;
+ --shadow:0 20px 50px -30px rgba(0,0,0,.9);
+ --screen:#05070e;--screen-ink:#eef1f7;--good:#0ca30c;--warn:#fab219;--crit:#d03b3b;
+}
+/* before prefs.js runs (no data-theme yet) the page follows the system theme */
+:root:not([data-theme]){color-scheme:light;
+ --page:#f3f0e8;--surface:#fffdf8;--raise:#ece7dc;--ink:#121722;--ink2:#353c4a;--mute:#596171;--grid:#e3ddd0;--axis:#c9c1b0;
+ --accent:#c2410c;--accent-ink:#9a3412;--accent-soft:#fde9dc;--oxy:#1d4ed8;--oxy-soft:#e3eafd;--line:#d8d1c2;
+ --shadow:0 1px 0 #fff inset,0 18px 40px -28px rgba(40,30,10,.35);--screen:#0b1020;--screen-ink:#eef1f7;--warn:#8a5a00;--good:#166534;--crit:#b91c1c;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){color-scheme:dark;
+ --page:#070a12;--surface:#0e1320;--raise:#161c2c;--ink:#eef1f7;--ink2:#bcc3d1;--mute:#8d96a8;--grid:#1e2638;--axis:#2c3550;
+ --accent:#ff7a3d;--accent-ink:#ffb089;--accent-soft:#2a160c;--oxy:#7aa2ff;--oxy-soft:#121c35;--line:#232c41;
+ --shadow:0 20px 50px -30px rgba(0,0,0,.9);--screen:#05070e;--screen-ink:#eef1f7;--good:#0ca30c;--warn:#fab219;--crit:#d03b3b;}}
+/* text-size steps (Read your way: A / A+ / A++) */
+html[data-size="1"]{--fs:18px}
+html[data-size="2"]{--fs:20px}
+html{font-size:var(--fs)}
+/* Calm: the motion kill-switch. Also honoured when the system asks for reduced motion. */
+html[data-motion=calm] *,html[data-motion=calm] *::before,html[data-motion=calm] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+html[data-motion=calm]::view-transition-old(root),html[data-motion=calm]::view-transition-new(root){animation:none!important}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media (max-width:680px){:root{--gutter:16px}}
