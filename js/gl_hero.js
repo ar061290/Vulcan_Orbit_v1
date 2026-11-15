@@ -191,7 +191,9 @@ export function hero({ g = 0, fit, ctx } = {}) {
   syncBtn();
 
   const size = () => {
-    const r = cv.getBoundingClientRect(); const w = Math.max(1, Math.round(r.width * scale)), hh = Math.max(1, Math.round(r.height * scale));
+    // v3: the Home hero is ~800 px wide; the ray-marcher is drawn at most ~90k pixels and CSS scales it up (perf check, see site/REDESIGN_REPORT.md)
+    const r = cv.getBoundingClientRect(), cap = Math.min(1, Math.sqrt(90000 / Math.max(1, r.width * r.height * scale * scale)));
+    const w = Math.max(1, Math.round(r.width * scale * cap)), hh = Math.max(1, Math.round(r.height * scale * cap));
     if (cv.width !== w || cv.height !== hh) { cv.width = w; cv.height = hh; }
     gl.viewport(0, 0, w, hh);
   };
@@ -199,7 +201,7 @@ export function hero({ g = 0, fit, ctx } = {}) {
     raf = 0; if (!visible || gone || fallen) return;
     const dt = lastT ? Math.min(.1, (now - lastT) / 1000) : .016; lastT = now;
     // keep it smooth: if frames are slow, render fewer pixels (main's rule: 20 slow frames → 0.85×, floor 0.6×)
-    if (dt > .028) { if (++slow > 20 && scale > .6) { scale = Math.max(.6, scale * .85); slow = 0; } } else slow = Math.max(0, slow - 1);
+    if (dt > .028) { if (++slow > 20 && scale > .35) { scale = Math.max(.35, scale * .85); slow = 0; } } else slow = Math.max(0, slow - 1);
     const calmNow = isCalm(), s = still();          // re-checked on every frame
     syncBtn();
     if (calmNow) gNow = gT; else gNow += (gT - gNow) * Math.min(1, dt * 2.2);
