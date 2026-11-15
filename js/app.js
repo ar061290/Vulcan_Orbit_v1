@@ -18,6 +18,7 @@ const setPop = open => { pop.hidden = !open; pill.setAttribute('aria-expanded', 
 pill?.addEventListener('click', () => setPop(pop.hidden));
 addEventListener('keydown', e => { if (e.key === 'Escape' && pop && !pop.hidden) { setPop(false); pill.focus(); } });
 document.addEventListener('click', e => { if (pop && !pop.hidden && !e.target.closest('.pill-wrap')) setPop(false); });
+pill?.closest('.pill-wrap')?.addEventListener('focusout', e => { if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget)) setPop(false); });
 load('manifest').then(m => renderPill(pill, pop, m, SCRAPPED, MANIFEST_WHAT, badge)).catch(e => console.error(e));
 // story mode: the see-through top bar gets its background once the page scrolls
 const topBar = document.querySelector('.top');

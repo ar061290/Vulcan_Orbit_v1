@@ -85,6 +85,7 @@ export function dock() {
   // v3: the toggle sits in the top bar and the panel opens under it as a popover
   built = h('div', { class: 'dock' }, toggle, panel);
   document.addEventListener('click', e => { if (!panel.hidden && !built.contains(e.target)) setOpen(false); });
+  built.addEventListener('focusout', e => { if (e.relatedTarget && !built.contains(e.relatedTarget)) setOpen(false); });
   const host = document.querySelector('.top .bar-tools');
   if (host) host.append(built); else document.body.append(built);
   return built;

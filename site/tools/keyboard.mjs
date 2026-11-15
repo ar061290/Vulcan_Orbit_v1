@@ -106,14 +106,14 @@ async function main() {
 
     // v3: the sidebar replaces the More menu. On Home (story mode) the sidebar is hidden, so check it on an app page,
     // and check the phone drawer: Menu opens it (aria-expanded), focus moves in, Escape closes it and returns focus.
-    await page.goto(`${base}index.html#/detect`, { waitUntil: 'load' }); await settle(page, 'detect');
+    await page.goto(`${base}index.html#/detect`, { waitUntil: 'load' }); await page.reload({ waitUntil: 'load' }); await settle(page, 'detect');
     let r = await tabTo(page, e => e.dataId === 'design', { max: 40 });
     step('Sidebar: every group is reachable by Tab (reached "Design kit", the last link)', r.ok, `${r.presses} Tabs`);
     {
       const ph = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const pp = await ph.newPage();
       await pp.goto(`${base}index.html#/detect`, { waitUntil: 'load' }); await settle(pp, 'detect');
-      const m = await tabTo(pp, e => /menu/.test(e.sel), { max: 10 });
+      const m = await tabTo(pp, e => /\bmenu\b/.test(e.sel), { max: 10 });
       let ok = false, info = `Menu not reached in ${m.presses} Tabs`;
       if (m.ok) {
         await pp.keyboard.press('Enter'); await pp.waitForTimeout(300);
@@ -127,8 +127,8 @@ async function main() {
       await ph.close();
     }
 
-    // Dock: from the top again, Tab forwards to the toggle (it sits after the footer)
-    await page.reload({ waitUntil: 'load' }); await settle(page, 'overview');
+    // Dock: from the top of Home again (v3: the toggle is in the top bar)
+    await page.goto(`${base}index.html#/overview`, { waitUntil: 'load' }); await page.reload({ waitUntil: 'load' }); await settle(page, 'overview');
     r = await tabTo(page, e => /dock-toggle/.test(e.sel), { max: 600 });
     let viaShift = null;
     if (!r.ok) {
@@ -153,7 +153,7 @@ async function main() {
     }
 
     // Sidebar link to Predict it, then a fold
-    await page.goto(`${base}index.html#/detect`, { waitUntil: 'load' }); await settle(page, 'detect');
+    await page.goto(`${base}index.html#/detect`, { waitUntil: 'load' }); await page.reload({ waitUntil: 'load' }); await settle(page, 'detect');
     r = await tabTo(page, e => e.dataId === 'predict', { max: 40 });
     if (r.ok) { await page.keyboard.press('Enter'); await settle(page, 'predict'); }
     step('Menu: Tab to "Predict it" and Enter opens the page', r.ok && (await page.evaluate(() => document.getElementById('view').dataset.page)) === 'predict', `${r.presses} Tabs`);
