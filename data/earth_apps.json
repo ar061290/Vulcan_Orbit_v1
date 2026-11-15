@@ -1,0 +1,173 @@
+{
+ "status": "team",
+ "what": "On Earth page (#/earth): three cards, each linking a finding already on this site to an Earth use. The wording is the team's. No number is typed in this file: every number is a {ref:{file, path}} item that the page reads from data/<file>.json at run time, and a card with no ref shows no number. Path grammar: dot-separated keys; [n] picks array item n; [key=value,key2=value2] picks the first array item whose fields equal those values. fmt: num (d digits), sig, pct (a 0-1 share shown as a percentage), count (length of an array), text (a quoted string from the file); map turns a stored code into words.",
+ "units": {
+  "note": "Each ref carries its own unit, copied from the units block of the file it reads (flex_suppression: burns; smoke_sizes: nm and share of smoke mass; flame_spread: O2 as a 0-1 mole fraction, kPa, m/s, mm/s; spread_predictor: mm/s, cm/s, vol%)."
+ },
+ "cards": [
+  {
+   "id": "water-mist",
+   "title": "Water mist",
+   "status": "team",
+   "sub": "What NASA's droplet tests show about putting flames out, beside our bench mist trial.",
+   "text": [
+    {"h": "What NASA's data shows"},
+    {"t": "In NASA's FLEX droplet tests on the space station, the flame went out in "},
+    {"ref": {"file": "flex_suppression", "path": "groups[gas=CO2].extinguished", "fmt": "num", "d": 0}},
+    {"t": " of "},
+    {"ref": {"file": "flex_suppression", "path": "groups[gas=CO2].tests", "fmt": "num", "d": 0}, "unit": "burns"},
+    {"t": " with added carbon dioxide, "},
+    {"ref": {"file": "flex_suppression", "path": "groups[gas=He].extinguished", "fmt": "num", "d": 0}},
+    {"t": " of "},
+    {"ref": {"file": "flex_suppression", "path": "groups[gas=He].tests", "fmt": "num", "d": 0}},
+    {"t": " with added helium, and "},
+    {"ref": {"file": "flex_suppression", "path": "groups[gas=None (O2/N2 only)].extinguished", "fmt": "num", "d": 0}},
+    {"t": " of "},
+    {"ref": {"file": "flex_suppression", "path": "groups[gas=None (O2/N2 only)].tests", "fmt": "num", "d": 0}},
+    {"t": " with no added gas. FLEX chose conditions close to the limit on purpose, so these counts are not a fair contest between the gases."},
+    {"trial": "mist"},
+    {"h": "What it could mean on Earth"},
+    {"t": "Water mist is one of the responses the challenge brief names. Mist and added gases both change what surrounds a flame, and FLEX shows that what surrounds a droplet flame decides whether it goes out. That is a reason to judge mist by what sensors measure on the flame, not by eye. Our bench rig runs at Earth gravity, so a completed mist trial would be an Earth result, not a space result."},
+    {"h": "What it does not show"},
+    {"t": "FLEX added gases around fuel droplets; it did not spray water. No test on this site shows mist putting out a fire, on Earth or in orbit."}
+   ],
+   "short": [
+    {"t": "Water mist: in NASA's FLEX droplet tests the flame went out in "},
+    {"ref": {"file": "flex_suppression", "path": "groups[gas=CO2].extinguished", "fmt": "num", "d": 0}},
+    {"t": " of "},
+    {"ref": {"file": "flex_suppression", "path": "groups[gas=CO2].tests", "fmt": "num", "d": 0}},
+    {"t": " burns with added carbon dioxide. FLEX tested gases, not mist. "},
+    {"trial": "mist"}
+   ],
+   "links": [
+    {"label": "NASA: which gas puts a droplet flame out", "page": "respond", "fig": "NASA: which gas puts a droplet flame out"},
+    {"label": "When does a droplet flame go out?", "page": "respond", "fig": "When does a droplet flame go out?"},
+    {"label": "Bench mist trial", "page": "respond", "fig": "Bench mist trial"}
+   ],
+   "sources": [
+    {"label": "NASA FLEX experimental table, PSI-69", "doi": "10.60555/mbq8-0451"}
+   ]
+  },
+  {
+   "id": "smoke-detectors",
+   "title": "Smoke detectors",
+   "status": "team",
+   "sub": "What NASA's smoke-size measurements show about smoke that light-scattering detectors can miss.",
+   "text": [
+    {"h": "What NASA's data shows"},
+    {"t": "In NASA's SAME-2 flight tests, half the smoke mass from Kapton was in particles smaller than "},
+    {"ref": {"file": "smoke_sizes", "path": "materials[name=Kapton].d_nm", "fmt": "num", "d": 0}, "unit": "nm"},
+    {"t": ", against "},
+    {"ref": {"file": "smoke_sizes", "path": "materials[name=Silicone].d_nm", "fmt": "num", "d": 0}, "unit": "nm"},
+    {"t": " for silicone. These sizes are NASA's, as reported by Urban et al. 2012; we have not re-measured them."},
+    {"table": {"file": "smoke_sizes", "path": "materials", "caption": "Smoke size by material (SAME-2, unaged smoke)", "columns": [
+     {"label": [{"t": "Material"}], "path": "name", "fmt": "text"},
+     {"label": [{"t": "Mass median diameter (nm)"}], "path": "d_nm", "fmt": "num", "d": 0},
+     {"label": [{"t": "Share of smoke mass under "}, {"ref": {"file": "smoke_sizes", "path": "detector_thresholds_nm[1]", "fmt": "num", "d": 0}}, {"t": " nm"}], "path": "mass_below.500.unaged", "fmt": "pct"}
+    ]}},
+    {"t": "Our smoke-miss model tells these cases apart with an AUC of "},
+    {"ref": {"file": "models", "path": "models[id=smoke-miss].score", "fmt": "sig"}},
+    {"t": " (range "},
+    {"ref": {"file": "models", "path": "models[id=smoke-miss].score_range[0]", "fmt": "sig"}},
+    {"t": " to "},
+    {"ref": {"file": "models", "path": "models[id=smoke-miss].score_range[1]", "fmt": "sig"}},
+    {"t": ") on flight tests it never saw, from only "},
+    {"ref": {"file": "models", "path": "models[id=smoke-miss].points", "fmt": "count"}, "unit": "tests"},
+    {"t": ". "},
+    {"ref": {"file": "daft", "path": "what_it_means", "fmt": "text"}},
+    {"h": "What it could mean on Earth"},
+    {"t": "Light-scattering smoke detectors are used on Earth too. The SAME results are a reason to ask how a detector responds to very fine smoke from specific materials, and not only to smoke in general."},
+    {"h": "What it does not show"},
+    {"t": "This is smoke made in microgravity from a handful of spacecraft materials. No Earth detector was tested, and nothing here says that smoke detectors fail in general. The detector limit is a choice ("},
+    {"ref": {"file": "smoke_sizes", "path": "detector_thresholds_nm[0]", "fmt": "num", "d": 0}},
+    {"t": ", "},
+    {"ref": {"file": "smoke_sizes", "path": "detector_thresholds_nm[1]", "fmt": "num", "d": 0}},
+    {"t": " or "},
+    {"ref": {"file": "smoke_sizes", "path": "detector_thresholds_nm[2]", "fmt": "num", "d": 0}, "unit": "nm"},
+    {"t": "), because sources disagree on where these detectors lose sensitivity. "},
+    {"ref": {"file": "daft", "path": "not_in_archive", "fmt": "text"}}
+   ],
+   "short": [
+    {"t": "Smoke detectors: in NASA's SAME-2 tests, half the smoke mass from Kapton was in particles under "},
+    {"ref": {"file": "smoke_sizes", "path": "materials[name=Kapton].d_nm", "fmt": "num", "d": 0}, "unit": "nm"},
+    {"t": "; the detector limits this site uses are "},
+    {"ref": {"file": "smoke_sizes", "path": "detector_thresholds_nm[0]", "fmt": "num", "d": 0}},
+    {"t": ", "},
+    {"ref": {"file": "smoke_sizes", "path": "detector_thresholds_nm[1]", "fmt": "num", "d": 0}},
+    {"t": " and "},
+    {"ref": {"file": "smoke_sizes", "path": "detector_thresholds_nm[2]", "fmt": "num", "d": 0}, "unit": "nm"},
+    {"t": ". No Earth detector was tested."}
+   ],
+   "links": [
+    {"label": "Smoke the detector misses", "page": "detect", "fig": "Smoke the detector misses"},
+    {"label": "Dust or smoke? Checking the counter first", "page": "detect", "fig": "Dust or smoke? Checking the counter first"},
+    {"label": "Model cards", "page": "models"}
+   ],
+   "sources": [
+    {"label": "Urban et al. 2012, AIAA 2012-3536 (NASA SAME-2 flight), NTRS 20130000422", "url": "https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf"},
+    {"label": "NASA SAME, PSI-102", "doi": "10.60555/gd4k-8h62"},
+    {"label": "NASA DAFT / DAFT-2, PSI-47", "doi": "10.60555/ztgj-d202"}
+   ]
+  },
+  {
+   "id": "materials-gear",
+   "title": "Materials and firefighter gear",
+   "status": "team",
+   "sub": "What our flame-spread models show about how fast flame crosses a material, and where it can keep burning.",
+   "text": [
+    {"h": "What the models show"},
+    {"t": "Our flame model says thin acrylic (PMMA) can keep burning down to "},
+    {"ref": {"file": "flame_spread", "path": "flammability_maps[gravity=0 g,P_kPa=101.3].min_O2", "fmt": "pct"}},
+    {"t": " oxygen without gravity, in a slow airflow of "},
+    {"ref": {"file": "flame_spread", "path": "flammability_maps[gravity=0 g,P_kPa=101.3].min_O2_flow_m_s", "fmt": "sig"}, "unit": "m/s"},
+    {"t": ", against "},
+    {"ref": {"file": "flame_spread", "path": "flammability_maps[gravity=Earth 1 g,P_kPa=101.3].min_O2", "fmt": "pct"}},
+    {"t": " at Earth gravity, both at "},
+    {"ref": {"file": "flame_spread", "path": "flammability_maps[gravity=0 g,P_kPa=101.3].P_kPa", "fmt": "num", "d": 1}, "unit": "kPa"},
+    {"t": ". In still air ("},
+    {"ref": {"file": "flame_spread", "path": "rates[fuel=PMMA 0.1 mm,P_kPa=101.3,X_O2=0.21,gravity=Earth 1 g].flow_m_s[0]", "fmt": "num", "d": 2}, "unit": "m/s"},
+    {"t": ") at "},
+    {"ref": {"file": "flame_spread", "path": "rates[fuel=PMMA 0.1 mm,P_kPa=101.3,X_O2=0.21,gravity=Earth 1 g].X_O2", "fmt": "pct"}},
+    {"t": " oxygen, the same model has a flame crossing a thin acrylic sheet at "},
+    {"ref": {"file": "flame_spread", "path": "rates[fuel=PMMA 0.1 mm,P_kPa=101.3,X_O2=0.21,gravity=Earth 1 g].rate_mm_s[0]", "fmt": "sig"}, "unit": "mm/s"},
+    {"t": " at Earth gravity, where rising hot gas draws in fresh air, and at "},
+    {"ref": {"file": "flame_spread", "path": "rates[fuel=PMMA 0.1 mm,P_kPa=101.3,X_O2=0.21,gravity=0 g].rate_mm_s[0]", "fmt": "sig"}, "unit": "mm/s"},
+    {"t": " without gravity. For a cotton-fiberglass fabric (SIBAL) with "},
+    {"ref": {"file": "spread_predictor", "path": "flow_cm_s[10]", "fmt": "num", "d": 0}, "unit": "cm/s"},
+    {"t": " of airflow along it at "},
+    {"ref": {"file": "spread_predictor", "path": "o2_vol_pct[7]", "fmt": "num", "d": 0}},
+    {"t": "% oxygen in microgravity, our spread predictor gives "},
+    {"ref": {"file": "spread_predictor", "path": "cases[id=sibal_concurrent].rate_mm_s[7][10]", "fmt": "sig"}, "unit": "mm/s"},
+    {"t": " (range "},
+    {"ref": {"file": "spread_predictor", "path": "cases[id=sibal_concurrent].lo[7][10]", "fmt": "sig"}},
+    {"t": " to "},
+    {"ref": {"file": "spread_predictor", "path": "cases[id=sibal_concurrent].hi[7][10]", "fmt": "sig"}, "unit": "mm/s"},
+    {"t": "). Inside the calibrated domain: "},
+    {"ref": {"file": "spread_predictor", "path": "cases[id=sibal_concurrent].in_domain[7][10]", "fmt": "text", "map": {"1": "yes", "true": "yes", "0": "no, so this value is an extrapolation", "false": "no, so this value is an extrapolation"}}},
+    {"t": "."},
+    {"h": "What it could mean on Earth"},
+    {"t": "Flame-spread tests on Earth run with gravity pulling hot gas upward. These models show that airflow, oxygen and gravity, not only the material, decide whether a flame spreads and how fast. That is a reason to test materials, including fabrics for protective gear, across the airflow and oxygen levels they will meet, not at one standard condition."},
+    {"h": "What it does not show"},
+    {"t": "No firefighter gear was tested. The fabric is one NASA sample material, and the acrylic numbers come from a physics model checked against NASA's BASS-II flights, not from a burn on Earth. Nothing here rates a material or a piece of gear for use."}
+   ],
+   "short": [
+    {"t": "Materials: our flame model says thin acrylic can keep burning down to "},
+    {"ref": {"file": "flame_spread", "path": "flammability_maps[gravity=0 g,P_kPa=101.3].min_O2", "fmt": "pct"}},
+    {"t": " oxygen without gravity and "},
+    {"ref": {"file": "flame_spread", "path": "flammability_maps[gravity=Earth 1 g,P_kPa=101.3].min_O2", "fmt": "pct"}},
+    {"t": " at Earth gravity. A material test at Earth gravity checks the Earth case only, and no firefighter gear was tested."}
+   ],
+   "links": [
+    {"label": "Where a flame can survive", "page": "flame", "fig": "Where a flame can survive"},
+    {"label": "How fast flame crosses a solid", "page": "flame", "fig": "How fast flame crosses a solid"},
+    {"label": "Will it spread, and how fast?", "page": "predict", "fig": "Will it spread, and how fast?"}
+   ],
+   "sources": [
+    {"label": "NASA BASS-II, PSI-25", "doi": "10.60555/4qc4-de67"},
+    {"label": "NASA BASS-II summary report, NTRS 20210011385 (Olson et al. 2021)", "url": "https://ntrs.nasa.gov/citations/20210011385"},
+    {"label": "NASA Saffire-II experimental table, PSI-99", "doi": "10.60555/2chp-m469"},
+    {"label": "Olson et al., concurrent flame spread over large cellulose samples in microgravity (accepted manuscript)", "url": "https://discovery.ucl.ac.uk/id/eprint/10164340/"}
+   ]
+  }
+ ]
+}

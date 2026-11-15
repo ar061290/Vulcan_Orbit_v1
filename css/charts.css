@@ -1,0 +1,52 @@
+/* charts.css: SVG charts from js/charts.js, keyboard focus marks, legends and the "Show the numbers" table.
+   Grid, axis, text and mark outlines use the theme tokens, so a chart recolours with Day/Night at once.
+   Fallbacks are the Night values from main (js/charts.js THEMES.night). */
+
+.chart-wrap{position:relative;margin:4px 0 2px;max-width:100%}
+svg.chart{display:block;width:100%;height:auto;overflow:visible;touch-action:pan-y}
+svg.chart text{font-family:var(--font,system-ui,sans-serif);fill:var(--mute,#8d96a8);font-size:11px}
+svg.chart text.ch-ink{fill:var(--ink,#eef1f7)}
+svg.chart text.ch-val{font-size:10.5px;font-weight:600}
+
+.ch-grid{stroke:var(--grid,#1e2638)}
+.ch-axis{stroke:var(--axis,#2c3550)}
+.ch-mute{stroke:var(--mute,#8d96a8)}
+.ch-cross{stroke:var(--mute,#8d96a8);pointer-events:none}
+.ch-surf{stroke:var(--surface,#0e1320)}
+.ch-warn{stroke:var(--warn,#fab219)}
+.ch-shade{fill:var(--crit,#d03b3b);opacity:.1}
+.ch-pat{stroke:var(--surface,#0e1320);opacity:.85}
+.ch-patfill{fill:var(--surface,#0e1320);opacity:.85}
+.ch-ring{fill:none;stroke:var(--ink,#eef1f7);stroke-width:2.5;pointer-events:none}
+
+/* keyboard: the chart is one tab stop; the mark being read gets a ring */
+svg.chart:focus{outline:none}
+svg.chart:focus-visible,[data-keynav]:focus-visible{outline:3px solid var(--oxy,#7aa2ff);outline-offset:3px;border-radius:6px}
+svg .kfocus{stroke:var(--ink,#eef1f7);stroke-width:3;paint-order:stroke}
+.kfocus:not(svg *){outline:2px solid var(--ink,#eef1f7);outline-offset:2px}
+
+/* legend under a chart: colour plus the same dash, shape or fill pattern the marks use */
+.chart-legend{display:flex;flex-wrap:wrap;gap:4px 16px;list-style:none;margin:6px 0 2px;padding:0;font-size:12.5px;color:var(--ink2,#bcc3d1)}
+.chart-legend li{display:inline-flex;align-items:center;gap:6px;margin:0}
+.chart-legend svg{flex:none;width:28px;height:12px;overflow:visible}
+
+.chart-none{color:var(--mute,#8d96a8);font-size:14px;margin:8px 0}
+
+/* "Show the numbers" */
+details.numbers{margin-bottom:2px}   /* margin-top and the dashed rule come from components.css (shared look) */
+details.numbers > summary{cursor:pointer;width:max-content;max-width:100%;font-size:13.5px;color:var(--ink2,#bcc3d1);padding:4px 0}
+details.numbers > summary:hover{color:var(--ink,#eef1f7)}
+details.numbers .scroll{max-height:420px;overflow:auto;margin-top:6px}
+details.numbers table{width:100%;border-collapse:collapse;font-size:13px}
+details.numbers caption{caption-side:top;text-align:left;font-size:12.5px;color:var(--mute,#8d96a8);padding:0 0 6px}
+details.numbers th,details.numbers td{padding:4px 8px;text-align:left;vertical-align:top;border-bottom:1px solid var(--grid,#1e2638)}
+details.numbers thead th{position:sticky;top:0;background:var(--surface,#0e1320)}
+details.numbers tbody th{font-weight:600;color:var(--ink2,#bcc3d1);text-transform:none;letter-spacing:0;font-family:inherit;font-size:13px}
+details.numbers td.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono,ui-monospace,monospace);white-space:nowrap}
+.numbers-note{font-size:12.5px;color:var(--mute,#8d96a8);margin:6px 0 0}
+
+@media (forced-colors:active){
+  svg .kfocus,.ch-ring{stroke:Highlight}
+  .ch-grid,.ch-axis{stroke:GrayText}
+}
+@media print{details.numbers{display:none}}

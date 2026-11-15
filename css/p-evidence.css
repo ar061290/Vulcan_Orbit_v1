@@ -1,0 +1,46 @@
+/* Page CSS for #/evidence (Checks). Every rule is scoped under #view[data-page="evidence"] (site/REBUILD_PLAN.md §0 rule 9).
+   Ported from main's freefall.css (.trust, .xcheck) and app.css (td b), plus the new check-row notes. */
+#view[data-page="evidence"] td b{color:var(--ink);font-weight:600}
+#view[data-page="evidence"] td small{color:var(--ink2);line-height:1.45}
+#view[data-page="evidence"] td code{font:12.5px var(--mono);color:var(--ink);overflow-wrap:anywhere}
+#view[data-page="evidence"] .checks td:first-child code{white-space:nowrap;overflow-wrap:normal}
+/* result pills hold long text (and glossary terms): flow it as text, not as flex items */
+#view[data-page="evidence"] td .status{display:inline}
+#view[data-page="evidence"] td .status::before{display:inline-block;margin-right:6px;vertical-align:.05em}
+
+/* Can you trust this? */
+#view[data-page="evidence"] .trust td{vertical-align:top}
+#view[data-page="evidence"] .trust .num{font:600 15px var(--mono);color:var(--ink)}
+#view[data-page="evidence"] .trust-dots{font:600 13px var(--mono);white-space:nowrap;color:var(--ink)}
+#view[data-page="evidence"] .ck-draft{display:inline-block;margin-left:6px;font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink2);border:1px dashed var(--axis);border-radius:4px;padding:1px 5px}
+
+/* NASA says / we get */
+#view[data-page="evidence"] .xcheck td{vertical-align:top;font-size:14px}
+#view[data-page="evidence"] .xcheck td:nth-child(2){font-style:italic;color:var(--ink2)}
+#view[data-page="evidence"] .xcheck td:nth-child(2) small{font-style:normal}
+
+/* Checks and Simulation checks */
+#view[data-page="evidence"] .checks td:nth-child(2){min-width:14em}
+#view[data-page="evidence"] .checks td.ck-result{min-width:13em}
+#view[data-page="evidence"] .checks .status,#view[data-page="evidence"] .simchecks .status{color:var(--ink)}
+#view[data-page="evidence"] tr.ck-scrapped td{color:var(--mute)}
+#view[data-page="evidence"] tr.ck-scrapped td b{color:var(--ink2);font-weight:600}
+#view[data-page="evidence"] tr.ck-added td:first-child code{border-bottom:1px dashed var(--axis)}
+#view[data-page="evidence"] .ck-source code{font-size:12px}
+#view[data-page="evidence"] .ck-proposed{font-style:italic}
+#view[data-page="evidence"] .simchecks td:nth-child(3){min-width:16em}
+#view[data-page="evidence"] .ck-per{font-size:14px;color:var(--ink2);margin:0 0 10px}
+#view[data-page="evidence"] .ck-reading{max-width:var(--measure);color:var(--ink2);margin:12px 0 0}
+
+/* Where each number comes from */
+#view[data-page="evidence"] .manifest td:first-child{white-space:nowrap}
+
+/* Known limits */
+#view[data-page="evidence"] .ck-limits{margin:0;padding-left:18px;color:var(--ink2);max-width:var(--measure)}
+#view[data-page="evidence"] .ck-limits li{margin-bottom:6px}
+
+@media (max-width:520px){
+  #view[data-page="evidence"] .checks td:nth-child(2),#view[data-page="evidence"] .simchecks td:nth-child(3){min-width:11em}
+  #view[data-page="evidence"] .manifest td:first-child{white-space:normal}
+}

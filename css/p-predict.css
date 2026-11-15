@@ -1,0 +1,64 @@
+/* Page CSS for #/predict. Every rule is scoped under #view[data-page="predict"] (site/REBUILD_PLAN.md §0 rule 9).
+   Owner: P4-C (spread, model cards, gap map). The .sp- rules are ported from main's css/freefall.css. */
+
+/* "Will it spread, and how fast?": controls beside the heatmap (tour stop 4 targets .sp-grid) */
+#view[data-page="predict"] .sp-grid{display:grid;grid-template-columns:minmax(240px,1fr) minmax(0,1.6fr);gap:22px;align-items:start}
+#view[data-page="predict"] .sp-grid > *{min-width:0}
+#view[data-page="predict"] .sp-ctl{display:grid;gap:4px;margin-bottom:12px;font-size:14px}
+#view[data-page="predict"] .sp-ctl label{font-weight:700;color:var(--ink)}
+#view[data-page="predict"] .sp-ctl select{width:100%;max-width:100%;min-width:0}
+#view[data-page="predict"] .sp-ctl b{font:600 14px var(--mono);color:var(--ink)}
+#view[data-page="predict"] .sp-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 22px;align-items:end}
+#view[data-page="predict"] .sp-cell{font-size:13px;color:var(--mute);margin:0 0 8px}
+#view[data-page="predict"] .sp-out{margin-top:6px}
+#view[data-page="predict"] .sp-big{font:600 2.2rem/1 var(--mono);color:var(--ink);overflow-wrap:anywhere}
+#view[data-page="predict"] .sp-big small{font:500 14px var(--font);color:var(--mute)}
+#view[data-page="predict"] .sp-big.out{color:var(--mute)}
+#view[data-page="predict"] .sp-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+#view[data-page="predict"] .sp-warn{font-size:13.5px;color:var(--accent-ink);background:var(--accent-soft);padding:8px 10px;border-radius:8px}
+#view[data-page="predict"] .sp-note,
+#view[data-page="predict"] .sp-sum,
+#view[data-page="predict"] .gap-sum{font-size:13.5px;color:var(--ink2);max-width:var(--measure)}
+#view[data-page="predict"] .sp-run{font-size:14px;margin:8px 0 0}
+
+/* heatmap: cells are drawn by fig_spread.js; text, outline and pick ring use the theme tokens */
+#view[data-page="predict"] svg.sp-heat rect{cursor:pointer}
+#view[data-page="predict"] svg.sp-heat .sp-mark{fill:var(--ink);font-size:13px;font-weight:700}
+#view[data-page="predict"] svg.sp-heat .sp-box{stroke:var(--ink);stroke-width:.8;opacity:.55}
+#view[data-page="predict"] svg.sp-heat .sp-pick{stroke:var(--ink);stroke-width:2.5}
+#view[data-page="predict"] .sp-legend > span{display:inline-flex;align-items:center;gap:6px}
+#view[data-page="predict"] .sp-sw{display:inline-block;width:14px;height:12px;border-radius:2px;flex:none}
+#view[data-page="predict"] .sp-sw-box{border:1.5px solid var(--ink);opacity:.7;background:none}
+#view[data-page="predict"] .sp-sw-faint{opacity:.35}
+#view[data-page="predict"] .sp-sw-pick{border:2.5px solid var(--ink);background:none}
+
+/* growth runs and M6b score tables */
+#view[data-page="predict"] .m6b-stats,
+#view[data-page="predict"] .mc-stats{gap:10px;margin-bottom:10px}
+#view[data-page="predict"] .m6b-stats .stat,
+#view[data-page="predict"] .mc-stats .stat{font-size:1.6rem;overflow-wrap:anywhere}
+#view[data-page="predict"] .m6b-rules{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px}
+#view[data-page="predict"] .m6b-rules b{margin-right:4px}
+#view[data-page="predict"] .m6b-disclose{font-size:14px;color:var(--ink2);border-left:3px solid var(--warn);padding:4px 0 4px 10px;max-width:var(--measure)}
+#view[data-page="predict"] .m6b-verdicts td:last-child{font:12.5px var(--mono);color:var(--mute)}
+
+/* model cards */
+#view[data-page="predict"] .mc-h{font-size:15px;margin:4px 0 6px}
+#view[data-page="predict"] .mc-findings{margin:0 0 10px;padding-left:18px}
+#view[data-page="predict"] .mc-findings li{margin-bottom:6px}
+#view[data-page="predict"] .mc-next{font-size:14px;margin:0 0 12px}
+#view[data-page="predict"] .mc-fail{font-size:14px;color:var(--ink2);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#view[data-page="predict"] .mc-kv{margin-top:10px}
+
+/* gap map and the next experiment */
+#view[data-page="predict"] svg.gap-map .gap-lab{font-size:12px;font-weight:600}
+#view[data-page="predict"] .gap-legend .gap-sw{flex:none}
+#view[data-page="predict"] .gap-verdicts{margin:10px 0 0;padding-left:18px}
+#view[data-page="predict"] .gap-verdicts li{margin-bottom:6px}
+#view[data-page="predict"] .nx-top{font-size:15px;color:var(--ink);max-width:var(--measure)}
+#view[data-page="predict"] .nx-rule{font-size:14px;color:var(--ink2);max-width:var(--measure)}
+
+@media (max-width:820px){
+  #view[data-page="predict"] .sp-grid,
+  #view[data-page="predict"] .sp-row{grid-template-columns:1fr}
+}

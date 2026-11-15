@@ -1,0 +1,113 @@
+/* Page CSS for #/overview (Home). Every rule is scoped under #view[data-page="overview"] (site/REBUILD_PLAN.md §0 rule 9).
+   Values ported from main's css/freefall.css and css/app.css (hero2, port, ring, story, qs/qn, readme, india, mission),
+   plus the new pipeline strip (.pipe) and the Assess / Flame lab links (.qs-also). */
+#view[data-page="overview"] .home{min-width:0}
+
+/* ---------- hero and porthole ---------- */
+#view[data-page="overview"] .hero2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:28px;align-items:center;margin:4px 0 40px;min-height:min(78vh,720px)}
+#view[data-page="overview"] .hero2 h1{font:800 clamp(40px,6.6vw,96px)/.93 var(--display);letter-spacing:-.05em;margin:14px 0 22px;overflow-wrap:break-word}
+#view[data-page="overview"] .hero2 h1 .lit{color:var(--accent)}
+#view[data-page="overview"] .hero2 .hero-lead{font-size:1.2rem;line-height:1.55;color:var(--ink2);max-width:34ch;margin:0 0 26px}
+#view[data-page="overview"] .hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+#view[data-page="overview"] .port-fig{margin:0;min-width:0}
+#view[data-page="overview"] .port{position:relative;aspect-ratio:1;width:min(100%,600px);margin:0 auto}
+#view[data-page="overview"] .port .ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+#view[data-page="overview"] .port .glass{position:absolute;inset:9%;border-radius:50%;overflow:hidden;background:var(--screen);box-shadow:0 0 0 10px var(--raise),0 0 0 12px var(--line),0 30px 70px -20px rgba(0,0,0,.6),inset 0 0 40px rgba(0,0,0,.8)}
+#view[data-page="overview"] .port .glass::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;background:radial-gradient(120% 80% at 30% 15%,rgba(255,255,255,.12),transparent 40%)}
+#view[data-page="overview"] .port .hero-gl{position:absolute;inset:0;border-radius:0}
+#view[data-page="overview"] .port .hero-gl svg,#view[data-page="overview"] .port canvas{width:100%;height:100%;display:block}
+#view[data-page="overview"] .port canvas{cursor:grab;touch-action:pan-y}
+#view[data-page="overview"] .port .hero-gl .illus-note{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);width:max-content;max-width:80%;z-index:1}
+#view[data-page="overview"] .port-ctl{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);display:flex;gap:6px;background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:4px;box-shadow:var(--shadow);z-index:2}
+#view[data-page="overview"] .port-ctl button{border:0;background:none;color:var(--ink2);font:700 13.5px var(--font);padding:8px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+#view[data-page="overview"] .port-ctl button[aria-pressed=true]{background:var(--ink);color:var(--page)}
+#view[data-page="overview"] .port-ctl button:focus-visible{outline:3px solid var(--oxy);outline-offset:2px}
+#view[data-page="overview"] .ring text{font:600 11.5px var(--mono);letter-spacing:.06em;fill:var(--mute)}
+#view[data-page="overview"] .ring .c{fill:none;stroke:var(--axis);stroke-width:1}
+#view[data-page="overview"] .ring .d{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 6}
+#view[data-page="overview"] .port-note{text-align:center;font:500 12px var(--mono);color:var(--mute);margin:22px 0 0}
+
+/* ---------- C8 pipeline strip ---------- */
+#view[data-page="overview"] .pipe{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+#view[data-page="overview"] .pipe-step{position:relative;display:grid;gap:6px;align-content:start;padding:16px;border-radius:12px;background:var(--raise);min-width:0}
+#view[data-page="overview"] .pipe-step+.pipe-step::before{content:"→";position:absolute;left:-22px;top:50%;transform:translateY(-50%);font:700 18px/1 var(--mono);color:var(--accent-ink)}
+#view[data-page="overview"] .pipe-n{font:700 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink)}
+#view[data-page="overview"] .pipe-step h3{margin:0;font:700 1.15rem/1.2 var(--display);letter-spacing:-.02em}
+#view[data-page="overview"] .pipe-step p{margin:0;font-size:.95rem;color:var(--ink2)}
+#view[data-page="overview"] .pipe-stamps{display:flex;flex-wrap:wrap;gap:6px;font-size:13px;color:var(--ink2)}
+#view[data-page="overview"] .pipe-stamps>span{display:inline-flex;gap:6px;align-items:center}
+#view[data-page="overview"] .pipe-links{font-weight:700}
+
+/* ---------- "The finding" ---------- */
+#view[data-page="overview"] .story{margin:34px 0 26px}
+#view[data-page="overview"] .story>h2{font:700 clamp(24px,3.4vw,40px)/1.12 var(--display);letter-spacing:-.03em;max-width:28ch;margin:10px 0 12px}
+#view[data-page="overview"] .story-stamps{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;color:var(--ink2);margin:0 0 10px}
+#view[data-page="overview"] .story-sub{font-size:1.1rem;color:var(--ink2);max-width:62ch;margin:0 0 18px}
+#view[data-page="overview"] .story-links{margin:10px 0 0;font-weight:700}
+#view[data-page="overview"] .story-map{font-weight:700;color:var(--ink);margin:26px 0 10px}
+
+/* ---------- the three questions ---------- */
+#view[data-page="overview"] .qs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--ink);border-bottom:1px solid var(--line);margin:0 0 14px}
+#view[data-page="overview"] .qn{padding:22px 22px 24px;text-decoration:none;color:inherit;display:grid;gap:8px;align-content:start;background:transparent;transition:background .2s;min-width:0}
+#view[data-page="overview"] .qn+.qn{border-left:1px solid var(--line)}
+#view[data-page="overview"] .qn:hover{background:var(--surface)}
+#view[data-page="overview"] .qn:focus-visible{outline:3px solid var(--oxy);outline-offset:-3px}
+#view[data-page="overview"] .qn .n{font:700 13px var(--mono);color:var(--accent-ink);letter-spacing:.1em}
+#view[data-page="overview"] .qn h2{font:700 1.7rem/1.05 var(--display);letter-spacing:-.03em;margin:0}
+#view[data-page="overview"] .qn p{margin:0;font-size:.98rem}
+#view[data-page="overview"] .qn-stamps{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:4px}
+#view[data-page="overview"] .qn-stamps>span{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--ink2)}
+#view[data-page="overview"] .qn .go{font:700 14px var(--font);color:var(--ink);margin-top:6px}
+#view[data-page="overview"] .qs-also{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 30px}
+#view[data-page="overview"] .qs-also-h{font:700 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="overview"] .qs-also a.also{display:inline-flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink);background:var(--surface)}
+#view[data-page="overview"] .qs-also a.also:hover{border-color:var(--ink2)}
+#view[data-page="overview"] .qs-also a.also span{color:var(--ink2)}
+
+/* ---------- coverage line and mission check ---------- */
+#view[data-page="overview"] .coverage{font:700 clamp(19px,2.2vw,26px)/1.3 var(--display);letter-spacing:-.02em;color:var(--ink);max-width:46ch;margin:6px 0 18px}
+#view[data-page="overview"] .mc-pick{display:grid;gap:6px;margin:4px 0 14px}
+#view[data-page="overview"] .mc-pick .row{margin:0}
+#view[data-page="overview"] .mc-pick .seg-label{font:600 13.5px var(--font);color:var(--ink2)}
+#view[data-page="overview"] .mc-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
+#view[data-page="overview"] .mc-c{padding:14px;border-radius:12px;background:var(--raise);display:grid;gap:2px}
+#view[data-page="overview"] .mc-c b{font:600 2rem/1 var(--mono);color:var(--ink)}
+#view[data-page="overview"] .mc-c span{font-weight:700;color:var(--ink)}
+#view[data-page="overview"] .mc-c.none{background:var(--accent-soft)}
+#view[data-page="overview"] .mc-c.none b{color:var(--accent-ink)}
+#view[data-page="overview"] .mc-note{font-size:13px}
+
+/* ---------- how to read this site ---------- */
+#view[data-page="overview"] .readme{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:8px}
+#view[data-page="overview"] .readme div{padding:14px;border:1.5px dashed var(--line);border-radius:12px}
+#view[data-page="overview"] .readme p{font-size:14px;margin:8px 0 0}
+#view[data-page="overview"] .readme-foot{margin:12px 0 0}
+
+/* ---------- India card ---------- */
+#view[data-page="overview"] .india{margin-top:20px}
+#view[data-page="overview"] .india .eyebrow{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 4px}
+#view[data-page="overview"] .india>h2{font:700 1.7rem/1.1 var(--display);letter-spacing:-.03em;margin:0 0 8px}
+#view[data-page="overview"] .india-levels{margin:10px 0 0}
+#view[data-page="overview"] .india-levels ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px;font-size:14px;color:var(--ink2)}
+#view[data-page="overview"] .india-facts{margin-top:10px}
+#view[data-page="overview"] .fact{padding:14px;border-radius:12px;background:var(--raise);min-width:0}
+#view[data-page="overview"] .fact-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-bottom:6px}
+#view[data-page="overview"] .fact p{font-size:14px;margin:0 0 6px}
+#view[data-page="overview"] .fact a{overflow-wrap:anywhere}
+#view[data-page="overview"] .india-checked{margin:12px 0 0}
+
+/* ---------- narrow screens ---------- */
+@media (max-width:900px){
+  #view[data-page="overview"] .hero2{grid-template-columns:1fr;min-height:0}
+  #view[data-page="overview"] .port-fig{order:-1}
+  #view[data-page="overview"] .port{width:min(100%,520px)}
+  #view[data-page="overview"] .qs{grid-template-columns:1fr}
+  #view[data-page="overview"] .qn+.qn{border-left:0;border-top:1px solid var(--line)}
+  #view[data-page="overview"] .pipe{grid-template-columns:1fr;gap:26px}
+  #view[data-page="overview"] .pipe-step+.pipe-step::before{content:"↓";left:50%;top:-22px;transform:translateX(-50%)}
+}
+@media (max-width:600px){
+  #view[data-page="overview"] .mc-counts{grid-template-columns:1fr}
+  #view[data-page="overview"] .qn{padding:18px 4px 20px}
+  #view[data-page="overview"] .hero2 h1{font-size:clamp(36px,11vw,44px)}
+}

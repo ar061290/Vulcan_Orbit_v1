@@ -1,0 +1,95 @@
+/* Page CSS for #/assess (package P3-B). Every rule is scoped under #view[data-page="assess"] (site/REBUILD_PLAN.md §0 rule 9).
+   Class prefix as- = js/fig_assess.js and js/pages/assess.js. Colours come from css/tokens.css only, so Day and Night both work. */
+
+#view[data-page="assess"] .as-body[aria-busy="true"]{opacity:.6;transition:opacity .2s}
+#view[data-page="assess"] .as-wait{color:var(--mute);font-style:italic;margin:6px 0}
+#view[data-page="assess"] .as-note{font-size:13.5px;color:var(--ink2);margin:8px 0 0;max-width:var(--measure,70ch)}
+#view[data-page="assess"] .as-from{display:block;font-size:12.5px;line-height:1.45;color:var(--mute);margin:-8px 0 10px;overflow-wrap:anywhere}
+#view[data-page="assess"] .card h3{font-size:15px;margin:14px 0 6px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+#view[data-page="assess"] .card h3 .badge,#view[data-page="assess"] td .badge{vertical-align:middle}
+#view[data-page="assess"] td{overflow-wrap:anywhere}
+
+/* 1 inputs */
+#view[data-page="assess"] .as-preset{display:grid;gap:6px;margin:4px 0 14px}
+#view[data-page="assess"] .as-preset label,#view[data-page="assess"] .as-field>label{font-weight:700;color:var(--ink)}
+#view[data-page="assess"] select,#view[data-page="assess"] .as-other input,#view[data-page="assess"] textarea{
+  font:500 14px var(--font);color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;max-width:100%;box-sizing:border-box}
+#view[data-page="assess"] .as-preset select{width:100%;max-width:40em}
+#view[data-page="assess"] .as-why{margin:0;font-size:13.5px;color:var(--ink2)}
+#view[data-page="assess"] .as-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+#view[data-page="assess"] .as-group{margin:0;padding:12px 14px 4px;border:1.5px solid var(--line);border-radius:var(--r,12px);min-width:0}
+#view[data-page="assess"] .as-group>legend{font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:0 6px}
+#view[data-page="assess"] .as-field{display:grid;gap:6px;margin:0 0 6px;min-width:0}
+#view[data-page="assess"] .as-field select{width:100%}
+#view[data-page="assess"] .as-field>*,#view[data-page="assess"] .as-cam-in>*{min-width:0}
+#view[data-page="assess"] .as-other{display:grid;gap:4px;margin-top:4px}
+#view[data-page="assess"] .as-other[hidden],#view[data-page="assess"] .as-flag[hidden],#view[data-page="assess"] .as-note[hidden]{display:none}
+#view[data-page="assess"] .as-flag{margin:-4px 0 10px;padding:6px 10px;border-left:3px solid var(--warn);background:var(--raise);border-radius:0 8px 8px 0;font-size:13px;color:var(--ink)}
+#view[data-page="assess"] .as-flag b::before{content:"\26A0\FE0E  ";}
+
+/* 2 camera */
+#view[data-page="assess"] .as-cam-latest{margin:0 0 10px}
+#view[data-page="assess"] .as-cam-none{margin:0 0 8px}
+#view[data-page="assess"] .as-cam-in{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px;align-items:start}
+#view[data-page="assess"] .as-cam-in textarea{width:100%;font:500 13px var(--mono);resize:vertical}
+#view[data-page="assess"] .as-cam-in input[type=file]{width:100%;max-width:100%;min-width:0;font:500 13.5px var(--font);color:var(--ink2)}
+#view[data-page="assess"] .as-cam-in .as-from{margin:0}
+#view[data-page="assess"] .as-cam-in .chip{justify-self:start}
+#view[data-page="assess"] .as-example{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+#view[data-page="assess"] .as-example small{color:var(--mute);flex:1 1 16em}
+#view[data-page="assess"] .as-cam-msg:empty{display:none}
+#view[data-page="assess"] .as-cam-msg{margin-top:12px}
+#view[data-page="assess"] .as-ok{margin:0;padding:8px 12px;border-left:3px solid var(--good);background:var(--raise);border-radius:0 8px 8px 0}
+#view[data-page="assess"] .as-err{margin:0;padding:8px 12px;border-left:3px solid var(--crit);background:var(--raise);border-radius:0 8px 8px 0}
+#view[data-page="assess"] .as-err p{margin:0 0 4px}
+#view[data-page="assess"] .as-err ul{margin:4px 0 0;padding-left:18px}
+#view[data-page="assess"] .as-err li{overflow-wrap:anywhere}
+#view[data-page="assess"] .as-smoke{margin-top:12px}
+
+/* 3 verdict */
+#view[data-page="assess"] .as-verdict{font-size:18px;margin:4px 0 8px;color:var(--ink)}
+#view[data-page="assess"] .as-verdict b{font-family:var(--display,var(--font))}
+#view[data-page="assess"] .as-verdict[data-code="0"] b{color:var(--crit)}
+#view[data-page="assess"] .as-verdict[data-code="1"] b{color:var(--warn)}
+#view[data-page="assess"] .as-unsup{font-weight:700}
+#view[data-page="assess"] .as-dirs{margin:0 0 10px;padding-left:18px}
+#view[data-page="assess"] .as-out{color:var(--crit)}
+#view[data-page="assess"] .as-out::before{content:"\26A0\FE0E  ";}
+
+/* 4 curve + 5 lists, side by side (spec C2: the lists stay visible beside the curve) */
+#view[data-page="assess"] .as-pair{align-items:start}
+#view[data-page="assess"] .as-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:4px 0 12px}
+#view[data-page="assess"] .as-stats .stat{font-size:20px;overflow-wrap:anywhere}
+#view[data-page="assess"] .as-stats .stat small{display:block;font-size:12px;color:var(--mute);font-weight:500}
+#view[data-page="assess"] .as-list{margin:0 0 10px;padding:4px 0 4px 12px;border-left:3px solid var(--line)}
+#view[data-page="assess"] .as-list.cal{border-left-color:var(--good)}
+#view[data-page="assess"] .as-list.ext{border-left-color:var(--warn)}
+#view[data-page="assess"] .as-list.ass{border-left-color:var(--mute)}
+#view[data-page="assess"] .as-list h3{margin-top:4px}
+#view[data-page="assess"] .as-list ul{margin:0;padding-left:18px;font-size:13.5px}
+#view[data-page="assess"] .as-list li{margin:0 0 4px;overflow-wrap:anywhere}
+
+/* 6 risk */
+#view[data-page="assess"] .as-banner{margin:0 0 12px;padding:8px 12px;border:1.5px dashed var(--warn);border-radius:10px;color:var(--ink)}
+#view[data-page="assess"] .as-parts .kv dd{overflow-wrap:anywhere}
+#view[data-page="assess"] .as-levelbox{margin:14px 0;padding:12px 14px;border-radius:12px;background:var(--raise);border-left:4px solid var(--line)}
+#view[data-page="assess"] .as-levelbox[data-level="Low"]{border-left-color:var(--good)}
+#view[data-page="assess"] .as-levelbox[data-level="Elevated"]{border-left-color:var(--warn)}
+#view[data-page="assess"] .as-levelbox[data-level="High"]{border-left-color:var(--crit)}
+#view[data-page="assess"] .as-levelbox p{margin:0 0 6px}
+#view[data-page="assess"] .as-level{font-size:18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+#view[data-page="assess"] .as-scale{display:inline-flex;gap:4px;margin-left:auto}
+#view[data-page="assess"] .as-scale i{font:600 12px var(--mono);font-style:normal;padding:3px 8px;border-radius:999px;border:1.5px solid var(--line);color:var(--mute)}
+#view[data-page="assess"] .as-scale i.on{border-color:var(--ink);color:var(--ink);background:var(--surface)}
+#view[data-page="assess"] .as-next{margin:14px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+#view[data-page="assess"] .as-next small{color:var(--mute)}
+
+@media (max-width:900px){
+  #view[data-page="assess"] .as-groups{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  #view[data-page="assess"] .as-cam-in{grid-template-columns:1fr}
+  #view[data-page="assess"] .as-stats{grid-template-columns:1fr}
+  #view[data-page="assess"] .as-scale{margin-left:0}
+}
+html[data-motion="calm"] #view[data-page="assess"] .as-body{transition:none}

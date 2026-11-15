@@ -1,42 +1,65 @@
-import { h, load, page, card, empty, fmt } from '../lib.js';
-import { scatter, C } from '../charts.js';
-import { driftCard, whatifCard, calibrationCard, robustCard, lbmWhatifCard } from '../drift_ui.js';
-import { gapCard as gapMap } from '../gaps_ui.js';
-import { spreadCard, growthCard } from '../spread_ui.js';
-import { cabin3d } from '../cabin3d.js';
-import { params } from '../lib.js';
-export default async function (root) {
-  const [m, drift, gaps, wi, cal, lbm, lwi, sp, gr] = await Promise.all([load('models'), load('drift'), load('gaps'), load('whatif'), load('drift_calibration'), load('drift_lbm'), load('drift_whatif'), load('spread_predictor'), load('growth_examples')]);
-  const q = params();
-  const schema = '{ "status":"real", "models":[{\n   "id":"spread", "name":"Flame spread over PMMA", "question":"How fast does it spread?",\n   "data":"BASS-II (PSI-25)", "method":"de Ris formula + learned correction", "validation":"leave one session out",\n   "metric":"R2", "score":0.58, "score_range":[0.41,0.70], "baseline_name":"de Ris formula", "baseline_score":0.44,\n   "unit":"mm/s", "points":[{ "obs":1.2, "pred":1.1, "lo":0.8, "hi":1.5, "label":"21% O2, 10 cm/s" }],\n   "drivers":[{ "name":"Oxygen", "share":0.5 }], "limits":"..." }] }';
-  const modelCards = m.status === 'missing'
-    ? [card('Models trained on NASA tables', 'missing', 'Spread, extinction and cool-flame models appear here as they are trained.', empty('Waiting for model results', 'models', 'One entry per model. Predictions come from test sessions the model never saw.', schema))]
-    : m.models.map(mod => card(mod.name, m.status, mod.question,
-      h('div', { class: 'grid g3', style: 'margin-bottom:8px' },
-        h('div', {}, h('small', {}, mod.metric + ' on unseen sessions'), h('div', { class: 'stat' }, fmt(mod.score, mod.kind === 'classifier' ? 3 : 2), mod.score_range && h('small', {}, `${fmt(mod.score_range[0], 2)} to ${fmt(mod.score_range[1], 2)}`))),
-        h('div', {}, h('small', {}, mod.baseline_name || 'Baseline'), h('div', { class: 'stat' }, mod.baseline_score == null ? '—' : fmt(mod.baseline_score, 2)), mod.baseline_metric_note ? h('small', {}, mod.baseline_metric_note) : null),
-        h('div', {}, h('small', {}, 'Test points'), h('div', { class: 'stat' }, String(mod.points?.length || 0)))),
-      mod.kind === 'classifier' && mod.points?.length ? h('div', {}, scatter({ xLabel: 'Air velocity past the sample, cm/s', yLabel: 'Predicted chance the detector misses it', yDom: [-0.05, 1.05],
-        points: mod.points.map(p => ({ x: p.x, y: p.pred, color: p.obs ? C.s2 : C.s3, label: `<b>${p.label}</b><br>model: ${Math.round(p.pred * 100)}% chance of a miss<br>actual: ${p.obs ? 'mostly too fine (missed)' : 'large enough (seen)'}` })) }),
-        h('div', { class: 'legend' }, h('span', {}, h('i', { style: `background:${C.s2};border-radius:50%` }), 'Actually too fine'), h('span', {}, h('i', { style: `background:${C.s3};border-radius:50%` }), 'Actually large enough'))) :
-      mod.points?.length ? scatter({ diagonal: true, xLabel: `Observed, ${mod.unit}`, yLabel: `Predicted, ${mod.unit}`, points: mod.points.map(p => ({ x: p.obs, y: p.pred, color: C.s1, label: `<b>${p.label || ''}</b><br>Observed ${fmt(p.obs, 2)}<br>Predicted ${fmt(p.pred, 2)}` + (p.lo != null ? ` (${fmt(p.lo, 2)} to ${fmt(p.hi, 2)})` : '') })) }) : null,
-      h('dl', { class: 'kv', style: 'margin-top:10px' }, ...[['Data', mod.data], ['Method', mod.method], ['Tested by', mod.validation], ['What drove it', (mod.drivers || []).map(d => `${d.name} ${Math.round(d.share * 100)}%`).join(', ')], ['Checks', (mod.checks_note || '')], ['Limits', mod.limits]].filter(r => r[1]).flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]))));
-  const dCard = drift.status === 'missing'
-    ? card('Where the smoke goes', 'missing', 'Smoke drift in a cabin with ventilation and no buoyancy.', empty('Waiting for the drift simulation', 'drift', 'A grid of smoke concentration per time step, plus detector positions.', '{ "status":"model", "nx":40, "ny":20, "dt_s":5, "flow_m_s":0.1,\n  "detectors":[{ "x":35, "y":10, "name":"Return duct" }],\n  "frames":[[0,0,0.1, ...nx*ny values], ...] }'))
-    : driftCard(drift);
-  const wiCard = wi.status === 'missing' ? null : whatifCard(wi);
-  const gapCard = gaps.status === 'missing'
-    ? card('What NASA has not tested', 'missing', 'Conditions with no data, and the next experiment worth running.', empty('Waiting for the gap table', 'gaps', 'Tested ranges per investigation and the gaps the team judges most important.', '{ "status":"real", "axes":["O2 %","Pressure, kPa"],\n  "tested":[{ "inv":"BASS-II", "x":[17,22], "y":[101,101] }],\n  "verdicts":[{ "text":"Solids: no data above X% O2", "source":"..." }] }'))
-    : gapMap(gaps);
-  root.append(page('Predict', 'Small models fitted to NASA\'s own tables, each compared with the textbook formula and tested on sessions it never saw. Every prediction carries a range.',
-    h('div', { class: 'grid g2' }, dCard, wiCard),
-    drift.status === 'missing' ? null : h('div', { style: 'margin-top:14px' }, cabin3d(drift)),
-    sp.status === 'missing' ? null : h('div', { style: 'margin-top:14px' }, spreadCard(sp, { case: q.fuel, o2: q.o2 && +q.o2, flow: q.flow && +q.flow })),
-    gr.status === 'missing' ? null : h('div', { style: 'margin-top:14px' }, growthCard(gr)),
-    cal.status === 'missing' ? null : h('div', { class: 'grid g2', style: 'margin-top:14px' }, calibrationCard(cal), robustCard(wi)),
-    lbm.status === 'missing' ? null : h('div', { class: 'grid g2', style: 'margin-top:14px' },
-      driftCard(lbm, 'Second opinion: a cabin with racks', `Independent lattice Boltzmann air model, ${lbm.lx_m} × ${lbm.ly_m} m module cross-section with racks, airflow ${lbm.flow_m_s} m/s, no buoyancy. It agrees with the model above on alarm vs no alarm for 94% of fire-detector pairs.`),
-      lwi.status === 'missing' ? null : lbmWhatifCard(lwi, lbm.lx_m, lbm.ly_m)),
-    h('div', { class: 'grid g2', style: 'margin-top:14px' }, ...modelCards, gapCard),
-    h('div', { style: 'margin-top:14px' }, card('Moon and Mars', null, null, h('p', {}, 'NASA\'s archive holds no combustion data taken at lunar or Martian gravity. We show microgravity and Earth-gravity results as the two ends of the range and do not invent a value in between.')))));
+// #/predict "Predict it": what will it do? Block order follows site/REBUILD_PLAN.md §3.6 with keep 1 (site.js): the smoke
+// map and the what-if runs show first; everything else sits under "Show N more figures" (the tour and ?fig= open it).
+// Every card renders even when its file is missing (an empty state, never a dropped card), except the robustness card,
+// which is drawn when data/whatif.json has its "robustness" block (or as an empty state when the file is missing).
+// Figures: js/fig_drift.js and js/fig_cabin3d.js (package P4-B), js/fig_spread.js, js/fig_models.js, js/fig_gaps.js.
+import { h, load, loadPath, page, card, empty, isMissing, fmt, pct, params as urlParams } from '../lib.js';
+import { driftCard, whatifCard, calibrationCard, robustCard, lbmWhatifCard, lbmAgreement } from '../fig_drift.js';
+import { cabin3dCard } from '../fig_cabin3d.js';
+import { spreadCard, growthCard, m6bCard, m6bSpreadChartCard } from '../fig_spread.js';
+import { modelCard, m6Card } from '../fig_models.js';
+import { gapCard, nextExperimentCard, moonMarsCard } from '../fig_gaps.js';
+
+const LEAD = 'Small models fitted to NASA\'s own tables, each compared with the textbook formula and tested on sessions it never saw. Every prediction carries a range.';
+const MODELS_SCHEMA = '{ "status":"model", "models":[{\n   "id":"…", "name":"…", "question":"…", "status":"real|model",\n   "data":"…", "method":"…", "validation":"…", "metric":"…", "score":…, "score_range":[lo, hi],\n   "baseline_name":"…", "baseline_score":…, "unit":"…", "points":[{ "obs":…, "pred":…, "lo":…, "hi":…, "label":"…" }],\n   "drivers":[{ "name":"…", "share":… }], "limits":"…" }] }';
+
+function lbmSub(lbm, dw) {
+  const agree = lbmAgreement(dw);
+  return `Independent lattice Boltzmann air model, ${fmt(lbm.lx_m, 2)} × ${fmt(lbm.ly_m, 2)} m module cross-section with racks, airflow ${fmt(lbm.flow_m_s, 3)} m/s, no buoyancy. ` +
+    (agree ? `It agrees with the model above on alarm vs no alarm for ${agree} of fire-detector pairs.`
+      : 'Its agreement with the model above is not available yet (data/drift_whatif.json missing or without its X-agree check).');
+}
+
+function modelCards(m, m6res) {
+  if (isMissing(m) || !Array.isArray(m.models) || !m.models.length)
+    return [card('Models trained on NASA tables', 'missing', 'Spread, extinction and cool-flame models appear here as they are trained.',
+      empty('Waiting for model results', 'models', 'One entry per model. Predictions come from test sessions the model never saw.', MODELS_SCHEMA))];
+  return m.models.map(mod => (mod && mod.id === 'm6' ? m6Card(mod, m6res) : modelCard(mod)));
+}
+
+export default async function render(root, ctx = {}) {
+  const names = ['models', 'drift', 'gaps', 'whatif', 'drift_calibration', 'drift_lbm', 'drift_whatif', 'spread_predictor', 'growth_examples'];
+  const [[m, drift, gaps, wi, cal, lbm, lwi, sp, gr], m6bRes, m6Res] = await Promise.all([
+    Promise.all(names.map(load)), loadPath('models/m6b-predictor/results.json'), loadPath('models/m6-spread/results.json')]);
+  const q = ctx.params || (ctx.detached ? {} : urlParams());
+  const showRobust = isMissing(wi) || Array.isArray(wi.robustness);
+  const lbmTitle = 'Second opinion: a cabin with racks';
+  root.append(page('What will it do?', LEAD,
+    h('div', { class: 'grid g2' }, driftCard(drift, {}, ctx), whatifCard(wi)),
+    cabin3dCard(drift, ctx),
+    h('div', { class: 'grid g2' }, calibrationCard(cal), showRobust ? robustCard(wi) : null),
+    h('div', { class: 'grid g2' },
+      driftCard(lbm, { title: lbmTitle, sub: isMissing(lbm) ? null : lbmSub(lbm, lwi), file: 'drift_lbm' }, ctx),
+      lbmWhatifCard(lwi, isMissing(lbm) ? undefined : lbm.lx_m, isMissing(lbm) ? undefined : lbm.ly_m)),
+    spreadCard(sp, { case: q.fuel, o2: q.o2, flow: q.flow, ctx }),
+    growthCard(gr),
+    m6bCard(sp, m6bRes),
+    m6bSpreadChartCard(sp, { case: q.fuel, o2: q.o2 }),
+    h('div', { class: 'grid g2 pr-models' }, modelCards(m, m6Res)),
+    gapCard(gaps),
+    nextExperimentCard(gaps),
+    moonMarsCard()));
+}
+
+/** "The short answer" (main's summaries.js predict lines). A sentence whose file is missing says so (D1.4). */
+export async function short() {
+  const w = await load('whatif');
+  const c = !isMissing(w) && Array.isArray(w.layouts) ? w.layouts[0] : null;
+  const out = ['With nothing to make it rise, smoke goes where the fans push it, not to the ceiling.'];
+  if (c && Number.isFinite(c.caught_120_at_10mg)) out.push(`In ${Number.isFinite(w.runs) ? fmt(w.runs, 0) : 'our'} simulated cabin fires, a ceiling detector at the station's alarm level caught only ${pct(c.caught_120_at_10mg, 1)} within 2 minutes.`);
+  else out.push('The share of simulated fires a ceiling detector catches is not available yet (data/whatif.json missing).');
+  // alarm levels: whatif.json alarm_mg_m3 (1, NASA ICES-2024-365) and alarm_hi_mg_m3 (10, the station level, NTRS 20170002629)
+  if (c && Number.isFinite(c.caught_120)) out.push(`A far more sensitive alarm level${Number.isFinite(w.alarm_mg_m3) ? ` (${fmt(w.alarm_mg_m3, 2)} mg/m³)` : ''} would catch about ${pct(c.caught_120)}. Where you put the detector matters less than how sensitive it is.`);
+  else out.push('The share caught at a more sensitive alarm level is not available yet (data/whatif.json missing).');
+  return out;
 }

@@ -1,6 +1,9 @@
 // Plain-language glossary. After a page renders, the first use of each term in every card becomes a button;
 // hover, focus or tap shows a one-line definition. Turn it off from the "Read your way" panel.
 // Definitions are written by the team in our own words; they describe, they do not add numbers.
+// The first 24 terms are verbatim from main. The last 4 (CV model, optical flow, de Ris, calibration box) are one-line
+// drafts for the team to check (site/DECISIONS.md). No ion-wind or thermopile terms.
+// Importable in Node: nothing touches the DOM until annotate() runs.
 export const TERMS = {
   'microgravity': 'Near-weightlessness, as on a space station in orbit. Hot gas no longer rises, so flames and smoke behave differently.',
   'buoyancy': 'The upward push gravity gives to hot, light gas. It is what makes a flame point up on Earth.',
@@ -26,39 +29,77 @@ export const TERMS = {
   'advection': 'Being carried along by moving air.',
   'diffusion flame': 'A flame where fuel and oxygen start apart and mix as they burn, like a candle.',
   'baseline': 'The simple rule or textbook formula a model has to beat to be worth using.',
+  // New in the rebuild: drafts, team to check.
+  'CV model': 'Computer-vision model: software that looks at camera frames and finds a flame, how big it is and where it sits.',
+  'optical flow': 'A way to measure movement between video frames. Here: following how smoke drifts across the camera view.',
+  'de Ris': 'The textbook formula, named after the scientist who derived it, for how fast a flame creeps over a solid against the airflow.',
+  'calibration box': 'The range of conditions a model was fitted and checked on. Outside it the answer is a stretch, and the site flags it.',
 };
 const KEYS = Object.keys(TERMS).sort((a, b) => b.length - a.length);
-const RX = new RegExp(`(^|[^\\w-])(${KEYS.map(k => k.replace(/[.*+?^${}()|[\]\\²]/g, m => m === '²' ? '²' : '\\' + m)).join('|')})(?![\\w-])`, 'i');
-const SKIP = 'a,button,summary,code,pre,svg,script,style,input,select,textarea,label,.term,.badge,.lvl,th,h1,.hero-gl,.stat,.gloss';
-const pop = Object.assign(document.createElement('div'), { className: 'gloss', id: 'gloss', hidden: true });
-pop.setAttribute('role', 'tooltip'); document.body.append(pop);
-let owner = null;
-const show = el => {
-  if (document.documentElement.dataset.terms === 'off') return;
-  const k = KEYS.find(k => k.toLowerCase() === el.dataset.term.toLowerCase());
+// Terms written with a capital (SAME, PSI, AUC, FLEX, Saffire, kPa, de Ris…) match case-sensitively, so the English word
+// "same" is never taken for the SAME experiment. All-lowercase terms also match with a capital first letter or in caps.
+const esc = k => k.replace(/[.*+?^${}()|[\]\\]/g, m => '\\' + m);
+const anyCase = k => /[A-Z]/.test(k) ? esc(k) : esc(k).replace(/[a-z]/g, c => `[${c}${c.toUpperCase()}]`);
+const RX = new RegExp(`(^|[^\\w-])(${KEYS.map(anyCase).join('|')})(?![\\w-])`);
+const SKIP = 'a,button,summary,code,pre,svg,script,style,input,select,textarea,label,.term,.badge,.lvl,th,h1,.hero-gl,.stat,.gloss,.numbers,.toc';
+const keyOf = word => KEYS.find(k => k.toLowerCase() === String(word).toLowerCase());
+
+/** The one-line definition for a term (case-insensitive), or '' when it is not in the glossary. */
+export function define(key) {
+  const k = keyOf(key);
+  return k ? TERMS[k] : '';
+}
+
+// The popup is created on first use, so importing this module never touches the DOM.
+let pop = null, owner = null;
+function ensurePop() {
+  if (pop) return pop;
+  pop = Object.assign(document.createElement('div'), { className: 'gloss', id: 'gloss', hidden: true });
+  pop.setAttribute('role', 'tooltip');
+  document.body.append(pop);
+  addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
+  addEventListener('scroll', hide, { passive: true });
+  document.addEventListener('click', e => {
+    const t = e.target.closest?.('.term');
+    if (t) show(t); else if (!e.target.closest?.('.gloss')) hide();
+  });
+  return pop;
+}
+function show(el) {
+  if (document.documentElement.dataset.terms === 'off' || !el.isConnected) return;
+  const k = keyOf(el.dataset.term); if (!k) return;
+  ensurePop();
   pop.replaceChildren(Object.assign(document.createElement('b'), { textContent: k }), document.createTextNode(TERMS[k]));
   pop.hidden = false; owner = el; el.setAttribute('aria-describedby', 'gloss');
   const r = el.getBoundingClientRect(), w = pop.offsetWidth, hgt = pop.offsetHeight;
   pop.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
   pop.style.top = (r.bottom + hgt + 12 < innerHeight ? r.bottom + 8 : r.top - hgt - 8) + 'px';
-};
-const hide = () => { pop.hidden = true; owner?.removeAttribute('aria-describedby'); owner = null; };
-addEventListener('keydown', e => { if (e.key === 'Escape') hide(); });
-addEventListener('scroll', hide, { passive: true });
-document.addEventListener('click', e => { const t = e.target.closest?.('.term'); if (t) show(t); else if (!e.target.closest?.('.gloss')) hide(); });
+}
+function hide() {
+  if (pop) pop.hidden = true;
+  owner?.removeAttribute('aria-describedby'); owner = null;
+}
 
-/** Wrap the first use of each term in every card (and in the page lead) of root. */
+// Text inside a scope whose language is not English (the te/hi short answer and India card) is never annotated:
+// the definitions are English only.
+const foreign = el => { const l = el.closest('[lang]')?.getAttribute('lang') || 'en'; return !/^en\b/i.test(l); };
+
+/** Wrap the first use of each term in every card (and in the page lead) of root. Works on a detached root. */
 export function annotate(root) {
+  if (!root?.querySelectorAll) return;
+  if (document.body) ensurePop(); // installs the tap/Escape/scroll listeners once (a detached root is swapped in later)
   const scopes = [...root.querySelectorAll('.card, .lead, .hero-lead, .qn')];
   for (const scope of scopes) {
     if (scope.parentElement?.closest('.card') && scope.classList.contains('card')) continue;
     const used = new Set();
-    const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, { acceptNode: n => n.parentElement.closest(SKIP) || !n.nodeValue.trim() ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+    const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => n.parentElement.closest(SKIP) || !n.nodeValue.trim() || foreign(n.parentElement) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+    });
     const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
     for (let node of nodes) {
       let m;
       while (node && (m = RX.exec(node.nodeValue))) {
-        const word = m[2], key = KEYS.find(k => k.toLowerCase() === word.toLowerCase());
+        const word = m[2], key = keyOf(word);
         const at = m.index + m[1].length;
         if (used.has(key)) { // skip this occurrence, keep scanning after it
           const rest = node.splitText(at + word.length); node = rest; continue;

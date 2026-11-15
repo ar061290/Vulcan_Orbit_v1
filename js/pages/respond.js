@@ -1,26 +1,67 @@
-import { h, load, page, card, empty, fmt } from '../lib.js';
-import { bars, C } from '../charts.js';
-import { extinctionCard, coolFlameCard, evidenceCard } from '../respond_ui.js';
-export default async function (root) {
-  const [tr, ef, fx, m7, gaps, inv] = await Promise.all([load('response_trials'), load('efield'), load('flex_suppression'), load('m7_explorer'), load('gaps'), load('investigations')]);
-  const trials = tr.status === 'missing'
-    ? card('Bench trials: ion wind and fine mist', 'missing', 'Each trial is measured by the dome\'s own sensors, before and after.', empty('Waiting for dome trials', 'response_trials', 'One entry per trial. Use the same sensor reading before and after so the change is measured, not judged by eye.', '{ "status":"dome", "reading":"Peak thermopile temperature", "unit":"C",\n  "trials":[{ "method":"Ion wind", "source":"tea light", "before":212, "after":148, "repeat":1, "note":"flame deflected 30 deg" }] }'))
-    : card('Bench trials: ion wind and fine mist', tr.status, `${tr.reading}, before and after each response. Earth gravity.`,
-      h('div', { class: 'legend' }, h('span', {}, h('i', { style: `background:${C.s1}` }), 'Before'), h('span', {}, h('i', { style: `background:${C.s2}` }), 'After')),
-      bars({ yLabel: `${tr.reading}, ${tr.unit}`, unit: ' ' + tr.unit, groups: tr.trials.map(t => ({ name: `${t.method} #${t.repeat || 1}`, values: [{ key: 'Before', value: t.before, color: C.s1 }, { key: 'After', value: t.after, color: C.s2 }] })) }),
-      h('div', { class: 'scroll' }, h('table', {}, h('thead', {}, h('tr', {}, ...['Method', 'Source', 'Before', 'After', 'Change', 'Note'].map(x => h('th', {}, x)))), h('tbody', {}, ...tr.trials.map(t => h('tr', {}, h('td', {}, h('b', {}, t.method)), h('td', {}, t.source), h('td', { class: 'num' }, fmt(t.before)), h('td', { class: 'num' }, fmt(t.after)), h('td', { class: 'num' }, fmt((t.after - t.before) / t.before * 100, 0) + '%'), h('td', {}, t.note || '')))))));
-  const efield = ef.status === 'missing'
-    ? card('NASA: flames in an electric field', 'missing', 'What the ACME E-FIELD Flames experiment found in orbit, to set beside our ion wind trial.', empty('Waiting for the E-FIELD table', 'efield', 'Rows from the NASA experiment summary, plus a one-line finding with its source.', '{ "status":"real", "finding":"...", "source":"PSI-22", "rows":[{ "fuel":"...", "field_kV":2, "result":"..." }] }'))
-    : card('NASA: flames in an electric field', ef.status, ef.source, h('p', {}, ef.finding),
-      h('div', { class: 'scroll' }, h('table', {}, h('thead', {}, h('tr', {}, ...Object.keys(ef.rows[0] || {}).map(k => h('th', {}, k)))), h('tbody', {}, ...ef.rows.map(r => h('tr', {}, ...Object.values(r).map(v => h('td', {}, String(v)))))))));
-  const flex = fx.status === 'missing'
-    ? card('NASA: which gas puts a droplet flame out', 'missing', 'Share of FLEX tests that ended in extinction, by added gas.', empty('Waiting for the FLEX table', 'flex_suppression', 'Counts per suppressant gas from the FLEX summary table.', '{ "status":"real", "source":"PSI-69", "groups":[{ "gas":"CO2", "tests":40, "extinguished":31 }] }'))
-    : card('NASA: which gas puts a droplet flame out', fx.status, fx.source, bars({ yLabel: 'Tests ending in extinction, %', unit: '%', groups: fx.groups.map(g => ({ name: g.gas, values: [{ key: `${g.extinguished} of ${g.tests} tests`, value: Math.round(g.extinguished / g.tests * 100), color: C.s3 }] })) }));
-  root.append(page('Respond', 'What NASA\'s experiments say about putting a fire out without gravity, next to what our bench rig measured. The two are shown together and never merged.',
-    gaps.status === 'missing' ? null : h('div', { style: 'margin-bottom:14px' }, evidenceCard(gaps, inv)),
-    m7.status === 'missing' ? null : h('div', { class: 'grid g2', style: 'margin-bottom:14px' }, extinctionCard(m7), coolFlameCard(m7)),
-    h('div', { class: 'grid g2' }, trials, efield, flex,
-      card('Reading the comparison', null, null,
-        h('p', {}, 'Our trials happen at Earth gravity, where hot gas rises and feeds the flame fresh air. A result on the bench shows a method can disturb a flame; it does not show it would work in orbit.'),
-        h('p', {}, 'This page summarises evidence. It is not a firefighting procedure.')))));
+// Put it out (#/respond): "What puts it out?" (site/REBUILD_PLAN.md §3.7).
+// Order: 1 evidence coverage, 2 response evidence for the fire on Assess (js/fig_response.js), then, folded (keep 2):
+// droplet extinction, cool flames, FLEX suppressants beside the M7 points, NASA E-FIELD (context only), the bench mist
+// trial and "Reading the comparison". Ion wind is not mentioned anywhere (spec C6).
+import { h, load, page, card, isMissing, pct } from '../lib.js';
+import { coverageCard, extinctionCard, coolFlameCard, flexCard, efieldCard, mistTrialCard, readingCard, mistRows } from '../fig_respond.js';
+
+const RESPONSE_TITLE = 'Response evidence for this fire';
+
+/** The C4 card from js/fig_response.js, fed by the shared Assess store. If that module (or assess_core.js) cannot be
+ *  loaded, the card still renders, with its title, as a "No data yet" panel, so the page never goes blank. */
+async function responseBlock(ctx, examples) {
+  // Both Assess and Put it out start the store from the URL (idempotent; §3.5). Not on a detached render (§0 rule 6).
+  if (!ctx.detached && ctx.store?.initFromURL && !isMissing(examples)) ctx.store.initFromURL(ctx.params || {}, examples);
+  try {
+    const { responseEvidenceCard } = await import('../fig_response.js');
+    // Detached (the Sources site map) only needs the title, so the Assess data files are not fetched there.
+    const data = ctx.detached ? null : await (await import('../assess_core.js')).loadAssessData();
+    const el = await responseEvidenceCard(data, ctx.store, ctx);
+    if (el) return el;
+    throw new Error('responseEvidenceCard returned nothing');
+  } catch (e) {
+    console.warn('Put it out: the response evidence card could not be built', e);
+    return card(RESPONSE_TITLE, 'missing', 'The evidence that applies to the fire set on Assess: suppressants, flames going out at low airflow, what NASA has not tested, and the urgency.',
+      h('div', { class: 'empty' }, h('h3', {}, 'This card is not available yet'),
+        h('p', {}, 'The response evidence card (js/fig_response.js) could not be loaded. The figures below do not depend on it.'),
+        h('p', {}, h('a', { href: '#/assess' }, 'Set up a fire on Assess'))),
+      h('p', {}, 'A summary of evidence, not a flight procedure.'));
+  }
+}
+
+export default async function render(root, ctx) {
+  const [tr, ef, fx, m7, gaps, inv, examples] = await Promise.all([
+    load('response_trials'), load('efield'), load('flex_suppression'), load('m7_explorer'), load('gaps'), load('investigations'), load('growth_examples'),
+  ]);
+  const mistDone = mistRows(tr).length > 0;
+  const lead = `What NASA's experiments say about putting a fire out without gravity, next to ${mistDone ? 'what our bench mist trial measured' : 'our bench mist trial, which is not completed yet'}. The two are shown together and never merged.`;
+  root.append(page('Put it out', lead,
+    coverageCard(gaps, inv),
+    await responseBlock(ctx, examples),
+    h('div', { class: 'grid g2' }, extinctionCard(m7), coolFlameCard(m7)),
+    h('div', { class: 'grid g2' }, flexCard(fx, m7), efieldCard(ef)),
+    h('div', { class: 'grid g2' }, mistTrialCard(tr), readingCard())));
+}
+
+/** "The short answer": main's summaries.js sentences; line 3 ends "Bench mist trial: not completed." (C6). */
+export async function short() {
+  const [x, f, e, tr] = await Promise.all([load('m7_explorer'), load('flex_suppression'), load('efield'), load('response_trials')]);
+  const out = [];
+  if (isMissing(f)) out.push('The FLEX suppressant shares are not available yet (data/flex_suppression.json missing).');
+  else {
+    const g = Object.fromEntries((f.groups || []).map(r => [String(r.gas).split(' ')[0], r]));
+    out.push(g.CO2 && g.He
+      ? `In NASA's droplet tests, flames went out in ${pct(g.CO2.extinguished / g.CO2.tests)} of burns with added carbon dioxide and ${pct(g.He.extinguished / g.He.tests)} with added helium. NASA chose hard cases on purpose, so these are not a fair contest between the gases.`
+      : 'The FLEX suppressant table has no carbon dioxide or helium group, so no share is given (data/flex_suppression.json).');
+  }
+  const auc = x?.extinction?.headline?.auc_median;
+  out.push(isMissing(x) || !Number.isFinite(auc)
+    ? 'The droplet extinction model is not available yet (data/m7_explorer.json missing).'
+    : `Our model predicts whether a droplet flame goes out from oxygen, pressure and added gas. It ranks the cases right ${Math.round(auc * 10)} times in 10 on test sessions it never saw.`);
+  const n = mistRows(tr).length;
+  const mist = n ? `Bench mist trial: ${n} mist run${n > 1 ? 's' : ''} measured on the dome, at Earth gravity.` : 'Bench mist trial: not completed.';
+  out.push(isMissing(e)
+    ? `The NASA E-FIELD summary is not available yet (data/efield.json missing). ${mist}`
+    : `NASA's electric-field flame tests studied how fields change a flame's shape and soot, not how to put fires out. ${mist}`);
+  return out;
 }

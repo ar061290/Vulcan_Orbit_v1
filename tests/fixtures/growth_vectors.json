@@ -1,0 +1,1118 @@
+{
+ "what": "Python reference outputs of models/m6b-predictor/growth.simulate with data/spread_predictor.json constants (as a JS port sees them), default grid, nSamples 301. Generated read-only by the inventory agent for testing a JS port; not a repo data file.",
+ "vectors": [
+  {
+   "id": "G1_strip_zero_flow",
+   "inputs": {
+    "flame_state": {
+     "flame_type": "surface",
+     "frame_time_s": 0.0,
+     "area_cm2": 0.5,
+     "centroid_cm": [
+      0.25,
+      0.5
+     ],
+     "bbox_cm": [
+      0,
+      0,
+      0.5,
+      1
+     ]
+    },
+    "fuel": {
+     "material": "PMMA",
+     "width_cm": 1,
+     "length_cm": 20,
+     "thickness_mm": 1,
+     "sides_burning": 2
+    },
+    "conditions": {
+     "flow_cm_s": 0,
+     "flow_direction_deg": 0,
+     "o2_vol_pct": 21,
+     "pressure_atm": 1
+    }
+   },
+   "expected": {
+    "verdict": {
+     "code": 0,
+     "label": "spreads",
+     "by_direction": {
+      "opposed": "spreads",
+      "concurrent": "spreads"
+     },
+     "matched_cases": []
+    },
+    "rates_mm_s": {
+     "lo": {
+      "opposed": 0.04659,
+      "concurrent": 0.04659,
+      "cross_flow": 0.04659
+     },
+     "mid": {
+      "opposed": 0.1081,
+      "concurrent": 0.1081,
+      "cross_flow": 0.1081
+     },
+     "hi": {
+      "opposed": 0.3298,
+      "concurrent": 0.3298,
+      "cross_flow": 0.3298
+     }
+    },
+    "burnout_s": {
+     "lo": 12.5,
+     "mid": 25.0,
+     "hi": 50.0
+    },
+    "grid": {
+     "dx_cm": 0.1,
+     "dy_cm": 0.1,
+     "nx": 200,
+     "ny": 10,
+     "initial_area_cm2": 0.46
+    },
+    "summary": {
+     "lo": {
+      "max_area_cm2": 0.46,
+      "t_max_s": 0.0,
+      "t_end_s": 4198.0,
+      "area_consumed_cm2": 20.0,
+      "stop_reason": "fuel edge"
+     },
+     "mid": {
+      "max_area_cm2": 0.7,
+      "t_max_s": 20.68,
+      "t_end_s": 1829.0,
+      "area_consumed_cm2": 20.0,
+      "stop_reason": "fuel edge"
+     },
+     "hi": {
+      "max_area_cm2": 2.1,
+      "t_max_s": 48.61,
+      "t_end_s": 641.3,
+      "area_consumed_cm2": 20.0,
+      "stop_reason": "fuel edge"
+     }
+    },
+    "calibrated": [
+     "opposed (upwind) rate: de Ris x thin-regime factor from 39 BASS-II slab rates"
+    ],
+    "extrapolated": [
+     "opposed rate OUTSIDE the calibration box (thickness, flow, O2 or pressure)"
+    ],
+    "assumed": [
+     "downwind rate over thin-regime PMMA: no data; set equal to the opposed rate",
+     "cross-flow rate = mean of downwind and upwind rates (no data)",
+     "zero flow: spread taken as isotropic at the opposed formula's zero-flow rate"
+    ],
+    "notes": [],
+    "t_s_first_last": [
+     0.0,
+     4197.74,
+     301
+    ],
+    "area_mid_every_50": [
+     0.46,
+     0.3,
+     0.3,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "pmma_thick_45deg_centre",
+   "inputs": {
+    "flame_state": {
+     "flame_type": "surface",
+     "frame_time_s": 0.0,
+     "area_cm2": 2.0,
+     "centroid_cm": [
+      10,
+      5
+     ],
+     "bbox_cm": [
+      9,
+      4,
+      11,
+      6
+     ]
+    },
+    "fuel": {
+     "material": "PMMA",
+     "width_cm": 10,
+     "length_cm": 20,
+     "thickness_mm": 4,
+     "sides_burning": 1
+    },
+    "conditions": {
+     "flow_cm_s": 15,
+     "flow_direction_deg": 45,
+     "o2_vol_pct": 20,
+     "pressure_atm": 1
+    }
+   },
+   "expected": {
+    "verdict": {
+     "code": 0,
+     "label": "spreads",
+     "by_direction": {
+      "opposed": "spreads",
+      "concurrent": "spreads"
+     },
+     "matched_cases": []
+    },
+    "rates_mm_s": {
+     "lo": {
+      "opposed": 0.02304,
+      "concurrent": 0.0,
+      "cross_flow": 0.01152
+     },
+     "mid": {
+      "opposed": 0.05346,
+      "concurrent": 0.0,
+      "cross_flow": 0.02673
+     },
+     "hi": {
+      "opposed": 0.1631,
+      "concurrent": 0.1667,
+      "cross_flow": 0.1649
+     }
+    },
+    "burnout_s": {
+     "lo": 100.0,
+     "mid": 200.0,
+     "hi": 400.0
+    },
+    "grid": {
+     "dx_cm": 0.1,
+     "dy_cm": 0.1,
+     "nx": 200,
+     "ny": 100,
+     "initial_area_cm2": 2.08
+    },
+    "summary": {
+     "lo": {
+      "max_area_cm2": 2.75,
+      "t_max_s": 2333.0,
+      "t_end_s": 8697.0,
+      "area_consumed_cm2": 111.5,
+      "stop_reason": "burned out"
+     },
+     "mid": {
+      "max_area_cm2": 11.35,
+      "t_max_s": 1072.0,
+      "t_end_s": 3905.0,
+      "area_consumed_cm2": 111.5,
+      "stop_reason": "burned out"
+     },
+     "hi": {
+      "max_area_cm2": 155.1,
+      "t_max_s": 556.4,
+      "t_end_s": 1033.0,
+      "area_consumed_cm2": 200.0,
+      "stop_reason": "fuel edge"
+     }
+    },
+    "calibrated": [
+     "opposed (upwind) rate: de Ris x thick-regime factor from 39 BASS-II slab rates",
+     "opposed rate inside the calibration box"
+    ],
+    "extrapolated": [
+     "downwind rate: observed bound 0 to 0.167 mm/s (PSI-99 thick PMMA anchored at 20 cm/s, 22% O2), used outside the observed condition"
+    ],
+    "assumed": [
+     "cross-flow rate = mean of downwind and upwind rates (no data)"
+    ],
+    "notes": [],
+    "t_s_first_last": [
+     0.0,
+     8697.13,
+     301
+    ],
+    "area_mid_every_50": [
+     2.08,
+     8.66,
+     3.09,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "pmma_film_opposed_noSpread",
+   "inputs": {
+    "flame_state": {
+     "flame_type": "surface",
+     "frame_time_s": 0.0,
+     "area_cm2": 0.785,
+     "centroid_cm": [
+      4.5,
+      1.0
+     ],
+     "bbox_cm": [
+      4,
+      0.5,
+      5,
+      1.5
+     ]
+    },
+    "fuel": {
+     "material": "PMMA",
+     "width_cm": 2,
+     "length_cm": 10,
+     "thickness_mm": 0.1,
+     "sides_burning": 2
+    },
+    "conditions": {
+     "flow_cm_s": 10,
+     "flow_direction_deg": 0,
+     "o2_vol_pct": 17.3,
+     "pressure_atm": 1
+    }
+   },
+   "expected": {
+    "verdict": {
+     "code": 2,
+     "label": "observed no-spread",
+     "by_direction": {
+      "opposed": "observed no-spread",
+      "concurrent": "spreads"
+     },
+     "matched_cases": [
+      {
+       "case_id": "B18",
+       "status": "real",
+       "level": "observed no-spread",
+       "outcome": "blowoff",
+       "flow_direction": "opposed"
+      },
+      {
+       "case_id": "B19",
+       "status": "real",
+       "level": "observed no-spread",
+       "outcome": "blowoff",
+       "flow_direction": "opposed"
+      }
+     ]
+    },
+    "rates_mm_s": {
+     "lo": {
+      "opposed": 0.3694,
+      "concurrent": 0.3694,
+      "cross_flow": 0.3694
+     },
+     "mid": {
+      "opposed": 0.8571,
+      "concurrent": 0.8571,
+      "cross_flow": 0.8571
+     },
+     "hi": {
+      "opposed": 2.615,
+      "concurrent": 2.615,
+      "cross_flow": 2.615
+     }
+    },
+    "burnout_s": {
+     "lo": 1.25,
+     "mid": 2.5,
+     "hi": 5.0
+    },
+    "grid": {
+     "dx_cm": 0.05,
+     "dy_cm": 0.05,
+     "nx": 200,
+     "ny": 40,
+     "initial_area_cm2": 0.79
+    },
+    "summary": {
+     "lo": {
+      "max_area_cm2": 0.79,
+      "t_max_s": 0.0,
+      "t_end_s": 1.25,
+      "area_consumed_cm2": 0.79,
+      "stop_reason": "observed no-spread conditions"
+     },
+     "mid": {
+      "max_area_cm2": 0.79,
+      "t_max_s": 0.0,
+      "t_end_s": 2.5,
+      "area_consumed_cm2": 0.79,
+      "stop_reason": "observed no-spread conditions"
+     },
+     "hi": {
+      "max_area_cm2": 0.79,
+      "t_max_s": 0.0,
+      "t_end_s": 5.0,
+      "area_consumed_cm2": 0.79,
+      "stop_reason": "observed no-spread conditions"
+     }
+    },
+    "calibrated": [
+     "opposed (upwind) rate: de Ris x thin-regime factor from 39 BASS-II slab rates"
+    ],
+    "extrapolated": [
+     "opposed rate OUTSIDE the calibration box (thickness, flow, O2 or pressure)"
+    ],
+    "assumed": [
+     "downwind rate over thin-regime PMMA: no data; set equal to the opposed rate",
+     "cross-flow rate = mean of downwind and upwind rates (no data)"
+    ],
+    "notes": [],
+    "t_s_first_last": [
+     0.0,
+     5.0,
+     301
+    ],
+    "area_mid_every_50": [
+     0.79,
+     0.79,
+     0.79,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "pmma_thin_regime_concurrent_assumed",
+   "inputs": {
+    "flame_state": {
+     "flame_type": "surface",
+     "frame_time_s": 0.0,
+     "area_cm2": 1.0,
+     "centroid_cm": [
+      2,
+      1
+     ],
+     "bbox_cm": [
+      1.5,
+      0.5,
+      2.5,
+      1.5
+     ]
+    },
+    "fuel": {
+     "material": "PMMA",
+     "width_cm": 2,
+     "length_cm": 10,
+     "thickness_mm": 1.5,
+     "sides_burning": 2
+    },
+    "conditions": {
+     "flow_cm_s": 4,
+     "flow_direction_deg": 180,
+     "o2_vol_pct": 18.5,
+     "pressure_atm": 1
+    }
+   },
+   "expected": {
+    "verdict": {
+     "code": 0,
+     "label": "spreads",
+     "by_direction": {
+      "opposed": "spreads",
+      "concurrent": "spreads"
+     },
+     "matched_cases": []
+    },
+    "rates_mm_s": {
+     "lo": {
+      "opposed": 0.02672,
+      "concurrent": 0.02672,
+      "cross_flow": 0.02672
+     },
+     "mid": {
+      "opposed": 0.062,
+      "concurrent": 0.062,
+      "cross_flow": 0.062
+     },
+     "hi": {
+      "opposed": 0.1892,
+      "concurrent": 0.1892,
+      "cross_flow": 0.1892
+     }
+    },
+    "burnout_s": {
+     "lo": 18.75,
+     "mid": 37.5,
+     "hi": 75.0
+    },
+    "grid": {
+     "dx_cm": 0.05,
+     "dy_cm": 0.05,
+     "nx": 200,
+     "ny": 40,
+     "initial_area_cm2": 0.98
+    },
+    "summary": {
+     "lo": {
+      "max_area_cm2": 1.14,
+      "t_max_s": 18.71,
+      "t_end_s": 2823.0,
+      "area_consumed_cm2": 20.0,
+      "stop_reason": "fuel edge"
+     },
+     "mid": {
+      "max_area_cm2": 1.87,
+      "t_max_s": 36.07,
+      "t_end_s": 1246.0,
+      "area_consumed_cm2": 20.0,
+      "stop_reason": "fuel edge"
+     },
+     "hi": {
+      "max_area_cm2": 7.51,
+      "t_max_s": 74.76,
+      "t_end_s": 471.1,
+      "area_consumed_cm2": 20.0,
+      "stop_reason": "fuel edge"
+     }
+    },
+    "calibrated": [
+     "opposed (upwind) rate: de Ris x thin-regime factor from 39 BASS-II slab rates",
+     "opposed rate inside the calibration box"
+    ],
+    "extrapolated": [],
+    "assumed": [
+     "downwind rate over thin-regime PMMA: no data; set equal to the opposed rate",
+     "cross-flow rate = mean of downwind and upwind rates (no data)"
+    ],
+    "notes": [],
+    "t_s_first_last": [
+     0.0,
+     2822.68,
+     301
+    ],
+    "area_mid_every_50": [
+     0.98,
+     0.485,
+     0.455,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "cotton_high_o2_out_of_domain",
+   "inputs": {
+    "flame_state": {
+     "flame_type": "surface",
+     "frame_time_s": 0.0,
+     "area_cm2": 3.0,
+     "centroid_cm": [
+      1,
+      3
+     ],
+     "bbox_cm": [
+      0,
+      1.5,
+      2,
+      4.5
+     ]
+    },
+    "fuel": {
+     "material": "cotton",
+     "width_cm": 6,
+     "length_cm": 30,
+     "thickness_mm": 0.3,
+     "sides_burning": 2
+    },
+    "conditions": {
+     "flow_cm_s": 30,
+     "flow_direction_deg": 0,
+     "o2_vol_pct": 34,
+     "pressure_atm": 0.7
+    }
+   },
+   "expected": {
+    "verdict": {
+     "code": 0,
+     "label": "spreads",
+     "by_direction": {
+      "opposed": "spreads",
+      "concurrent": "spreads"
+     },
+     "matched_cases": []
+    },
+    "rates_mm_s": {
+     "lo": {
+      "opposed": 0.0,
+      "concurrent": 3.215,
+      "cross_flow": 1.607
+     },
+     "mid": {
+      "opposed": 0.0,
+      "concurrent": 5.52,
+      "cross_flow": 2.76
+     },
+     "hi": {
+      "opposed": 0.0,
+      "concurrent": 10.12,
+      "cross_flow": 5.06
+     }
+    },
+    "burnout_s": {
+     "lo": 22.0,
+     "mid": 22.0,
+     "hi": 35.0
+    },
+    "grid": {
+     "dx_cm": 0.15,
+     "dy_cm": 0.15,
+     "nx": 200,
+     "ny": 40,
+     "initial_area_cm2": 3.015
+    },
+    "summary": {
+     "lo": {
+      "max_area_cm2": 49.5,
+      "t_max_s": 27.59,
+      "t_end_s": 111.1,
+      "area_consumed_cm2": 179.1,
+      "stop_reason": "burned out"
+     },
+     "mid": {
+      "max_area_cm2": 80.55,
+      "t_max_s": 24.67,
+      "t_end_s": 73.91,
+      "area_consumed_cm2": 179.1,
+      "stop_reason": "burned out"
+     },
+     "hi": {
+      "max_area_cm2": 179.1,
+      "t_max_s": 28.32,
+      "t_end_s": 63.32,
+      "area_consumed_cm2": 179.1,
+      "stop_reason": "burned out"
+     }
+    },
+    "calibrated": [
+     "downwind (concurrent) rate: scaling law x one constant from 6 reported spacecraft flights"
+    ],
+    "extrapolated": [
+     "concurrent rate OUTSIDE the calibration box (flow 19-25 cm/s, O2 21.2-26.9%, 76-102 kPa)"
+    ],
+    "assumed": [
+     "upwind (opposed) rate over fabric: no data and no model; set to 0, so upwind growth is not simulated",
+     "cross-flow rate = mean of downwind and upwind rates (no data)"
+    ],
+    "notes": [],
+    "t_s_first_last": [
+     0.0,
+     111.143,
+     301
+    ],
+    "area_mid_every_50": [
+     3.015,
+     68.94,
+     74.07,
+     59.71,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "sibal_custom_area_density_90deg",
+   "inputs": {
+    "flame_state": {
+     "flame_type": "surface",
+     "frame_time_s": 0.0,
+     "area_cm2": 1.5,
+     "centroid_cm": [
+      5,
+      0.5
+     ],
+     "bbox_cm": [
+      4.5,
+      0,
+      5.5,
+      1
+     ]
+    },
+    "fuel": {
+     "material": "SIBAL",
+     "width_cm": 8,
+     "length_cm": 10,
+     "thickness_mm": 0.32,
+     "sides_burning": 2,
+     "area_density_mg_cm2": 25.0
+    },
+    "conditions": {
+     "flow_cm_s": 22,
+     "flow_direction_deg": 90,
+     "o2_vol_pct": 24,
+     "pressure_atm": 1
+    }
+   },
+   "expected": {
+    "verdict": {
+     "code": 0,
+     "label": "spreads",
+     "by_direction": {
+      "opposed": "spreads",
+      "concurrent": "spreads"
+     },
+     "matched_cases": []
+    },
+    "rates_mm_s": {
+     "lo": {
+      "opposed": 0.0,
+      "concurrent": 1.44,
+      "cross_flow": 0.72
+     },
+     "mid": {
+      "opposed": 0.0,
+      "concurrent": 2.473,
+      "cross_flow": 1.236
+     },
+     "hi": {
+      "opposed": 0.0,
+      "concurrent": 4.534,
+      "cross_flow": 2.267
+     }
+    },
+    "burnout_s": {
+     "lo": 22.0,
+     "mid": 22.0,
+     "hi": 35.0
+    },
+    "grid": {
+     "dx_cm": 0.05,
+     "dy_cm": 0.05,
+     "nx": 200,
+     "ny": 160,
+     "initial_area_cm2": 1.39
+    },
+    "summary": {
+     "lo": {
+      "max_area_cm2": 34.89,
+      "t_max_s": 55.15,
+      "t_end_s": 100.4,
+      "area_consumed_cm2": 79.78,
+      "stop_reason": "burned out"
+     },
+     "mid": {
+      "max_area_cm2": 54.86,
+      "t_max_s": 35.34,
+      "t_end_s": 67.67,
+      "area_consumed_cm2": 79.78,
+      "stop_reason": "burned out"
+     },
+     "hi": {
+      "max_area_cm2": 79.78,
+      "t_max_s": 24.91,
+      "t_end_s": 59.91,
+      "area_consumed_cm2": 79.78,
+      "stop_reason": "burned out"
+     }
+    },
+    "calibrated": [
+     "downwind (concurrent) rate: scaling law x one constant from 6 reported spacecraft flights"
+    ],
+    "extrapolated": [
+     "concurrent rate OUTSIDE the calibration box (flow 19-25 cm/s, O2 21.2-26.9%, 76-102 kPa)"
+    ],
+    "assumed": [
+     "upwind (opposed) rate over fabric: no data and no model; set to 0, so upwind growth is not simulated",
+     "cross-flow rate = mean of downwind and upwind rates (no data)"
+    ],
+    "notes": [],
+    "t_s_first_last": [
+     0.0,
+     100.421,
+     301
+    ],
+    "area_mid_every_50": [
+     1.39,
+     23.6,
+     53.72,
+     25.6,
+     0.055,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "tiny_flame_fallback_cell",
+   "inputs": {
+    "flame_state": {
+     "flame_type": "surface",
+     "frame_time_s": 0.0,
+     "area_cm2": 0.0001,
+     "centroid_cm": [
+      3.03,
+      1.07
+     ],
+     "bbox_cm": [
+      3.025,
+      1.065,
+      3.035,
+      1.075
+     ]
+    },
+    "fuel": {
+     "material": "PMMA",
+     "width_cm": 2,
+     "length_cm": 6,
+     "thickness_mm": 3,
+     "sides_burning": 2
+    },
+    "conditions": {
+     "flow_cm_s": 8,
+     "flow_direction_deg": 0,
+     "o2_vol_pct": 21,
+     "pressure_atm": 1
+    }
+   },
+   "expected": {
+    "verdict": {
+     "code": 0,
+     "label": "spreads",
+     "by_direction": {
+      "opposed": "spreads",
+      "concurrent": "spreads"
+     },
+     "matched_cases": []
+    },
+    "rates_mm_s": {
+     "lo": {
+      "opposed": 0.01378,
+      "concurrent": 0.0,
+      "cross_flow": 0.006892
+     },
+     "mid": {
+      "opposed": 0.03198,
+      "concurrent": 0.0,
+      "cross_flow": 0.01599
+     },
+     "hi": {
+      "opposed": 0.09756,
+      "concurrent": 0.1667,
+      "cross_flow": 0.1321
+     }
+    },
+    "burnout_s": {
+     "lo": 37.5,
+     "mid": 75.0,
+     "hi": 150.0
+    },
+    "grid": {
+     "dx_cm": 0.03,
+     "dy_cm": 0.0298507,
+     "nx": 200,
+     "ny": 67,
+     "initial_area_cm2": 0.0008955
+    },
+    "summary": {
+     "lo": {
+      "max_area_cm2": 0.1567,
+      "t_max_s": 1324.0,
+      "t_end_s": 2733.0,
+      "area_consumed_cm2": 6.12,
+      "stop_reason": "burned out"
+     },
+     "mid": {
+      "max_area_cm2": 0.6716,
+      "t_max_s": 597.1,
+      "t_end_s": 1237.0,
+      "area_consumed_cm2": 6.12,
+      "stop_reason": "burned out"
+     },
+     "hi": {
+      "max_area_cm2": 8.716,
+      "t_max_s": 182.3,
+      "t_end_s": 471.0,
+      "area_consumed_cm2": 12.0,
+      "stop_reason": "fuel edge"
+     }
+    },
+    "calibrated": [
+     "opposed (upwind) rate: de Ris x thick-regime factor from 39 BASS-II slab rates",
+     "opposed rate inside the calibration box"
+    ],
+    "extrapolated": [
+     "downwind rate: observed bound 0 to 0.167 mm/s (PSI-99 thick PMMA anchored at 20 cm/s, 22% O2), used outside the observed condition"
+    ],
+    "assumed": [
+     "cross-flow rate = mean of downwind and upwind rates (no data)"
+    ],
+    "notes": [],
+    "t_s_first_last": [
+     0.0,
+     2732.72,
+     301
+    ],
+    "area_mid_every_50": [
+     0.0008955,
+     0.5033,
+     0.5418,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "sibal_zero_flow_no_growth",
+   "inputs": {
+    "flame_state": {
+     "flame_type": "surface",
+     "frame_time_s": 0.0,
+     "area_cm2": 2.0,
+     "centroid_cm": [
+      5,
+      1
+     ],
+     "bbox_cm": [
+      4,
+      0,
+      6,
+      2
+     ]
+    },
+    "fuel": {
+     "material": "SIBAL",
+     "width_cm": 2,
+     "length_cm": 10,
+     "thickness_mm": 0.32,
+     "sides_burning": 2
+    },
+    "conditions": {
+     "flow_cm_s": 0,
+     "flow_direction_deg": 0,
+     "o2_vol_pct": 21,
+     "pressure_atm": 1
+    }
+   },
+   "expected": {
+    "verdict": {
+     "code": 0,
+     "label": "spreads",
+     "by_direction": {
+      "opposed": "spreads",
+      "concurrent": "spreads"
+     },
+     "matched_cases": []
+    },
+    "rates_mm_s": {
+     "lo": {
+      "opposed": 0.0,
+      "concurrent": 0.0,
+      "cross_flow": 0.0
+     },
+     "mid": {
+      "opposed": 0.0,
+      "concurrent": 0.0,
+      "cross_flow": 0.0
+     },
+     "hi": {
+      "opposed": 0.0,
+      "concurrent": 0.0,
+      "cross_flow": 0.0
+     }
+    },
+    "burnout_s": {
+     "lo": 22.0,
+     "mid": 22.0,
+     "hi": 35.0
+    },
+    "grid": {
+     "dx_cm": 0.05,
+     "dy_cm": 0.05,
+     "nx": 200,
+     "ny": 40,
+     "initial_area_cm2": 2.03
+    },
+    "summary": {
+     "lo": {
+      "max_area_cm2": 2.03,
+      "t_max_s": 0.0,
+      "t_end_s": 22.0,
+      "area_consumed_cm2": 2.03,
+      "stop_reason": "burned out"
+     },
+     "mid": {
+      "max_area_cm2": 2.03,
+      "t_max_s": 0.0,
+      "t_end_s": 22.0,
+      "area_consumed_cm2": 2.03,
+      "stop_reason": "burned out"
+     },
+     "hi": {
+      "max_area_cm2": 2.03,
+      "t_max_s": 0.0,
+      "t_end_s": 35.0,
+      "area_consumed_cm2": 2.03,
+      "stop_reason": "burned out"
+     }
+    },
+    "calibrated": [
+     "downwind (concurrent) rate: scaling law x one constant from 6 reported spacecraft flights"
+    ],
+    "extrapolated": [
+     "concurrent rate OUTSIDE the calibration box (flow 19-25 cm/s, O2 21.2-26.9%, 76-102 kPa)"
+    ],
+    "assumed": [
+     "upwind (opposed) rate over fabric: no data and no model; set to 0, so upwind growth is not simulated",
+     "cross-flow rate = mean of downwind and upwind rates (no data)",
+     "zero flow: spread taken as isotropic at the opposed formula's zero-flow rate"
+    ],
+    "notes": [],
+    "t_s_first_last": [
+     0.0,
+     35.0,
+     301
+    ],
+    "area_mid_every_50": [
+     2.03,
+     2.03,
+     2.03,
+     2.03,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "id": "frame_time_offset",
+   "inputs": {
+    "flame_state": {
+     "flame_type": "surface",
+     "frame_time_s": 12.4,
+     "area_cm2": 2.5,
+     "centroid_cm": [
+      0.25,
+      2.5
+     ],
+     "bbox_cm": [
+      0,
+      0,
+      0.5,
+      5
+     ]
+    },
+    "fuel": {
+     "material": "SIBAL",
+     "width_cm": 5,
+     "length_cm": 29,
+     "thickness_mm": 0.32,
+     "sides_burning": 2
+    },
+    "conditions": {
+     "flow_cm_s": 20,
+     "flow_direction_deg": 0,
+     "o2_vol_pct": 22.1,
+     "pressure_atm": 1
+    }
+   },
+   "expected": {
+    "verdict": {
+     "code": 0,
+     "label": "spreads",
+     "by_direction": {
+      "opposed": "spreads",
+      "concurrent": "spreads"
+     },
+     "matched_cases": []
+    },
+    "rates_mm_s": {
+     "lo": {
+      "opposed": 0.0,
+      "concurrent": 1.67,
+      "cross_flow": 0.8348
+     },
+     "mid": {
+      "opposed": 0.0,
+      "concurrent": 2.867,
+      "cross_flow": 1.434
+     },
+     "hi": {
+      "opposed": 0.0,
+      "concurrent": 5.256,
+      "cross_flow": 2.628
+     }
+    },
+    "burnout_s": {
+     "lo": 22.0,
+     "mid": 22.0,
+     "hi": 35.0
+    },
+    "grid": {
+     "dx_cm": 0.145,
+     "dy_cm": 0.142857,
+     "nx": 200,
+     "ny": 35,
+     "initial_area_cm2": 2.444
+    },
+    "summary": {
+     "lo": {
+      "max_area_cm2": 20.73,
+      "t_max_s": 21.98,
+      "t_end_s": 192.9,
+      "area_consumed_cm2": 145.0,
+      "stop_reason": "fuel edge"
+     },
+     "mid": {
+      "max_area_cm2": 33.83,
+      "t_max_s": 21.95,
+      "t_end_s": 121.5,
+      "area_consumed_cm2": 145.0,
+      "stop_reason": "fuel edge"
+     },
+     "hi": {
+      "max_area_cm2": 94.17,
+      "t_max_s": 34.97,
+      "t_end_s": 89.29,
+      "area_consumed_cm2": 145.0,
+      "stop_reason": "fuel edge"
+     }
+    },
+    "calibrated": [
+     "downwind (concurrent) rate: scaling law x one constant from 6 reported spacecraft flights"
+    ],
+    "extrapolated": [],
+    "assumed": [
+     "upwind (opposed) rate over fabric: no data and no model; set to 0, so upwind growth is not simulated",
+     "cross-flow rate = mean of downwind and upwind rates (no data)"
+    ],
+    "notes": [],
+    "t_s_first_last": [
+     0.0,
+     192.91,
+     301
+    ],
+    "area_mid_every_50": [
+     2.444,
+     31.34,
+     31.82,
+     31.34,
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  }
+ ],
+ "droplet_pointer": {
+  "status": "model",
+  "flame_type": "droplet",
+  "handled_by": "M7",
+  "note": "Droplet flames are not simulated by M6b. Droplet burnout follows the d-squared law: t_burnout = d0^2 / K. K (mm^2/s) comes from M7's burning-rate model (data/models.json id 'm7-burning-rate'); the chance the flame goes out comes from 'm7-extinction', and whether it burns on invisibly from 'm7-cool-flame'. See GROWTH_API.md.",
+  "frame_time_s": 3.0,
+  "values": null
+ },
+ "unsupported_material_error": "material 'Nomex' is not modelled (PMMA, SIBAL, cotton)"
+}

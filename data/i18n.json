@@ -1,0 +1,111 @@
+{
+ "status": "team",
+ "reviewed": false,
+ "what": "Telugu and Hindi strings for the Home short answer and the India card (draft until reviewed)",
+ "drafted": "Drafted by an AI coding agent (Claude, site package P5-G) on 2026-11-15. Not yet checked by a native speaker; set reviewed to true only after a Telugu and a Hindi speaker have read every string.",
+ "how": "Each entry keeps the English it translates in 'en'. The site shows a translation only while that English, filled with the same numbers, still matches the English on the page; otherwise it shows the English. Placeholders in braces, such as {n_fires}, are filled at run time from js/facts.js (data/saffire_latency.json, data/saffire_gas.json) or from data/india.json, so no number is typed here.",
+ "languages": {"en": "English", "te": "తెలుగు", "hi": "हिन्दी"},
+ "scope": "Translated: the Home short answer, and the India card's title, eyebrow, link text, labels and source levels. Kept in English with lang=\"en\": the India fact texts, their sources and the not-found list, so each one still matches its cited source word for word.",
+ "strings": {
+  "short.title": {
+   "en": "The short answer",
+   "te": "క్లుప్తంగా జవాబు",
+   "hi": "संक्षेप में जवाब"
+  },
+  "short.s1": {
+   "en": "In the {n_fires} real fires NASA lit in orbit, a flame light sensor would have noticed within {rad_s} s (using our alarm thresholds). The smoke detector took {smoke_min_s} to {smoke_max_s} s.",
+   "te": "నాసా కక్ష్యలో వెలిగించిన {n_fires} నిజమైన మంటల్లో, మంట వెలుతురును గుర్తించే సెన్సార్ {rad_s} సెకన్లలోపే గమనించేది (మా అలారం పరిమితుల ప్రకారం). పొగ డిటెక్టర్‌కు {smoke_min_s} నుంచి {smoke_max_s} సెకన్లు పట్టింది.",
+   "hi": "नासा ने कक्षा में जो {n_fires} असली आग जलाईं, उनमें लौ की रोशनी पहचानने वाला सेंसर {rad_s} सेकंड के भीतर आग पकड़ लेता (हमारी अलार्म सीमाओं के हिसाब से)। धुएँ के डिटेक्टर को {smoke_min_s} से {smoke_max_s} सेकंड लगे।"
+  },
+  "short.s2": {
+   "en": "The second kind of smoke detector, which looks for dimmed light, never alarmed at all.",
+   "te": "కాంతి మసకబారడాన్ని చూసే రెండో రకం పొగ డిటెక్టర్ ఒక్కసారి కూడా అలారం మోగించలేదు.",
+   "hi": "दूसरी तरह के धुआँ डिटेक्टर ने, जो रोशनी के मंद पड़ने को देखता है, कभी अलार्म बजाया ही नहीं।"
+  },
+  "short.s3": {
+   "en": "That matters: in NASA's later Saffire fires, carbon monoxide passed the 24-hour crew limit in {co_over} of {co_tests} tests, and a smoke monitor reached its alarm level only after much of the gas was out.",
+   "te": "ఇది ఎందుకు ముఖ్యం: నాసా తర్వాత చేసిన సఫైర్ మంటల పరీక్షల్లో, {co_tests} పరీక్షలకు గాను {co_over} పరీక్షల్లో కార్బన్ మోనాక్సైడ్ సిబ్బందికి నిర్ణయించిన 24 గంటల పరిమితిని దాటింది. చాలా వాయువు అప్పటికే బయటకు వచ్చాకే ఒక పొగ మానిటర్ తన అలారం స్థాయికి చేరింది.",
+   "hi": "यह क्यों मायने रखता है: नासा के बाद के सैफ़ायर प्रयोगों की आग में, {co_tests} में से {co_over} परीक्षणों में कार्बन मोनोऑक्साइड चालक दल के लिए तय 24 घंटे की सीमा से ऊपर चली गई, और धुएँ का एक मॉनिटर अपने अलार्म स्तर तक तब पहुँचा जब काफ़ी गैस पहले ही निकल चुकी थी।"
+  },
+  "short.missing_latency": {
+   "en": "Alarm timing on NASA's orbital fires is not available yet (data/{file}.json missing).",
+   "te": "నాసా కక్ష్య మంటలపై అలారం సమయాలు ఇంకా అందుబాటులో లేవు (data/{file}.json లేదు).",
+   "hi": "नासा की कक्षा वाली आग पर अलार्म का समय अभी उपलब्ध नहीं है (data/{file}.json नहीं मिली)।"
+  },
+  "short.missing_gas": {
+   "en": "Cabin gas timing from NASA's later Saffire fires is not available yet (data/{file}.json missing).",
+   "te": "నాసా తర్వాతి సఫైర్ మంటల నుంచి క్యాబిన్ వాయువు సమయాలు ఇంకా అందుబాటులో లేవు (data/{file}.json లేదు).",
+   "hi": "नासा के बाद के सैफ़ायर प्रयोगों से केबिन गैस का समय अभी उपलब्ध नहीं है (data/{file}.json नहीं मिली)।"
+  },
+  "india.eyebrow": {
+   "en": "From Hyderabad",
+   "te": "హైదరాబాద్ నుంచి",
+   "hi": "हैदराबाद से"
+  },
+  "india.title": {
+   "en": "Why this matters for India's own crew and station",
+   "te": "భారతదేశ సొంత వ్యోమగాములకు, అంతరిక్ష కేంద్రానికి ఇది ఎందుకు ముఖ్యం",
+   "hi": "भारत के अपने अंतरिक्ष यात्रियों और स्टेशन के लिए यह क्यों मायने रखता है"
+  },
+  "india.link": {
+   "en": "Why it matters here: a long-stay Indian station will face the same problems the NASA data shows: fine smoke that light-scattering detectors see weakly, and flames carried by ventilation airflow. That link is our reading, not an ISRO statement.",
+   "te": "ఇక్కడ ఇది ఎందుకు ముఖ్యం: సిబ్బంది ఎక్కువ కాలం ఉండే భారతీయ అంతరిక్ష కేంద్రం కూడా నాసా డేటా చూపిస్తున్న సమస్యలనే ఎదుర్కొంటుంది: కాంతి చెదరడాన్ని కొలిచే డిటెక్టర్లు బలహీనంగా గుర్తించే సన్నని పొగ, వెంటిలేషన్ గాలితో పాటు కదిలే మంటలు. ఈ సంబంధం మా సొంత అవగాహన మాత్రమే, ఇస్రో ప్రకటన కాదు.",
+   "hi": "यहाँ यह क्यों मायने रखता है: लंबे समय तक चालक दल वाले भारतीय स्टेशन को वही समस्याएँ झेलनी होंगी जो नासा के आँकड़े दिखाते हैं: बारीक धुआँ, जिसे रोशनी के बिखराव से काम करने वाले डिटेक्टर कमज़ोर ढंग से देखते हैं, और वेंटिलेशन की हवा के साथ बहती लपटें। यह संबंध हमारी अपनी समझ है, इसरो का कोई बयान नहीं।"
+  },
+  "india.facts_summary": {
+   "en": "The facts we checked, with sources ({n})",
+   "te": "మేము తనిఖీ చేసిన వాస్తవాలు, వాటి ఆధారాలతో ({n})",
+   "hi": "हमने जो तथ्य जाँचे, उनके स्रोतों के साथ ({n})"
+  },
+  "india.facts_en_note": {
+   "en": "The fact texts stay in English, so each one matches its source word for word.",
+   "te": "ప్రతి వాస్తవం దాని ఆధారంతో పదం పదం సరిపోలేలా, వాస్తవాల పాఠ్యాన్ని ఇంగ్లీష్‌లోనే ఉంచాం.",
+   "hi": "तथ्यों का पाठ अंग्रेज़ी में ही रखा गया है, ताकि हर तथ्य अपने स्रोत से शब्दशः मेल खाए।"
+  },
+  "india.levels_intro": {
+   "en": "How sure we are of each source:",
+   "te": "ప్రతి ఆధారంపై మాకు ఎంత నమ్మకం ఉంది:",
+   "hi": "हर स्रोत पर हमें कितना भरोसा है:"
+  },
+  "india.not_found": {
+   "en": "What we looked for and did not find",
+   "te": "మేము వెతికినా దొరకనివి",
+   "hi": "हमने क्या खोजा, पर नहीं मिला"
+  },
+  "india.checked": {
+   "en": "Checked {date}.",
+   "te": "{date}న తనిఖీ చేశాం.",
+   "hi": "{date} को जाँचा गया।"
+  },
+  "level.official": {
+   "en": "official",
+   "te": "అధికారిక",
+   "hi": "आधिकारिक"
+  },
+  "level.official via news": {
+   "en": "official via news",
+   "te": "వార్తల ద్వారా అధికారిక",
+   "hi": "समाचार के ज़रिए आधिकारिक"
+  },
+  "level.news only": {
+   "en": "news only",
+   "te": "వార్తలు మాత్రమే",
+   "hi": "सिर्फ़ समाचार"
+  },
+  "level_def.official": {
+   "en": "Read on a Government of India page",
+   "te": "భారత ప్రభుత్వ వెబ్ పేజీలో చదివినది",
+   "hi": "भारत सरकार के किसी वेब पेज पर पढ़ा गया"
+  },
+  "level_def.official via news": {
+   "en": "An official statement we saw only as reported by news",
+   "te": "అధికారిక ప్రకటనే, కానీ మేము దాన్ని వార్తల్లో మాత్రమే చూశాం",
+   "hi": "एक आधिकारिक बयान, जिसे हमने केवल समाचारों में छपा देखा"
+  },
+  "level_def.news only": {
+   "en": "Press report; no official document found",
+   "te": "పత్రికా కథనం; అధికారిక పత్రం ఏదీ దొరకలేదు",
+   "hi": "समाचार रिपोर्ट; कोई आधिकारिक दस्तावेज़ नहीं मिला"
+  }
+ }
+}

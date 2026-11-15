@@ -1,80 +1,144 @@
-// Ask the evidence: every answer is pre-written from a data file (scripts/build_assistant.py). Typed questions are
-// matched to an answer by keywords; below the threshold the assistant refuses. The scorecard runs the fixed test set
-// through this same matcher, so the score shown is the score of what the visitor uses.
-import { h, load, page, card } from '../lib.js';
-import { askAI, retrieve } from '../llm.js';
+// Ask the evidence (#/ask). Every saved answer is pre-written from a data file (scripts/build_assistant.py). Typed
+// questions are matched to an answer by keywords (js/ask_match.js, verbatim from main); below the threshold the
+// assistant refuses. The scorecard runs the fixed test set through this same matcher, so the score shown is the score
+// of what the visitor uses. Ion-wind text is removed at display time only (js/overlays.js, Q4); the cache is unchanged
+// and all of its items stay in the matcher, so the score is the file's score.
+// The optional live mode (js/llm.js, verbatim from main) is off while data/assistant_config.json has endpoint null.
+import { h, add, load, page, card, empty, stat, table, announce, isMissing } from '../lib.js';
+import { askAI } from '../llm.js';
+import { match } from '../ask_match.js';
+import { askAnswer, hideGoldRow, kbPassage } from '../overlays.js';
 
-const STOP = new Set('a an the is are was were do does did of in on at to for and or what which how why who when where can will would should i we you it this that be by with from about any there their our your me my'.split(' '));
-const words = s => s.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').split(/\s+/).filter(w => w && !STOP.has(w));
-const MIN_SCORE = 2;   // fewer matching keywords than this = no evidence
+const CACHE_SHAPE = `{"status": "reported", "items": [{"id": "…", "kind": "answer" | "refusal", "q": "…", "a": "…",
+  "keywords": ["…"], "hard": ["…"], "trace": "data/<file>.json <field>", "sources": [{"label": "…", "url": "…"}]}]}`;
+const GOLD_SHAPE = `{"status": "team", "items": [{"q": "…", "expect": "<answer id> | refuse"}]}`;
 
-export function match(q, items) {
-  const qs = new Set(words(q)); let best = null, bestScore = 0;
-  // stated rule: a question that names a refusal topic (Moon, Mars, safety...) is refused, whatever else it matches
-  const hard = items.filter(it => it.kind === 'refusal').find(it => (it.hard || []).some(w => qs.has(w)));
-  if (hard) return { item: hard, score: Infinity };
-  for (const it of items) {
-    const keys = new Set([...(it.keywords || []), ...words(it.q)]);
-    let s = 0; for (const w of qs) if (keys.has(w)) s += (it.keywords || []).includes(w) ? 1 : 0.5;
-    if (s > bestScore) { bestScore = s; best = it; }
-  }
-  return bestScore >= MIN_SCORE ? { item: best, score: bestScore } : { item: null, score: bestScore };
+// verbatim from main's footnote and "kept honest" list
+const AI_ON = 'Typed questions also get an AI answer (Claude Haiku via our Worker), written only from the passages listed under it; any number not found in them blocks the answer.';
+const AI_OFF = 'AI answers are built but switched off: they turn on when the team deploys the Worker in worker/README.md. Until then every answer is a saved one.';
+const HONEST_1_OFF = 'No language model writes answers at run time. Each answer is generated from the data files by scripts/build_assistant.py, so every number traces to a file and field.';
+const HONEST_1_ON = 'No language model writes the saved answers. Each one is generated from the data files by scripts/build_assistant.py, so every number traces to a file and field. ' + AI_ON;
+
+const LINE_1 = 'Ask a question in plain words. Answers come only from this site\'s data files, with sources.';
+const LINE_2 = 'It refuses questions the data cannot answer, such as Moon or Mars predictions or whether something is "safe".';
+
+export async function short() {
+  const c = await load('assistant_cache');
+  return [isMissing(c) ? 'The saved answers are not available yet (data/assistant_cache.json missing).' : LINE_1, LINE_2];
 }
 
-export default async function (root) {
+const clear = el => { el.replaceChildren(); return el; };
+const stamp = (cls, status, text) => h('span', { class: `badge ${cls}`, 'data-status': status }, text);
+const link = (url, label) => {
+  const u = String(url || '#'), ext = !u.startsWith('#');
+  return h('a', { href: u, target: ext ? '_blank' : null, rel: ext ? 'noopener' : null }, label, ext ? h('span', { class: 'sr' }, ' (opens in a new tab)') : null);
+};
+
+export default async function render(root, ctx = {}) {
   const [c, gold, kb, cfg] = await Promise.all([load('assistant_cache'), load('assistant_gold'), load('kb'), load('assistant_config')]);
-  const endpoint = cfg && cfg.status !== 'missing' ? cfg.endpoint : null;
-  const items = c.items || [];
+  const endpoint = !isMissing(cfg) && typeof cfg.endpoint === 'string' && cfg.endpoint.trim() ? cfg.endpoint.trim() : null;
+  const haveCache = !isMissing(c) && Array.isArray(c.items);
+  const items = haveCache ? c.items : [];
+  let alive = true, seq = 0;
+  ctx.onLeave?.(() => { alive = false; });
+  const say = msg => { if (!ctx.detached && alive) announce(msg); };
+
+  // ---------- the answer panel ----------
   const out = h('div', { class: 'answer' }, h('p', { class: 'muted' }, 'Pick a question, or type your own.'));
   const show = (it, asked) => {
-    if (!it) { out.replaceChildren(h('span', { class: 'badge missing' }, 'No NASA evidence'), h('p', { class: 'ans', style: 'margin-top:10px' }, `Nothing in our library answers "${asked}". The assistant does not guess.`)); return; }
-    out.replaceChildren(it.kind === 'refusal' ? h('span', { class: 'badge missing' }, 'No evidence, so no answer') : h('span', { class: 'badge real' }, 'Answered from sources'),
-      asked ? h('p', { style: 'margin:8px 0 0' }, h('small', {}, `Matched to: ${it.q}`)) : null,
-      h('p', { class: 'ans', style: 'margin-top:10px' }, it.a),
+    if (!it) {
+      const txt = `Nothing in our library answers "${asked}". The assistant does not guess.`;
+      out.replaceChildren(stamp('missing', 'missing', 'No NASA evidence'), h('p', { class: 'ans' }, txt));
+      say(`No NASA evidence. ${txt}`);
+      return;
+    }
+    const { a, showMatched } = askAnswer(it);
+    const refusal = it.kind === 'refusal';
+    const label = refusal ? 'No evidence, so no answer' : 'Answered from sources';
+    const matched = asked && showMatched ? `Matched to: ${it.q}` : null;
+    const sources = Array.isArray(it.sources) ? it.sources : [];
+    // replaceChildren would print a null kid as "null"; add() drops it (REBUILD_PLAN §0 rule 5)
+    add(clear(out),
+      refusal ? stamp('missing', 'missing', label) : stamp('real', 'reported', label),
+      matched ? h('p', { class: 'matched' }, h('small', {}, matched)) : null,
+      h('p', { class: 'ans' }, a),
       it.trace ? h('p', {}, h('small', {}, 'Numbers from: ', h('code', {}, it.trace))) : null,
-      h('div', { class: 'src' }, 'Sources: ', ...it.sources.flatMap((s, i) => [i ? '; ' : '', h('a', { href: s.url, target: s.url.startsWith('#') ? null : '_blank', rel: 'noopener' }, s.label)])));
+      sources.length ? h('div', { class: 'src' }, 'Sources: ', ...sources.flatMap((s, i) => [i ? '; ' : '', link(s.url, s.label)])) : null);
+    say(`${label}. ${matched ? matched + '. ' : ''}${a}`);
   };
-  const input = h('input', { type: 'search', placeholder: 'Ask about fire in orbit, e.g. "where should the smoke detector go?"', style: 'flex:1', 'aria-label': 'Ask a question' });
-  const aiOut = h('div', { class: 'ai-out', 'aria-live': 'polite' });
-  const aiShow = async q => {
-    if (!endpoint || kb.status === 'missing') { aiOut.replaceChildren(); return; }
-    const m = match(q, items); if (m.item && m.item.kind === 'refusal') { aiOut.replaceChildren(); return; }   // refusal topics never go to the AI
-    aiOut.replaceChildren(h('p', { class: 'muted' }, 'Asking the AI, using only the passages below…'));
-    try {
-      const r = await askAI(endpoint, q, kb);
-      if (r.refused) { aiOut.replaceChildren(h('p', {}, 'No NASA evidence in our library answers this.')); return; }
-      const src = h('ol', { class: 'ai-src' }, ...r.passages.map(p => h('li', {}, h('a', { href: p.url || '#', target: (p.url || '').startsWith('#') ? null : '_blank', rel: 'noopener' }, p.title), h('small', {}, ` · ${p.source} · ${p.file}`))));
-      aiOut.replaceChildren(h('div', { class: 'ai-head' }, h('span', { class: `badge ${r.bad.length ? 'missing' : 'model'}` }, r.bad.length ? 'Held back' : 'AI answer, numbers checked'), h('small', {}, ` ${r.model || ''}`)),
-        r.bad.length ? h('p', {}, `The AI answer used a number not found in our sources (${r.bad.join(', ')}), so it is not shown. The saved answer above is the one to trust.`) : h('p', { class: 'ans' }, r.answer),
-        h('p', {}, h('small', {}, 'Passages the AI was allowed to use ([P1] is the first):')), src);
-    } catch (e) { aiOut.replaceChildren(h('p', { class: 'muted' }, `${e.message}. The saved answer above still works.`)); }
-  };
-  const ask = () => { const q = input.value.trim(); if (!q) return; document.querySelectorAll('.q').forEach(b => b.setAttribute('aria-pressed', 'false')); show(match(q, items).item, q); aiShow(q); };
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
-  const list = items.filter(it => it.kind === 'answer').map(it => { const b = h('button', { class: 'q', 'aria-pressed': 'false' }, it.q); b.addEventListener('click', () => { document.querySelectorAll('.q').forEach(x => x.setAttribute('aria-pressed', String(x === b))); show(it); }); return b; });
 
-  // scorecard: the same matcher on the fixed test set
-  let score = null;
-  if (gold.status !== 'missing') {
+  // ---------- optional live AI answer (typed questions only; refusal topics never go to the AI) ----------
+  const aiOut = h('div', { class: 'ai-out' });
+  const aiShow = async (q, my) => {
+    if (!endpoint || isMissing(kb) || !Array.isArray(kb.passages)) { aiOut.replaceChildren(); return; }
+    const m = match(q, items); if (m.item && m.item.kind === 'refusal') { aiOut.replaceChildren(); return; }
+    aiOut.replaceChildren(h('p', { class: 'muted' }, 'Asking the AI, using only the passages below…'));
+    const stale = () => !alive || my !== seq;
+    try {
+      const r = await askAI(endpoint, q, { ...kb, passages: kb.passages.map(kbPassage) });
+      if (stale()) return;
+      if (r.refused) { aiOut.replaceChildren(h('p', {}, 'No NASA evidence in our library answers this.')); say('AI answer: No NASA evidence in our library answers this.'); return; }
+      const src = h('ol', { class: 'ai-src' }, ...r.passages.map(p => h('li', {}, link(p.url, p.title), h('small', {}, ` · ${p.source} · ${p.file}`))));
+      const held = r.bad.length > 0;
+      const head = held ? 'Held back' : 'AI answer, numbers checked';
+      const body = held ? `The AI answer used a number not found in our sources (${r.bad.join(', ')}), so it is not shown. The saved answer above is the one to trust.` : r.answer;
+      aiOut.replaceChildren(h('div', { class: 'ai-head' }, held ? stamp('missing', 'missing', head) : stamp('real', 'model', head), h('small', {}, ` ${r.model || ''}`)),
+        h('p', { class: held ? null : 'ans' }, body),
+        h('p', {}, h('small', {}, 'Passages the AI was allowed to use ([P1] is the first):')), src);
+      say(`${head}. ${body}`);
+    } catch (e) {
+      if (stale()) return;
+      aiOut.replaceChildren(h('p', { class: 'muted' }, `${e.message}. The saved answer above still works.`));
+    }
+  };
+
+  // ---------- questions: search box, Ask button, one button per saved answer ----------
+  const input = h('input', { type: 'search', id: 'ask-q', placeholder: 'Ask about fire in orbit, e.g. "where should the smoke detector go?"', autocomplete: 'off' });
+  const answers = items.filter(it => it.kind === 'answer');
+  const list = answers.map(it => h('button', { type: 'button', class: 'q', 'aria-pressed': 'false' }, it.q));
+  const press = b => list.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  list.forEach((b, i) => b.addEventListener('click', () => { seq++; press(b); aiOut.replaceChildren(); show(answers[i]); }));
+  const ask = () => { const q = input.value.trim(); if (!q) return; const my = ++seq; press(null); show(match(q, items).item, q); aiShow(q, my); };
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ask(); } });
+
+  const questions = haveCache
+    ? card('Questions', c.status, `${list.length} answers, each written from a data file. Type a question or pick one.`,
+        h('div', { class: 'ask-box' }, h('label', { for: 'ask-q' }, 'Type a question'),
+          h('div', { class: 'row' }, input, h('button', { type: 'button', class: 'chip', onclick: ask }, 'Ask'))),
+        h('div', { class: 'qlist', role: 'group', 'aria-label': 'Saved questions' }, list))
+    : card('Questions', 'missing', null, empty('No saved answers yet', 'assistant_cache', 'The questions and their pre-written answers come from this file (scripts/build_assistant.py).', CACHE_SHAPE));
+  const answer = haveCache
+    ? card('Answer', c.status, null, out, aiOut, h('p', {}, h('small', {}, endpoint ? AI_ON : AI_OFF)))
+    : card('Answer', 'missing', null, h('p', { class: 'muted' }, 'Answers appear here once data/assistant_cache.json is in place.'));
+
+  // ---------- scorecard: the same matcher on the fixed test set ----------
+  let score;
+  if (isMissing(gold) || !Array.isArray(gold.items)) {
+    score = card('Assistant scorecard', 'missing', null, empty('No test set yet', 'assistant_gold', 'The fixed questions with known answers that the matcher is scored on.', GOLD_SHAPE));
+  } else if (!haveCache) {
+    score = card('Assistant scorecard', 'missing', null, empty('No saved answers to score', 'assistant_cache', 'The test set is here, but the answers it is scored against are not.', CACHE_SHAPE));
+  } else {
     const rows = gold.items.map(g => { const r = match(g.q, items); const got = r.item ? (r.item.kind === 'refusal' ? 'refuse' : r.item.id) : 'refuse'; return { ...g, got, ok: got === g.expect }; });
     const ans = rows.filter(r => r.expect !== 'refuse'), ref = rows.filter(r => r.expect === 'refuse');
-    score = card('Assistant scorecard', 'team', `${gold.items.length} fixed questions with known answers, run live through the matcher above. Written before the score was seen; misses stay listed.`,
-      h('div', { class: 'grid g3', style: 'margin-bottom:10px' },
-        h('div', {}, h('small', {}, 'Right answer'), h('div', { class: 'stat' }, `${ans.filter(r => r.ok).length}/${ans.length}`)),
-        h('div', {}, h('small', {}, 'Correct refusals'), h('div', { class: 'stat' }, `${ref.filter(r => r.ok).length}/${ref.length}`)),
-        h('div', {}, h('small', {}, 'Overall'), h('div', { class: 'stat' }, `${Math.round(100 * rows.filter(r => r.ok).length / rows.length)}%`))),
-      h('div', { class: 'scroll' }, h('table', {}, h('thead', {}, h('tr', {}, ...['Question', 'Expected', 'Got', ''].map(t => h('th', {}, t)))),
-        h('tbody', {}, ...rows.map(r => h('tr', {}, h('td', {}, r.q), h('td', {}, h('code', {}, r.expect)), h('td', {}, h('code', {}, r.got)), h('td', {}, h('span', { class: `status ${r.ok ? 'pass' : 'fail'}` }, r.ok ? 'Pass' : 'Miss'))))))));
+    const shown = rows.filter(r => !hideGoldRow(r)), hidden = rows.filter(hideGoldRow);
+    const hk = hidden.length, hp = hidden.filter(r => r.ok).length;
+    score = card('Assistant scorecard', gold.status, `${gold.items.length} fixed questions with known answers, run live through the matcher above. Written before the score was seen; misses stay listed.`,
+      h('div', { class: 'grid g3 ask-stats' },
+        stat('Right answer', `${ans.filter(r => r.ok).length}/${ans.length}`),
+        stat('Correct refusals', `${ref.filter(r => r.ok).length}/${ref.length}`),
+        stat('Overall', `${Math.round(100 * rows.filter(r => r.ok).length / rows.length)}%`)),
+      table(['Question', 'Expected', 'Got', ''], shown.map(r => [r.q, h('code', {}, r.expect), h('code', {}, r.got), h('span', { class: `status ${r.ok ? 'pass' : 'fail'}` }, r.ok ? 'Pass' : 'Miss')])),
+      hk ? h('p', { class: 'ask-foot' }, `${hk} question${hk > 1 ? 's' : ''} from the test set ${hk > 1 ? 'are' : 'is'} counted in the score above but not listed, because ${hk > 1 ? 'they ask' : 'it asks'} about a bench response the team dropped in plan v2. ${hp} of ${hk} passed.`) : null);
   }
+
+  const honest = card('How the assistant is kept honest', 'team', null, h('ul', { class: 'honest' },
+    ...[endpoint ? HONEST_1_ON : HONEST_1_OFF,
+      'A typed question is matched by keywords. If too few match, it replies "No NASA evidence" instead of guessing.',
+      'Questions about Moon or Mars gravity, about safety, or about our bench working in space get a refusal on purpose.',
+      'The scorecard above runs the fixed test set through the same matcher every time the page loads.'].map(t => h('li', {}, t))));
+
   root.append(page('Ask the evidence', 'An assistant that answers only from NASA rows, NASA papers and our own model outputs, shows where each number came from, and says so when there is no evidence.',
-    h('div', { class: 'grid g2' },
-      card('Questions', c.status, `${list.length} answers, each written from a data file. Type a question or pick one.`, h('div', { class: 'row' }, input, h('button', { class: 'chip', onclick: ask }, 'Ask')), ...list),
-      card('Answer', null, null, out, aiOut,
-        h('p', {}, h('small', {}, endpoint ? 'Typed questions also get an AI answer (Claude Haiku via our Worker), written only from the passages listed under it; any number not found in them blocks the answer.' : 'AI answers are built but switched off: they turn on when the team deploys the Worker in worker/README.md. Until then every answer is a saved one.')))),
-    score ? h('div', { style: 'margin-top:14px' }, score) : null,
-    h('div', { style: 'margin-top:14px' }, card('How the assistant is kept honest', null, null, h('ul', { style: 'margin:0;padding-left:18px;color:var(--ink2)' },
-      ...['No language model writes answers at run time. Each answer is generated from the data files by scripts/build_assistant.py, so every number traces to a file and field.',
-        'A typed question is matched by keywords. If too few match, it replies "No NASA evidence" instead of guessing.',
-        'Questions about Moon or Mars gravity, about safety, or about our bench working in space get a refusal on purpose.',
-        'The scorecard above runs the fixed test set through the same matcher every time the page loads.'].map(t => h('li', { style: 'margin-bottom:6px' }, t)))))));
+    h('div', { class: 'grid g2' }, questions, answer),
+    score,
+    honest));
 }

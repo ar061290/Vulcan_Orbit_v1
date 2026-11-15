@@ -1,0 +1,61 @@
+/* Page CSS for #/models (Model cards). Every rule is scoped under #view[data-page="models"] (site/REBUILD_PLAN.md §0 rule 9).
+   Package P5-C. Colours come from tokens.css only, so Day and Night both work. */
+#view[data-page="models"] .mcard{margin-top:14px}
+#view[data-page="models"] .mcard h3{font:700 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:18px 0 8px}
+
+/* Use it for / Not for (main's SCOPE text) */
+#view[data-page="models"] .mc-scope{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+#view[data-page="models"] .mc-scope > div{padding:10px 14px;border-radius:12px;background:var(--raise);border-left:4px solid var(--good)}
+#view[data-page="models"] .mc-scope > .mc-not{border-left:4px dashed var(--crit)}
+#view[data-page="models"] .mc-scope p{margin:4px 0 0;color:var(--ink)}
+#view[data-page="models"] .mc-k{font:700 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+
+/* score boxes */
+#view[data-page="models"] .mc-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:10px;margin:12px 0}
+#view[data-page="models"] .mc-stats .stat{font-size:1.6rem;overflow-wrap:anywhere}
+#view[data-page="models"] .mc-stats .stat small{display:block;margin:4px 0 0;line-height:1.4;font-size:12.5px;color:var(--ink2)}
+#view[data-page="models"] .mc-stats .stat-label{font-size:13px;color:var(--ink2)}
+
+/* the sub-model parts (M3 grid model and lattice Boltzmann; M4 rate-of-rise extension) */
+#view[data-page="models"] .mc-part{margin:16px 0 0;padding:4px 0 0 14px;border-left:2px solid var(--line)}
+#view[data-page="models"] .mc-part > h3{margin-top:6px;color:var(--ink);font:700 15px var(--font);letter-spacing:0;text-transform:none}
+
+#view[data-page="models"] dl.made.mc{padding-left:0;padding-right:0;font-size:14px}
+#view[data-page="models"] .mc-quote{font-size:14px;color:var(--ink2);margin:10px 0}
+#view[data-page="models"] .mc-quote q{font-style:italic}
+#view[data-page="models"] .mc-verdict{margin:12px 0;padding:10px 14px;border-radius:12px;background:var(--raise);border-left:4px solid var(--crit);color:var(--ink)}
+
+/* M6 findings first */
+#view[data-page="models"] .mc-find{margin:6px 0 10px;padding-left:1.3em;color:var(--ink)}
+#view[data-page="models"] .mc-find li{margin:4px 0}
+
+/* drivers: the share is printed as text; the bar is decoration (aria-hidden) */
+#view[data-page="models"] .mc-drivers{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-width:36rem}
+#view[data-page="models"] .mc-drivers li{display:grid;grid-template-columns:minmax(8rem,14rem) 1fr 3.5em;gap:10px;align-items:center;font-size:14px}
+#view[data-page="models"] .mc-dn{color:var(--ink);overflow-wrap:anywhere}
+#view[data-page="models"] .mc-bar{height:8px;border-radius:4px;background:var(--grid);overflow:hidden}
+#view[data-page="models"] .mc-bar > span{display:block;height:100%;background:var(--s1)}
+#view[data-page="models"] .mc-ds{font:600 13px var(--mono);color:var(--ink);text-align:right}
+
+/* pass-rule results */
+#view[data-page="models"] .mc-checks ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+#view[data-page="models"] .mc-checks li{font-size:14px;color:var(--ink2);line-height:1.45;overflow-wrap:anywhere}
+#view[data-page="models"] .mc-checks li b{color:var(--ink);font:600 13px var(--mono)}
+#view[data-page="models"] .mc-checks .status{display:inline;color:var(--ink);font-weight:700}
+#view[data-page="models"] .mc-checks .status::before{display:inline-block;margin-right:6px;vertical-align:.05em}
+#view[data-page="models"] .mc-checks li[data-state="fail"] .status{color:var(--crit)}
+#view[data-page="models"] .mc-count{margin:0 0 8px;font-size:13.5px;color:var(--ink2)}
+#view[data-page="models"] .mc-checks details.fold{margin-top:8px}
+
+#view[data-page="models"] .mc-links{margin:14px 0 4px}
+#view[data-page="models"] .mc-links ul{margin:4px 0 0;padding-left:1.2em}
+#view[data-page="models"] .mc-links li{margin:2px 0}
+#view[data-page="models"] .cred{padding-left:0;padding-right:0;margin-top:14px}
+#view[data-page="models"] .mc-foot{margin-top:22px}
+
+@media (max-width:600px){
+  #view[data-page="models"] .mc-scope{grid-template-columns:1fr}
+  #view[data-page="models"] .mc-drivers li{grid-template-columns:1fr 3.5em}
+  #view[data-page="models"] .mc-drivers .mc-bar{grid-column:1 / -1;grid-row:2}
+  #view[data-page="models"] .mc-part{padding-left:10px}
+}

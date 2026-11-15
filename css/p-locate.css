@@ -1,0 +1,9 @@
+/* Page CSS for #/locate. Every rule is scoped under #view[data-page="locate"] (site/REBUILD_PLAN.md §0 rule 9).
+   The shared mist-trial card (fig_respond) uses its own unscoped .mist- classes in fx-response.css. */
+#view[data-page="locate"] .bench-steps{margin:0 0 14px;padding-left:1.4em;display:grid;gap:8px;max-width:var(--measure)}
+#view[data-page="locate"] .bench-steps li::marker{font:600 .85rem var(--mono);color:var(--accent-ink)}
+#view[data-page="locate"] .bench-steps b{color:var(--ink)}
+#view[data-page="locate"] .bench-absent{font-style:italic;color:var(--mute)}
+#view[data-page="locate"] .bench-pending{margin:0 0 10px;padding-left:1.1em;display:grid;gap:6px}
+#view[data-page="locate"] .card>h3{margin-top:18px}
+#view[data-page="locate"] .card table td:nth-child(2){font-family:var(--mono);overflow-wrap:anywhere}

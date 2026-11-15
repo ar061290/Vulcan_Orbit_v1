@@ -1,0 +1,62 @@
+/* Shared figure CSS (fx-drift): smoke drift map, what-if layouts, blind-spot maps and the 3D cabin
+   (js/fig_drift.js, js/fig_cabin3d.js; package P4-B). Unscoped, prefixed .drift- and .cab3d- (site/REBUILD_PLAN.md §0 rule 9). */
+
+/* time controls */
+.drift-ctl{gap:8px 10px;margin:4px 0 10px}
+.drift-tlabel{font:600 13px var(--font);color:var(--ink2)}
+.drift-slider{flex:1 1 160px;min-width:0;accent-color:var(--oxy)}
+.drift-time,.cab3d-t{font:600 14px var(--mono);min-width:56px;display:inline-block;color:var(--ink)}
+
+/* 2D drift map: a dark instrument screen in both themes */
+.drift-canvas{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--grid);background:var(--screen)}
+.drift-canvas:focus-visible,.drift-map:focus-visible,.cab3d-cv:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.drift-dets{margin-top:10px;gap:12px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}   /* 2 or 4 detectors fill the row */
+.drift-dets .stat{font-size:18px}
+.drift-on .stat{color:var(--warn)}
+.drift-sum{margin:10px 0 0;font-size:14px;color:var(--ink2);max-width:var(--measure)}
+.drift-h3{margin:14px 0 6px}
+.drift-h3-top{margin-top:0}
+
+/* legend swatches (gradient, dot, square, line, hatch) */
+.drift-sw{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:middle;flex:none}
+.drift-sw-ramp{width:60px}
+.drift-sw-dot{width:11px;height:11px;border-radius:50%}
+.drift-sw-sq{width:10px;height:10px}
+.drift-sw-line{width:18px;height:3px;border-radius:2px}
+.drift-sw-miss{background:repeating-linear-gradient(135deg,#3a1616 0 3px,#241010 3px 6px)}
+.drift-sw-det{background:var(--warn);border:2px solid #0b0b0b}
+.legend .lg-item{display:inline-flex;align-items:center;gap:6px}
+
+/* what-if layout buttons and share bars */
+.drift-layouts{display:grid;gap:10px;margin:8px 0 14px}
+button.drift-q{display:block;width:100%;text-align:left;background:var(--raise);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:9px 11px;margin:0;font:inherit;font-size:13.5px;cursor:pointer;transition:border-color .15s,background .15s}
+button.drift-q:hover{border-color:var(--ink2)}
+button.drift-q[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.drift-q small,.drift-bar small{display:block;color:var(--mute);margin-top:2px}
+.drift-q small.drift-warn{color:var(--warn)}
+.drift-q-head{display:flex;justify-content:space-between;gap:10px}
+.drift-q-head b{font-family:var(--mono)}
+.drift-track{display:block;height:8px;border-radius:4px;background:var(--grid);overflow:hidden;margin-top:6px}
+.drift-track i{display:block;height:100%;width:0;background:var(--s1);border-radius:4px;transition:width .25s}
+.drift-bar{margin-bottom:10px}
+.drift-g2>*{min-width:0}   /* a wide table scrolls in its .scroll box instead of widening the grid at 320 px */
+
+/* blind-spot maps: positioned cells */
+.drift-map{position:relative;border:1px solid var(--grid);border-radius:8px;overflow:hidden;background:var(--page)}
+.drift-cell{position:absolute;border-radius:3px}
+.drift-cell.kfocus{outline:2px solid var(--ink);outline-offset:0;z-index:2}
+.drift-det{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--warn);border:2px solid #0b0b0b;z-index:3;pointer-events:none}
+
+/* 3D cabin */
+.cab3d{position:relative;aspect-ratio:16/8;border-radius:12px;overflow:hidden;background:#05070e}
+.cab3d-cv{width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
+.cab3d-cv:active{cursor:grabbing}
+.cab3d-fallback{position:absolute;inset:0;margin:0;padding:18px;display:flex;align-items:center;color:var(--screen-ink);font-size:14.5px;line-height:1.5}
+.cab3d-fallback[hidden]{display:none}
+.cab3d-keys{gap:6px 8px;margin:0 0 6px}
+.cab3d-view{font:500 12.5px var(--mono);color:var(--mute)}
+.cab3d-hint{margin:0}
+
+/* Calm: no transitions on the bars */
+html[data-motion=calm] .drift-track i,html[data-motion=calm] button.drift-q{transition:none}
+@media (max-width:480px){.cab3d{aspect-ratio:4/3}.drift-sw-ramp{width:40px}}

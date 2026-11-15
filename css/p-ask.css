@@ -1,0 +1,26 @@
+/* Page CSS for #/ask. Every rule is scoped under #view[data-page="ask"] (site/REBUILD_PLAN.md §0 rule 9).
+   Ported from main's css/app.css (.q, .ans, .src) and css/freefall.css (.ai-out, .ai-src, .ai-head). */
+#view[data-page="ask"] .muted{color:var(--mute)}
+#view[data-page="ask"] .ask-box{display:grid;gap:6px;margin-bottom:4px}
+#view[data-page="ask"] .ask-box > label{font-weight:700;color:var(--ink)}
+#view[data-page="ask"] .ask-box .row{flex-wrap:nowrap}
+#view[data-page="ask"] .ask-box input[type=search]{flex:1 1 auto;min-width:0;width:100%}
+#view[data-page="ask"] .ask-box .chip{flex:0 0 auto}
+#view[data-page="ask"] .qlist{display:grid;gap:6px}
+#view[data-page="ask"] .q{display:block;width:100%;text-align:left;background:var(--raise);color:var(--ink);border:1.5px solid var(--grid);border-radius:8px;padding:9px 11px;font:inherit;font-size:.9rem;line-height:1.4;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+#view[data-page="ask"] .q:hover{border-color:var(--ink2)}
+#view[data-page="ask"] .q[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+#view[data-page="ask"] .answer > p{margin:10px 0 0}
+#view[data-page="ask"] .answer > .matched{margin-top:8px}
+#view[data-page="ask"] .ans{white-space:pre-wrap;color:var(--ink);overflow-wrap:anywhere}
+#view[data-page="ask"] .src{font-size:.82rem;color:var(--mute);margin-top:10px;overflow-wrap:anywhere}
+#view[data-page="ask"] .src a{color:var(--s1)}
+#view[data-page="ask"] .ai-out:not(:empty){margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
+#view[data-page="ask"] .ai-src{font-size:.85rem;padding-left:20px;overflow-wrap:anywhere}
+#view[data-page="ask"] .ai-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#view[data-page="ask"] .ask-stats{margin-bottom:10px}
+#view[data-page="ask"] .ask-foot{font-size:.85rem;color:var(--ink2);margin:10px 0 0}
+#view[data-page="ask"] .honest{margin:0;padding-left:18px;color:var(--ink2)}
+#view[data-page="ask"] .honest li{margin-bottom:6px}
+#view[data-page="ask"] .page > .card{margin-top:14px}
+@media (max-width:420px){#view[data-page="ask"] .ask-box .row{flex-wrap:wrap}}

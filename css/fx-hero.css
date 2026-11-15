@@ -1,0 +1,34 @@
+/* Shared figure CSS (fx-hero): the hero flame, js/gl_hero.js (P6-A; site/REBUILD_PLAN.md §1, §7).
+   Unscoped, every class prefixed .hero-. Placement of the box itself stays with its host
+   (the page-header band in components.css, the Home porthole in p-overview.css). */
+.hero-gl{background:var(--screen);color:var(--screen-ink)}
+.hero-gl canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
+.hero-gl canvas:active{cursor:grabbing}
+.hero-gl canvas:focus{outline:none}
+.hero-gl canvas:focus-visible{outline:3px solid #7aa2ff;outline-offset:-3px}
+.hero-center canvas:focus-visible{outline-offset:-6px;border-radius:50%}
+.hero-gl.nogl{background:radial-gradient(circle at 70% 45%,rgba(90,130,255,.35),transparent 40%),var(--screen)}
+.hero-gl.nogl.hero-center{background:radial-gradient(circle at 50% 50%,rgba(90,130,255,.28),transparent 45%),var(--screen)}
+
+/* Pause / Play: always on the dark illustration, so fixed light-on-dark colours (contrast > 12:1) */
+.hero-pause{position:absolute;z-index:3;min-height:28px;min-width:56px;padding:4px 12px;border:1px solid rgba(238,241,247,.45);border-radius:999px;
+  background:rgba(5,7,13,.72);color:#eef1f7;font:700 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.hero-pause:hover{background:rgba(5,7,13,.9);border-color:#eef1f7}
+.hero-pause:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
+.hero-band .hero-pause{right:12px;bottom:36px}
+.hero-center .hero-pause{top:13%;left:50%;transform:translateX(-50%)}
+
+/* the no-WebGL sentence (page-header band only; the Home porthole prints it in its caption), in one box with the label */
+.hero-fb{position:absolute;z-index:2;right:12px;bottom:8px;max-width:min(46ch,46%);padding:5px 8px;border-radius:5px;
+  background:rgba(5,7,13,.78);color:#eef1f7;font:500 11px/1.45 var(--mono);text-align:right}
+.hero-band .hero-fb .illus-note{position:static;display:inline;padding:0;background:none;border-radius:0;font:inherit;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:inherit}
+.hero-band .hero-fb .hero-fallback{display:inline;margin:0;max-width:none;font:inherit;color:inherit}
+
+@media (max-width:680px){
+  .hero-band .hero-pause{top:8px;bottom:auto;right:auto;left:12px}
+  .hero-fb{top:4px;bottom:auto;left:12px;right:12px;max-width:none;padding:3px 7px;text-align:left;font-size:10px;line-height:1.25}
+  .hero-band .hero-fb .illus-note{letter-spacing:.02em}
+}
+@media (forced-colors:active){
+  .hero-pause,.hero-fb{border:1px solid CanvasText;background:Canvas;color:CanvasText}
+}

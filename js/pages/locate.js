@@ -1,26 +1,36 @@
-import { h, load, page, card, empty, fmt } from '../lib.js';
-import { scatter, lineChart, C } from '../charts.js';
-export default async function (root) {
-  const [loc, cnt] = await Promise.all([load('dome_locator'), load('dome_sensor_count')]);
-  let a, b;
-  if (loc.status === 'missing') a = card('Where the locator put the source', 'missing', 'Top view of the dome. Filled dot is the true position, ring is the estimate.',
-    empty('Waiting for dome data', 'dome_locator', 'One entry per test position on the grid, in centimetres from the dome centre.',
-      '{ "status":"dome", "units":"cm", "method":"least squares", "points":[\n   { "true":[10,0,5], "pred":[11.2,-0.6,5.9] }\n ] }'));
-  else {
-    const pts = loc.points.map(p => { const e = Math.hypot(...p.true.map((v, i) => v - p.pred[i])); return { x: p.true[0], y: p.true[1], x2: p.pred[0], y2: p.pred[1], e, label: `True (${p.true.join(', ')})<br>Estimate (${p.pred.map(v => fmt(v)).join(', ')})<br><b>Error ${fmt(e)} ${loc.units}</b>` }; });
-    const errs = pts.map(p => p.e), mean = errs.reduce((x, y) => x + y, 0) / errs.length;
-    a = card('Where the locator put the source', loc.status, `Top view. Method: ${loc.method || 'n/a'}. Error is measured in 3D.`,
-      h('div', { class: 'grid g3', style: 'margin-bottom:8px' }, ...[['Test positions', errs.length, ''], ['Mean error', fmt(mean), loc.units], ['Worst error', fmt(Math.max(...errs)), loc.units]].map(([l, v, u]) => h('div', {}, h('small', {}, l), h('div', { class: 'stat' }, String(v), h('small', {}, u))))),
-      scatter({ points: pts, xLabel: `x, ${loc.units}`, yLabel: `y, ${loc.units}`, square: true }));
-  }
-  if (cnt.status === 'missing') b = card('More sensors, less error', 'missing', 'How quickly accuracy improves as sensors are added.',
-    empty('Waiting for dome data', 'dome_sensor_count', 'Mean error for each number of sensors, one series per method so the physics model and the neural net can be compared.',
-      '{ "status":"dome", "units":"cm", "series":[\n   { "name":"Least squares", "points":[[2,6.1],[3,3.4],[4,2.2]] },\n   { "name":"Neural net",   "points":[[2,7.0],[3,4.1],[4,2.9]] }\n ] }'));
-  else b = card('More sensors, less error', cnt.status, 'Mean location error on held-out positions.',
-    h('div', { class: 'legend' }, ...cnt.series.map((s, i) => h('span', {}, h('i', { style: `background:${[C.s1, C.s2][i]}` }), s.name))),
-    lineChart({ series: cnt.series.map((s, i) => ({ ...s, color: [C.s1, C.s2][i] })), xLabel: 'Number of sensors', yLabel: `Mean error, ${cnt.units}`, unit: ' ' + cnt.units }));
-  root.append(page('Locate', 'A handful of heat sensors on a dome, and a model that works out where the source is. NASA watched its orbital burns with a similarly sparse set of radiometers; this is the bench version of that problem.',
-    h('div', { class: 'grid g2' }, a, b),
-    h('div', { style: 'margin-top:14px' }, card('What this does and does not show', null, null,
-      h('p', {}, 'The rig runs at Earth gravity with a steady heat source. It tests whether sparse sensors can locate a source that does not flicker or send heat upward. It does not reproduce a microgravity flame.')))));
+// #/locate "Our bench rig" (REBUILD_PLAN §3.13, spec C5): the camera and optical-flow rig. The old thermopile panels
+// are dropped (plan v2 removed features 3, 4 and 5). keep = 1 (site.js), so only the first block shows before the fold;
+// the first block holds the explainer and its limits side by side, so the limits are never hidden.
+import { h, load, page, card, isMissing } from '../lib.js';
+import { benchExplainCard, cvLatestCard, pendingCard, doesNotShowCard, plannedCard } from '../fig_bench.js';
+import { figLink } from '../passes.js';
+
+/** "Bench mist trial" is drawn by fig_respond.mistTrialCard (shared with Put it out). If that module cannot be loaded,
+ *  this fallback says the same thing the spec requires (C6) and draws nothing: "Bench mist trial: not completed". */
+async function mistCard(tr) {
+  try {
+    const m = await import('../fig_respond.js');
+    if (typeof m.mistTrialCard === 'function') return m.mistTrialCard(tr);
+  } catch (e) { console.warn('locate: js/fig_respond.js not available, using the plain mist-trial card', e); }
+  const measured = !isMissing(tr) && tr.status === 'dome';
+  return card('Bench mist trial', measured ? 'dome' : 'missing', 'Fine mist on a small flame on the bench, measured by the dome before and after. Optional in plan v2.',
+    measured
+      ? h('p', {}, 'The measured trial is drawn on ', h('a', { href: figLink('respond', 'Bench mist trial') }, 'the Put it out page'), '.')
+      : h('div', { class: 'empty' }, h('h3', {}, 'Bench mist trial: not completed.'),
+        h('p', {}, 'It is optional and is done last, after the camera model and the smoke sensor. Nothing is drawn until data/response_trials.json holds measured dome data.')));
+}
+
+export default async function render(root, ctx) {
+  // card titles first (site map): the explainer and limits need no data
+  const first = h('div', { class: 'grid g2' }, benchExplainCard(), doesNotShowCard());
+  const pg = page('Bench rig',
+    'A camera and a smoke-flow sensor on a bench-top dome, at Earth gravity. The camera\'s reading of the flame is meant to be the first step of the site\'s pipeline, feeding the growth simulation on the Assess page.',
+    first);
+  root.append(pg);
+  const [cv, tr] = await Promise.all([load('cv_latest'), load('response_trials')]);
+  pg.append(
+    cvLatestCard(cv),
+    h('div', { class: 'grid g3' }, pendingCard('cv'), pendingCard('depth'), pendingCard('flow')),
+    await mistCard(tr),
+    plannedCard());
 }

@@ -1,0 +1,36 @@
+/* Page CSS for #/explorer. Every rule is scoped under #view[data-page="explorer"] (site/REBUILD_PLAN.md §0 rule 9). Package P5-B. */
+#view[data-page="explorer"] .xp-controls{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;margin:0 0 14px}
+#view[data-page="explorer"] .xp-controls .seg-row{margin:0;min-width:0}
+#view[data-page="explorer"] .xp-field{display:grid;gap:6px;min-width:0;max-width:100%}
+#view[data-page="explorer"] .xp-field>label,#view[data-page="explorer"] .xp-field>.seg-label{font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="explorer"] .xp-field>small{font-size:12.5px;color:var(--mute)}
+#view[data-page="explorer"] .xp-field input[type=search]{width:min(320px,100%)}
+#view[data-page="explorer"] details.xp-rule{margin:0 0 14px;font-size:13.5px;color:var(--ink2)}
+#view[data-page="explorer"] details.xp-rule>summary{cursor:pointer}
+#view[data-page="explorer"] details.xp-rule[open]{border:1px solid var(--line);border-radius:10px;background:var(--raise);padding:8px 14px 10px}
+#view[data-page="explorer"] details.xp-rule p{margin:8px 0 6px}
+#view[data-page="explorer"] details.xp-rule ul{margin:0;padding-left:20px}
+/* .sr text inside the tables is position:absolute; without a positioned .scroll it escapes the scroll box and widens the page at 320 px */
+#view[data-page="explorer"] .scroll{position:relative}
+#view[data-page="explorer"] .xp-table td{font-size:13.5px}
+#view[data-page="explorer"] .xp-meas{min-width:16em;max-width:34em}
+#view[data-page="explorer"] .xp-bar{display:block;height:6px;border-radius:3px;background:var(--s1);margin:6px 0 2px}
+#view[data-page="explorer"] button.xp-x{display:inline-flex;align-items:baseline;gap:6px;background:none;border:0;padding:2px 0;margin:0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;border-radius:4px}
+#view[data-page="explorer"] button.xp-x:hover b{text-decoration:underline}
+#view[data-page="explorer"] button.xp-x:focus-visible{outline:3px solid var(--oxy);outline-offset:2px}
+#view[data-page="explorer"] .xp-caret::before{content:"+";display:inline-block;width:1em;font:700 14px/1 var(--mono);color:var(--oxy)}
+#view[data-page="explorer"] button.xp-x[aria-expanded=true] .xp-caret::before{content:"−"}
+#view[data-page="explorer"] button.xp-pick{padding:5px 11px;font-size:12.5px;white-space:nowrap}
+#view[data-page="explorer"] tr.xp-detail[hidden]{display:none}
+#view[data-page="explorer"] tr.xp-detail>td{background:var(--raise);padding:12px 14px 14px}
+#view[data-page="explorer"] .xp-kv{max-width:var(--measure)}
+#view[data-page="explorer"] .xp-kv dd{overflow-wrap:anywhere}
+#view[data-page="explorer"] .xp-note{margin:8px 0 0;color:var(--mute)}
+#view[data-page="explorer"] tr.xp-ghead>th{padding-top:18px;color:var(--ink);font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;border-bottom:1.5px solid var(--ink2);white-space:normal}
+#view[data-page="explorer"] .xp-cmp{margin:14px 0 0}
+#view[data-page="explorer"] .xp-cmp-table tbody th{white-space:nowrap;vertical-align:top}
+#view[data-page="explorer"] .xp-score-rule{margin:14px 0 0;display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
+@media (max-width:680px){
+  #view[data-page="explorer"] .xp-controls{display:grid;align-items:stretch}
+  #view[data-page="explorer"] .xp-field input[type=search],#view[data-page="explorer"] .xp-field select{width:100%}
+}

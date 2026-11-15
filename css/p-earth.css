@@ -1,0 +1,31 @@
+/* Page CSS for #/earth (package P5-F). Every rule is scoped under #view[data-page="earth"] (site/REBUILD_PLAN.md §0 rule 9). */
+#view[data-page="earth"] .ea-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 28px;margin-top:6px}
+#view[data-page="earth"] .ea-block{min-width:0}
+#view[data-page="earth"] .ea-block:first-child{grid-column:1/-1}
+#view[data-page="earth"] .ea-block h3,
+#view[data-page="earth"] .ea-links h3,
+#view[data-page="earth"] .ea-src h3,
+#view[data-page="earth"] .ea-files h3{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:14px 0 4px}
+#view[data-page="earth"] .ea-block p{max-width:var(--measure);margin:0 0 10px;line-height:1.6;overflow-wrap:anywhere}
+#view[data-page="earth"] .ea-block .scroll{margin:4px 0 12px}
+#view[data-page="earth"] .ea-ref{font-family:var(--mono);font-size:.92em;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;
+  border-bottom:1px dotted var(--axis);white-space:nowrap}
+#view[data-page="earth"] .ea-block .ea-ref[title]{cursor:help}
+/* text refs (quoted sentences from a data file) wrap normally and keep the body font */
+#view[data-page="earth"] .ea-quote{font-family:inherit;font-size:inherit;font-weight:400;white-space:normal;border-bottom:1px dotted var(--axis)}
+#view[data-page="earth"] .ea-gap{font-family:inherit;font-weight:400;color:var(--mute);font-style:italic;white-space:normal;border:0}
+#view[data-page="earth"] .ea-trial{color:var(--ink)}
+#view[data-page="earth"] .ea-foot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px;border-top:1px solid var(--line);margin-top:10px}
+#view[data-page="earth"] .ea-foot ul,
+#view[data-page="earth"] .ea-files ul{margin:0 0 6px;padding-left:1.2em}
+#view[data-page="earth"] .ea-foot li,
+#view[data-page="earth"] .ea-files li{margin:2px 0;overflow-wrap:anywhere}
+#view[data-page="earth"] .ea-src li{font-size:.92em;color:var(--ink2)}
+#view[data-page="earth"] .ea-files{border-top:1px solid var(--line);margin-top:8px}
+#view[data-page="earth"] .ea-files li .badge{margin-left:4px;vertical-align:middle}
+#view[data-page="earth"] .ea-files code,
+#view[data-page="earth"] .ea-files td code{overflow-wrap:anywhere}
+@media (max-width:760px){
+  #view[data-page="earth"] .ea-grid,
+  #view[data-page="earth"] .ea-foot{grid-template-columns:minmax(0,1fr)}
+}
