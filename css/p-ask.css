@@ -14,7 +14,7 @@
 #view[data-page="ask"] .answer > .matched{margin-top:8px}
 #view[data-page="ask"] .ans{white-space:pre-wrap;color:var(--ink);overflow-wrap:anywhere}
 #view[data-page="ask"] .src{font-size:.82rem;color:var(--mute);margin-top:10px;overflow-wrap:anywhere}
-#view[data-page="ask"] .src a{color:var(--s1)}
+#view[data-page="ask"] .src a{color:var(--c1)}
 #view[data-page="ask"] .ai-out:not(:empty){margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
 #view[data-page="ask"] .ai-src{font-size:.85rem;padding-left:20px;overflow-wrap:anywhere}
 #view[data-page="ask"] .ai-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}

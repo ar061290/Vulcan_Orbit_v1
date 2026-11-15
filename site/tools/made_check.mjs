@@ -146,7 +146,7 @@ async function crawlRoute(browser, base, route, sels = []) {
       return {
         title: titleOf(c), fignum: c.dataset.fignum || null, nested: !!c.parentElement?.closest('.card'),
         stamp: c.querySelector(':scope > h2 .badge, .badge')?.textContent?.trim() || null,
-        made: mb ? (mb.querySelector('summary')?.textContent || '').replace(/^Made by\s*/, '').trim() : null,
+        made: mb ? (mb.querySelector('summary .mb-kind')?.textContent || (mb.querySelector('summary')?.textContent || '').replace(/^Made by\s*/, '')).trim() : null,
         madeModels: mb?.dataset.models || '', madeFiles: files.trim(), cardModels: c.dataset.models || '',
         madeText: mb ? mb.innerText : '',
         madeOptOut: c.dataset.made === 'none',
@@ -173,7 +173,7 @@ async function crawlRoute(browser, base, route, sels = []) {
       };
     });
     // the shell outside #view: header (top menu and the More menu, whose items are in the DOM while closed), banner, footer
-    const shell = ['header.top', '#demo-banner', 'footer.foot'].map(q => document.querySelector(q)?.textContent || '').join('\n');
+    const shell = ['header.top', '#nav', '#demo-banner', 'footer.foot'].map(q => document.querySelector(q)?.textContent || '').join('\n');
     return { title: document.title, h1: [...v.querySelectorAll('h1')].map(x => x.innerText.trim()), text: v.innerText, attrs: attrText(v), cards, banner: document.getElementById('demo-banner')?.innerText || '', shell };
   });
   // Flame lab: turn the "Show Moon and Mars (model only)" switch on and check the gravity note appears only then (C10 #30)

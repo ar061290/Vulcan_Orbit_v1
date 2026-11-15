@@ -1,0 +1,97 @@
+/* v3 app shell: slim top bar, left sidebar (a drawer on phones), data status pill, Read your way popover, footer.
+   Two modes set by js/router.js on <html data-mode>: "story" (Home: no sidebar, see-through bar) and "app" (every other page). */
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:40;height:var(--bar-h);display:flex;align-items:center;gap:var(--s4);padding:0 var(--s4) 0 var(--s5);
+ background:var(--bg);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:var(--s3);text-decoration:none;color:var(--ink);flex:none;width:calc(var(--side-w) - var(--s5) - var(--s4))}
+.brand b{font:700 var(--t2)/1 var(--display);font-stretch:125%;letter-spacing:.06em;text-transform:uppercase}
+.mark,.mark svg{width:24px;height:24px;display:block;flex:none}
+.bar-title{margin:0;font:600 var(--t2)/1 var(--display);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;padding-left:var(--s4);border-left:1px solid var(--line)}
+.bar-title:empty{display:none}
+.bar-tools{margin-left:auto;display:flex;align-items:center;gap:var(--s2);flex:none}
+.bar-app{display:none;font:600 var(--t2) var(--font);color:var(--ink);text-decoration:none;padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r)}
+.bar-app:hover{border-color:var(--ink)}
+.menu{display:none;align-items:center;gap:var(--s2);background:none;color:var(--ink);border:1px solid var(--line-2);border-radius:var(--r);padding:var(--s2) var(--s3);font:600 var(--t2) var(--font);cursor:pointer}
+.menu svg{width:18px;height:18px}
+
+/* data status pill */
+.pill-wrap{position:relative}
+.pill{display:inline-flex;align-items:center;gap:var(--s2);font:600 var(--t1)/1 var(--mono);letter-spacing:.04em;color:var(--ink-2);background:none;border:1px solid var(--line-2);border-radius:var(--r);padding:var(--s2) var(--s3);cursor:pointer;white-space:nowrap}
+.pill i{width:8px;height:8px;background:var(--st-missing);flex:none}
+.pill.ok i{background:var(--st-real)}
+.pill:hover,.pill[aria-expanded=true]{color:var(--ink);border-color:var(--ink)}
+.pop{position:absolute;right:0;top:calc(100% + var(--s2));z-index:60;width:min(380px,calc(100vw - 2 * var(--s4)));background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r2);padding:var(--s4);box-shadow:var(--pop-shadow)}
+.pop[hidden]{display:none}
+.pop-h{font:600 var(--t1) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 var(--s3)}
+.pill-pop ul{list-style:none;margin:0 0 var(--s3);padding:0;display:grid;gap:var(--s3)}
+.pill-pop li{display:grid;grid-template-columns:auto 1fr;gap:var(--s1) var(--s3);align-items:baseline;font-size:var(--t2);color:var(--ink-2)}
+.pill-pop li code{font-size:var(--t1)}
+.pill-pop li span{grid-column:2}
+.pop-note{font-size:var(--t2);margin:0}
+
+/* Read your way: toggle in the bar, panel as a popover */
+.dock{position:relative}
+.dock>button.dock-toggle{display:inline-flex;align-items:center;gap:var(--s2);font:600 var(--t2)/1 var(--font);background:var(--ink);color:var(--bg);border:1px solid var(--ink);border-radius:var(--r);padding:var(--s2) var(--s3);cursor:pointer}
+.dock-aa{font:700 var(--t2)/1 var(--display)}
+.dock-panel{position:absolute;right:0;top:calc(100% + var(--s2));z-index:60;width:min(320px,calc(100vw - 2 * var(--s4)));max-height:calc(100vh - var(--bar-h) - var(--s5));overflow:auto;background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r2);padding:var(--s4);box-shadow:var(--pop-shadow)}
+.dock-panel[hidden]{display:none}
+.dock-panel h2{font-size:var(--t3);margin:0 0 var(--s1)}.dock-panel>p{font-size:var(--t2);margin:0 0 var(--s4)}
+.dock-row{display:grid;gap:var(--s1);margin:0 0 var(--s3)}
+.dock-row>span{font:600 var(--t1) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.dock-listen{width:100%;justify-content:center}
+
+/* ---------- frame: sidebar + content column ---------- */
+.frame{display:grid;grid-template-columns:var(--side-w) minmax(0,1fr);min-height:calc(100vh - var(--bar-h))}
+.col{min-width:0;display:flex;flex-direction:column}
+.col>main{flex:1}
+.side{position:sticky;top:var(--bar-h);align-self:start;height:calc(100vh - var(--bar-h));overflow:auto;border-right:1px solid var(--line);background:var(--bg);padding:0 0 var(--s5);display:flex;flex-direction:column}
+.side-fx{height:var(--s2);flex:none;position:relative;overflow:hidden}
+.side-g{padding:var(--s4) var(--s4) 0}
+.side-h{font:600 var(--t1) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 var(--s2);padding-left:var(--s3)}
+.side ul{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+.side a{display:flex;align-items:center;min-height:36px;padding:var(--s1) var(--s3);border-radius:var(--r);color:var(--ink-2);text-decoration:none;font:500 var(--t2)/1.3 var(--font);border-left:2px solid transparent}
+.side a:hover{background:var(--panel-2);color:var(--ink)}
+.side a[aria-current=page]{color:var(--ink);background:var(--panel-2);border-left-color:var(--accent);border-radius:0 var(--r) var(--r) 0;font-weight:700}
+.side-foot{margin-top:auto;padding:var(--s5) var(--s4) 0;display:grid;gap:var(--s3)}
+.judge{font:600 var(--t2) var(--font);padding:var(--s2) var(--s3);border-radius:var(--r);border:1px solid var(--line-2);background:none;color:var(--ink);cursor:pointer;text-align:left}
+.judge:hover{border-color:var(--ink)}
+.side-home{font-size:var(--t2);color:var(--ink-2);padding:0 var(--s3)}
+
+/* ---------- footer ---------- */
+.foot{margin:0;padding:var(--s6) var(--gutter) var(--s7);border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s5) var(--s7);align-items:start;color:var(--ink-2);font-size:var(--t2)}
+.foot-text{max-width:var(--measure)}
+.foot-text b{color:var(--ink)}
+.foot-links{display:grid;grid-template-columns:repeat(2,auto);gap:var(--s1) var(--s5)}
+.foot a{font-weight:600}
+
+/* ---------- story mode (Home): no sidebar, see-through bar over the hero ---------- */
+html[data-mode=story] .frame{grid-template-columns:minmax(0,1fr)}
+html[data-mode=story] .side{display:none}
+html[data-mode=story] .top{position:fixed;left:0;right:0;background:transparent;border-bottom-color:transparent}
+html[data-mode=story] .top.scrolled{background:var(--bg);border-bottom-color:var(--line)}
+html[data-mode=story] .menu,html[data-mode=story] .pill-wrap{display:none}
+html[data-mode=story] .bar-app{display:inline-flex}
+html[data-mode=story] .brand{width:auto}
+
+/* ---------- narrow: the sidebar is a slide-out drawer with a visible Menu button ---------- */
+@media (max-width:1023px){
+ .frame{grid-template-columns:minmax(0,1fr)}
+ .menu{display:inline-flex}
+ .brand{width:auto}
+ .top{padding:0 var(--s3);gap:var(--s3)}
+ .side{position:fixed;z-index:50;top:var(--bar-h);left:0;bottom:0;height:auto;width:min(300px,86vw);border-right:1px solid var(--line-2);
+  transform:translateX(-100%);visibility:hidden;transition:transform .2s ease,visibility 0s linear .2s}
+ .side.open{transform:none;visibility:visible;transition:transform .2s ease}
+ html.drawer-open .col{filter:brightness(.55)}
+}
+@media (max-width:680px){
+ .bar-title{display:none}
+ .brand b{display:none}
+ .dock>button.dock-toggle{width:40px;height:36px;padding:0;justify-content:center}
+ .dock-toggle .dock-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .foot{grid-template-columns:1fr}
+ .menu span{display:none}
+}
+@media (max-width:380px){.pill .pill-n{font-size:11px}}
+@media (forced-colors:active){.pill i{forced-color-adjust:none}.side a[aria-current=page]{border-left-color:Highlight}}

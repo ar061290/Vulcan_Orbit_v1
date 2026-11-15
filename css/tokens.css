@@ -1,48 +1,68 @@
-/* FREEFALL tokens: Vulcan Orbit's own design system (values verbatim from main's css/app.css + css/freefall.css).
-   Idea: a field manual for fire in orbit. Pages are paper (Day) or the dark side of orbit (Night);
-   every chart is a numbered figure; live instruments sit in dark "screens".
-   Type: Bricolage Grotesque (display), Atkinson Hyperlegible (body, designed for low-vision readers), IBM Plex Mono (numbers),
-   Special Elite and Libre Caslon Text (History page only).
-   The theme blocks match ANY element with data-theme, not only <html>, so the Design kit can measure both themes at once. */
+/* Vulcan Orbit v3 tokens ("Ember on ink"). Dark first: deep space-ink, flame orange as the one accent, oxygen blue second.
+   Day is a clean, cool light theme. Every size and space on the site comes from the two scales below (site/DECISIONS.md, v3).
+   Type: Archivo (display; its width axis gives the wide headline cut), Atkinson Hyperlegible (body, chosen for low-vision
+   readers, kept on purpose), IBM Plex Mono (every number). Special Elite and Libre Caslon Text stay for the History page only.
+   The theme blocks match ANY element with data-theme, not only <html>, so the Design kit can measure both themes at once.
+   The v2 token names (--page, --surface, --raise, --ink2, --grid, --axis ...) are kept as aliases so every page restyles at once. */
 :root{
- /* Noto Sans Telugu / Devanagari: per-glyph fallback for the Home te/hi switch (the Latin fonts have no Indic glyphs) */
  --font:"Atkinson Hyperlegible","Atkinson Hyperlegible Next","Noto Sans Telugu","Noto Sans Devanagari",system-ui,sans-serif;
- --display:"Bricolage Grotesque","Noto Sans Telugu","Noto Sans Devanagari",system-ui,sans-serif;
+ --display:"Archivo","Noto Sans Telugu","Noto Sans Devanagari",system-ui,sans-serif;
  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
  --caslon:"Libre Caslon Text",Georgia,serif;
  --elite:"Special Elite",var(--mono);
- --r:14px;--fs:16px;--measure:68ch;
+
+ /* type scale: six sizes, in rem so "Read your way" text size scales all of them */
+ --t1:.75rem;      /* 12  labels, stamps, figure numbers */
+ --t2:.875rem;     /* 14  secondary text, tables, controls */
+ --t3:1rem;        /* 16  body */
+ --t4:1.375rem;    /* 22  figure titles, lead */
+ --t5:2.5rem;      /* 40  page titles, stat tiles */
+ --t6:clamp(3.5rem,9vw,8.5rem);  /* the huge numbers and the Home headline */
+
+ /* spacing scale: 4 px base */
+ --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;--s9:96px;
+
+ --r:4px;--r2:6px;           /* corner radius: 0-6 px only */
+ --fs:16px;--measure:68ch;
+ --gutter:32px;--maxw:1320px;--side-w:248px;--bar-h:56px;
+
+ /* fire palette (effects and the risk band only) */
+ --ember:#5a0f05;--fire:#d9480f;--amber:#f59f00;--hot:#fff3d6;
+ /* chart series (fixed order: blue, orange, green, amber); --s1..--s9 are SPACING */
+ --c1:#4d8fe8;--c2:#e8642a;--c3:#22a37a;--c4:#c98500;--serious:#ec835a;
  --flame:#c2410c;--soot:#57534e;--ice:#0e7490;
- /* chart series (fixed order: blue, orange, green, amber) and status colours that are the same in both themes */
- --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--serious:#ec835a;
- /* the night values of good/warn come from main's app.css base (never overridden there for Night).
-    Night --crit was main's #d03b3b (3.85:1 as text on --surface); it is lightened to #ef6464 (5.89:1 on #0e1320,
-    6.29:1 on #070a12, 5.51:1 on #141a2b, WCAG 1.4.3) because pages use it as a text colour (P7-D, site/A11Y.md 2.1). */
- --good:#0ca30c;--warn:#fab219;--crit:#ef6464;
- --gutter:24px;--maxw:1240px;
-}
-[data-theme=day]{color-scheme:light;
- --page:#f3f0e8;--surface:#fffdf8;--raise:#ece7dc;--ink:#121722;--ink2:#353c4a;--mute:#596171;--grid:#e3ddd0;--axis:#c9c1b0;
- --accent:#c2410c;--accent-ink:#9a3412;--accent-soft:#fde9dc;--oxy:#1d4ed8;--oxy-soft:#e3eafd;--line:#d8d1c2;
- --shadow:0 1px 0 #fff inset,0 18px 40px -28px rgba(40,30,10,.35);
- --screen:#0b1020;--screen-ink:#eef1f7;--warn:#8a5a00;--good:#166534;--crit:#b91c1c;
 }
 [data-theme=night]{color-scheme:dark;
- --page:#070a12;--surface:#0e1320;--raise:#161c2c;--ink:#eef1f7;--ink2:#bcc3d1;--mute:#8d96a8;--grid:#1e2638;--axis:#2c3550;
- --accent:#ff7a3d;--accent-ink:#ffb089;--accent-soft:#2a160c;--oxy:#7aa2ff;--oxy-soft:#121c35;--line:#232c41;
- --shadow:0 20px 50px -30px rgba(0,0,0,.9);
- --screen:#05070e;--screen-ink:#eef1f7;--good:#0ca30c;--warn:#fab219;--crit:#ef6464;
+ --bg:#07090e;--panel:#0c0f15;--panel-2:#131720;--line:#1d232d;--line-2:#2b323e;
+ --ink:#eceff4;--ink-2:#b3bac6;--mute:#8a93a2;
+ --accent:#ff6b2c;--accent-ink:#ff9a66;--accent-on:#1a0800;--accent-soft:#2a1206;
+ --oxy:#74a9ff;--oxy-soft:#0f1a2e;
+ --good:#4cc26a;--warn:#f0b429;--crit:#f47171;
+ --st-real:#4cc26a;--st-reported:#74a9ff;--st-demo:#f0b429;--st-missing:#f47171;--st-plan:#a7b0c0;--st-team:#c9cfd9;
+ /* v2 aliases */
+ --page:var(--bg);--surface:var(--panel);--raise:var(--panel-2);--ink2:var(--ink-2);--grid:#171c25;--axis:#2b323e;
+ --shadow:none;--pop-shadow:0 12px 32px -12px rgba(0,0,0,.8);
+ --screen:#05070b;--screen-ink:#eceff4;
 }
-/* before prefs.js runs (no data-theme yet) the page follows the system theme */
-:root:not([data-theme]){color-scheme:light;
- --page:#f3f0e8;--surface:#fffdf8;--raise:#ece7dc;--ink:#121722;--ink2:#353c4a;--mute:#596171;--grid:#e3ddd0;--axis:#c9c1b0;
- --accent:#c2410c;--accent-ink:#9a3412;--accent-soft:#fde9dc;--oxy:#1d4ed8;--oxy-soft:#e3eafd;--line:#d8d1c2;
- --shadow:0 1px 0 #fff inset,0 18px 40px -28px rgba(40,30,10,.35);--screen:#0b1020;--screen-ink:#eef1f7;--warn:#8a5a00;--good:#166534;--crit:#b91c1c;
+[data-theme=day]{color-scheme:light;
+ --bg:#f4f6f9;--panel:#ffffff;--panel-2:#edf0f4;--line:#dbe0e7;--line-2:#c3cad4;
+ --ink:#0a0e15;--ink-2:#353f4e;--mute:#566070;
+ --accent:#c2410c;--accent-ink:#9a3412;--accent-on:#ffffff;--accent-soft:#fdeee5;
+ --oxy:#1d4ed8;--oxy-soft:#e7eefc;
+ --good:#15803d;--warn:#8a5a00;--crit:#b91c1c;
+ --st-real:#15803d;--st-reported:#1d4ed8;--st-demo:#a16207;--st-missing:#b91c1c;--st-plan:#566070;--st-team:#353f4e;
+ --page:var(--bg);--surface:var(--panel);--raise:var(--panel-2);--ink2:var(--ink-2);--grid:#e6e9ee;--axis:#c3cad4;
+ --shadow:none;--pop-shadow:0 12px 32px -12px rgba(10,14,21,.28);
+ --screen:#07090e;--screen-ink:#eceff4;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme]){color-scheme:dark;
- --page:#070a12;--surface:#0e1320;--raise:#161c2c;--ink:#eef1f7;--ink2:#bcc3d1;--mute:#8d96a8;--grid:#1e2638;--axis:#2c3550;
- --accent:#ff7a3d;--accent-ink:#ffb089;--accent-soft:#2a160c;--oxy:#7aa2ff;--oxy-soft:#121c35;--line:#232c41;
- --shadow:0 20px 50px -30px rgba(0,0,0,.9);--screen:#05070e;--screen-ink:#eef1f7;--good:#0ca30c;--warn:#fab219;--crit:#ef6464;}}
+/* before prefs.js runs (no data-theme yet): dark first */
+:root:not([data-theme]){color-scheme:dark;
+ --bg:#07090e;--panel:#0c0f15;--panel-2:#131720;--line:#1d232d;--line-2:#2b323e;
+ --ink:#eceff4;--ink-2:#b3bac6;--mute:#8a93a2;
+ --accent:#ff6b2c;--accent-ink:#ff9a66;--accent-on:#1a0800;--accent-soft:#2a1206;--oxy:#74a9ff;--oxy-soft:#0f1a2e;
+ --good:#4cc26a;--warn:#f0b429;--crit:#f47171;
+ --page:var(--bg);--surface:var(--panel);--raise:var(--panel-2);--ink2:var(--ink-2);--grid:#171c25;--axis:#2b323e;--shadow:none;--screen:#05070b;--screen-ink:#eceff4;
+}
 /* text-size steps (Read your way: A / A+ / A++) */
 html[data-size="1"]{--fs:18px}
 html[data-size="2"]{--fs:20px}
@@ -51,4 +71,5 @@ html{font-size:var(--fs)}
 html[data-motion=calm] *,html[data-motion=calm] *::before,html[data-motion=calm] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 html[data-motion=calm]::view-transition-old(root),html[data-motion=calm]::view-transition-new(root){animation:none!important}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media (max-width:1100px){:root{--gutter:24px}}
 @media (max-width:680px){:root{--gutter:16px}}

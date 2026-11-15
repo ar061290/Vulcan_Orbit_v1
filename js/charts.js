@@ -23,12 +23,12 @@ const hd = (tag, a = {}, ...kids) => {   // tiny HTML builder, so this module on
 export const C = { s1: '#3987e5', s2: '#d95926', s3: '#199e70', s4: '#c98500', grid: '#2c2c2a', axis: '#383835', ink: '#f0efec', mute: '#898781', surface: '#1a1a19', good: '#0ca30c', crit: '#d03b3b', warn: '#fab219' };
 export const SERIES = [C.s1, C.s2, C.s3, C.s4];
 // Live instrument canvases always sit on a dark screen, whatever the page theme.
-export const SCREEN = { ink: '#eef1f7', mute: '#9aa3b5', surface: '#0b1020', grid: '#1e2638' };
+export const SCREEN = { ink: '#eceff4', mute: '#9aa3b2', surface: '#05070b', grid: '#171c25' };
 export const DASH = ['', '6 4', '2 3', '8 3 2 3'];
 export const SHAPES = ['circle', 'square', 'triangle', 'diamond'];
 const THEMES = {
-  night: { grid: '#1e2638', axis: '#2c3550', ink: '#eef1f7', mute: '#8d96a8', surface: '#0e1320' },
-  day: { grid: '#e3ddd0', axis: '#c9c1b0', ink: '#121722', mute: '#596171', surface: '#fffdf8' },
+  night: { grid: '#171c25', axis: '#2b323e', ink: '#eceff4', mute: '#8a93a2', surface: '#0c0f15' },   // v3 tokens (css/tokens.css)
+  day: { grid: '#e6e9ee', axis: '#c3cad4', ink: '#0a0e15', mute: '#566070', surface: '#ffffff' },
 };
 /** Charts read C when they are drawn, so switching theme and re-rendering the page recolours every figure.
  *  The SVG charts below also draw grid, axis, text and outlines through CSS tokens (css/charts.css), so they

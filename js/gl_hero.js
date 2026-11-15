@@ -177,6 +177,7 @@ export function hero({ g = 0, fit, ctx } = {}) {
 
   // state (main's starting view)
   let gNow = g, gT = g, yaw = .5, pitch = .12, vy = 0, drag = null, scale = Math.min(devicePixelRatio || 1, 2);
+  let yOff = 0, pOff = 0;                 // v3: extra turn linked to the Home scroll position (setScroll), never in Calm
   let visible = true, raf = 0, slow = 0, lastT = 0, clock = 3, mounted = false, gone = false, fallen = false;
   let want = 'auto';                      // 'auto' follows Calm; 'pause' / 'play' are the visitor's own choice
   let setStatic = null;                   // set once the context is lost and the static drawing has taken over
@@ -206,7 +207,7 @@ export function hero({ g = 0, fit, ctx } = {}) {
     if (!s) clock += dt;
     size();
     gl.uniform2f(u.res, cv.width, cv.height); gl.uniform1f(u.t, clock); gl.uniform1f(u.g, gNow);
-    gl.uniform1f(u.yaw, yaw); gl.uniform1f(u.pitch, pitch); gl.uniform1f(u.fit, center ? 1 : 0);
+    gl.uniform1f(u.yaw, yaw + yOff); gl.uniform1f(u.pitch, Math.max(-.7, Math.min(.9, pitch + pOff))); gl.uniform1f(u.fit, center ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     // a still flame renders only on demand: while a gravity change settles, while dragged or while it coasts
     if (!s || Math.abs(gT - gNow) > .002 || drag || vy) raf = requestAnimationFrame(frame);
@@ -268,5 +269,9 @@ export function hero({ g = 0, fit, ctx } = {}) {
       gT = v; if (now || isCalm()) gNow = v;
       if (setStatic) setStatic(v); else kick();
     },
-  };
+    /** v3 Home: f = 0..1 scroll progress through the hero; turns the flame a little. Ignored in Calm. */
+    setScroll(f) {
+      const y = isCalm() ? 0 : f * 2.4, p = isCalm() ? 0 : -f * .4;
+      if (y === yOff && p === pOff) return; yOff = y; pOff = p; if (!setStatic) kick();
+    },
 }

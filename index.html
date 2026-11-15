@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vulcan Orbit: fire safety for worlds without "up"</title>
-<meta name="theme-color" content="#f3f0e8">
+<meta name="theme-color" content="#07090e">
 <meta name="description" content="Vulcan Orbit: what NASA's microgravity fire experiments say about finding, predicting and stopping fires in spacecraft. Every number traced to its source.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,650;12..96,800&family=IBM+Plex+Mono:wght@500;600;700&family=Special+Elite&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@500;600;700&family=Special+Elite&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap">
 <!-- Telugu and Hindi script for the Home language switch; Google Fonts serves these with unicode-range, so they download only on pages that show those scripts -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap">
 <link rel="stylesheet" href="css/tokens.css">
@@ -34,21 +34,34 @@
 <link rel="stylesheet" href="css/p-locate.css">
 <link rel="stylesheet" href="css/p-about.css">
 <link rel="stylesheet" href="css/p-design.css">
+<link rel="stylesheet" href="css/shell.css">
+<link rel="stylesheet" href="css/fx-effects.css">
+<link rel="stylesheet" href="css/p-home.css">
 </head>
 <body>
 <a class="skip" href="#view">Skip to content</a>
 <header class="top">
-  <a class="brand" href="#/overview"><span class="mark" style="color:var(--ink)"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" stroke-width="1.5"/><ellipse cx="16" cy="16" rx="14.5" ry="5" fill="none" stroke="var(--accent)" stroke-width="1.5" transform="rotate(-24 16 16)"/><circle cx="16" cy="16" r="6" fill="var(--oxy)" opacity=".25"/><circle cx="16" cy="16" r="6" fill="none" stroke="var(--oxy)" stroke-width="1.6"/><circle cx="16" cy="16" r="1.6" fill="currentColor"/></svg></span><span><b>Vulcan Orbit</b><small>Fire safety where nothing rises</small></span></a>
-  <button type="button" class="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="nav">Menu</button>
-  <nav id="nav" aria-label="Sections"></nav>
+  <button type="button" class="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="nav"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><span>Menu</span></button>
+  <a class="brand" href="#/overview" aria-label="Vulcan Orbit, home"><span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="1.4"/><ellipse cx="16" cy="16" rx="14.5" ry="4.6" fill="none" stroke="var(--accent)" stroke-width="1.4" transform="rotate(-24 16 16)"/><circle cx="16" cy="16" r="2.4" fill="currentColor"/></svg></span><b>Vulcan Orbit</b></a>
+  <p class="bar-title" id="bar-title" aria-live="off"></p>
+  <div class="bar-tools">
+    <a class="bar-app" href="#/assess">Open the app</a>
+    <div class="pill-wrap">
+      <button type="button" class="pill" aria-expanded="false" aria-controls="demo-banner"><i aria-hidden="true"></i><span class="pill-n">Data status</span></button>
+      <div id="demo-banner" class="pop pill-pop" role="region" aria-label="Data status" hidden></div>
+    </div>
+  </div>
 </header>
-<div id="demo-banner" class="banner" role="region" aria-label="Project status" hidden></div>
-<main id="view" tabindex="-1"></main>
-<footer class="foot">
-  <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width=".8" stroke-dasharray="2 3"/><circle cx="32" cy="32" r="9" fill="none" stroke="var(--oxy)" stroke-width="2"/><circle cx="32" cy="32" r="2.5" fill="currentColor"/><ellipse cx="32" cy="32" rx="28" ry="9" fill="none" stroke="var(--accent)" stroke-width="1.6" transform="rotate(-24 32 32)"/></svg>
-  <div class="foot-text"><b style="color:var(--ink)">Vulcan Orbit</b> · NASA Space Apps Challenge 2026, Flame in Freefall. Built on NASA Physical Sciences Informatics data. Not endorsed by NASA.<br>Every panel says where its numbers come from. Designed to be read by anyone: plain words, large-text and calm-motion options, keyboard and screen-reader friendly.</div>
-  <nav class="foot-links" aria-label="More pages"><a href="#/explorer">NASA experiments</a><a href="#/models">Model cards</a><a href="#/earth">On Earth</a><a href="#/locate">Bench rig</a><a href="#/about">Sources</a><a href="#/design">Design kit</a></nav>
-</footer>
+<div class="frame">
+  <nav id="nav" class="side" aria-label="Sections"></nav>
+  <div class="col">
+    <main id="view" tabindex="-1"></main>
+    <footer class="foot">
+      <div class="foot-text"><b>Vulcan Orbit</b> · NASA Space Apps Challenge 2026, Flame in Freefall. Built on NASA Physical Sciences Informatics data. Not endorsed by NASA.<br>Every panel says where its numbers come from. Designed to be read by anyone: plain words, large-text and calm-motion options, keyboard and screen-reader friendly.</div>
+      <nav class="foot-links" aria-label="More pages"><a href="#/explorer">NASA experiments</a><a href="#/models">Model cards</a><a href="#/earth">On Earth</a><a href="#/locate">Bench rig</a><a href="#/about">Sources</a><a href="#/design">Design kit</a></nav>
+    </footer>
+  </div>
+</div>
 <div id="tip" class="tip" aria-hidden="true" hidden></div>
 <div id="live" class="sr" aria-live="polite"></div>
 <script type="module" src="js/app.js"></script>

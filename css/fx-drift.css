@@ -37,7 +37,7 @@ button.drift-q[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 3p
 .drift-q-head{display:flex;justify-content:space-between;gap:10px}
 .drift-q-head b{font-family:var(--mono)}
 .drift-track{display:block;height:8px;border-radius:4px;background:var(--grid);overflow:hidden;margin-top:6px}
-.drift-track i{display:block;height:100%;width:0;background:var(--s1);border-radius:4px;transition:width .25s}
+.drift-track i{display:block;height:100%;width:0;background:var(--c1);border-radius:4px;transition:width .25s}
 .drift-bar{margin-bottom:10px}
 .drift-g2>*{min-width:0}   /* a wide table scrolls in its .scroll box instead of widening the grid at 320 px */
 

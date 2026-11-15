@@ -3,11 +3,9 @@
 // The visible "Figure N" label is CSS content: "Figure " attr(data-fignum), so it always agrees with ?fig=N and
 // with "On this page", including cards inside closed folds.
 import { h, slug, calm, setParams } from './lib.js';
-import { kicker } from './site.js';
+import { groupOf } from './site.js';
 import * as prov from './provenance.js';
 import * as gloss from './glossary.js';
-import { hero } from './gl_hero.js';
-import { banner } from './gl_banner.js';
 
 const titleOf = c => c.dataset.title || c.querySelector(':scope > h2')?.childNodes[0]?.textContent?.trim() || '';
 /** Top-level figure cards: a .card with its own h2 that is not inside another card. */
@@ -51,7 +49,7 @@ function simplifyCard(c) {
         const p = h('p', {}); p.append(rest);
         if (p.firstChild?.nodeType === 3) p.firstChild.textContent = p.firstChild.textContent.replace(/^\s+/, '');
         if (sub.lastChild?.nodeType === 3) sub.lastChild.textContent = sub.lastChild.textContent.replace(/\s+$/, '');
-        c.append(h('details', { class: 'fold' }, h('summary', {}, 'How this was made'), p));
+        c.append(h('details', { class: 'fold' }, h('summary', {}, 'Read the rest of the note'), p));
       }
     }
   }
@@ -68,16 +66,14 @@ function foldBlocks(pg, keep) {
   more.addEventListener('toggle', () => { if (more.open) dispatchEvent(new Event('resize')); });
 }
 
-// ---------- page header ----------
+// ---------- page header (v3: compact; no illustrated band, site/DECISIONS.md v3) ----------
 function pageHead(pg, page, ctx) {
   let h1 = pg.querySelector(':scope > h1') || pg.querySelector('h1');
   if (!h1) { h1 = h('h1', {}, page.title || page.label); pg.prepend(h1); }
   const lead = h1.nextElementSibling?.classList.contains('lead') ? h1.nextElementSibling : null;
   if (page.title) h1.textContent = page.title;
-  let vis = null;
-  try { vis = page.visual === 'flame' ? hero({ g: 0, ctx }).el : banner(page.visual || 'earth', ctx); }
-  catch (e) { console.error(e); }
-  const head = h('header', { class: 'phead' }, vis, h('div', { class: 'phead-in' }, h('p', { class: 'kicker' }, kicker(page)), h1, lead));
+  const grp = groupOf(page.id);
+  const head = h('header', { class: 'phead' }, h('p', { class: 'kicker' }, grp ? h('span', {}, grp) : null, h('b', {}, page.kicker || page.label)), h1, lead);
   pg.prepend(head);
   return head;
 }
@@ -113,7 +109,10 @@ function anchorsAndToc(pg, page, head, detached) {
     } }, t));
   }).filter(Boolean);
   if (!items.length) return null;
-  const toc = h('nav', { class: 'toc', 'aria-label': 'On this page' }, h('span', {}, 'On this page'), h('ol', {}, items));
+  // v3: a sticky right rail on wide screens, a dropdown (details) on narrow ones
+  const wide = typeof matchMedia === 'function' && matchMedia('(min-width: 1280px)').matches;
+  const toc = h('nav', { class: 'toc', 'aria-label': 'On this page' },
+    h('details', { class: 'toc-d', open: wide || detached }, h('summary', {}, h('span', {}, 'On this page'), h('small', {}, `${items.length} figure${items.length > 1 ? 's' : ''}`)), h('ol', {}, items)));
   const anchor = head || pg.querySelector(':scope > .lead') || pg.querySelector(':scope > h1');
   if (anchor) anchor.after(toc); else pg.prepend(toc);
   return toc;

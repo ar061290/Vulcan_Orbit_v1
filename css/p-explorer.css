@@ -14,7 +14,7 @@
 #view[data-page="explorer"] .scroll{position:relative}
 #view[data-page="explorer"] .xp-table td{font-size:13.5px}
 #view[data-page="explorer"] .xp-meas{min-width:16em;max-width:34em}
-#view[data-page="explorer"] .xp-bar{display:block;height:6px;border-radius:3px;background:var(--s1);margin:6px 0 2px}
+#view[data-page="explorer"] .xp-bar{display:block;height:6px;border-radius:3px;background:var(--c1);margin:6px 0 2px}
 #view[data-page="explorer"] button.xp-x{display:inline-flex;align-items:baseline;gap:6px;background:none;border:0;padding:2px 0;margin:0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;border-radius:4px}
 #view[data-page="explorer"] button.xp-x:hover b{text-decoration:underline}
 #view[data-page="explorer"] button.xp-x:focus-visible{outline:3px solid var(--oxy);outline-offset:2px}

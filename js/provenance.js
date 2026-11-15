@@ -214,8 +214,8 @@ export function provenance(root) {
     }
     const box = el('details', 'madeby');
     if (m.models?.length) box.dataset.models = m.models.join(' ');
-    const sm = el('summary'); sm.append(el('span', null, 'Made by'), ' ' + m.kind);
-    if (m.check) sm.append(el('small', null, ' · ' + m.check.split(/[;:]|, doi/)[0]));
+    // v3: a small "How this was made" button; the kind and NASA source stay on the line, quietly (made_check reads the kind)
+    const sm = el('summary'); sm.append(el('span', 'mb-btn', 'How this was made'), el('span', 'sr', 'Made by'), el('small', 'mb-kind', m.kind + (m.check ? ' · ' + m.check.split(/[;:]|, doi/)[0] : '')));
     box.append(sm);
     if (m.cred && CRED[m.cred]) box.append(credStrip(CRED[m.cred]));
     box.append(dl);

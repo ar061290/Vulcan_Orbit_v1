@@ -8,14 +8,15 @@ import { h } from './lib.js';
 import { setChartTheme } from './charts.js';
 
 const root = document.documentElement;
-const KEYS = ['theme', 'size', 'terms', 'motion', 'lang'];
+const KEYS = ['theme', 'size', 'terms', 'motion', 'lang', 'effects'];
 const mq = q => { try { return matchMedia(q).matches; } catch { return false; } };
 const DEFAULTS = {
-  theme: () => (mq('(prefers-color-scheme: dark)') ? 'night' : 'day'),
+  theme: () => 'night',   // v3: dark first (site/DECISIONS.md); Day is one click away in Read your way
   size: () => '0',
   terms: () => 'on',
   motion: () => (mq('(prefers-reduced-motion: reduce)') ? 'calm' : 'full'),
   lang: () => 'en',
+  effects: () => 'on',      // v3 signature effects (cursor, stars, fire trail...), separate from Motion
 };
 const read = k => { try { return localStorage.getItem('vo.' + k); } catch { return null; } };
 const write = (k, v) => { try { localStorage.setItem('vo.' + k, v); } catch { /* storage blocked: the choice lasts for this visit */ } };
@@ -33,9 +34,9 @@ export const prefs = {
 };
 
 export function applyPrefs() {
-  root.dataset.theme = state.theme; root.dataset.size = state.size; root.dataset.terms = state.terms; root.dataset.motion = state.motion;
+  root.dataset.theme = state.theme; root.dataset.size = state.size; root.dataset.terms = state.terms; root.dataset.motion = state.motion; root.dataset.effects = state.effects;
   try { setChartTheme(state.theme); } catch (e) { console.error(e); }
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', state.theme === 'day' ? '#f3f0e8' : '#070a12');
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', state.theme === 'day' ? '#f4f6f9' : '#07090e');
 }
 
 // ---------- read aloud ----------
@@ -73,14 +74,18 @@ export function dock() {
     row('size', 'Text size', [['0', 'A'], ['1', 'A+'], ['2', 'A++']]),
     row('terms', 'Explain science words', [['on', 'On'], ['off', 'Off']]),
     row('motion', 'Motion', [['full', 'Full'], ['calm', 'Calm']]),
+    row('effects', 'Effects', [['on', 'On'], ['off', 'Off']]),
     listenBtn);
   const toggle = h('button', { type: 'button', class: 'dock-toggle', 'aria-expanded': 'false', 'aria-controls': 'dock-panel' },
-    h('span', { 'aria-hidden': 'true' }, 'Aa'), h('span', { class: 'dock-label' }, 'Read your way'));
+    h('span', { class: 'dock-aa', 'aria-hidden': 'true' }, 'Aa'), h('span', { class: 'dock-label' }, 'Read your way'));
   const setOpen = open => { panel.hidden = !open; toggle.setAttribute('aria-expanded', String(open)); };
   toggle.addEventListener('click', () => { const open = panel.hidden; setOpen(open); if (open) panel.querySelector('button').focus(); });
   addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); toggle.focus(); } });
   addEventListener('hashchange', stopReading);
-  built = h('div', { class: 'dock' }, panel, toggle);
-  document.body.append(built);
+  // v3: the toggle sits in the top bar and the panel opens under it as a popover
+  built = h('div', { class: 'dock' }, toggle, panel);
+  document.addEventListener('click', e => { if (!panel.hidden && !built.contains(e.target)) setOpen(false); });
+  const host = document.querySelector('.top .bar-tools');
+  if (host) host.append(built); else document.body.append(built);
   return built;
 }

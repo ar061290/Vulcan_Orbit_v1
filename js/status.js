@@ -34,3 +34,42 @@ export function renderBanner(el, manifest, SCRAPPED, MANIFEST_WHAT) {
   el.textContent = text; el.hidden = !text;
   return text;
 }
+
+// ---------- v3: the data status pill in the top bar (replaces the full-width banner) ----------
+// Same counting rule as statusBanner(), file by file, except data/cv_example.json: it is a deliberate worked example for
+// the Assess "Load example camera reading" button, so it is never counted as unfinished (site/DECISIONS.md, v3).
+export const PILL_SKIP = ['cv_example'];
+/** Pure: the files behind the pill, [{name, status, what, optional}]. */
+export function statusItems(manifest, SCRAPPED = {}, MANIFEST_WHAT = {}) {
+  const files = (manifest && Array.isArray(manifest.files)) ? manifest.files : [];
+  const approved = SCRAPPED.approved === true;
+  const scrapped = new Set(approved ? (SCRAPPED.files || []) : []);
+  const optional = new Set(approved ? (SCRAPPED.optional || []) : []);
+  return files.filter(f => !scrapped.has(f.name) && !PILL_SKIP.includes(f.name) && (f.status === 'demo' || f.status === 'missing'))
+    .map(f => ({ name: f.name, status: f.status, what: shortWhat(f, MANIFEST_WHAT), optional: optional.has(f.name) }));
+}
+/** Fill the pill button and its popover list. badge = lib.js badge(). Returns the items. */
+export function renderPill(btn, pop, manifest, SCRAPPED, MANIFEST_WHAT, badge) {
+  if (!btn || !pop) return [];
+  const items = statusItems(manifest, SCRAPPED, MANIFEST_WHAT);
+  const n = items.length;
+  const short = n ? `${n} file${plural(n, '', 's')} pending` : 'All data in';
+  btn.querySelector('.pill-n').textContent = short;
+  btn.classList.toggle('ok', !n);
+  btn.setAttribute('aria-label', `Data status: ${short}. Show the list`);
+  const doc = pop.ownerDocument;
+  const ul = doc.createElement('ul');
+  for (const it of items) {
+    const li = doc.createElement('li');
+    const code = doc.createElement('code'); code.textContent = `data/${it.name}.json`;
+    const p = doc.createElement('span'); p.textContent = it.what + (it.optional ? ' (optional)' : '');
+    li.append(badge(it.status), code, p); ul.append(li);
+  }
+  const head = doc.createElement('p'); head.className = 'pop-h'; head.textContent = 'Data status';
+  const note = doc.createElement('p'); note.className = 'pop-note';
+  const demo = items.some(i => i.status === 'demo'), miss = items.some(i => i.status === 'missing');
+  note.textContent = (n ? (demo && miss ? 'Affected panels are labelled “Demo data” or “No data yet”.' : demo ? 'Every affected panel is labelled “Demo data”.' : 'Every affected panel is labelled “No data yet”.')
+    : 'Every data file the site reads is in.') + ' The worked camera example (data/cv_example.json) is a deliberate example and is not counted.';
+  pop.replaceChildren(head, ...(n ? [ul] : []), note);
+  return items;
+}

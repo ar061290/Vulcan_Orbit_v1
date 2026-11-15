@@ -34,7 +34,7 @@
 #view[data-page="models"] .mc-drivers li{display:grid;grid-template-columns:minmax(8rem,14rem) 1fr 3.5em;gap:10px;align-items:center;font-size:14px}
 #view[data-page="models"] .mc-dn{color:var(--ink);overflow-wrap:anywhere}
 #view[data-page="models"] .mc-bar{height:8px;border-radius:4px;background:var(--grid);overflow:hidden}
-#view[data-page="models"] .mc-bar > span{display:block;height:100%;background:var(--s1)}
+#view[data-page="models"] .mc-bar > span{display:block;height:100%;background:var(--c1)}
 #view[data-page="models"] .mc-ds{font:600 13px var(--mono);color:var(--ink);text-align:right}
 
 /* pass-rule results */

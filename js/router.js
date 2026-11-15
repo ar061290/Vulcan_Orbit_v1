@@ -2,7 +2,7 @@
 // Each page is js/pages/<id>.js exporting `default async function render(root, ctx)` and optionally `short(ctx)`.
 // ctx = { id, page, params, detached, store, onMount(fn), onLeave(fn) }.
 import { h, untip } from './lib.js';
-import { TOP, MORE, pageById, docTitle } from './site.js';
+import { GROUPS, pageById, docTitle } from './site.js';
 import { runPasses, revealFigure } from './passes.js';
 import { stopReading } from './prefs.js';
 import { startTour } from './tour.js';
@@ -42,14 +42,13 @@ function errorCard(e) {
   return h('div', {}, h('div', { class: 'page' }, h('div', { class: 'empty' }, h('h3', {}, 'This page failed to load'), h('pre', {}, String(e?.stack || e)))));
 }
 
-function closeMenus() {
-  const nav = $('nav'), menu = document.querySelector('.menu');
-  nav?.classList.remove('open'); menu?.setAttribute('aria-expanded', 'false');
-  setMore(false);
-}
+function closeMenus() { setDrawer(false, { restore: false }); }
 function markCurrent(id) {
   document.querySelectorAll('#nav a[data-id]').forEach(a => (a.dataset.id === id ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
-  document.querySelector('.more-btn')?.classList.toggle('has-current', MORE.some(p => p.id === id));
+  // v3: Home is the story (no sidebar, see-through bar); every other page is the app
+  const p = pageById(id), html = document.documentElement;
+  html.dataset.mode = id === 'overview' ? 'story' : 'app';
+  const t = $('bar-title'); if (t) t.textContent = id === 'overview' ? '' : (p?.label || '');
 }
 
 const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex]';
@@ -100,28 +99,39 @@ export const go = (id, p = {}) => {
 export const currentRoute = () => ({ ...cur, params: { ...cur.params } });
 export { currentRoute as current };
 
-// ---------- navigation ----------
-let moreBtn = null, moreList = null;
-function setMore(open) {
-  if (!moreBtn) return;
-  moreBtn.setAttribute('aria-expanded', String(open)); moreList.hidden = !open;
+// ---------- navigation: the v3 sidebar (a drawer on phones) ----------
+const narrow = () => matchMedia('(max-width: 1023px)').matches;
+let drawerOpen = false;
+function setDrawer(open, { restore = true } = {}) {
+  const nav = $('nav'), menu = document.querySelector('.menu'); if (!nav) return;
+  drawerOpen = !!open && narrow();
+  nav.classList.toggle('open', drawerOpen); document.documentElement.classList.toggle('drawer-open', drawerOpen);
+  menu?.setAttribute('aria-expanded', String(drawerOpen));
+  menu?.setAttribute('aria-label', drawerOpen ? 'Close navigation' : 'Open navigation');
+  if (drawerOpen) (nav.querySelector('[aria-current=page]') || nav.querySelector('a'))?.focus();
+  else if (restore && nav.contains(document.activeElement)) menu?.focus();
 }
 function buildNav() {
   const nav = $('nav'), menu = document.querySelector('.menu');
-  const link = p => h('a', { href: `#/${p.id}`, 'data-id': p.id }, p.label);
-  moreList = h('ul', { id: 'more-list', class: 'more-list', hidden: true }, MORE.map(p => h('li', {}, link(p))));
-  moreBtn = h('button', { type: 'button', class: 'more-btn', 'aria-expanded': 'false', 'aria-controls': 'more-list' }, 'More');
-  moreBtn.addEventListener('click', () => { const open = moreList.hidden; setMore(open); if (open) moreList.querySelector('a')?.focus(); });
-  const more = h('div', { class: 'more-menu' }, moreBtn, moreList);
-  more.addEventListener('keydown', e => { if (e.key === 'Escape' && !moreList.hidden) { e.stopPropagation(); setMore(false); moreBtn.focus(); } });
-  more.addEventListener('focusout', e => { if (!more.contains(e.relatedTarget) && e.relatedTarget) setMore(false); });
-  document.addEventListener('click', e => { if (!more.contains(e.target)) setMore(false); });
-  nav.replaceChildren(...TOP.map(link), more,
-    h('button', { type: 'button', class: 'judge', onclick: () => { closeMenus(); startTour(); }, title: 'A 1-minute guided tour of the key results' }, 'Judge mode'));
+  const link = p => h('a', { href: `#/${p.id}`, 'data-id': p.id }, h('span', {}, p.label));
+  const groups = GROUPS.map(([name, ids], gi) => h('div', { class: 'side-g' },
+    h('p', { class: 'side-h', id: `side-h-${gi}` }, name),
+    h('ul', { 'aria-labelledby': `side-h-${gi}` }, ids.map(pageById).filter(Boolean).map(p => h('li', {}, link(p))))));
+  nav.replaceChildren(
+    h('div', { class: 'side-fx', 'aria-hidden': 'true' }),
+    ...groups,
+    h('div', { class: 'side-foot' },
+      h('button', { type: 'button', class: 'judge', onclick: () => { closeMenus(); startTour(); }, title: 'A 1-minute guided tour of the key results' }, 'Judge mode: 1-minute tour'),
+      h('a', { class: 'side-home', href: '#/overview' }, 'Back to the story')));
   const top = document.querySelector('.top');      // the sticky header's height, so revealed figures are not hidden under it
   if (top && 'ResizeObserver' in window) new ResizeObserver(() => document.documentElement.style.setProperty('--top-h', `${Math.round(top.getBoundingClientRect().height)}px`)).observe(top);
-  menu?.addEventListener('click', () => { const o = nav.classList.toggle('open'); menu.setAttribute('aria-expanded', String(o)); });
-  addEventListener('keydown', e => { if (e.key === 'Escape' && nav.classList.contains('open')) { nav.classList.remove('open'); menu?.setAttribute('aria-expanded', 'false'); menu?.focus(); } });
+  menu?.addEventListener('click', () => setDrawer(!drawerOpen));
+  nav.addEventListener('click', e => { if (e.target.closest('a')) setDrawer(false, { restore: false }); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && drawerOpen) { e.stopPropagation(); setDrawer(false); } });
+  // focus stays inside the open drawer (Tab from the last link returns to the Menu button)
+  nav.addEventListener('focusout', e => { if (drawerOpen && e.relatedTarget && !nav.contains(e.relatedTarget) && e.relatedTarget !== menu) setDrawer(false, { restore: false }); });
+  addEventListener('resize', () => { if (drawerOpen && !narrow()) setDrawer(false, { restore: false }); });
+  document.addEventListener('click', e => { if (drawerOpen && !nav.contains(e.target) && !menu.contains(e.target)) setDrawer(false, { restore: false }); });
 }
 
 let startedRouter = false;

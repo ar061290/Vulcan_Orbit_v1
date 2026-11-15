@@ -27,3 +27,11 @@ export function kicker(p) {
   const n = TOP.indexOf(p);
   return n >= 0 ? `${String(n).padStart(2, '0')} / ${p.label}` : `More / ${p.kicker || p.label}`;
 }
+// v3 app shell: the sidebar groups (site/DECISIONS.md, v3). Every page except Home is in exactly one group; Home is the brand link.
+export const GROUPS = [
+  ['Pipeline', ['assess', 'detect', 'predict', 'respond']],
+  ['Science', ['flame', 'explorer', 'models']],
+  ['Trust', ['evidence', 'ask', 'about']],
+  ['More', ['earth', 'locate', 'memory', 'design']],
+];
+export const groupOf = id => GROUPS.find(([, ids]) => ids.includes(id))?.[0] || null;
