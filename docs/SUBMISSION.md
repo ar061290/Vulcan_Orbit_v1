@@ -46,6 +46,9 @@ to claim. The flame and Earth images are computer illustrations, labelled as suc
 
 ## 30-second video (screen capture with captions, no faces)
 
+A ready-made draft is in `docs/demo/vulcan_orbit_30s.mp4` (captions only, no voices), with a 7-slide PDF version in
+`docs/demo/vulcan_orbit_7_slides.pdf`. Re-record from the live site if anything changes before submitting.
+
 | Time | On screen | Caption |
 |---|---|---|
 | 0-4 s | Home page title and porthole flame | "When would a spacecraft's sensors notice a fire? Built on NASA's orbital fire data." |

@@ -14,11 +14,11 @@ export function missionCheck(g) {
   const show = i => {
     btns.forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
     const p = g.probes[i], near = (g.reported?.points || []).filter(([o, k]) => Math.abs(o - p.o2) <= 3 && Math.abs(k - p.kpa) <= 10);
-    body.replaceChildren(
+    body.replaceChildren(...[
       h('div', { class: 'mc-counts' }, ...Object.entries(p.counts).map(([k, n]) => h('div', { class: `mc-c ${n ? '' : 'none'}` }, h('b', {}, n), h('span', {}, k), h('small', {}, n ? 'NASA tests nearby' : 'no NASA test')))),
       near.length ? h('p', {}, `Also nearby: ${near.length} large Saffire burn${near.length > 1 ? 's' : ''} in cargo ships (${near.map(x => x[2]).join(', ')}), reported in a NASA paper.`) : null,
       h('p', { class: 'mc-note' }, `${p.o2}% oxygen at ${p.kpa} kPa. "Nearby" means within 3 oxygen points and 10 kPa. ${g.note}`),
-      h('p', {}, h('a', { href: '#/predict' }, 'See the full map of what NASA has tested →')));
+      h('p', {}, h('a', { href: '#/predict' }, 'See the full map of what NASA has tested →'))].filter(Boolean));
     try { history.replaceState(null, '', `#/${location.hash.replace(/^#\//, '').split('?')[0] || 'overview'}?atm=${encodeURIComponent(SHORT(p.atmosphere).split(' ')[0])}`); } catch {}
   };
   show(start);

@@ -36,14 +36,14 @@ export function spreadCard(sp, opts = {}) {
     for (const v of [15, 21, 25, 30, 35]) { const i = O2.indexOf(v); if (i >= 0) svg.append(s('text', { x: m.l - 6, y: m.t + (O2.length - 1 - i) * ch + ch * 0.75, 'text-anchor': 'end' }, `${v}%`)); }
     for (const v of [0, 10, 20, 30, 40, 50]) { const j = FL.indexOf(v); if (j >= 0) svg.append(s('text', { x: m.l + j * cw + cw / 2, y: H - m.b + 16, 'text-anchor': 'middle' }, v)); }
     svg.append(s('text', { x: m.l + (W - m.l - m.r) / 2, y: H - 6, 'text-anchor': 'middle' }, `Airflow, cm/s (${c.flow_direction})`));
-    out.replaceChildren(
+    out.replaceChildren(...[
       r == null ? h('div', { class: 'sp-big' }, '—', h('small', {}, ' no data and no model here'))
         : h('div', { class: `sp-big ${dom ? '' : 'out'}` }, `${r.toFixed(2)}`, h('small', {}, ` mm/s  [${lo?.toFixed(2)}–${hi?.toFixed(2)}]`)),
       h('div', { class: 'sp-tags' },
         h('span', { class: `lvl ${v === 0 ? '' : 'demo'}` }, VERD[v] ?? '—'),
         h('span', { class: `lvl ${dom ? 'real' : 'demo'}` }, dom ? 'Inside NASA\'s data' : 'Outside NASA\'s data: extrapolation'),
         cal ? h('span', { class: 'lvl' }, cal) : null),
-      !dom && r != null ? h('p', { class: 'sp-warn' }, 'These conditions are outside the range NASA tested for this fuel. The number is the model carried beyond its data: treat it as a guess, not a result.') : null);
+      !dom && r != null ? h('p', { class: 'sp-warn' }, 'These conditions are outside the range NASA tested for this fuel. The number is the model carried beyond its data: treat it as a guess, not a result.') : null].filter(Boolean));
     note.textContent = c.note;
   };
   sel.value = String(st.c);
