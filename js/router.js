@@ -110,7 +110,7 @@ function buildNav() {
   const nav = $('nav'), menu = document.querySelector('.menu');
   const link = p => h('a', { href: `#/${p.id}`, 'data-id': p.id }, p.label);
   moreList = h('ul', { id: 'more-list', class: 'more-list', hidden: true }, MORE.map(p => h('li', {}, link(p))));
-  moreBtn = h('button', { type: 'button', class: 'more-btn', 'aria-expanded': 'false', 'aria-controls': 'more-list' }, 'More');
+  moreBtn = h('button', { type: 'button', class: 'more-btn', 'aria-expanded': 'false', 'aria-controls': 'more-list' }, 'Full project');
   moreBtn.addEventListener('click', () => { const open = moreList.hidden; setMore(open); if (open) moreList.querySelector('a')?.focus(); });
   const more = h('div', { class: 'more-menu' }, moreBtn, moreList);
   more.addEventListener('keydown', e => { if (e.key === 'Escape' && !moreList.hidden) { e.stopPropagation(); setMore(false); moreBtn.focus(); } });

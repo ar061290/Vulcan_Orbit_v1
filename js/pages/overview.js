@@ -26,24 +26,19 @@ export default async function render(root, ctx = {}) {
   const [man, india, lat, gas, gaps, i18n] = await Promise.all([load('manifest'), load('india'), load('saffire_latency'), load('saffire_gas'), load('gaps'), loadI18n()]);
   const st = n => (Array.isArray(man.files) ? man.files : []).find(f => f.name === n)?.status || 'missing';
   const facts = detectFacts(lat, gas);
+  // Demo split (15 Nov 2026): Home is the product demo. It keeps the hero, the camera -> spread -> risk strip, the one big
+  // finding, the three steps and the India card. The short answer, mission check, how-to-read and extra links moved to
+  // the "Full project" menu pages (Checks, NASA experiments, Sources), where judges who dig can find them.
   root.append(h('div', { class: 'page home' },
     heroSection(ctx),
     pipelineCard(st),
     findingSection(facts, lat, gas, ctx),
-    shortAnswer(facts, lat, gas, i18n, ctx),
-    h('p', { class: 'story-map' }, 'The challenge asks teams to summarise, rank and interpret NASA\'s fire data. We do that as three questions:'),
     questions(st),
-    alsoLinks(),
-    isMissing(gaps) ? null : h('p', { class: 'coverage' }, coverageLine(gaps)),
-    isMissing(gaps)
-      ? card('Mission check: is there NASA data for your cabin air?', 'missing', null,
-        empty('Mission check: is there NASA data for your cabin air?', 'gaps', 'The count of NASA tests near each cabin atmosphere is not available yet.'))
-      : missionCheck(gaps, { params: ctx.params }),
-    howToRead(),
     isMissing(india)
-      ? card('Why this matters for India\'s own crew and station', 'missing', null,
-        empty('Why this matters for India\'s own crew and station', 'india', 'The checked India facts are not available yet.'))
-      : indiaCard(india, i18n, ctx)));
+      ? null
+      : indiaCard(india, i18n, ctx),
+    h('p', { class: 'story-map' }, 'Want the method, the checks and every source? Open ', h('b', {}, 'Full project'),
+      ' in the top menu: the story, the NASA data, the model cards and how we checked each number.')));
 }
 
 // ---------- hero and porthole ----------
