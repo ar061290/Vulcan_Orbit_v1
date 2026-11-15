@@ -249,3 +249,5 @@ Every effect in `js/fx/` was written from scratch for this repo (AGENTS.md rule 
 - Fire detection and 3D location code: Mukund MV, FIRE-LOCALIZATION-AND-VOLUME-ESTIMATION (team repository, forked at github.com/ar061290/FIRE-LOCALIZATION-AND-VOLUME-ESTIMATION). Scores in `data/cv_scores.json` come from its `train/results.csv` (epoch 100); `media/cv/` images and the depth clip come from its `train/` folder and `depth_webcam.mp4`.
 - Ultralytics YOLO11 (detector architecture, yolo11s weights as the starting point): https://github.com/ultralytics/ultralytics
 - Depth Anything V2 (relative depth, vits encoder): Yang et al. 2024, https://github.com/DepthAnything/Depth-Anything-V2
+
+- Demo film narration: Piper TTS (rhasspy/piper), voice en-us-ryan-high, https://github.com/rhasspy/piper
