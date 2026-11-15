@@ -12,7 +12,7 @@ document.body.prepend(canvas);
 const ctx = canvas.getContext('2d', { alpha: false });
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
-const N = 900, DEPTH = 1000, BASE = 2.2, WARP = 34;
+const N = 280, DEPTH = 1000, BASE = 0.9, WARP = 22;   // calm: few, dim, slow stars so the demos stay readable
 let W = 0, H = 0, dpr = 1, stars = [];
 let speed = BASE, target = BASE, warp = false, scrollBoost = 0, lastY = scrollY;
 const vp = { x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0 };         // vanishing point offset (px) and its spring state
@@ -51,9 +51,9 @@ function frame(still) {
     if (s.z < 1) { spawn(s, false); continue; }
     const [x, y] = project(s, s.z), [px, py] = project(s, s.pz + speed * (1 + stretch * 3));
     if (x < -50 || x > W + 50 || y < -50 || y > H + 50) { spawn(s, false); continue; }
-    const near = 1 - s.z / DEPTH, a = Math.min(1, near * 1.4 + 0.08);
-    ctx.strokeStyle = s.hue ? `hsla(${s.hue},95%,${s.hue === 18 ? 62 : 74}%,${a})` : `rgba(237,232,223,${a})`;
-    ctx.lineWidth = Math.max(0.6, near * 2.4);
+    const near = 1 - s.z / DEPTH, a = Math.min(0.55, near * 0.7 + 0.05);
+    ctx.strokeStyle = s.hue ? `hsla(${s.hue},95%,${s.hue === 18 ? 62 : 74}%,${a})` : `rgba(150,160,190,${a})`;
+    ctx.lineWidth = Math.max(0.5, near * 1.3);
     ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y); ctx.stroke();
   }
 }
@@ -69,7 +69,7 @@ addEventListener('pointerdown', e => {
   steer(e.clientX, e.clientY); warp = true;
 }, { passive: true });
 ['pointerup', 'pointercancel', 'blur'].forEach(t => addEventListener(t, () => { warp = false; }, { passive: true }));
-addEventListener('scroll', () => { const d = Math.abs(scrollY - lastY); lastY = scrollY; scrollBoost = Math.min(18, scrollBoost + d * 0.08); }, { passive: true });
+addEventListener('scroll', () => { const d = Math.abs(scrollY - lastY); lastY = scrollY; scrollBoost = Math.min(2.5, scrollBoost + d * 0.02); }, { passive: true });
 addEventListener('resize', () => { resize(); if (reduce.matches) frame(true); });
 document.addEventListener('visibilitychange', () => (document.hidden ? cancelAnimationFrame(raf) : start()));
 reduce.addEventListener?.('change', start);
