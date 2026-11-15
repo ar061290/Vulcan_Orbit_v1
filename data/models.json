@@ -1,6 +1,6 @@
 {
  "status": "model",
- "note": "Each entry carries its own status. M7 entries were marked \"real\" by their author (trained on NASA data); M5 is \"model\".",
+ "note": "Each entry carries its own status. M7 and M6 entries were marked \"real\" by their author (trained on NASA data; M6 spread rates come from the BASS-II report table, de Ris constants are reported); M5 is \"model\".",
  "models": [
   {
    "id": "m7-extinction",
@@ -4741,7 +4741,323 @@
    },
    "limits": "16 tests, 3 materials, unaged smoke only, airflow 0 to 8 cm/s. A test bench result in orbit, not a detector certification. Detector limit is a choice (300/500/1000 nm reported).",
    "checks_note": "M5-lognormal FAIL; M5-trace pass; M5-auc FAIL; M5-bacc pass; M5-base reported; M5-drivers reported; M5-sens reported. Rules in models/m5-smoke-miss/RULES.md, written before training."
+  },
+  {
+   "id": "m6",
+   "status": "real",
+   "name": "Flame spread over PMMA slabs (BASS-II)",
+   "question": "How fast does a flame spread over a solid fuel in microgravity, given airflow speed, oxygen level, pressure and fuel?",
+   "data": "NASA BASS-II, PSI-25 (doi:10.60555/4qc4-de67): 39 measured opposed-flow spread rates from 18 PMMA slab tests (1-5 mm thick, 1.2 or 2.2 cm wide, one- or two-sided) on the ISS in 7 sessions, 2-21 cm/s, 16.8-22.2% O2, about 1 atm. Spread rates are NASA's own measurements as printed in Table 5.1 of the BASS-II Summary Report (NASA/TM-20210011385, a PSI-25 file), transcribed by us; session and O2 come from the PSI-25 experimental table, which matches the report.",
+   "method": "de Ris thermal-regime spread formula (thin or thick by burning half-thickness; coefficients from Bhattacharjee et al. 2016, flame coefficient scaled with O2) multiplied by a learned correction of log(observed/de Ris). Tried, simplest first: one constant, linear regression, Gaussian process, small gradient-boosted trees. Kept: de Ris x one fitted constant (simplest within the best model's range).",
+   "validation": "Whole ISS sessions held out: leave one session out (7 sessions, grouped by GMT day). Score = R2 on the pooled held-out predictions; range = 95% session bootstrap. Holding out single tests instead gives R2 -0.77.",
+   "metric": "R\u00b2 (held-out sessions, spread rate in mm/s)",
+   "score": -0.6797,
+   "score_range": [
+    -3.8668,
+    -0.1401
+   ],
+   "baseline_name": "de Ris",
+   "baseline_score": -40.0264,
+   "unit": "mm/s",
+   "points": [
+    {
+     "obs": 0.071,
+     "pred": 0.0577,
+     "lo": 0.0188,
+     "hi": 0.1709,
+     "label": "M1 (GMT51): PMMA slab 1 mm, 2.2 cm wide, one-sided, opposed flow 9 cm/s, O2 22.0%"
+    },
+    {
+     "obs": 0.052,
+     "pred": 0.1269,
+     "lo": 0.0413,
+     "hi": 0.3758,
+     "label": "M2 (GMT51): PMMA slab 3 mm, 2.2 cm wide, one-sided, opposed flow 20 cm/s, O2 21.9%"
+    },
+    {
+     "obs": 0.033,
+     "pred": 0.0903,
+     "lo": 0.0294,
+     "hi": 0.2672,
+     "label": "M2 (GMT51): PMMA slab 3 mm, 2.2 cm wide, one-sided, opposed flow 15 cm/s, O2 21.4%"
+    },
+    {
+     "obs": 0.029,
+     "pred": 0.0516,
+     "lo": 0.0168,
+     "hi": 0.1528,
+     "label": "M3 (GMT192): PMMA slab 5 mm, 2.2 cm wide, one-sided, opposed flow 10 cm/s, O2 20.5%"
+    },
+    {
+     "obs": 0.024,
+     "pred": 0.0968,
+     "lo": 0.0315,
+     "hi": 0.2867,
+     "label": "M3 (GMT192): PMMA slab 5 mm, 2.2 cm wide, one-sided, opposed flow 20 cm/s, O2 20.0%"
+    },
+    {
+     "obs": 0.045,
+     "pred": 0.0253,
+     "lo": 0.0082,
+     "hi": 0.0749,
+     "label": "M4 (GMT212): PMMA slab 5 mm, 2.2 cm wide, two-sided, opposed flow 5 cm/s, O2 21.3%"
+    },
+    {
+     "obs": 0.033,
+     "pred": 0.0136,
+     "lo": 0.0044,
+     "hi": 0.0402,
+     "label": "M4 (GMT212): PMMA slab 5 mm, 2.2 cm wide, two-sided, opposed flow 3 cm/s, O2 20.3%"
+    },
+    {
+     "obs": 0.071,
+     "pred": 0.0547,
+     "lo": 0.0178,
+     "hi": 0.162,
+     "label": "M5 (GMT51): PMMA slab 3 mm, 2.2 cm wide, two-sided, opposed flow 10 cm/s, O2 20.6%"
+    },
+    {
+     "obs": 0.106,
+     "pred": 0.0472,
+     "lo": 0.0153,
+     "hi": 0.1396,
+     "label": "M7 (GMT192): PMMA slab 1 mm, 1.2 cm wide, two-sided, opposed flow 10 cm/s, O2 18.8%"
+    },
+    {
+     "obs": 0.099,
+     "pred": 0.0468,
+     "lo": 0.0152,
+     "hi": 0.1385,
+     "label": "M7 (GMT192): PMMA slab 1 mm, 1.2 cm wide, two-sided, opposed flow 6 cm/s, O2 18.7%"
+    },
+    {
+     "obs": 0.083,
+     "pred": 0.0464,
+     "lo": 0.0151,
+     "hi": 0.1374,
+     "label": "M7 (GMT192): PMMA slab 1 mm, 1.2 cm wide, two-sided, opposed flow 5 cm/s, O2 18.6%"
+    },
+    {
+     "obs": 0.07,
+     "pred": 0.046,
+     "lo": 0.015,
+     "hi": 0.1362,
+     "label": "M7 (GMT192): PMMA slab 1 mm, 1.2 cm wide, two-sided, opposed flow 3 cm/s, O2 18.5%"
+    },
+    {
+     "obs": 0.057,
+     "pred": 0.0427,
+     "lo": 0.0139,
+     "hi": 0.1264,
+     "label": "M8 (GMT192): PMMA slab 2 mm, 1.2 cm wide, two-sided, opposed flow 10 cm/s, O2 19.0%"
+    },
+    {
+     "obs": 0.056,
+     "pred": 0.0247,
+     "lo": 0.008,
+     "hi": 0.073,
+     "label": "M8 (GMT192): PMMA slab 2 mm, 1.2 cm wide, two-sided, opposed flow 6 cm/s, O2 18.6%"
+    },
+    {
+     "obs": 0.04,
+     "pred": 0.0228,
+     "lo": 0.0074,
+     "hi": 0.0676,
+     "label": "M8 (GMT192): PMMA slab 2 mm, 1.2 cm wide, two-sided, opposed flow 5 cm/s, O2 18.4%"
+    },
+    {
+     "obs": 0.025,
+     "pred": 0.0514,
+     "lo": 0.0167,
+     "hi": 0.1522,
+     "label": "M9 (GMT192): PMMA slab 3 mm, 1.2 cm wide, two-sided, opposed flow 14 cm/s, O2 17.8%"
+    },
+    {
+     "obs": 0.0373,
+     "pred": 0.0659,
+     "lo": 0.0214,
+     "hi": 0.1951,
+     "label": "M10 (GMT204): PMMA slab 4 mm, 1.2 cm wide, two-sided, opposed flow 15 cm/s, O2 19.7%"
+    },
+    {
+     "obs": 0.03,
+     "pred": 0.0401,
+     "lo": 0.013,
+     "hi": 0.1186,
+     "label": "M10 (GMT204): PMMA slab 4 mm, 1.2 cm wide, two-sided, opposed flow 10 cm/s, O2 19.0%"
+    },
+    {
+     "obs": 0.048,
+     "pred": 0.099,
+     "lo": 0.0322,
+     "hi": 0.293,
+     "label": "M11 (GMT192): PMMA slab 5 mm, 1.2 cm wide, two-sided, opposed flow 21 cm/s, O2 19.8%"
+    },
+    {
+     "obs": 0.028,
+     "pred": 0.0665,
+     "lo": 0.0216,
+     "hi": 0.1969,
+     "label": "M11 (GMT192): PMMA slab 5 mm, 1.2 cm wide, two-sided, opposed flow 15 cm/s, O2 19.2%"
+    },
+    {
+     "obs": 0.022,
+     "pred": 0.0541,
+     "lo": 0.0176,
+     "hi": 0.1602,
+     "label": "M11 (GMT192): PMMA slab 5 mm, 1.2 cm wide, two-sided, opposed flow 13 cm/s, O2 18.8%"
+    },
+    {
+     "obs": 0.047,
+     "pred": 0.0278,
+     "lo": 0.009,
+     "hi": 0.0822,
+     "label": "M13 (GMT212): PMMA slab 4 mm, 2.2 cm wide, two-sided, opposed flow 6 cm/s, O2 20.5%"
+    },
+    {
+     "obs": 0.035,
+     "pred": 0.0216,
+     "lo": 0.007,
+     "hi": 0.0639,
+     "label": "M13 (GMT212): PMMA slab 4 mm, 2.2 cm wide, two-sided, opposed flow 5 cm/s, O2 19.9%"
+    },
+    {
+     "obs": 0.033,
+     "pred": 0.016,
+     "lo": 0.0052,
+     "hi": 0.0475,
+     "label": "M13 (GMT212): PMMA slab 4 mm, 2.2 cm wide, two-sided, opposed flow 4 cm/s, O2 19.3%"
+    },
+    {
+     "obs": 0.0624,
+     "pred": 0.0967,
+     "lo": 0.0315,
+     "hi": 0.2863,
+     "label": "M14 (GMT51): PMMA slab 2 mm, 2.2 cm wide, one-sided, opposed flow 15 cm/s, O2 22.1%"
+    },
+    {
+     "obs": 0.055,
+     "pred": 0.0884,
+     "lo": 0.0288,
+     "hi": 0.2617,
+     "label": "M14 (GMT51): PMMA slab 2 mm, 2.2 cm wide, one-sided, opposed flow 14 cm/s, O2 21.9%"
+    },
+    {
+     "obs": 0.0353,
+     "pred": 0.0618,
+     "lo": 0.0201,
+     "hi": 0.183,
+     "label": "M14 (GMT51): PMMA slab 2 mm, 2.2 cm wide, one-sided, opposed flow 10 cm/s, O2 21.7%"
+    },
+    {
+     "obs": 0.045,
+     "pred": 0.1026,
+     "lo": 0.0334,
+     "hi": 0.3038,
+     "label": "M15 (GMT188): PMMA slab 4 mm, 2.2 cm wide, one-sided, opposed flow 20 cm/s, O2 20.5%"
+    },
+    {
+     "obs": 0.144,
+     "pred": 0.0449,
+     "lo": 0.0146,
+     "hi": 0.1328,
+     "label": "M16 (GMT204): PMMA slab 1 mm, 2.2 cm wide, two-sided, opposed flow 5 cm/s, O2 19.1%"
+    },
+    {
+     "obs": 0.1309,
+     "pred": 0.0444,
+     "lo": 0.0144,
+     "hi": 0.1315,
+     "label": "M16 (GMT204): PMMA slab 1 mm, 2.2 cm wide, two-sided, opposed flow 3 cm/s, O2 18.9%"
+    },
+    {
+     "obs": 0.1062,
+     "pred": 0.0439,
+     "lo": 0.0143,
+     "hi": 0.1301,
+     "label": "M16 (GMT204): PMMA slab 1 mm, 2.2 cm wide, two-sided, opposed flow 2 cm/s, O2 18.8%"
+    },
+    {
+     "obs": 0.053,
+     "pred": 0.022,
+     "lo": 0.0072,
+     "hi": 0.0653,
+     "label": "M17 (GMT196): PMMA slab 2 mm, 2.2 cm wide, two-sided, opposed flow 5 cm/s, O2 18.5%"
+    },
+    {
+     "obs": 0.042,
+     "pred": 0.0212,
+     "lo": 0.0069,
+     "hi": 0.0628,
+     "label": "M17 (GMT196): PMMA slab 2 mm, 2.2 cm wide, two-sided, opposed flow 4 cm/s, O2 18.0%"
+    },
+    {
+     "obs": 0.026,
+     "pred": 0.0204,
+     "lo": 0.0066,
+     "hi": 0.0604,
+     "label": "M17 (GMT196): PMMA slab 2 mm, 2.2 cm wide, two-sided, opposed flow 3 cm/s, O2 17.4%"
+    },
+    {
+     "obs": 0.026,
+     "pred": 0.0342,
+     "lo": 0.0111,
+     "hi": 0.1013,
+     "label": "M18 (GMT196): PMMA slab 3 mm, 2.2 cm wide, two-sided, opposed flow 10 cm/s, O2 17.6%"
+    },
+    {
+     "obs": 0.013,
+     "pred": 0.0253,
+     "lo": 0.0082,
+     "hi": 0.075,
+     "label": "M18 (GMT196): PMMA slab 3 mm, 2.2 cm wide, two-sided, opposed flow 8 cm/s, O2 17.1%"
+    },
+    {
+     "obs": 0.027,
+     "pred": 0.0382,
+     "lo": 0.0124,
+     "hi": 0.113,
+     "label": "M19 (GMT204): PMMA slab 4 mm, 2.2 cm wide, two-sided, opposed flow 10 cm/s, O2 18.6%"
+    },
+    {
+     "obs": 0.0159,
+     "pred": 0.0206,
+     "lo": 0.0067,
+     "hi": 0.061,
+     "label": "M19 (GMT204): PMMA slab 4 mm, 2.2 cm wide, two-sided, opposed flow 6 cm/s, O2 17.8%"
+    },
+    {
+     "obs": 0.012,
+     "pred": 0.0364,
+     "lo": 0.0118,
+     "hi": 0.1076,
+     "label": "M20 (GMT213): PMMA slab 5 mm, 2.2 cm wide, two-sided, opposed flow 10 cm/s, O2 17.7%"
+    }
+   ],
+   "drivers": [
+    {
+     "name": "Fuel thickness",
+     "share": 0.7944
+    },
+    {
+     "name": "One or two sides burning",
+     "share": 0.2056
+    },
+    {
+     "name": "Sample width",
+     "share": 0.0
+    },
+    {
+     "name": "Opposed-flow speed",
+     "share": 0.0
+    },
+    {
+     "name": "Oxygen",
+     "share": 0.0
+    }
+   ],
+   "limits": "PMMA slabs in opposed flow at about 1 atm only: other fuels, thin films, rods, fabrics, concurrent flow and other pressures are outside the data, and pressure could not be tested. Mean error 0.033 mm/s (de Ris alone 0.163 mm/s; the textbook formula over-predicts these slabs about 3.5-fold). The other corrections on held-out sessions: linear-regression correction R\u00b2 0.26 (range -2.3 to 0.58); Gaussian-process correction R\u00b2 0.01 (range -5.1 to 0.76); small gradient-boosted-tree correction R\u00b2 0.33 (range -2.3 to 0.81); the rule fixed before training keeps the simplest model within the best one's range. Below the 0.6 target. O2 per flow step is estimated from start and end readings. Only 39 points from 7 sessions, so ranges are wide. Microgravity only: nothing here applies to Moon or Mars gravity, and a slow spread rate does not make a material or atmosphere safe."
   }
  ],
- "source": "Trained by the scripts in models/m5-smoke-miss and models/m7-extinction on NASA PSI data and published NASA results; each entry names its data."
+ "source": "Trained by the scripts in models/m5-smoke-miss, models/m6-spread and models/m7-extinction on NASA PSI data and published NASA results; each entry names its data."
 }

@@ -1,0 +1,49 @@
+# M6 cleaned BASS-II spread table. Source: NASA PSI-25 (BASS-II, doi:10.60555/4qc4-de67): Table 5.1 of the BASS-II Summary
+# Report (NASA/TM-20210011385, a PSI-25 file) joined to the PSI-25 Experimental table (session, date, sample, O2).
+# Units: thickness mm, width cm, velocity cm/s (opposed), O2 vol%, spread and de Ris mm/s, burn time min. Empty spread = 'Not tracked'.
+# o2_vol_pct = segment estimate (linear decay, equal segments). de_ris_mm_s = M6 baseline (models/m6-spread/README.md).
+# Written by python models/m6-spread/build.py
+test,session,date,sample,fuel,flow_direction,thickness_mm,width_cm,sides_burning,burning_half_thickness_mm,segment,n_segments,velocity_cm_s,o2_vol_pct,o2_initial_vol_pct,o2_final_vol_pct,pressure,spread_mm_s,de_ris_mm_s,de_ris_regime,burn_time_min
+M1,GMT51,2/20/2014,222,PMMA slab,opposed,1,2.2,1,1.0,1,1,9,22.05,22.2,21.9,about 1 atm (not recorded per test),0.071,0.23432,thick,6.4
+M2,GMT51,2/20/2014,224,PMMA slab,opposed,3,2.2,1,3.0,1,2,20,21.95,22.2,21.2,about 1 atm (not recorded per test),0.052,0.51527,thick,22.9
+M2,GMT51,2/20/2014,224,PMMA slab,opposed,3,2.2,1,3.0,2,2,15,21.45,22.2,21.2,about 1 atm (not recorded per test),0.033,0.36632,thick,22.9
+M3,GMT192,7/11/2014,226m,PMMA slab,opposed,5,2.2,1,5.0,1,2,10,20.525,20.8,19.7,about 1 atm (not recorded per test),0.029,0.22028,thick,20.1
+M3,GMT192,7/11/2014,226m,PMMA slab,opposed,5,2.2,1,5.0,2,2,20,19.975,20.8,19.7,about 1 atm (not recorded per test),0.024,0.41323,thick,20.1
+M4,GMT212,7/31/2014,171m,PMMA slab,opposed,5,2.2,2,2.5,1,2,5,21.3,21.8,19.8,about 1 atm (not recorded per test),0.045,0.12013,thick,19.8
+M4,GMT212,7/31/2014,171m,PMMA slab,opposed,5,2.2,2,2.5,2,2,3,20.3,21.8,19.8,about 1 atm (not recorded per test),0.033,0.06439,thick,19.8
+M5,GMT51,2/20/2014,167,PMMA slab,opposed,3,2.2,2,1.5,1,1,10,20.6,22.2,19.0,about 1 atm (not recorded per test),0.071,0.22218,thick,27.2
+M6,GMT212,7/31/2014,163m,PMMA slab,opposed,1,2.2,2,0.5,1,2,10,21.525,21.8,20.7,about 1 atm (not recorded per test),,0.2462,thick,16.8
+M6,GMT212,7/31/2014,163m,PMMA slab,opposed,1,2.2,2,0.5,2,2,8,20.975,21.8,20.7,about 1 atm (not recorded per test),,0.22853,thin,16.8
+M7,GMT192,7/11/2014,177m,PMMA slab,opposed,1,1.2,2,0.5,1,4,10,18.838,18.9,18.4,about 1 atm (not recorded per test),0.106,0.20121,thin,18.4
+M7,GMT192,7/11/2014,177m,PMMA slab,opposed,1,1.2,2,0.5,2,4,6,18.712,18.9,18.4,about 1 atm (not recorded per test),0.099,0.19961,thin,18.4
+M7,GMT192,7/11/2014,177m,PMMA slab,opposed,1,1.2,2,0.5,3,4,5,18.588,18.9,18.4,about 1 atm (not recorded per test),0.083,0.198,thin,18.4
+M7,GMT192,7/11/2014,177m,PMMA slab,opposed,1,1.2,2,0.5,4,4,3,18.462,18.9,18.4,about 1 atm (not recorded per test),0.07,0.1964,thin,18.4
+M8,GMT192,7/11/2014,178m,PMMA slab,opposed,2,1.2,2,1.0,1,3,10,18.95,19.1,18.2,about 1 atm (not recorded per test),0.057,0.18225,thick,25.2
+M8,GMT192,7/11/2014,178m,PMMA slab,opposed,2,1.2,2,1.0,2,3,6,18.65,19.1,18.2,about 1 atm (not recorded per test),0.056,0.10524,thick,25.2
+M8,GMT192,7/11/2014,178m,PMMA slab,opposed,2,1.2,2,1.0,3,3,5,18.35,19.1,18.2,about 1 atm (not recorded per test),0.04,0.09748,thin,25.2
+M9,GMT192,7/11/2014,179m,PMMA slab,opposed,3,1.2,2,1.5,1,1,14,17.8,18.0,17.6,about 1 atm (not recorded per test),0.025,0.21933,thick,16.8
+M10,GMT204,7/23/2014,180m,PMMA slab,opposed,4,1.2,2,2.0,1,2,15,19.725,20.1,18.6,about 1 atm (not recorded per test),0.0373,0.30081,thick,30.5
+M10,GMT204,7/23/2014,180m,PMMA slab,opposed,4,1.2,2,2.0,2,2,10,18.975,20.1,18.6,about 1 atm (not recorded per test),0.03,0.18283,thick,30.5
+M11,GMT192,7/11/2014,181m,PMMA slab,opposed,5,1.2,2,2.5,1,3,21,19.75,20.0,18.5,about 1 atm (not recorded per test),0.048,0.4224,thick,28.5
+M11,GMT192,7/11/2014,181m,PMMA slab,opposed,5,1.2,2,2.5,2,3,15,19.25,20.0,18.5,about 1 atm (not recorded per test),0.028,0.28385,thick,28.5
+M11,GMT192,7/11/2014,181m,PMMA slab,opposed,5,1.2,2,2.5,3,3,13,18.75,20.0,18.5,about 1 atm (not recorded per test),0.022,0.23097,thick,28.5
+M12,GMT212,7/31/2014,165m,PMMA slab,opposed,2,2.2,2,1.0,1,2,12,21.375,21.7,20.4,about 1 atm (not recorded per test),,0.29067,thick,16.2
+M12,GMT212,7/31/2014,165m,PMMA slab,opposed,2,2.2,2,1.0,2,2,10,20.725,21.7,20.4,about 1 atm (not recorded per test),,0.22536,thick,16.2
+M13,GMT212,7/31/2014,169m,PMMA slab,opposed,4,2.2,2,2.0,1,3,6,20.5,20.8,19.0,about 1 atm (not recorded per test),0.047,0.13179,thick,20.5
+M13,GMT212,7/31/2014,169m,PMMA slab,opposed,4,2.2,2,2.0,2,3,5,19.9,20.8,19.0,about 1 atm (not recorded per test),0.035,0.10239,thick,20.5
+M13,GMT212,7/31/2014,169m,PMMA slab,opposed,4,2.2,2,2.0,3,3,4,19.3,20.8,19.0,about 1 atm (not recorded per test),0.033,0.07616,thick,20.5
+M14,GMT51,2/20/2014,223,PMMA slab,opposed,2,2.2,1,2.0,1,3,15,22.1,22.2,21.6,about 1 atm (not recorded per test),0.0624,0.39259,thick,15.4
+M14,GMT51,2/20/2014,223,PMMA slab,opposed,2,2.2,1,2.0,2,3,14,21.9,22.2,21.6,about 1 atm (not recorded per test),0.055,0.35879,thick,15.4
+M14,GMT51,2/20/2014,223,PMMA slab,opposed,2,2.2,1,2.0,3,3,10,21.7,22.2,21.6,about 1 atm (not recorded per test),0.0353,0.25088,thick,15.4
+M15,GMT188,7/7/2014,225m,PMMA slab,opposed,4,2.2,1,4.0,1,1,20,20.5,21.0,20.0,about 1 atm (not recorded per test),0.045,0.43931,thick,22.0
+M16,GMT204,7/23/2014,164m,PMMA slab,opposed,1,2.2,2,0.5,1,3,5,19.117,19.2,18.7,about 1 atm (not recorded per test),0.144,0.20479,thin,8.4
+M16,GMT204,7/23/2014,164m,PMMA slab,opposed,1,2.2,2,0.5,2,3,3,18.95,19.2,18.7,about 1 atm (not recorded per test),0.1309,0.20265,thin,8.4
+M16,GMT204,7/23/2014,164m,PMMA slab,opposed,1,2.2,2,0.5,3,3,2,18.783,19.2,18.7,about 1 atm (not recorded per test),0.1062,0.20052,thin,8.4
+M17,GMT196,7/15/2014,166m,PMMA slab,opposed,2,2.2,2,1.0,1,3,5,18.517,18.8,17.1,about 1 atm (not recorded per test),0.053,0.09855,thin,30.7
+M17,GMT196,7/15/2014,166m,PMMA slab,opposed,2,2.2,2,1.0,2,3,4,17.95,18.8,17.1,about 1 atm (not recorded per test),0.042,0.09491,thin,30.7
+M17,GMT196,7/15/2014,166m,PMMA slab,opposed,2,2.2,2,1.0,3,3,3,17.383,18.8,17.1,about 1 atm (not recorded per test),0.026,0.09126,thin,30.7
+M18,GMT196,7/15/2014,168m,PMMA slab,opposed,3,2.2,2,1.5,1,2,10,17.625,17.9,16.8,about 1 atm (not recorded per test),0.026,0.15294,thick,25.5
+M18,GMT196,7/15/2014,168m,PMMA slab,opposed,3,2.2,2,1.5,2,2,8,17.075,17.9,16.8,about 1 atm (not recorded per test),0.013,0.11319,thick,25.5
+M19,GMT204,7/23/2014,170m,PMMA slab,opposed,4,2.2,2,2.0,1,2,10,18.6,19.0,17.4,about 1 atm (not recorded per test),0.027,0.17427,thick,25.7
+M19,GMT204,7/23/2014,170m,PMMA slab,opposed,4,2.2,2,2.0,2,2,6,17.8,19.0,17.4,about 1 atm (not recorded per test),0.0159,0.094,thick,25.7
+M20,GMT213,8/1/2014,172m,PMMA slab,opposed,5,2.2,2,2.5,1,1,10,17.7,18.0,17.4,about 1 atm (not recorded per test),0.012,0.15453,thick,16.5

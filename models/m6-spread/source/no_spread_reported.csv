@@ -1,0 +1,24 @@
+# Observed no-spread / extinction cases printed in NASA/TM-20210011385 (BASS-II Summary Report, PSI-25 file). Status: reported.
+# table = "7.1": TABLE 7.1 "Test summary of flat SIBAL fabrics in concurrent flow in BASS and BASS-II", p. 96 (PDF page 103), T'ien.
+#   Only rows whose Comments column states no ignition, quenching, blow-off or no blow-off are copied; empty comments ("-----") and "Reused, ignited" rows are left out.
+#   "a to b" flow means the flow was changed from a to b cm/s during the test. Footnote b: "O2 reading in these two tests might be inaccurate" (T1, T2; not copied).
+# table = "2.1": TABLE 2.1 "Comparison of extinction velocity Vg,cr for thin PMMA at 1 atm", p. 27 (PDF page 35), Bhattacharjee:
+#   experimental opposed-flow velocity below which a thin PMMA flame went out (radiative extinction), quoted with its +/- 5 mm/s.
+table,test,fuel,flow_direction,width_cm,flow_cm_s,o2_vol_pct,outcome
+7.1,GMT45-T4,SIBAL cotton-fiberglass fabric,concurrent,2.2,10 to 2.2,18.7,Quenched
+7.1,GMT45-T15,SIBAL cotton-fiberglass fabric,concurrent,2.2,10 to 29,18.7,No blowoff
+7.1,GMT100-T13,SIBAL cotton-fiberglass fabric,concurrent,2.2,4 to 2.2,17.5,Quenched
+7.1,GMT175-T9,SIBAL cotton-fiberglass fabric,concurrent,2.2,10,16.4,No ignition
+7.1,GMT175-T10,SIBAL cotton-fiberglass fabric,concurrent,2.2,5,16.4,No ignition
+7.1,GMT175-T18,SIBAL cotton-fiberglass fabric,concurrent,2.2,5 to 2.6,17.4,Quenched
+7.1,GMT178-T12,SIBAL cotton-fiberglass fabric,concurrent,2.2,5,16.8,No ignition
+7.1,GMT178-T14,SIBAL cotton-fiberglass fabric,concurrent,2.2,4 to 2.8,16.9,Quenched
+7.1,GMT178-T17,SIBAL cotton-fiberglass fabric,concurrent,2.2,6 to 53,16.9,No blowoff
+7.1,GMT190-T20,SIBAL cotton-fiberglass fabric,concurrent,1.2,11 to 3,17.2,Quenched
+7.1,GMT190-T21,SIBAL cotton-fiberglass fabric,concurrent,1.2,11 to 47,17.2,Blow-off
+7.1,GMT190-T22,SIBAL cotton-fiberglass fabric,concurrent,1.2,10.5 to 5,17.1,Quenched
+7.1,GMT190-T23,SIBAL cotton-fiberglass fabric,concurrent,2.2,10,17.2,"Reused, did not ignite"
+7.1,GMT216-T28a,SIBAL cotton-fiberglass fabric,concurrent,1.2,5,20.7,"Reused, did not ignite"
+7.1,GMT216-T28b,SIBAL cotton-fiberglass fabric,concurrent,1.2,5,20.7,"Reused, did not ignite"
+2.1,thin PMMA (Bhattacharjee tests),thin PMMA film,opposed,2,1.0 +/- 0.5,21,Flame went out below this opposed-flow speed (radiative extinction)
+2.1,thin PMMA (Bhattacharjee tests),thin PMMA film,opposed,2,3.0 +/- 0.5,16,Flame went out below this opposed-flow speed (radiative extinction)

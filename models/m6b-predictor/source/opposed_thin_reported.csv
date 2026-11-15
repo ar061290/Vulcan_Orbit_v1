@@ -1,0 +1,14 @@
+# Opposed-flow spread over a thin PMMA film in ISS microgravity (BASS-II, Bhattacharjee tests). Status: reported. Used ONLY as an independent check.
+# FSJ2016 = Bhattacharjee et al., Fire Safety Journal 79 (2016) 111-118, doi:10.1016/j.firesaf.2015.11.011 (paywalled; datasets/raw/m6/, not committed)
+#   p. 115: "For flame spread over 100 um thick samples ... in the microgravity experiment, the opposing flow velocity is 3 cm/s."
+#   p. 115: "For the same fuel thickness, the highest spread rate obtained is about 2.2 mm/s even though the opposing flow velocity was varied
+#            from about 40 cm/s to about 1 cm/s."  p. 116: "For the experimental value of Vf,thin = 2.2 mm/s for tau = 50 um" (tau = half-thickness,
+#            so both faces burn).  p. 117: "at 21% oxygen level, downward spread over PMMA can be considered thermally controlled";
+#            the downward tests were at "pressure 101 kPa, oxygen level 21%" and "Most conditions are kept similar between the microgravity and
+#            downward experiments except ... the opposing flow velocity is 3 cm/s".
+# CNF2016 = Bhattacharjee et al., Combust. Flame 163 (2016) 472-477, doi:10.1016/j.combustflame.2015.10.023, p. 2: samples "20 mm wide";
+#   p. 3: "a steady flame was established over a 100 um sample ... at a steady spread rate of 2.2 mm/s". Same sentence in NASA/TM-20210011385 p. 20.
+# Pressure 99.2-99.5 kPa: M6 DATA.md, from the same paper. The paper used this point to derive F = 4.76 (vs F_adb 4.89 used by M6), so the raw
+#   de Ris agreement on it is not a blind test of the de Ris formula; it IS a blind test of the slab-calibrated factor, which never saw it.
+id,material,geometry,thickness_mm,sides_burning,width_cm,flow_direction,flow_cm_s,o2_vol_pct,pressure_kpa,spread_mm_s,source
+film_100um,PMMA,film,0.1,2,2.0,opposed,3,21,99.35,2.2,"FSJ2016 pp. 115-116; CNF2016 p. 3"

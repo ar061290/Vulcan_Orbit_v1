@@ -41,7 +41,7 @@
    "name": "models",
    "status": "model",
    "owner": "Karthikeya",
-   "what": "Trained models: smoke miss risk (M5), extinction, burning rate, cool flames (M7)"
+   "what": "Trained models: smoke miss risk (M5), flame spread (M6), extinction, burning rate, cool flames (M7)"
   },
   {
    "name": "drift",
@@ -162,6 +162,36 @@
    "status": "reported",
    "owner": "Dashboard",
    "what": "Sixty years of fire: history page entries with sources"
+  },
+  {
+   "name": "spread_predictor",
+   "status": "model",
+   "owner": "M6b",
+   "what": "Flame spread rate (lo, mid, hi), will-it-spread verdict and calibration label by material, flow and O2"
+  },
+  {
+   "name": "growth_examples",
+   "status": "model",
+   "owner": "M6b",
+   "what": "Growth simulation: burning area over time for three worked examples"
+  },
+  {
+   "name": "trust",
+   "status": "model",
+   "owner": "Dashboard",
+   "what": "One trust table across all models (scripts/build_trust.py)"
+  },
+  {
+   "name": "kb",
+   "status": "model",
+   "owner": "Dashboard",
+   "what": "Assistant passages built from the site's data files"
+  },
+  {
+   "name": "assistant_config",
+   "status": "team",
+   "owner": "Dashboard",
+   "what": "AI assistant switch: Worker URL or null (saved answers only)"
   }
  ]
 }

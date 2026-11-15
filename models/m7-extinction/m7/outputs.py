@@ -35,18 +35,40 @@ def suppression(flex) -> dict:
     }
 
 
+def models_dumps(obj) -> str:
+    """data/models.json is shared with M5, whose builder reads it without naming an encoding: keep it pure ASCII
+    (unicode escapes), indent 1, no trailing newline, as on main."""
+    return json.dumps(obj, indent=1)
+
+
 def merge_models(entries: list) -> dict:
-    """Replace only the M7 entries in data/models.json; keep every other feature's entries and order."""
+    """Replace only the M7 entries in data/models.json, in place; keep every other feature's entries, their order and any
+    extra top-level keys (main's 'note' and 'source').
+
+    File status: 'real' (all entries NASA-derived) or, as on main since M5 joined, 'model' with a status on every entry.
+    In the second case each M7 entry carries "status": "real" (its author's label)."""
     if MODELS_JSON.exists():
         doc = json.loads(MODELS_JSON.read_bytes().decode("utf-8"))
-        others = [m for m in doc.get("models", []) if m.get("id") not in M7_IDS]
-        status = doc.get("status", "real")
     else:
-        others, status = [], "real"
-    if status != "real":
-        raise SystemExit(f"data/models.json has status '{status}'; M7 entries are NASA-derived ('real'). "
+        doc = {"status": "real", "models": []}
+    status = doc.get("status", "real")
+    if status not in ("real", "model"):
+        raise SystemExit(f"data/models.json has status '{status}'; expected 'real' or 'model' with per-entry status. "
                          "Agree the file status with the team before merging.")
-    return {"status": "real", "models": others + entries}
+    per_entry = status != "real" or any("status" in m for m in doc.get("models", []))
+    if per_entry:
+        entries = [{**{k: v for k, v in e.items() if k != "status"}, "status": "real"} for e in entries]   # last, as on main
+    new = {e["id"]: e for e in entries}
+    models, seen = [], set()
+    for m in doc.get("models", []):
+        if m.get("id") in M7_IDS:
+            if m["id"] in new and m["id"] not in seen:
+                models.append(new[m["id"]])
+                seen.add(m["id"])
+        else:
+            models.append(m)
+    models += [e for e in entries if e["id"] not in seen]
+    return {**doc, "status": status, "models": models}
 
 
 def remove_m7_outputs() -> None:
@@ -57,17 +79,23 @@ def remove_m7_outputs() -> None:
         doc = json.loads(MODELS_JSON.read_bytes().decode("utf-8"))
         rest = [m for m in doc.get("models", []) if m.get("id") not in M7_IDS]
         if rest:
-            write(MODELS_JSON, {**doc, "models": rest})
+            MODELS_JSON.write_bytes(models_dumps({**doc, "models": rest}).encode("utf-8"))
         else:
             MODELS_JSON.unlink()
 
 
 def update_manifest() -> None:
-    """Set the manifest lines M7 owns ('models', 'flex_suppression') to 'real'."""
+    """Set the manifest lines M7 owns: 'flex_suppression' to 'real'; 'models' to the file status of data/models.json
+    ('real', or 'model' once it also holds M5's model-status entry)."""
     doc = json.loads(MANIFEST_JSON.read_bytes().decode("utf-8"))
     names = {f["name"] for f in doc["files"]}
     assert {"models", "flex_suppression"} <= names, "manifest lines for models/flex_suppression are missing"
+    models_status = "real"
+    if MODELS_JSON.exists():
+        models_status = json.loads(MODELS_JSON.read_bytes().decode("utf-8")).get("status", "real")
     for f in doc["files"]:
-        if f["name"] in ("models", "flex_suppression"):
+        if f["name"] == "flex_suppression":
             f["status"] = "real"
+        elif f["name"] == "models":
+            f["status"] = models_status
     write(MANIFEST_JSON, doc)

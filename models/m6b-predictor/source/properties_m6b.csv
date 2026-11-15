@@ -1,0 +1,20 @@
+# M6b values beyond M6's de Ris properties (M6's models/m6-spread/source/properties.csv is read unchanged for c_thin, c_thick, F_adb_21, T_v, T_inf).
+# status: real = NASA PSI data file; reported = paper or NASA report text, not checked by us.
+# OLSON = Olson et al., "The effect of duct size, sample size, and fuel composition on concurrent flame spread over large cellulose samples in
+#         microgravity", accepted manuscript, UCL Discovery eprint 10164340 (see concurrent_reported.csv). Page = PDF page.
+# PSI99 = NASA PSI-99 (Saffire-II) Experimental table, doi:10.60555/2chp-m469, datasets/psi/PSI-99/PSI-99_Experimental table_SAFFIRE-2.csv
+# TM2021 = NASA/TM-20210011385 BASS-II Summary Report (PSI-25 file, doi:10.60555/4qc4-de67)
+name,value,unit,status,source,quote,note
+sibal_area_density,18.05,mg/cm^2,reported,OLSON p. 7,"has a total area density of 18.05 mg/cm2 (13.54 mg/cm2 cotton)",reference area density of the concurrent law
+sibal_area_density_bass,18.2,mg/cm^2,reported,TM2021 p. 94,"The thickness of the sample is about 0.32 mm with an area density of 18.2 mg/cm2",context only (0.8% above the OLSON value)
+cotton_area_density,18.1,mg/cm^2,reported,OLSON p. 7,"The bleached organic interlock cotton fabric ... has an area density of 18.1 mg/cm2",Saffire V calibration row
+sibal_thickness,0.32,mm,reported,TM2021 p. 94,"The thickness of the sample is about 0.32 mm",context only; the model uses area density
+sibal_burnout_time,22,s,reported,OLSON p. 17,"The steady state burnout time for SIBAL in atmospheric air appears to be approximately 22 s.",burnout time tb = Lp/Vf; low and central growth runs
+sibal_burnout_time_peak,35,s,reported,OLSON p. 18,"burnout time peak ~ 30 s versus ~35 s for Saffire I and III",transient excess after ignition; high-area growth run
+concurrent_flow_exponent,1,dimensionless,reported,OLSON p. 5,"the concurrent flame spread rate varies linearly with flow rate (over the range tested) and oxygen concentration but with the square root of pressure via convective heat transfer scaling [8, 24]",refs 8 = Olson and Miller 2009 PCI 32; 24 = Thomsen et al. 2019 PCI 37
+concurrent_o2_exponent,1,dimensionless,reported,OLSON p. 14,"Using the concurrent flame spread correlation Vf ~O2%* P1/2 [8, 18, 24]",
+concurrent_pressure_exponent,0.5,dimensionless,reported,OLSON p. 5,"with the square root of pressure via convective heat transfer scaling",
+pmma_regression_lo,0.01,mm/s,real,PSI99 Note 4,"The flames remain anchored at the base of the sample which has a very slow regression rate (0.01 to 0.04 mm/s)",thick PMMA samples 2-8 and 2-9 in concurrent flow
+pmma_regression_hi,0.04,mm/s,real,PSI99 Note 4,"(same note)",
+pmma_concurrent_damage_length,10,cm,real,PSI99 sample 2-8 and Note 3,"~ 10 cm (note 3) ... Note 3 This is the length of fuel with significant visible damage.",upper bound of downstream spread with the burn time below
+pmma_concurrent_burn_time,600,s,real,PSI99 sample 2-8 column Burn Time (s),"600 s",

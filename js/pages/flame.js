@@ -100,10 +100,10 @@ function checksCard(list) {
 }
 
 export default async function (root) {
-  const [fs, sp] = await Promise.all([load('flame_static'), load('flame_spread')]);
+  const [fs, sp, gapsD] = await Promise.all([load('flame_static'), load('flame_spread'), load('gaps')]);
   if (fs.status === 'missing') { root.append(page('Flame', '', card('Flame simulator', 'missing', null, empty('Waiting for the flame model', 'flame_static', 'Run python models/flame-sim/build.py', '')))); return; }
   root.append(page('Flame in freefall', 'On Earth a flame is a flickering teardrop because hot gas rises. In orbit nothing rises, so the same flame becomes a sphere fed only by slow diffusion. This page runs our reduced-order flame model and shows every check against NASA data.',
-    flameSim(fs),
+    flameSim(fs, gapsD),
     h('div', { class: 'grid g2', style: 'margin-top:14px' }, flexCard(fs), spreadCard(sp)),
     h('div', { class: 'grid g2', style: 'margin-top:14px' }, mapCard(sp), frontCard(sp)),
     h('div', { style: 'margin-top:14px' }, checksCard([...(fs.checks || []), ...(sp.checks || [])])),

@@ -1,0 +1,53 @@
+# Hand transcription of TABLE 5.1 "Twenty Burning and Suppression of Solids-II (BASS-II) tests",
+# Olson S.L., Ferkul P.V., Bhattacharjee S., Miller F.J., Fernandez-Pello C., Link S., T'ien J.S., Wichman I.,
+# "Burning and Suppression of Solids-II (BASS-II) Summary Report", NASA/TM-20210011385, p. 57 (PDF page 65),
+# section 5 (Miller and Wichman). File PSI-25_Reports_BASS-II Summary Report.pdf from NASA PSI-25 (doi:10.60555/4qc4-de67),
+# sha256 5ffa911fd9b6356f204646003fb9342e341810dcdfdf5cb15756e7f01ec5f770. Transcribed 14 Nov 2026 from the rendered page image.
+# One row per (test, velocity) pair. Where the table lists several velocities and spread rates for one test, they are
+# paired in the order printed ("10, 6, and 5" with "0.057, 0.056, and 0.04"); segment = position in that list (1 = first).
+# Units as printed in the table header: thickness mm, width cm, velocity cm/s, spread rate mm/s, burn time min, O2 vol%.
+# spread_mm_s is empty where the table says "Not tracked". The text on p. 56 states "The airflow was always opposed."
+test,thickness_mm,width_cm,sides_burning,segment,n_segments,velocity_cm_s,spread_mm_s,burn_time_min,o2_initial_vol_pct,o2_final_vol_pct
+M1,1,2.2,1,1,1,9,0.071,6.4,22.2,21.9
+M2,3,2.2,1,1,2,20,0.052,22.9,22.2,21.2
+M2,3,2.2,1,2,2,15,0.033,22.9,22.2,21.2
+M3,5,2.2,1,1,2,10,0.029,20.1,20.8,19.7
+M3,5,2.2,1,2,2,20,0.024,20.1,20.8,19.7
+M4,5,2.2,2,1,2,5,0.045,19.8,21.8,19.8
+M4,5,2.2,2,2,2,3,0.033,19.8,21.8,19.8
+M5,3,2.2,2,1,1,10,0.071,27.2,22.2,19
+M6,1,2.2,2,1,2,10,,16.8,21.8,20.7
+M6,1,2.2,2,2,2,8,,16.8,21.8,20.7
+M7,1,1.2,2,1,4,10,0.106,18.4,18.9,18.4
+M7,1,1.2,2,2,4,6,0.099,18.4,18.9,18.4
+M7,1,1.2,2,3,4,5,0.083,18.4,18.9,18.4
+M7,1,1.2,2,4,4,3,0.07,18.4,18.9,18.4
+M8,2,1.2,2,1,3,10,0.057,25.2,19.1,18.2
+M8,2,1.2,2,2,3,6,0.056,25.2,19.1,18.2
+M8,2,1.2,2,3,3,5,0.04,25.2,19.1,18.2
+M9,3,1.2,2,1,1,14,0.025,16.8,18,17.6
+M10,4,1.2,2,1,2,15,0.0373,30.5,20.1,18.6
+M10,4,1.2,2,2,2,10,0.03,30.5,20.1,18.6
+M11,5,1.2,2,1,3,21,0.048,28.5,20,18.5
+M11,5,1.2,2,2,3,15,0.028,28.5,20,18.5
+M11,5,1.2,2,3,3,13,0.022,28.5,20,18.5
+M12,2,2.2,2,1,2,12,,16.2,21.7,20.4
+M12,2,2.2,2,2,2,10,,16.2,21.7,20.4
+M13,4,2.2,2,1,3,6,0.047,20.5,20.8,19
+M13,4,2.2,2,2,3,5,0.035,20.5,20.8,19
+M13,4,2.2,2,3,3,4,0.033,20.5,20.8,19
+M14,2,2.2,1,1,3,15,0.0624,15.4,22.2,21.6
+M14,2,2.2,1,2,3,14,0.055,15.4,22.2,21.6
+M14,2,2.2,1,3,3,10,0.0353,15.4,22.2,21.6
+M15,4,2.2,1,1,1,20,0.045,22.0,21,20
+M16,1,2.2,2,1,3,5,0.144,8.4,19.2,18.7
+M16,1,2.2,2,2,3,3,0.1309,8.4,19.2,18.7
+M16,1,2.2,2,3,3,2,0.1062,8.4,19.2,18.7
+M17,2,2.2,2,1,3,5,0.053,30.7,18.8,17.1
+M17,2,2.2,2,2,3,4,0.042,30.7,18.8,17.1
+M17,2,2.2,2,3,3,3,0.026,30.7,18.8,17.1
+M18,3,2.2,2,1,2,10,0.026,25.5,17.9,16.8
+M18,3,2.2,2,2,2,8,0.013,25.5,17.9,16.8
+M19,4,2.2,2,1,2,10,0.027,25.7,19,17.4
+M19,4,2.2,2,2,2,6,0.0159,25.7,19,17.4
+M20,5,2.2,2,1,1,10,0.012,16.5,18,17.4

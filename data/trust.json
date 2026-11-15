@@ -1,0 +1,134 @@
+{
+ "status": "model",
+ "what": "Every model and analysis on one page: score on data it did not learn from, the simple baseline, and whether it met the pass rule written before it ran.",
+ "note": "Scores are copied from each model's own output file by scripts/build_trust.py.",
+ "rows": [
+  {
+   "id": "m7-extinction",
+   "name": "Will a droplet flame go out?",
+   "kind": "Trained model",
+   "metric": "AUC",
+   "score": 0.899,
+   "range": [
+    0.8425,
+    0.9469
+   ],
+   "baseline": "Best single input (oxygen)",
+   "baseline_score": 0.8061,
+   "tested": "Whole test sessions held out: 5-fold grouped by ISS test date (80 dates), repeated 20 times. Score = median AUC; range = 95% session bootstrap.",
+   "passed": true,
+   "rule": "Median AUC at least 0.80 and range above the one-variable baseline (models/m7-extinction/RULES.md, R1)",
+   "page": "respond"
+  },
+  {
+   "id": "m7-burning-rate",
+   "name": "How fast does a droplet burn?",
+   "kind": "Formula + trained correction",
+   "metric": "MAE (mm²/s, lower is better)",
+   "score": 0.0516,
+   "range": [
+    0.0434,
+    0.0617
+   ],
+   "baseline": "d-squared law (one constant per fuel)",
+   "baseline_score": 0.0791,
+   "tested": "Whole test sessions held out: 5-fold grouped by ISS test date (80 dates), repeated 20 times. Score = median MAE; range = 95% session bootstrap.",
+   "passed": true,
+   "rule": "Beats the d-squared law and the per-fuel mean in 16 of 20 repeats (R2)",
+   "page": "respond"
+  },
+  {
+   "id": "m7-cool-flame",
+   "name": "Does a cool flame keep burning?",
+   "kind": "Trained model",
+   "metric": "AUC",
+   "score": 0.8237,
+   "range": [
+    0.6979,
+    0.9159
+   ],
+   "baseline": "Best single input (pressure)",
+   "baseline_score": 0.7806,
+   "tested": "Whole test sessions held out: 5-fold grouped by ISS test date (39 dates), repeated 20 times. Score = median AUC; range = 95% session bootstrap.",
+   "passed": true,
+   "rule": "Lower end of the AUC range above 0.5 (R3). Note: its range overlaps a pressure-only rule.",
+   "page": "respond"
+  },
+  {
+   "id": "smoke-miss",
+   "name": "Will the detector miss this smoke?",
+   "kind": "Trained model",
+   "metric": "AUC",
+   "score": 0.746,
+   "range": [
+    0.436,
+    1.0
+   ],
+   "baseline": "Material only (Table 1)",
+   "baseline_score": null,
+   "tested": "leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples",
+   "passed": false,
+   "rule": "AUC at least 0.75 (models/m5-smoke-miss/RULES.md)",
+   "page": "predict"
+  },
+  {
+   "id": "m6",
+   "name": "How fast does flame cross an acrylic slab? (M6)",
+   "kind": "Formula + one fitted constant",
+   "metric": "R² (held-out sessions, spread rate in mm/s)",
+   "score": -0.6797,
+   "range": [
+    -3.8668,
+    -0.1401
+   ],
+   "baseline": "de Ris",
+   "baseline_score": -40.0264,
+   "tested": "Whole ISS sessions held out: leave one session out (7 sessions, grouped by GMT day). Score = R2 on the pooled held-out predictions; range = 95% session bootstrap. Holding out single tests instead gives R2 -0.77.",
+   "passed": false,
+   "rule": "Held-out R² at least 0.6 (models/m6-spread/RULES.md)",
+   "page": "predict"
+  },
+  {
+   "id": "m6b",
+   "name": "Will it spread, and how fast? (M6b)",
+   "kind": "Calibrated physics",
+   "metric": "Mean error on held-out sessions, mm/s; range coverage",
+   "score": 0.02005,
+   "range": "coverage 87% of real results",
+   "baseline": "M6 one constant",
+   "baseline_score": 0.033,
+   "tested": "Whole ISS sessions held out; two independent Saffire-II rates",
+   "passed": true,
+   "rule": "R1-R4 and growth checks G1-G5 (models/m6b-predictor/RULES.md)",
+   "page": "predict"
+  },
+  {
+   "id": "drift",
+   "name": "Where does the smoke go?",
+   "kind": "Physics model, 4 tuned settings",
+   "metric": "R² of detector signal",
+   "score": 0.07,
+   "range": "fit to the tuning burn 0.9",
+   "baseline": null,
+   "baseline_score": null,
+   "tested": "Tuned on Sample 1 burn (flame seen by radiometers 61 to 410 s after T0); tested on Smoke-wire puff (wire on 32 to 44 s)",
+   "passed": false,
+   "rule": "The held-out smoke puff should match too (shown on the smoke model's check figure)",
+   "page": "predict"
+  },
+  {
+   "id": "rate",
+   "name": "Would a fast-rise alarm be quicker?",
+   "kind": "NASA data, no model",
+   "metric": "Events where it beat the fixed alarm",
+   "score": 0,
+   "range": "0 false alarms",
+   "baseline": "fixed level alarm",
+   "baseline_score": null,
+   "tested": "All three Saffire-III events, each on its own",
+   "passed": false,
+   "rule": "Earlier in 2 of 3 events and no false alarms (models/m4-latency/RULES.md)",
+   "page": "detect"
+  }
+ ]
+}

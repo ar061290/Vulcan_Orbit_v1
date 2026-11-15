@@ -1,8 +1,10 @@
 import { h, load, page, card, badge, fmt } from '../lib.js';
 import { hero } from '../hero.js';
 import { ticking } from '../clock.js';
+import { tourButton } from '../tour.js';
+import { missionCheck, coverageLine } from '../mission.js';
 export default async function (root) {
-  const [man, inv, sm, india, lat] = await Promise.all([load('manifest'), load('investigations'), load('smoke_sizes'), load('india'), load('saffire_latency')]);
+  const [man, inv, sm, india, lat, gaps] = await Promise.all([load('manifest'), load('investigations'), load('smoke_sizes'), load('india'), load('saffire_latency'), load('gaps')]);
   const fine = (sm.materials || []).filter(m => m.Dg_nm != null).sort((a, b) => a.Dg_nm - b.Dg_nm)[0];
   const st = n => (man.files || []).find(f => f.name === n)?.status || 'missing';
   const stage = (n, id, title, text, files) => h('a', { class: 'card stage', href: `#/${id}` }, h('div', { class: 'n' }, n), h('h2', {}, title), h('p', {}, text),
@@ -22,7 +24,7 @@ export default async function (root) {
       h('p', { class: 'kicker' }, 'NASA Space Apps 2026 · Flame in Freefall'),
       h('h1', { id: 'hero-title' }, 'In orbit, fire doesn\'t rise. ', h('span', { class: 'lit' }, 'It hides.')),
       h('p', { class: 'hero-lead' }, 'Without gravity, flames turn into dim blue balls and smoke drifts wherever the fans push it. We used NASA\'s own space-station fire experiments to answer three questions: where is the fire, what will it do, and what puts it out.'),
-      h('div', { class: 'hero-cta' }, h('a', { class: 'btn primary', href: '#/detect' }, 'Start with the fire'), h('a', { class: 'btn', href: '#/evidence' }, 'How we checked it'))),
+      h('div', { class: 'hero-cta' }, h('a', { class: 'btn primary', href: '#/detect' }, 'Start with the fire'), tourButton(), h('a', { class: 'btn', href: '#/evidence' }, 'How we checked it'))),
     h('figure', { style: 'margin:0' },
       h('div', { class: 'port' }, ring, h('div', { class: 'glass' }, H.el),
         h('div', { class: 'port-ctl', role: 'group', 'aria-label': 'Gravity in the illustration' }, gBtn(0, 'In orbit'), gBtn(1, 'On Earth'))),
@@ -51,6 +53,8 @@ export default async function (root) {
       q('01 · LOCATE', 'detect', 'Where is the fire?', 'Which sensor would have noticed real orbital fires first, how late, and which smoke the station detector cannot see.', [['saffire_latency', 'Saffire alarm timing'], ['smoke_sizes', 'SAME smoke sizes']]),
       q('02 · PREDICT', 'predict', 'What will it do?', 'How fast flame spreads, whether a burning droplet goes out, and where smoke drifts when nothing rises.', [['drift', 'Smoke drift'], ['models', 'Trained models']]),
       q('03 · RESPOND', 'respond', 'What puts it out?', 'What NASA found about gases that starve flames, next to our own bench trials of ion wind and fine mist.', [['flex_suppression', 'FLEX suppression'], ['response_trials', 'Bench trials']])),
+    gaps.status !== 'missing' ? h('p', { class: 'coverage' }, coverageLine(gaps)) : null,
+    gaps.status !== 'missing' ? missionCheck(gaps) : null,
     h('details', { class: 'more' }, h('summary', {}, h('span', {}, 'How to read this site'), h('small', {}, 'What the coloured stamps on every panel mean')),
       h('p', {}, 'Every panel is stamped with where its numbers come from. Only the first two are results.'),
       h('div', { class: 'readme' },

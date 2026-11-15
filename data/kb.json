@@ -1,0 +1,502 @@
+{
+ "status": "model",
+ "what": "Passages the AI assistant may answer from; each keeps its source and the data file it came from.",
+ "passages": [
+  {
+   "id": "qa-saffire-latency",
+   "title": "How long did the smoke detector take to notice a real fire in orbit?",
+   "text": "In Saffire-III, a real fire on an uncrewed Cygnus cargo ship, the flame radiometers responded 7 s after ignition of Sample 1. The cabin smoke detector's scatter channel crossed our alarm rule after 92 s (plus or minus 10 s; 72 s with a looser threshold). Its obscuration channel never rose. The alarm rule is ours (baseline + 5 SD), because the file holds raw counts, not the vehicle's setpoint.",
+   "source": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",
+   "url": "https://doi.org/10.60555/040q-4h36",
+   "file": "data/saffire_latency.json burns[s1].channels[radiometer, scatter, obscuration].alarm_s"
+  },
+  {
+   "id": "qa-saffire-what",
+   "title": "What was Saffire-III?",
+   "text": "Saffire-III burned large fabric samples inside an uncrewed Cygnus cargo vehicle after it left the space station, at 30 cm/s airflow, one with the flow and one against it. Its telemetry file has 11,450-row flight telemetry file. NASA's summary table lists the two samples.",
+   "source": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",
+   "url": "https://doi.org/10.60555/040q-4h36",
+   "file": "data/investigations.json items[saffire3]"
+  },
+  {
+   "id": "qa-smoke-fine",
+   "title": "Which materials make smoke that is hardest for a station smoke detector to see?",
+   "text": "In NASA's SAME-2 flight experiment, Kapton made the finest smoke: geometric mean diameter 42 nm unaged. From the paper's own size spreads, 82% of Kapton's smoke mass is in particles finer than 500 nm, against 9% for silicone. Light-scattering detectors like the station's respond weakly to particles that fine. The paper itself says the small Kapton and Teflon particles make detection challenging.",
+   "source": "Urban et al. 2012, SAME-2, AIAA 2012-3536 (NTRS 20130000422)",
+   "url": "https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf",
+   "file": "data/smoke_sizes.json materials[Kapton, Silicone].Dg_nm, mass_below"
+  },
+  {
+   "id": "qa-smoke-airflow",
+   "title": "Does airflow change whether the detector can see the smoke?",
+   "text": "In 16 SAME-2 flight tests, faster air past the heated sample gave finer smoke. Our model ranks air velocity as the main driver (76%) of whether most smoke mass falls below 500 nm. Its score on held-out tests is AUC 0.746 (0.44 to 1.00), only level with knowing the material alone, so treat it as a trend, not a classifier.",
+   "source": "Urban et al. 2012, SAME-2, AIAA 2012-3536 (NTRS 20130000422)",
+   "url": "https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf",
+   "file": "data/models.json models[smoke-miss].drivers, score, score_range"
+  },
+  {
+   "id": "qa-airflow-iss",
+   "title": "How fast does air move inside the space station?",
+   "text": "NASA's requirement is an effective air velocity in the cabin aisleway of 4.6 to 12.2 metres per minute, about 0.08 to 0.2 metres per second. With no buoyancy, smoke and heat go wherever the ventilation carries them instead of rising.",
+   "source": "Link and Balistreri, ICES 2015 (NTRS 20150009509), p. 10",
+   "url": "https://ntrs.nasa.gov/api/citations/20150009509/downloads/20150009509.pdf",
+   "file": "data/whatif.json varied.airflow_m_s; NTRS 20150009509 p. 10"
+  },
+  {
+   "id": "qa-placement",
+   "title": "Where should a smoke detector go in a spacecraft cabin?",
+   "text": "In our drift model of a ventilated cabin, a detector at the air return caught 48% of simulated fires within 2 minutes, and one on the ceiling 45%: a small difference. Fire size mattered far more than position. At an ISS-like alarm level of 10 mg/m3 the same detectors caught 2% and 1%. This is a screening model tuned on Saffire-III, not a design rule for a real module.",
+   "source": "Predict page, what-if runs",
+   "url": "#/predict",
+   "file": "data/whatif.json layouts[At the air return, Ceiling].caught_120, caught_120_at_10mg"
+  },
+  {
+   "id": "qa-alarm-level",
+   "title": "What smoke level sets off a spacecraft smoke alarm?",
+   "text": "NASA's Saffire VI paper uses 1 mg/m3 and calls it a relatively tight alarm threshold. A NASA study of smoke detection gives about 10 mg/m3 as the ISS detection threshold and 2 mg/m3 for the Space Shuttle. Our models report catch rates at both 1 and 10 mg/m3.",
+   "source": "Saffire VI, ICES-2024-365 (NTRS 20240002981)",
+   "url": "https://ntrs.nasa.gov/api/citations/20240002981/downloads/Saffire-ICES-2024-ICES-365-accepted%20final.pdf",
+   "file": "data/whatif.json alarm_mg_m3, alarm_hi_mg_m3"
+  },
+  {
+   "id": "qa-smoke-clear",
+   "title": "How long does smoke take to clear from a spacecraft cabin?",
+   "text": "Tuning our drift model on the Saffire-III smoke detector record gives a clearance time of 120 to 240 s (the time for ventilation and filtering to remove smoke). That range comes from one detector in one vehicle. The same model gets a smoke puff it was not tuned on wrong (peak about 18 s off), so it is a screening tool, not a validated one.",
+   "source": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",
+   "url": "https://doi.org/10.60555/040q-4h36",
+   "file": "data/drift_calibration.json clearance_s_range"
+  },
+  {
+   "id": "qa-flame-shape",
+   "title": "Why is a flame round in space?",
+   "text": "Without gravity, hot gas does not rise, so fuel and oxygen meet only by diffusion, which is the same in every direction. In our flame model a heptane droplet flame in still air has a length-to-width ratio of 1.0 in orbit and 13.7 at Earth gravity. The shapes follow the physics; the model's absolute sizes are 2 to 3 times too large (check S1-height, failed).",
+   "source": "Flame page, simulator",
+   "url": "#/flame",
+   "file": "data/flame_static.json flames[n-heptane, 0 g / Earth 1 g].aspect"
+  },
+  {
+   "id": "qa-droplet-rate",
+   "title": "How fast does a fuel droplet burn in microgravity?",
+   "text": "NASA's FLEX experiment burned 150 methanol and 107 heptane droplets on the space station. Our d-squared-law model matches the measured burning rate within 6% for methanol and 29% for heptane on held-out tests; for heptane a single constant rate does better (22%).",
+   "source": "NASA PSI-69, FLEX (doi 10.60555/mbq8-0451)",
+   "url": "https://doi.org/10.60555/mbq8-0451",
+   "file": "data/flame_static.json flex_K_stats"
+  },
+  {
+   "id": "qa-extinction-o2",
+   "title": "At what oxygen level does a droplet flame go out?",
+   "text": "From NASA FLEX data, the M7 model gives a 3 mm heptane droplet at 1 atm a 50% chance of going out at 19.5% oxygen (18.7 to 20.9%). Replacing 20% of the nitrogen with CO2 raises that to 21.7%. These are model outputs for one droplet size, not flammability limits.",
+   "source": "NASA PSI-69, FLEX (doi 10.60555/mbq8-0451)",
+   "url": "https://doi.org/10.60555/mbq8-0451",
+   "file": "data/m7_explorer.json extinction.table"
+  },
+  {
+   "id": "qa-suppressant",
+   "title": "Which gas is better at putting out a droplet flame, CO2 or helium?",
+   "text": "In the M7 model built on NASA FLEX data, adding 20% CO2 or 20% helium in place of nitrogen both raise the oxygen level a flame needs, by about 2 to 3 points. For heptane at 1 atm: 19.5% with no added gas, 21.7% with CO2. The raw FLEX extinction shares by gas reflect NASA's test plan, so they are not a fair comparison on their own.",
+   "source": "NASA PSI-69, FLEX (doi 10.60555/mbq8-0451)",
+   "url": "https://doi.org/10.60555/mbq8-0451",
+   "file": "data/m7_explorer.json extinction.table; data/flex_suppression.json"
+  },
+  {
+   "id": "qa-cool-flame",
+   "title": "What is a cool flame and why is it dangerous?",
+   "text": "A cool flame is a low-temperature flame that can keep burning after the visible flame goes out. In NASA's CFI droplet tests the M7 model finds pressure the main driver of whether the cool flame burns the droplet away (AUC 0.82); for a 4.3 mm n-dodecane droplet in air the 50% point is about 3.2 atm. A fire that looks out may not be.",
+   "source": "NASA PSI-39, CFI (doi 10.60555/m6pj-a914)",
+   "url": "https://doi.org/10.60555/m6pj-a914",
+   "file": "data/m7_explorer.json cool_flame"
+  },
+  {
+   "id": "qa-spread",
+   "title": "How fast does fire spread over plastic in microgravity?",
+   "text": "Our de Ris-based model matches NASA BASS-II spread over thin acrylic (100 micron PMMA) within 7% (2 burns), but runs about 3 times too fast for thick acrylic (median error 190% over 39 readings), because thick samples in orbit never reached steady spread. BASS-II spread rates come from NASA's summary report.",
+   "source": "BASS-II summary report, NASA/TM-20210011385",
+   "url": "https://ntrs.nasa.gov/citations/20210011385",
+   "file": "data/flame_spread.json bass_ii_groups"
+  },
+  {
+   "id": "qa-min-oxygen",
+   "title": "What is the lowest oxygen level at which a thin sheet can burn in orbit?",
+   "text": "Our flame-spread model gives 11% oxygen at about 2.7 cm/s airflow for thin acrylic in orbit. That is probably too low: BASS-II observed spread only down to about 16 to 17%.",
+   "source": "BASS-II summary report, NASA/TM-20210011385",
+   "url": "https://ntrs.nasa.gov/citations/20210011385",
+   "file": "data/flame_spread.json flammability_maps[0 g, 101.3].min_O2"
+  },
+  {
+   "id": "qa-gaps",
+   "title": "What has NASA not tested?",
+   "text": "Solid fuels (BASS-II): tested at 13.6-22.2% O2. The table records no pressure, so we place these tests at cabin pressure (101.3 kPa); that is our assumption. Either way, these archives hold no solid-fuel spread data at a known reduced pressure. 34% O2 at 70.3 kPa (10.2 psi): no solids, no gas flames tests within 3 O2 points and 10 kPa. 26.5% O2 at 70.3 kPa (10.2 psi): no solids, no gas flames tests within 3 O2 points and 10 kPa.",
+   "source": "NASA Physical Sciences Informatics",
+   "url": "https://psi.nasa.gov",
+   "file": "data/gaps.json verdicts"
+  },
+  {
+   "id": "qa-efield",
+   "title": "Did NASA test electric fields on flames?",
+   "text": "NASA ran 21 test days on the space station in 2018 and ignited 230 methane and ethylene flames with up to 10 kV between the burner and a mesh above it. It measured ion current, how fast the flame responds to the field, soot, and lifted flames. NASA states the research is not aimed at space applications, and putting flames out is not among its stated objectives. Our ion-wind trial is a different question: this panel shows what NASA studied, not that electric fields extinguish fires in orbit.",
+   "source": "NASA PSI-22, ACME E-FIELD Flames (doi 10.60555/se5a-8c73)",
+   "url": "https://doi.org/10.60555/se5a-8c73",
+   "file": "data/efield.json finding, totals"
+  },
+  {
+   "id": "qa-datasets",
+   "title": "Which NASA datasets does this project use?",
+   "text": "Mainly NASA Physical Sciences Informatics: Saffire-III telemetry (PSI-100), FLEX (PSI-69), CFI (PSI-39), BASS-II (PSI-25), SAME and SAME-R (PSI-102, PSI-101), Saffire-I and II (PSI-98, PSI-99), ACME E-FIELD (PSI-22), CFI-G (PSI-159) and Flame Design (PSI-10). The Investigations page lists every one with its DOI.",
+   "source": "NASA Physical Sciences Informatics",
+   "url": "https://psi.nasa.gov",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "model-m7-extinction",
+   "title": "Droplet flame goes out (FLEX)",
+   "text": "Question: Will a burning fuel droplet's flame go out on its own before the fuel is used up? Data: NASA FLEX, PSI-69 (doi:10.60555/mbq8-0451): 260 methanol and n-heptane droplet burns on the ISS, 0.69-3.05 atm, 12%-34% O2, up to 70% CO2 or 45% He added, initial diameter 1.1-4.7 mm. Outcome: NASA's 'Test end' = Extinction (vs Disruption or Completion). Method: Model chosen inside every training split from: logistic regression on the raw inputs with fuel interactions; logistic regression on physics features (inert heat capacity per O2, O2 partial pressure, gas conductivity); Gaussian-process classifier. Picked: LR physics features (C=10) 69%, Gaussian-process classifier 15%, LR raw+fuel interactions (C=10) 14%, LR physics features (C=0.1) 1%, LR raw+fuel interactions (C=1) 1%. Tested: Whole test sessions held out: 5-fold grouped by ISS test date (80 dates), repeated 20 times. Score = median AUC; range = 95% session bootstrap. Score: AUC 0.899 range [0.8425, 0.9469]; baseline Best single input (oxygen) 0.8061. Limits: Microgravity droplets only (two fuels, 1.1-4.7 mm). NASA does not define 'Test end' publicly; with Disruption burns dropped the AUC is 0.89, and with whole atmospheres held out it is 0.90. The FLEX plan aimed at near-limit conditions, so the chance shown is for those conditions, not for cabin fires in general. A low chance of extinction does not make an atmosphere safe, and nothing here applies to Moon or Mars gravity.",
+   "source": "Vulcan Orbit models",
+   "url": "#/predict",
+   "file": "data/models.json"
+  },
+  {
+   "id": "model-m7-burning-rate",
+   "title": "Droplet burning rate (FLEX)",
+   "text": "Question: How fast does a burning fuel droplet shrink, in this atmosphere? Data: NASA FLEX, PSI-69 (doi:10.60555/mbq8-0451): 256 methanol and n-heptane droplet burns with a measured burning-rate constant K = -d(D^2)/dt. Method: Textbook d-squared law (K proportional to gas conductivity/heat capacity times ln(1+B), constants from NIST, one scale factor per fuel) multiplied by a learned correction chosen inside every training split. Picked: d2 law x ridge (alpha=10) 100%. Tested: Whole test sessions held out: 5-fold grouped by ISS test date (80 dates), repeated 20 times. Score = median MAE; range = 95% session bootstrap. Score: MAE (mm²/s, lower is better) 0.0516 range [0.0434, 0.0617]; baseline d-squared law (one constant per fuel) 0.0791. Limits: Two fuels and the FLEX test range only. R² on held-out sessions 0.67 (d-squared law 0.39). The textbook law with no fitted constant is off by a mean 0.60 mm²/s. Burning rate says how fast fuel is consumed, not whether a fire is dangerous.",
+   "source": "Vulcan Orbit models",
+   "url": "#/predict",
+   "file": "data/models.json"
+  },
+  {
+   "id": "model-m7-cool-flame",
+   "title": "Burns on invisibly after the flame goes out (CFI)",
+   "text": "Question: After the visible flame goes out, does a cool flame keep the droplet burning until all the fuel is used up? Data: NASA CFI, PSI-39 (doi:10.60555/m6pj-a914): 117 n-dodecane and n-dodecane/iso-dodecane droplet burns (3.9-6.4 mm) whose visible flame went out and then burned on as a cool flame, 0.5-5 atm, 17%-21% O2, 0-59% He. Gas flames (CFI-G, PSI-159): cool flames were seen only with 30% n-butane and 40% O2 at 2.03 bar. Method: Logistic regression on pressure, O2, helium, droplet size, fuel blend and support fibre; strength chosen inside every training split. Label: 'Dext,cool' = 0 in NASA's analysis (droplet used up) versus a cool flame that went out and left fuel. Tested: Whole test sessions held out: 5-fold grouped by ISS test date (39 dates), repeated 20 times. Score = median AUC; range = 95% session bootstrap. Score: AUC 0.8237 range [0.6979, 0.9159]; baseline Best single input (pressure) 0.7806. Limits: A visible flame going out does not mean the fire is out: in these burns a flame too dim for the colour camera kept consuming fuel. 'Used up' includes droplets finished off by a reignited hot flame (common above about 2 atm). Whether a cool flame appears at all is not modelled, because missing cool-flame data usually means the droplet drifted out of view. One fuel family, about 4-6 mm droplets, microgravity only; nothing here applies to Moon or Mars gravity.",
+   "source": "Vulcan Orbit models",
+   "url": "#/predict",
+   "file": "data/models.json"
+  },
+  {
+   "id": "model-smoke-miss",
+   "title": "Will the detector miss this smoke?",
+   "text": "Question: Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)? Data: 16 SAME-2 flight tests (Kapton, lampwick, Teflon) from Urban et al. 2012, AIAA 2012-3536, Figures 6-8, read from the PDF's vector drawing; Table 1 for the baseline Method: Logistic regression on material and air velocity; label from the lognormal mass median diameter (Hatch-Choate, from each test's count-mean and average-mass diameters) Tested: leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples Score: AUC 0.746 range [0.436, 1.0]; baseline Material only (Table 1) None. Limits: 16 tests, 3 materials, unaged smoke only, airflow 0 to 8 cm/s. A test bench result in orbit, not a detector certification. Detector limit is a choice (300/500/1000 nm reported).",
+   "source": "Vulcan Orbit models",
+   "url": "#/predict",
+   "file": "data/models.json"
+  },
+  {
+   "id": "model-m6",
+   "title": "Flame spread over PMMA slabs (BASS-II)",
+   "text": "Question: How fast does a flame spread over a solid fuel in microgravity, given airflow speed, oxygen level, pressure and fuel? Data: NASA BASS-II, PSI-25 (doi:10.60555/4qc4-de67): 39 measured opposed-flow spread rates from 18 PMMA slab tests (1-5 mm thick, 1.2 or 2.2 cm wide, one- or two-sided) on the ISS in 7 sessions, 2-21 cm/s, 16.8-22.2% O2, about 1 atm. Spread rates are NASA's own measurements as printed in Table 5.1 of the BASS-II Summary Report (NASA/TM-20210011385, a PSI-25 file), transcribed by us; session and O2 come from the PSI-25 experimental table, which matches the report. Method: de Ris thermal-regime spread formula (thin or thick by burning half-thickness; coefficients from Bhattacharjee et al. 2016, flame coefficient scaled with O2) multiplied by a learned correction of log(observed/de Ris). Tried, simplest first: one constant, linear regression, Gaussian process, small gradient-boosted trees. Kept: de Ris x one fitted constant (simplest within the best model's range). Tested: Whole ISS sessions held out: leave one session out (7 sessions, grouped by GMT day). Score = R2 on the pooled held-out predictions; range = 95% session bootstrap. Holding out single tests instead gives R2 -0.77. Score: R² (held-out sessions, spread rate in mm/s) -0.6797 range [-3.8668, -0.1401]; baseline de Ris -40.0264. Limits: PMMA slabs in opposed flow at about 1 atm only: other fuels, thin films, rods, fabrics, concurrent flow and other pressures are outside the data, and pressure could not be tested. Mean error 0.033 mm/s (de Ris alone 0.163 mm/s; the textbook formula over-predicts these slabs about 3.5-fold). The other corrections on held-out sessions: linear-regression correction R² 0.26 (range -2.3 to 0.58); Gaussian-process correction R² 0.01 (range -5.1 to 0.76); small gradient-boosted-tree correction R² 0.33 (range -2.3 to 0.81); the rule fixed before training keeps the simplest model within the best one's range. Below the 0.6 target. O2 per flow step is estimated from start and end readings. Only 39 points from 7 sessions, so ranges are wide. Microgravity only: nothing here applies to Moon or Mars gravity, and a slow spread rate does not make a material or atmosphere safe.",
+   "source": "Vulcan Orbit models",
+   "url": "#/predict",
+   "file": "data/models.json"
+  },
+  {
+   "id": "history-0",
+   "title": "23 March 1961: Valentin Bondarenko",
+   "text": "On the ground, Moscow: a low-pressure test chamber enriched with oxygen. A 24-year-old cosmonaut trainee near the end of a long isolation test. A piece of alcohol-soaked cotton landed on a hot plate and the oxygen-rich air let the fire spread fast. He died of his burns hours later, twenty days before Gagarin flew. What changed: His death was kept secret for 25 years and made public in April 1986. It is now remembered as the first warning that oxygen-rich air turns a small flame into a disaster.",
+   "source": "UPI, 4 April 1986 (reporting Izvestia)",
+   "url": "https://www.upi.com/Archives/1986/04/04/Soviets-disclose-1961-death-of-cosmonaut/8174512974800/",
+   "file": "data/memory.json"
+  },
+  {
+   "id": "history-1",
+   "title": "27 January 1967: Apollo 1: Gus Grissom, Ed White, Roger Chaffee",
+   "text": "On the ground, Launch Pad 34, during a launch rehearsal. The cabin held pure oxygen at 16.7 psi. At 6:31 in the evening the crew reported a fire. About fifteen seconds later the cabin ruptured. The review board found no single cause and did not blame any one person. What changed: Flammable materials in the cabin were strictly limited, full-scale fire tests became normal, and a new hatch could be opened in about five seconds.",
+   "source": "Report of the Apollo 204 Review Board (NASA)",
+   "url": "https://www.nasa.gov/missions/apollo/apollo-1/report-of-the-apollo-204-review-board/",
+   "file": "data/memory.json"
+  },
+  {
+   "id": "history-2",
+   "title": "April 1970: Apollo 13",
+   "text": "In flight, on the way to the Moon. Wiring damaged during ground testing shorted inside an oxygen tank and set its Teflon insulation burning. The tank burst. The crew of three made it home. What changed: Teflon was removed from the redesigned tanks and the wiring was sheathed in stainless steel.",
+   "source": "NASA Apollo Flight Journal, post-flight",
+   "url": "https://history.nasa.gov/afj/ap13fj/30postflight.html",
+   "file": "data/memory.json"
+  },
+  {
+   "id": "history-3",
+   "title": "30 June 1971: Soyuz 11: Georgy Dobrovolsky, Vladislav Volkov, Viktor Patsayev",
+   "text": "Returning from the first space station, Salyut 1. Not a fire. A valve jolted open as the modules separated before re-entry, and the cabin lost its air. They are the only people to have died above the atmosphere. What changed: Soviet and Russian crews have flown in pressure suits for launch and landing ever since.",
+   "source": "NASA Safety and Mission Assurance: 'Descent into the Void'",
+   "url": "https://sma.nasa.gov/SignificantIncidents/assets/descent-into-the-void.pdf",
+   "file": "data/memory.json"
+  },
+  {
+   "id": "history-4",
+   "title": "23-24 February 1997: Fire on space station Mir",
+   "text": "In orbit, six crew aboard. An oxygen-generating canister caught fire. The crew put on masks and used three extinguishers while smoke filled the station. Everyone survived. Official reports said about 90 seconds; astronaut Jerry Linenger later said the fire burned for about 14 minutes. What changed: It showed what our site is about: in orbit, smoke does not rise. It goes wherever the air carries it.",
+   "source": "NASA Shuttle-Mir history",
+   "url": "https://spaceflight.nasa.gov/history/shuttle-mir/history/h-f-linenger-fire.htm",
+   "file": "data/memory.json"
+  },
+  {
+   "id": "history-5",
+   "title": "2016 to 2024: Saffire: fires lit on purpose, with no one aboard",
+   "text": "In orbit, inside empty Cygnus cargo ships after they left the space station. NASA started burning large samples in unmanned cargo ships so no crew ever has to learn the hard way. In the last test, Saffire VI, a smoke monitor reached its alarm level at 981 seconds, after much of the hazardous gas had already been released. What changed: This is the data our site is built on.",
+   "source": "Urban et al., ICES-2024-365 (Saffire VI)",
+   "url": "https://ntrs.nasa.gov/citations/20240002981",
+   "file": "data/memory.json"
+  },
+  {
+   "id": "history-6",
+   "title": "Artemis and beyond: The air the next crews will breathe",
+   "text": "Moon landers, habitats and Gateway. NASA has studied lower-pressure, oxygen-richer cabin air for exploration, around 8 psi with about a third oxygen. Saffire VI came close, but no large-scale fire test has been run at those conditions yet. What changed: Our ask: pair flame-light sensors with smoke detectors in future fire tests, and test that air before crews breathe it.",
+   "source": "NASA/TP-2010-216134, Exploration Atmospheres Working Group",
+   "url": "https://www.nasa.gov/wp-content/uploads/2023/03/henninger-8.2-34-atm-tp216134-2010.pdf",
+   "file": "data/memory.json"
+  },
+  {
+   "id": "saffire-gas",
+   "title": "Saffire IV-VI cabin gas vs crew limits",
+   "text": "CO rose above the 24-hour crew limit in three of the five tests, and in both acrylic burns the CO2 rise passed the 1-hour limit. The authors conclude that gases, not heat, are the main hazard. Far-field smoke monitor reached its 1 mg/m³ level at 981 s. The paper says much of the hazardous gas release had already occurred by then. It does not state what time zero is, so this is not an ignition-to-alarm delay. Tests: IV-1 SIBAL cloth: CO +80 ppm, CO2 +1.03 mmHg, peak 3150 W; V-2 Cotton jersey: CO +83 ppm, CO2 +1.26 mmHg, peak 2800 W; VI-2 SIBAL cloth: CO +120 ppm, CO2 +1.15 mmHg, peak 3217 W; VI-3 PMMA, 1 cm thick, 2-sided: CO +308 ppm, CO2 +3.51 mmHg, peak 3080 W; VI-4 PMMA, 0.5 cm, 1-sided: CO +320 ppm, CO2 +3.37 mmHg, peak 1507 W",
+   "source": "ICES-2024-365",
+   "url": "https://ntrs.nasa.gov/citations/20240002981",
+   "file": "data/saffire_gas.json"
+  },
+  {
+   "id": "rate-of-rise",
+   "title": "Rate-of-rise alarm test on Saffire-III",
+   "text": "Fail: rate-of-rise was earlier than the fixed level in 0 of 3 events on the scatter channel, with 0 false alarms in quiet stretches. Rule: Rise rate over 30 s; alarm when it exceeds the 300 s pre-event mean + 5 SD of rise rates (3 SD as low end). Ours, not a NASA setting.",
+   "source": "NASA PSI-100",
+   "url": "https://doi.org/10.60555/040q-4h36",
+   "file": "data/rate_of_rise.json"
+  },
+  {
+   "id": "gap-0",
+   "title": "What NASA has not tested",
+   "text": "Solid fuels (BASS-II): tested at 13.6-22.2% O2. The table records no pressure, so we place these tests at cabin pressure (101.3 kPa); that is our assumption. Either way, these archives hold no solid-fuel spread data at a known reduced pressure.",
+   "source": "NASA PSI-25 summary table (calibrated initial O2 column; no pressure column)",
+   "url": "#/predict",
+   "file": "data/gaps.json"
+  },
+  {
+   "id": "gap-1",
+   "title": "What NASA has not tested",
+   "text": "34% O2 at 70.3 kPa (10.2 psi): no solids, no gas flames tests within 3 O2 points and 10 kPa.",
+   "source": "Computed from the PSI tables listed under 'tested'",
+   "url": "#/predict",
+   "file": "data/gaps.json"
+  },
+  {
+   "id": "gap-2",
+   "title": "What NASA has not tested",
+   "text": "26.5% O2 at 70.3 kPa (10.2 psi): no solids, no gas flames tests within 3 O2 points and 10 kPa.",
+   "source": "Computed from the PSI tables listed under 'tested'",
+   "url": "#/predict",
+   "file": "data/gaps.json"
+  },
+  {
+   "id": "gap-3",
+   "title": "What NASA has not tested",
+   "text": "32% O2 at 55.2 kPa (8.0 psia, NASA EAWG 2010 recommendation): no solids, no liquid droplets tests within 3 O2 points and 10 kPa.",
+   "source": "Computed from the PSI tables listed under 'tested'",
+   "url": "#/predict",
+   "file": "data/gaps.json"
+  },
+  {
+   "id": "gap-4",
+   "title": "What NASA has not tested",
+   "text": "No combustion data at lunar or Martian gravity in these archives: Moon and Mars answers can only be bounded by the 0 g and 1 g results.",
+   "source": "All investigations here ran in orbit (0 g); the challenge brief notes the same gap",
+   "url": "#/predict",
+   "file": "data/gaps.json"
+  },
+  {
+   "id": "gap-5",
+   "title": "What NASA has not tested",
+   "text": "Saffire VI (2024) burned large cloth and acrylic samples at 54-55 kPa and 29-31% O2, the closest large-scale flight data to the 8 psia / 32% exploration atmosphere. These are 3 burns in one vehicle: a bound, not a trend.",
+   "source": "ICES-2024-365 (reported); EAWG recommendation: NASA/TP-2010-216134",
+   "url": "#/predict",
+   "file": "data/gaps.json"
+  },
+  {
+   "id": "india-0",
+   "title": "Bharatiya Antariksh Station",
+   "text": "The Union Cabinet approved the first module, BAS-1, for launch by December 2028, and an operational Bharatiya Antariksh Station by 2035. (verification: official)",
+   "source": "Press Information Bureau, Government of India, 18 Sep 2024",
+   "url": "https://pib.gov.in/PressReleasePage.aspx?PRID=2055992",
+   "file": "data/india.json"
+  },
+  {
+   "id": "india-1",
+   "title": "Indian microgravity smoke research",
+   "text": "ISRO funds an IIT Madras project to build an experimental setup that characterises smoke and soot from flaming and smouldering materials in microgravity (Phase II, listed as under development). (verification: official)",
+   "source": "India Science, Technology & Innovation portal, Government of India",
+   "url": "https://www.indiascienceandtechnology.gov.in/technologies/smoke-characteristation-flaming-and-smouldering-materials-micro-gravity-phase-ii",
+   "file": "data/india.json"
+  },
+  {
+   "id": "india-2",
+   "title": "Gaganyaan schedule",
+   "text": "In a 29 Jul 2026 Lok Sabha reply the government said work towards the first uncrewed mission, G1, is in progress. In September 2026 the ISRO chairman said G1 is being readied for launch this year, with crewed flight in 2027 if all three uncrewed missions succeed. No Gaganyaan flight had launched as of 14 Nov 2026. (verification: official via news)",
+   "source": "CXO Digital Pulse (Lok Sabha reply); Starlust, 6 Sep 2026",
+   "url": "https://starlust.org/indias-uncrewed-gaganyaan-test-mission-getting-ready-for-launch-in-late-2026-isro-chief-confirms/",
+   "file": "data/india.json"
+  },
+  {
+   "id": "india-3",
+   "title": "Gaganyaan fire hardware",
+   "text": "According to a May 2026 report in The Hindu, the Gaganyaan crew module carries smoke detectors and fine water-mist fire extinguishers. We found no ISRO document confirming this. (verification: news only)",
+   "source": "Drishti IAS summary of The Hindu, 22 May 2026",
+   "url": "https://www.drishtiias.com/daily-updates/daily-news-analysis/gaganyaans-environmental-control-and-life-support-system/print_manually",
+   "file": "data/india.json"
+  },
+  {
+   "id": "inv-saffire3",
+   "title": "Saffire-III",
+   "text": "id: saffire3 name: Saffire-III psi: PSI-100 doi: 10.60555/040q-4h36 facility: Cygnus cargo vehicle focus: flammability fuel: solid measured: Two SIBAL fabric samples burned at 30 cm/s (concurrent and opposed flow); flight telemetry: radiometers, anemometers, pressure, and the Cygnus cabin smoke detector (obscuration and scatter) rows: 2 samples in the summary table; 11,450-row flight telemetry file",
+   "source": "10.60555/040q-4h36",
+   "url": "https://doi.org/10.60555/040q-4h36",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-saffire2",
+   "title": "Saffire-II",
+   "text": "id: saffire2 name: Saffire-II psi: PSI-99 doi: 10.60555/2chp-m469 facility: Cygnus cargo vehicle focus: flammability fuel: solid measured: Nine samples (silicone, SIBAL fabric, PMMA, Nomex) burned in a 20 cm/s flow duct; burn times and spread rates in the summary table rows: 9 samples",
+   "source": "10.60555/2chp-m469",
+   "url": "https://doi.org/10.60555/2chp-m469",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-saffire1",
+   "title": "Saffire-I",
+   "text": "id: saffire1 name: Saffire-I psi: PSI-98 doi: 10.60555/0t15-1z43 facility: Cygnus cargo vehicle focus: flammability fuel: solid measured: Two large SIBAL fabric samples (40.6 x 94 cm) burned at 20 cm/s, concurrent and opposed flow rows: 2 samples",
+   "source": "10.60555/0t15-1z43",
+   "url": "https://doi.org/10.60555/0t15-1z43",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-bass2",
+   "title": "BASS-II",
+   "text": "id: bass2 name: BASS-II psi: PSI-25 doi: 10.60555/4qc4-de67 facility: Microgravity Science Glovebox, SPICE flow duct focus: flammability fuel: solid measured: Flame spread and extinction over PMMA rods and sheets and SIBAL fabric versus airflow and oxygen; the summary table holds test conditions, not spread rates rows: 129 tests",
+   "source": "10.60555/4qc4-de67",
+   "url": "https://doi.org/10.60555/4qc4-de67",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-bass",
+   "title": "BASS",
+   "text": "id: bass name: BASS psi: PSI-26 doi: 10.60555/58h4-dy80 facility: Microgravity Science Glovebox, SPICE flow duct focus: flammability fuel: solid measured: Burning and suppression of solid samples; burn outcomes and crew notes rows: 122 tests",
+   "source": "10.60555/58h4-dy80",
+   "url": "https://doi.org/10.60555/58h4-dy80",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-same",
+   "title": "SAME",
+   "text": "id: same name: SAME psi: PSI-102 doi: 10.60555/gd4k-8h62 facility: Microgravity Science Glovebox focus: detection fuel: smoke aerosol measured: Smoke particle size from overheated spacecraft materials rows: 8 rows (sample conditions)",
+   "source": "10.60555/gd4k-8h62",
+   "url": "https://doi.org/10.60555/gd4k-8h62",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-samer",
+   "title": "SAME-R",
+   "text": "id: samer name: SAME-R psi: PSI-101 doi: 10.60555/2np7-jv14 facility: Microgravity Science Glovebox focus: detection fuel: smoke aerosol measured: Reflight of SAME: Kapton, silicone, lampwick, Teflon and Pyrell heated in 0 to 8.1 cm/s flow, smoke aged up to 1,923 s; the table holds conditions, not particle sizes rows: 109 tests (conditions only, no particle sizes)",
+   "source": "10.60555/2np7-jv14",
+   "url": "https://doi.org/10.60555/2np7-jv14",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-daft",
+   "title": "DAFT / DAFT-2",
+   "text": "id: daft name: DAFT / DAFT-2 psi: PSI-47 doi: 10.60555/ztgj-d202 facility: ISS cabin focus: detection fuel: dust aerosol measured: Test dust (Arizona Road Dust) counted by a modified P-Trak and a DustTrak in the ISS cabin, to check the counter SAME relied on works in microgravity rows: 2 sessions",
+   "source": "10.60555/ztgj-d202",
+   "url": "https://doi.org/10.60555/ztgj-d202",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-flex",
+   "title": "FLEX",
+   "text": "id: flex name: FLEX psi: PSI-69 doi: 10.60555/mbq8-0451 facility: Combustion Integrated Rack, MDCA focus: suppression fuel: liquid droplet measured: Methanol and heptane droplets: extinction and burning rate versus O2, CO2, He, N2, pressure and droplet size rows: 274 tests",
+   "source": "10.60555/mbq8-0451",
+   "url": "https://doi.org/10.60555/mbq8-0451",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-flex2",
+   "title": "FLEX-2",
+   "text": "id: flex2 name: FLEX-2 psi: PSI-68 doi: 10.60555/byp8-h018 facility: Combustion Integrated Rack, MDCA focus: suppression fuel: liquid droplet measured: Follow-on droplet tests; condition ranges only in the summary table rows: 8 rows",
+   "source": "10.60555/byp8-h018",
+   "url": "https://doi.org/10.60555/byp8-h018",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-cfi",
+   "title": "Cool Flames Investigation (droplets)",
+   "text": "id: cfi name: Cool Flames Investigation (droplets) psi: PSI-39 doi: 10.60555/m6pj-a914 facility: Combustion Integrated Rack, MDCA focus: flammability fuel: liquid droplet measured: Low-temperature 'cool flames' that persist after the visible flame goes out rows: 87 tests",
+   "source": "10.60555/m6pj-a914",
+   "url": "https://doi.org/10.60555/m6pj-a914",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-spice",
+   "title": "SPICE",
+   "text": "id: spice name: SPICE psi: PSI-107 doi: 10.60555/9kbh-e962 facility: Microgravity Science Glovebox, SPICE flow duct focus: detection fuel: gas jet measured: Smoke point: flame length at which a gas flame starts to emit soot, versus fuel, burner size and co-flow rows: 469 tests",
+   "source": "10.60555/9kbh-e962",
+   "url": "https://doi.org/10.60555/9kbh-e962",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-slice",
+   "title": "SLICE",
+   "text": "id: slice name: SLICE psi: PSI-106 doi: 10.60555/pm12-rg61 facility: Microgravity Science Glovebox, SPICE flow duct focus: flammability fuel: gas jet measured: Lifted and attached gas-jet flames in co-flow rows: 12 test days",
+   "source": "10.60555/pm12-rg61",
+   "url": "https://doi.org/10.60555/pm12-rg61",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-efield",
+   "title": "ACME E-FIELD Flames",
+   "text": "id: efield name: ACME E-FIELD Flames psi: PSI-22 doi: 10.60555/se5a-8c73 facility: Combustion Integrated Rack, ACME insert focus: suppression fuel: gas measured: Gas flames under an applied electric field (electric-field effects on laminar diffusion flames) rows: 32 rows",
+   "source": "10.60555/se5a-8c73",
+   "url": "https://doi.org/10.60555/se5a-8c73",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-cfig",
+   "title": "ACME CFI-G",
+   "text": "id: cfig name: ACME CFI-G psi: PSI-159 doi: 10.60555/cyt1-kh64 facility: Combustion Integrated Rack, ACME insert focus: flammability fuel: gas measured: Cool flames with gaseous fuels; oxygen up to 85% in inverse flames rows: 333 tests (154 inverse + 179 normal flames)",
+   "source": "10.60555/cyt1-kh64",
+   "url": "https://doi.org/10.60555/cyt1-kh64",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-flamedesign",
+   "title": "ACME Flame Design",
+   "text": "id: flamedesign name: ACME Flame Design psi: PSI-10 doi: 10.60555/w4zy-bt45 facility: Combustion Integrated Rack, ACME insert focus: flammability fuel: gas measured: Normal and inverse ethylene and propane flames, studied for soot-free flame design rows: 327 tests (120 inverse + 207 normal flames)",
+   "source": "10.60555/w4zy-bt45",
+   "url": "https://doi.org/10.60555/w4zy-bt45",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "inv-bre",
+   "title": "ACME BRE",
+   "text": "id: bre name: ACME BRE psi: PSI-20 doi: 10.60555/vb93-3y72 facility: Combustion Integrated Rack, ACME insert focus: flammability fuel: gas (emulating solids and liquids) measured: Burning Rate Emulator: gas burner that mimics the flammability of condensed fuels rows: 18 test days",
+   "source": "10.60555/vb93-3y72",
+   "url": "https://doi.org/10.60555/vb93-3y72",
+   "file": "data/investigations.json"
+  },
+  {
+   "id": "drift-assumptions",
+   "title": "Smoke drift model assumptions",
+   "text": "2D side view of a 4.0 x 2.0 m cabin section, 2.0 m deep No buoyancy: smoke only moves with the air and by mixing Mixing D = 0.1 m2/s (flight data allows 0.004 to 0.1) and clearance 170 s, both inside the range tuned on Saffire-III flight data Alarm times include a 11 s detector delay tuned on the same record Supply and return positions are illustrative Screening model, not a full fluid-dynamics simulation",
+   "source": "Vulcan Orbit smoke model",
+   "url": "#/predict",
+   "file": "data/drift.json"
+  },
+  {
+   "id": "m6b",
+   "title": "Flame spread predictor (M6b)",
+   "text": "M6b flame spread predictor: spread rate with range, will-it-spread verdict, calibration label and in-domain flag, by material, flow direction, flow speed and O2, at 1 atm, microgravity only. Reduced-order model calibrated to NASA ISS and spacecraft data; not validated fluid dynamics. Microgravity only: no Moon or Mars prediction. Outside the in-domain cells every value is an extrapolation. Nothing here says a material or atmosphere is safe. Held-out error 0.02005 mm/s; range coverage 0.8718.",
+   "source": "Vulcan Orbit M6b",
+   "url": "#/predict",
+   "file": "data/spread_predictor.json"
+  },
+  {
+   "id": "efield",
+   "title": "NASA E-FIELD Flames",
+   "text": "NASA ran 21 test days on the space station in 2018 and ignited 230 methane and ethylene flames with up to 10 kV between the burner and a mesh above it. It measured ion current, how fast the flame responds to the field, soot, and lifted flames. NASA states the research is not aimed at space applications, and putting flames out is not among its stated objectives. Our ion-wind trial is a different question: this panel shows what NASA studied, not that electric fields extinguish fires in orbit.",
+   "source": "NASA PSI-22",
+   "url": "https://doi.org/10.60555/se5a-8c73",
+   "file": "data/efield.json"
+  }
+ ]
+}

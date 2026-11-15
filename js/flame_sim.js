@@ -25,7 +25,12 @@ const BB = [[800, [120, 20, 0]], [1200, [255, 70, 0]], [1600, [255, 115, 10]], [
 function bb(T) { if (T <= BB[0][0]) return BB[0][1]; for (let i = 1; i < BB.length; i++) if (T <= BB[i][0]) { const [a, ca] = BB[i - 1], [b, cb] = BB[i], f = (T - a) / (b - a); return ca.map((x, k) => x + (cb[k] - x) * f); } return BB[BB.length - 1][1]; }
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-export function flameSim(fs) {
+// How many NASA tests ran near these conditions (same window as the gap map: 3 oxygen points, 10 kPa), by fire type.
+export function nearTests(gaps, kind, o2pct, kpa) {
+  if (!gaps || gaps.status === 'missing') return null;
+  return gaps.tested.filter(t => t.kind === kind).reduce((n, t) => n + t.points.filter(([o, p]) => Math.abs(o - o2pct) <= 3 && Math.abs(p - kpa) <= 10).length, 0);
+}
+export function flameSim(fs, gaps) {
   const idx = new Map(fs.flames.map(f => [`${f.fuel}|${f.gravity}|${f.X_O2}|${f.P_kPa}|${f.flow_m_s}`, f]));
   const flows = [...new Set(fs.flames.map(f => f.flow_m_s))].sort((a, b) => a - b);
   const st = { fuel: 'n-heptane', g: '0 g', o2: 0.21, p: 101.3, flow: 0 };
@@ -165,7 +170,11 @@ export function flameSim(fs) {
       val('Tilt from vertical', fmt(f.tilt_deg_from_vertical, 0), '°'),
       val('Stoichiometric mixture fraction', fmt(f.Z_st, 3)));
     const validated = f.gravity_label === 'validated';
-    labelBox.replaceChildren(h('p', { style: 'margin:0' }, validated
+    const kind = f.source.type === 'droplet' ? 'liquid droplets' : 'gas flames', near = nearTests(gaps, kind, st.o2 * 100, st.p);
+    const domain = near == null ? null : near > 0
+      ? h('p', { class: 'dom ok' }, h('b', {}, 'Inside NASA\'s data: '), `${near} NASA ${kind === 'gas flames' ? 'gas-flame' : 'droplet'} test${near > 1 ? 's' : ''} ran near ${Math.round(st.o2 * 100)}% oxygen and ${st.p} kPa.`)
+      : h('p', { class: 'dom out' }, h('b', {}, 'Outside NASA\'s data: '), `no NASA ${kind === 'gas flames' ? 'gas-flame' : 'droplet'} test ran near ${Math.round(st.o2 * 100)}% oxygen and ${st.p} kPa. This view is the model alone, with nothing to check it against.`);
+    labelBox.replaceChildren(domain || '', h('p', { style: 'margin:0' }, validated
       ? h('span', {}, badge('model'), ' NASA has flame data at this gravity, and the checks below compare the model with it (some fail).')
       : h('span', {}, h('span', { class: 'badge', style: 'border-color:var(--warn);color:var(--warn)' }, 'model only'), ' Not validated: NASA has no flame data at this gravity. It lies between the microgravity and Earth results.')));
   }
