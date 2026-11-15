@@ -22,7 +22,7 @@ async function mistCard(tr) {
 
 export default async function render(root, ctx) {
   // card titles first (site map): the explainer and limits need no data
-  const first = h('div', { class: 'grid g2' }, benchExplainCard(), doesNotShowCard());
+  const first = h('div', { class: 'bench-top' }, benchExplainCard(), doesNotShowCard());   // v3: wide explainer + narrow limits
   const pg = page('Bench rig',
     'A camera and a smoke-flow sensor on a bench-top dome, at Earth gravity. The camera\'s reading of the flame is meant to be the first step of the site\'s pipeline, feeding the growth simulation on the Assess page.',
     first);
@@ -30,7 +30,7 @@ export default async function render(root, ctx) {
   const [cv, tr] = await Promise.all([load('cv_latest'), load('response_trials')]);
   pg.append(
     cvLatestCard(cv),
-    h('div', { class: 'grid g3' }, pendingCard('cv'), pendingCard('depth'), pendingCard('flow')),
+    h('div', { class: 'grid bench-checks' }, pendingCard('cv'), pendingCard('depth'), pendingCard('flow')),
     await mistCard(tr),
     plannedCard());
 }

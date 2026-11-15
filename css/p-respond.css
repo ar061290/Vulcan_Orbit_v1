@@ -1,34 +1,40 @@
-/* Page CSS for #/respond (package P4-D). Every rule is scoped under #view[data-page="respond"] (site/REBUILD_PLAN.md §0 rule 9).
-   Class prefix fr- = js/fig_respond.js. The bench mist card uses only shared component classes, so it also works on Bench rig. */
+/* Page CSS for #/respond (v3). Every rule is scoped under #view[data-page="respond"] (site/REBUILD_PLAN.md §0 rule 9).
+   Class prefix fr- = js/fig_respond.js. The bench mist card uses only shared component classes, so it also works on Bench rig.
+   Sizes come only from the scales in css/tokens.css. */
 
-#view[data-page="respond"] .seg-row{margin-bottom:8px}
+#view[data-page="respond"] .seg-row{margin-bottom:var(--s2)}
+/* the two short text figures (bench mist trial, reading the comparison) sit side by side from 320 px each */
+#view[data-page="respond"] .fr-duo{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
 
-/* 1 evidence coverage */
-#view[data-page="respond"] .fr-cov-grid{margin:6px 0 10px;align-items:start}
+/* 1 evidence coverage: the big count on the left, the investigations on the right */
+#view[data-page="respond"] .fr-cov-grid{margin:var(--s2) 0 var(--s4);align-items:start;gap:var(--s5)}
 #view[data-page="respond"] .fr-cov .statbox{min-width:0}
-#view[data-page="respond"] .fr-gap{margin:6px 0 0;font-size:14px;color:var(--ink)}
+#view[data-page="respond"] .fr-cov .stat small{display:block;margin:var(--s2) 0 0}
+#view[data-page="respond"] .fr-gap{margin:var(--s2) 0 0;font-size:var(--t2);color:var(--ink)}
 #view[data-page="respond"] .fr-gap b{color:var(--crit)}
-#view[data-page="respond"] .fr-inv,#view[data-page="respond"] .fr-ours{margin:6px 0 8px;padding-left:18px}
-#view[data-page="respond"] .fr-inv li,#view[data-page="respond"] .fr-ours li{margin:0 0 4px;overflow-wrap:anywhere}
+#view[data-page="respond"] .fr-inv,#view[data-page="respond"] .fr-ours{margin:var(--s2) 0 var(--s3);padding-left:var(--s5)}
+#view[data-page="respond"] .fr-inv li,#view[data-page="respond"] .fr-ours li{margin:0 0 var(--s1);overflow-wrap:anywhere}
 #view[data-page="respond"] .fr-inv small{color:var(--mute)}
 
-/* chart captions and quotes */
-#view[data-page="respond"] .fr-cap{margin-top:6px}
-#view[data-page="respond"] .fr-quote{margin:12px 0;padding:8px 14px;border-left:3px solid var(--accent);background:var(--raise);border-radius:0 var(--r,8px) var(--r,8px) 0}
-#view[data-page="respond"] .fr-quote p{margin:0 0 4px;color:var(--ink)}
-#view[data-page="respond"] .fr-quote footer{font-size:12.5px;color:var(--mute)}
+/* chart captions and quotes: a quiet rule, no filled box */
+#view[data-page="respond"] .fr-cap{margin-top:var(--s2)}
+#view[data-page="respond"] .fr-quote{margin:var(--s4) 0;padding:var(--s1) 0 var(--s1) var(--s4);border-left:2px solid var(--line-2)}
+#view[data-page="respond"] .fr-quote p{margin:0 0 var(--s1);color:var(--ink)}
+#view[data-page="respond"] .fr-quote footer{font-size:var(--t1);color:var(--mute)}
 
 /* FLEX beside the M7 points */
-#view[data-page="respond"] .fr-beside{margin-top:12px}
-#view[data-page="respond"] .fr-beside h3{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-#view[data-page="respond"] .fr-beside table{font-size:13px}
+#view[data-page="respond"] .fr-beside{margin-top:var(--s4)}
+#view[data-page="respond"] .fr-beside h3{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2)}
 #view[data-page="respond"] .fr-beside td{white-space:nowrap}
 #view[data-page="respond"] .fr-beside td:first-child{white-space:normal;min-width:9em}
-#view[data-page="respond"] .card h3 .badge,#view[data-page="respond"] th .badge{margin-left:4px;vertical-align:middle}
+#view[data-page="respond"] .card h3 .badge,#view[data-page="respond"] th .badge{margin-left:var(--s1)}
 
-/* E-FIELD totals */
-#view[data-page="respond"] .fr-stats{margin:10px 0}
+/* E-FIELD totals: big numbers in a row */
+#view[data-page="respond"] .fr-stats{margin:var(--s3) 0 var(--s4);gap:var(--s5)}
 
-@media (max-width:520px){
-  #view[data-page="respond"] .fr-quote{padding:6px 10px}
-}
+/* the response evidence card: the "How many tests" count keeps its unit under the number */
+#view[data-page="respond"] .resp-probe .stat small{display:block;margin:var(--s2) 0 0}
+
+/* E-FIELD experiment table: long column names wrap so the 21 rows stay one line each (no 6-line cells) */
+#view[data-page="respond"] [data-fig="nasa-flames-in-an-electric-field"] th{white-space:normal;vertical-align:bottom;min-width:6em}
+#view[data-page="respond"] [data-fig="nasa-flames-in-an-electric-field"] td{white-space:nowrap}

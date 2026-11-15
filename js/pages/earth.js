@@ -117,7 +117,11 @@ function dataTable(spec, files, used) {
   const heads = spec.columns.map(col => h('span', {}, inline(col.label, files, used)));
   const body = rows.map(row => spec.columns.map(col => show(resolvePath(row, col.path), col) ?? 'n/a'));
   spec.columns.forEach(col => used.push({ ok: true, file: spec.file, path: `${spec.path}[*].${col.path}`, status: d.status, text: `${rows.length} rows` }));
-  return table(heads, body, { caption: spec.caption || null });
+  const out = table(heads, body, { caption: spec.caption || null, cls: 'ea-table' });
+  // v3 layout: a column whose every cell is a number is right-aligned in tabular figures (no value changes)
+  const numCol = spec.columns.map((_, j) => body.every(r => /^[\d.,%\s–-]+$/.test(String(r[j]))));
+  out.querySelectorAll('tr').forEach(tr => [...tr.cells].forEach((c, j) => { if (numCol[j]) c.classList.add('num'); }));
+  return out;
 }
 
 /** The card text: {h} starts a new block (heading + paragraph); a table item gets its own place in the block. */

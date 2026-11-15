@@ -153,15 +153,17 @@ export default async function render(root, ctx = {}) {
       h('span', { class: 'xp-caret', 'aria-hidden': 'true' }), h('b', {}, r.name), h('span', { class: 'sr' }, ': show all attributes'));
     const cbtn = h('button', { type: 'button', class: 'chip xp-pick', 'aria-pressed': picked, 'data-id': r.id },
       'Compare', h('span', { class: 'sr' }, ` ${r.name}`));
+    // v3: data-label lets the phone layout stack each row with its column names (css/p-explorer.css)
     const tr = h('tr', { class: picked ? 'sel' : null, 'data-id': r.id },
-      h('td', {}, haveW
+      h('td', { class: 'xp-rel', 'data-label': COLS[0] }, haveW
         ? [h('span', { class: 'xp-bar', 'aria-hidden': 'true', style: `width:${Math.max(4, (r.score / r.max) * BAR_PX)}px` }), h('small', {}, String(r.score))]
         : h('small', {}, 'n/a')),
-      h('td', {}, xbtn, h('br'), h('small', {}, r.facility)),
-      h('td', {}, r.focus), h('td', {}, r.fuel), h('td', { class: 'xp-meas' }, r.measured),
-      h('td', { class: 'num' }, r.rows || 'unverified'),
-      h('td', {}, r.psi ? ext(PSI_URL(r.psi), r.psi) : 'unverified'),
-      h('td', {}, cbtn));
+      h('td', { class: 'xp-inv', 'data-label': COLS[1] }, xbtn, h('br'), h('small', {}, r.facility)),
+      h('td', { class: 'xp-focus', 'data-label': COLS[2] }, r.focus), h('td', { class: 'xp-fuel', 'data-label': COLS[3] }, r.fuel),
+      h('td', { class: 'xp-meas', 'data-label': COLS[4] }, r.measured),
+      h('td', { class: 'xp-rows', 'data-label': COLS[5] }, r.rows || 'unverified'),
+      h('td', { class: 'xp-psi', 'data-label': COLS[6] }, r.psi ? ext(PSI_URL(r.psi), r.psi) : 'unverified'),
+      h('td', { class: 'xp-cmpcell', 'data-label': COLS[7] }, cbtn));
     const det = detailRow(r, did);
     xbtn.addEventListener('click', () => {
       const open = !state.open.has(r.id);
@@ -176,7 +178,7 @@ export default async function render(root, ctx = {}) {
     const rows = items.filter(matches).map(i => ({ ...i, score: score(i) })).sort((a, b) => b.score - a.score);
     const max = Math.max(1, ...rows.map(r => r.score));
     rows.forEach(r => { r.max = max; });
-    const head = h('thead', {}, h('tr', {}, COLS.map(c => h('th', { scope: 'col' }, c))));
+    const head = h('thead', {}, h('tr', {}, COLS.map((c, i) => h('th', { scope: 'col', class: i === 5 ? 'xp-rows' : null }, c))));
     let bodies;
     if (!rows.length) {
       bodies = [h('tbody', {}, h('tr', {}, h('td', { colspan: COLS.length }, `No experiments match "${state.q.trim()}"${state.focus !== 'all' ? ` with focus ${state.focus}` : ''}.`)))];

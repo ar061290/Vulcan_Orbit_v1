@@ -104,18 +104,28 @@ async function main() {
     const first = await page.evaluate(DESCRIBE);
     step('First Tab lands on the skip link', first && /\bskip\b/.test(first.sel), first ? `${first.sel} "${first.name}"` : 'nothing focused');
 
-    // More menu
-    let r = await tabTo(page, e => /more-btn/.test(e.sel), { max: 40 });
-    if (r.ok) {
-      await page.keyboard.press('Enter');
-      const open = await page.evaluate(() => document.querySelector('.more-btn')?.getAttribute('aria-expanded'));
-      await page.keyboard.press('Tab');
-      const inList = await page.evaluate(DESCRIBE);
-      await page.keyboard.press('Escape');
-      const after = await page.evaluate(() => ({ exp: document.querySelector('.more-btn')?.getAttribute('aria-expanded'), back: document.activeElement?.classList.contains('more-btn') }));
-      step('More menu: Enter opens it (aria-expanded), Tab enters it, Escape closes it and returns focus', open === 'true' && inList?.dataId && after.exp === 'false' && after.back,
-        `${r.presses} Tabs; expanded=${open}; next stop ${inList?.sel} "${inList?.name}"; after Escape expanded=${after.exp}, focus back=${after.back}`);
-    } else step('More menu reachable by Tab', false, `not reached in ${r.presses} Tabs`);
+    // v3: the sidebar replaces the More menu. On Home (story mode) the sidebar is hidden, so check it on an app page,
+    // and check the phone drawer: Menu opens it (aria-expanded), focus moves in, Escape closes it and returns focus.
+    await page.goto(`${base}index.html#/detect`, { waitUntil: 'load' }); await settle(page, 'detect');
+    let r = await tabTo(page, e => e.dataId === 'design', { max: 40 });
+    step('Sidebar: every group is reachable by Tab (reached "Design kit", the last link)', r.ok, `${r.presses} Tabs`);
+    {
+      const ph = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const pp = await ph.newPage();
+      await pp.goto(`${base}index.html#/detect`, { waitUntil: 'load' }); await settle(pp, 'detect');
+      const m = await tabTo(pp, e => /menu/.test(e.sel), { max: 10 });
+      let ok = false, info = `Menu not reached in ${m.presses} Tabs`;
+      if (m.ok) {
+        await pp.keyboard.press('Enter'); await pp.waitForTimeout(300);
+        const o = await pp.evaluate(() => ({ exp: document.querySelector('.menu')?.getAttribute('aria-expanded'), inNav: !!document.activeElement?.closest('#nav'), vis: getComputedStyle(document.getElementById('nav')).visibility }));
+        await pp.keyboard.press('Escape'); await pp.waitForTimeout(300);
+        const c = await pp.evaluate(() => ({ exp: document.querySelector('.menu')?.getAttribute('aria-expanded'), back: document.activeElement?.classList.contains('menu'), vis: getComputedStyle(document.getElementById('nav')).visibility }));
+        ok = o.exp === 'true' && o.inNav && o.vis === 'visible' && c.exp === 'false' && c.back && c.vis === 'hidden';
+        info = `open ${JSON.stringify(o)}; after Escape ${JSON.stringify(c)}`;
+      }
+      step('Phone drawer (390 px): Menu opens it, focus moves in, Escape closes it and returns focus', ok, info);
+      await ph.close();
+    }
 
     // Dock: from the top again, Tab forwards to the toggle (it sits after the footer)
     await page.reload({ waitUntil: 'load' }); await settle(page, 'overview');
@@ -142,8 +152,8 @@ async function main() {
       step('Dock: Escape closes it and returns focus to the toggle', esc.hidden && esc.back, JSON.stringify(esc));
     }
 
-    // Menu link to Predict it, then a fold
-    await page.reload({ waitUntil: 'load' }); await settle(page, 'overview');
+    // Sidebar link to Predict it, then a fold
+    await page.goto(`${base}index.html#/detect`, { waitUntil: 'load' }); await settle(page, 'detect');
     r = await tabTo(page, e => e.dataId === 'predict', { max: 40 });
     if (r.ok) { await page.keyboard.press('Enter'); await settle(page, 'predict'); }
     step('Menu: Tab to "Predict it" and Enter opens the page', r.ok && (await page.evaluate(() => document.getElementById('view').dataset.page)) === 'predict', `${r.presses} Tabs`);

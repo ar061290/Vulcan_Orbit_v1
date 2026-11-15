@@ -1,26 +1,57 @@
-/* Page CSS for #/ask. Every rule is scoped under #view[data-page="ask"] (site/REBUILD_PLAN.md §0 rule 9).
-   Ported from main's css/app.css (.q, .ans, .src) and css/freefall.css (.ai-out, .ai-src, .ai-head). */
+/* Page CSS for #/ask (v3). Every rule is scoped under #view[data-page="ask"] (site/REBUILD_PLAN.md §0 rule 9).
+   A calm question-and-answer tool: the question box is the one prominent control (the only accent on the page),
+   saved questions are a quiet list, and the answer sits beside them (sticky on wide screens) with its sources.
+   Sizes and spaces only from css/tokens.css scales. */
 #view[data-page="ask"] .muted{color:var(--mute)}
-#view[data-page="ask"] .ask-box{display:grid;gap:6px;margin-bottom:4px}
-#view[data-page="ask"] .ask-box > label{font-weight:700;color:var(--ink)}
-#view[data-page="ask"] .ask-box .row{flex-wrap:nowrap}
-#view[data-page="ask"] .ask-box input[type=search]{flex:1 1 auto;min-width:0;width:100%}
-#view[data-page="ask"] .ask-box .chip{flex:0 0 auto}
-#view[data-page="ask"] .qlist{display:grid;gap:6px}
-#view[data-page="ask"] .q{display:block;width:100%;text-align:left;background:var(--raise);color:var(--ink);border:1.5px solid var(--grid);border-radius:8px;padding:9px 11px;font:inherit;font-size:.9rem;line-height:1.4;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
-#view[data-page="ask"] .q:hover{border-color:var(--ink2)}
-#view[data-page="ask"] .q[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
-#view[data-page="ask"] .answer > p{margin:10px 0 0}
-#view[data-page="ask"] .answer > .matched{margin-top:8px}
-#view[data-page="ask"] .ans{white-space:pre-wrap;color:var(--ink);overflow-wrap:anywhere}
-#view[data-page="ask"] .src{font-size:.82rem;color:var(--mute);margin-top:10px;overflow-wrap:anywhere}
-#view[data-page="ask"] .src a{color:var(--c1)}
-#view[data-page="ask"] .ai-out:not(:empty){margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
-#view[data-page="ask"] .ai-src{font-size:.85rem;padding-left:20px;overflow-wrap:anywhere}
-#view[data-page="ask"] .ai-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-#view[data-page="ask"] .ask-stats{margin-bottom:10px}
-#view[data-page="ask"] .ask-foot{font-size:.85rem;color:var(--ink2);margin:10px 0 0}
-#view[data-page="ask"] .honest{margin:0;padding-left:18px;color:var(--ink2)}
-#view[data-page="ask"] .honest li{margin-bottom:6px}
-#view[data-page="ask"] .page > .card{margin-top:14px}
-@media (max-width:420px){#view[data-page="ask"] .ask-box .row{flex-wrap:wrap}}
+
+/* two columns: questions (narrower) | answer (wider, sticky) */
+#view[data-page="ask"] .ask-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:var(--s5);align-items:start}
+#view[data-page="ask"] .ask-grid > .card:last-child{position:sticky;top:calc(var(--bar-h) + var(--s4))}
+
+/* the question box */
+#view[data-page="ask"] .ask-box{display:grid;gap:var(--s2);margin:0 0 var(--s5)}
+#view[data-page="ask"] .ask-box > label{font:600 var(--t1) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="ask"] .ask-row{flex-wrap:nowrap;gap:var(--s2);margin:0}
+#view[data-page="ask"] .ask-box input[type=search]{flex:1 1 auto;min-width:0;width:100%;min-height:48px;padding:var(--s3) var(--s4);font-size:var(--t3);background:var(--bg);border-color:var(--line-2)}
+#view[data-page="ask"] .ask-box input[type=search]:focus-visible{border-color:var(--oxy)}
+#view[data-page="ask"] .ask-go{flex:0 0 auto;min-height:48px;padding:0 var(--s5)}
+
+/* saved questions: a quiet list, the chosen one marked by the accent rule */
+#view[data-page="ask"] .qlist-h{font:600 var(--t1) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:0 0 var(--s2)}
+#view[data-page="ask"] .qlist{display:grid;gap:0;border-top:1px solid var(--line)}
+#view[data-page="ask"] .q{display:block;width:100%;text-align:left;background:transparent;color:var(--ink-2);border:0;border-bottom:1px solid var(--line);border-left:2px solid transparent;border-radius:0;
+  padding:var(--s3) var(--s3);font:inherit;font-size:var(--t2);line-height:1.45;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+#view[data-page="ask"] .q:hover{background:var(--panel-2);color:var(--ink)}
+#view[data-page="ask"] .q[aria-pressed=true]{color:var(--ink);background:var(--panel-2);border-left-color:var(--accent);font-weight:700}
+#view[data-page="ask"] .q:focus-visible{outline-offset:-2px}
+
+/* the answer */
+#view[data-page="ask"] .answer{min-height:var(--s9)}
+#view[data-page="ask"] .answer > .badge{margin-bottom:var(--s3)}
+#view[data-page="ask"] .answer > p{margin:var(--s3) 0 0}
+#view[data-page="ask"] .answer > .matched{margin-top:var(--s2)}
+#view[data-page="ask"] .ans{white-space:pre-wrap;color:var(--ink);font-size:var(--t3);line-height:1.65;max-width:68ch;overflow-wrap:anywhere}
+#view[data-page="ask"] .src{font-size:var(--t2);color:var(--ink-2);margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--line);overflow-wrap:anywhere}
+#view[data-page="ask"] .src a{color:var(--oxy)}
+#view[data-page="ask"] .ai-out:not(:empty){margin-top:var(--s5);border-top:1px solid var(--line);padding-top:var(--s4)}
+#view[data-page="ask"] .ai-src{font-size:var(--t2);padding-left:var(--s5);overflow-wrap:anywhere}
+#view[data-page="ask"] .ai-head{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+
+/* scorecard and the honesty list */
+#view[data-page="ask"] .ask-stats{margin-bottom:var(--s4)}
+#view[data-page="ask"] .ask-stats .statbox{padding-top:var(--s3)}
+#view[data-page="ask"] .ask-foot{font-size:var(--t2);color:var(--ink-2);margin:var(--s3) 0 0}
+#view[data-page="ask"] .honest{margin:0;padding-left:var(--s5);color:var(--ink-2);max-width:var(--measure)}
+#view[data-page="ask"] .honest li{margin-bottom:var(--s2)}
+#view[data-page="ask"] td code{white-space:nowrap}
+
+@media (max-width:1279px){
+  #view[data-page="ask"] .ask-grid{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="ask"] .ask-grid > .card:last-child{position:static}
+}
+@media (max-width:420px){
+  #view[data-page="ask"] .ask-row{flex-wrap:wrap}
+  #view[data-page="ask"] .ask-go{width:100%}
+  #view[data-page="ask"] .ask-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3)}
+  #view[data-page="ask"] .ask-stats .stat{font-size:var(--t4)}
+}

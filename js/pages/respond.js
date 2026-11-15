@@ -38,9 +38,11 @@ export default async function render(root, ctx) {
   root.append(page('Put it out', lead,
     coverageCard(gaps, inv),
     await responseBlock(ctx, examples),
-    h('div', { class: 'grid g2' }, extinctionCard(m7), coolFlameCard(m7)),
-    h('div', { class: 'grid g2' }, flexCard(fx, m7), efieldCard(ef)),
-    h('div', { class: 'grid g2' }, mistTrialCard(tr), readingCard())));
+    // v3 layout: chart and table figures go in the shared figure grid (side by side only when each gets >= 520 px);
+    // the two short text figures stay side by side from 320 px.
+    h('div', { class: 'figs' }, extinctionCard(m7), coolFlameCard(m7)),
+    h('div', { class: 'figs' }, flexCard(fx, m7), efieldCard(ef)),
+    h('div', { class: 'figs fr-duo' }, mistTrialCard(tr), readingCard())));
 }
 
 /** "The short answer": main's summaries.js sentences; line 3 ends "Bench mist trial: not completed." (C6). */

@@ -1,36 +1,91 @@
-/* Page CSS for #/explorer. Every rule is scoped under #view[data-page="explorer"] (site/REBUILD_PLAN.md §0 rule 9). Package P5-B. */
-#view[data-page="explorer"] .xp-controls{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;margin:0 0 14px}
+/* Page CSS for #/explorer (v3). Every rule is scoped under #view[data-page="explorer"] (site/REBUILD_PLAN.md §0 rule 9).
+   v3: the page reads as a dense data browser: a toolbar of filters over one full-width table; on phones each row stacks
+   with its column names (data-label, set in js/pages/explorer.js). Sizes only from the token scales. */
+
+/* one figure: no side rail on wide screens, the table gets the full width; "On this page" stays in the flow */
+@media (min-width:1280px){
+  #view[data-page="explorer"] .page:has(>.toc){grid-template-columns:minmax(0,1fr)}
+  #view[data-page="explorer"] .page>.toc{grid-column:1;grid-row:auto;position:static;border:1px solid var(--line);border-radius:var(--r2);padding:var(--s3) var(--s4);margin:0 0 var(--s5);max-height:none;max-width:420px}
+}
+
+/* the figure as an app panel: header, toolbar, full-width table, notes */
+#view[data-page="explorer"] .card[data-title="Find and rank"]{padding:var(--s5) 0 var(--s4)}
+#view[data-page="explorer"] .card[data-title="Find and rank"]>*{margin-left:var(--s5);margin-right:var(--s5)}
+#view[data-page="explorer"] .card[data-title="Find and rank"]>.xp-scroll{margin-left:0;margin-right:0}
+#view[data-page="explorer"] .card[data-title="Find and rank"]::before{margin-left:var(--s5)}
+
+/* toolbar */
+#view[data-page="explorer"] .xp-controls{display:flex;flex-wrap:wrap;gap:var(--s4) var(--s5);align-items:flex-end;margin-top:var(--s2);margin-bottom:0;padding:var(--s4) 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 #view[data-page="explorer"] .xp-controls .seg-row{margin:0;min-width:0}
-#view[data-page="explorer"] .xp-field{display:grid;gap:6px;min-width:0;max-width:100%}
-#view[data-page="explorer"] .xp-field>label,#view[data-page="explorer"] .xp-field>.seg-label{font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
-#view[data-page="explorer"] .xp-field>small{font-size:12.5px;color:var(--mute)}
-#view[data-page="explorer"] .xp-field input[type=search]{width:min(320px,100%)}
-#view[data-page="explorer"] details.xp-rule{margin:0 0 14px;font-size:13.5px;color:var(--ink2)}
-#view[data-page="explorer"] details.xp-rule>summary{cursor:pointer}
-#view[data-page="explorer"] details.xp-rule[open]{border:1px solid var(--line);border-radius:10px;background:var(--raise);padding:8px 14px 10px}
-#view[data-page="explorer"] details.xp-rule p{margin:8px 0 6px}
-#view[data-page="explorer"] details.xp-rule ul{margin:0;padding-left:20px}
+#view[data-page="explorer"] .xp-field{display:grid;gap:var(--s1);min-width:0;max-width:100%}
+#view[data-page="explorer"] .xp-field>label,#view[data-page="explorer"] .xp-field>.seg-label{font:600 var(--t1) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="explorer"] .xp-field>small{font-size:var(--t1);color:var(--mute)}
+#view[data-page="explorer"] .xp-field input[type=search]{width:min(340px,100%);min-height:36px}
+#view[data-page="explorer"] .xp-field select{min-height:36px}
+#view[data-page="explorer"] details.xp-rule{margin-top:0;margin-bottom:0;padding:var(--s2) 0;border-top:0;border-bottom:1px solid var(--line);font-size:var(--t2);color:var(--ink-2)}
+#view[data-page="explorer"] details.xp-rule[open]{padding-bottom:var(--s3)}
+#view[data-page="explorer"] details.xp-rule p{margin:var(--s2) 0 var(--s1)}
+#view[data-page="explorer"] details.xp-rule ul{margin:0;padding-left:var(--s5)}
+
+/* the table */
 /* .sr text inside the tables is position:absolute; without a positioned .scroll it escapes the scroll box and widens the page at 320 px */
 #view[data-page="explorer"] .scroll{position:relative}
-#view[data-page="explorer"] .xp-table td{font-size:13.5px}
+#view[data-page="explorer"] .xp-table caption{padding:var(--s3) var(--s5) var(--s2);font:500 var(--t1) var(--mono)}
+#view[data-page="explorer"] .xp-table th:first-child,#view[data-page="explorer"] .xp-table td:first-child{padding-left:var(--s5)}
+#view[data-page="explorer"] .xp-table th:last-child,#view[data-page="explorer"] .xp-table td:last-child{padding-right:var(--s5)}
+#view[data-page="explorer"] .xp-table td{font-size:var(--t2);padding-top:var(--s3);padding-bottom:var(--s3)}
+#view[data-page="explorer"] .xp-table th.xp-rows{text-align:right}
+#view[data-page="explorer"] .xp-rel{width:96px;white-space:nowrap}
+#view[data-page="explorer"] .xp-rel small{font:600 var(--t1) var(--mono);color:var(--ink-2)}
+#view[data-page="explorer"] .xp-inv{min-width:14em}
+#view[data-page="explorer"] .xp-inv small{font-size:var(--t1)}
 #view[data-page="explorer"] .xp-meas{min-width:16em;max-width:34em}
-#view[data-page="explorer"] .xp-bar{display:block;height:6px;border-radius:3px;background:var(--c1);margin:6px 0 2px}
-#view[data-page="explorer"] button.xp-x{display:inline-flex;align-items:baseline;gap:6px;background:none;border:0;padding:2px 0;margin:0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;border-radius:4px}
+#view[data-page="explorer"] td.xp-rows{min-width:9em;max-width:13em;text-align:right;font-size:var(--t1);color:var(--ink-2)}
+#view[data-page="explorer"] .xp-psi{white-space:nowrap;font:500 var(--t1) var(--mono)}
+#view[data-page="explorer"] .xp-bar{display:block;height:4px;background:var(--c1);margin:var(--s2) 0 var(--s1)}
+#view[data-page="explorer"] button.xp-x{display:inline-flex;align-items:baseline;gap:6px;background:none;border:0;padding:2px 0;margin:0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;border-radius:var(--r)}
+#view[data-page="explorer"] button.xp-x b{font-weight:700}
 #view[data-page="explorer"] button.xp-x:hover b{text-decoration:underline}
-#view[data-page="explorer"] button.xp-x:focus-visible{outline:3px solid var(--oxy);outline-offset:2px}
-#view[data-page="explorer"] .xp-caret::before{content:"+";display:inline-block;width:1em;font:700 14px/1 var(--mono);color:var(--oxy)}
+#view[data-page="explorer"] button.xp-x:focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+#view[data-page="explorer"] .xp-caret::before{content:"+";display:inline-block;width:1em;font:600 var(--t2)/1 var(--mono);color:var(--accent-ink)}
 #view[data-page="explorer"] button.xp-x[aria-expanded=true] .xp-caret::before{content:"−"}
-#view[data-page="explorer"] button.xp-pick{padding:5px 11px;font-size:12.5px;white-space:nowrap}
+#view[data-page="explorer"] button.xp-pick{padding:var(--s1) var(--s3);font-size:var(--t1);white-space:nowrap}
+#view[data-page="explorer"] tr.sel>td{background:var(--oxy-soft)}
+#view[data-page="explorer"] tr.sel>td:first-child{box-shadow:inset 2px 0 0 var(--oxy)}
 #view[data-page="explorer"] tr.xp-detail[hidden]{display:none}
-#view[data-page="explorer"] tr.xp-detail>td{background:var(--raise);padding:12px 14px 14px}
+#view[data-page="explorer"] tr.xp-detail>td{background:var(--panel-2);padding:var(--s4) var(--s5)}
 #view[data-page="explorer"] .xp-kv{max-width:var(--measure)}
 #view[data-page="explorer"] .xp-kv dd{overflow-wrap:anywhere}
-#view[data-page="explorer"] .xp-note{margin:8px 0 0;color:var(--mute)}
-#view[data-page="explorer"] tr.xp-ghead>th{padding-top:18px;color:var(--ink);font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;border-bottom:1.5px solid var(--ink2);white-space:normal}
-#view[data-page="explorer"] .xp-cmp{margin:14px 0 0}
+#view[data-page="explorer"] .xp-note{margin:var(--s2) 0 0;color:var(--mute)}
+#view[data-page="explorer"] tr.xp-ghead>th{padding-top:var(--s5);color:var(--ink);font:600 var(--t1) var(--mono);letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:normal}
+#view[data-page="explorer"] .xp-cmp{margin-top:var(--s4)}
 #view[data-page="explorer"] .xp-cmp-table tbody th{white-space:nowrap;vertical-align:top}
-#view[data-page="explorer"] .xp-score-rule{margin:14px 0 0;display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
-@media (max-width:680px){
+#view[data-page="explorer"] .xp-score-rule{margin-top:var(--s4);display:flex;flex-wrap:wrap;gap:var(--s2);align-items:baseline}
+#view[data-page="explorer"] .xp-score-rule small{font-size:var(--t1)}
+
+/* phones: each row stacks, labelled with its column name; nothing scrolls sideways */
+@media (max-width:760px){
+  #view[data-page="explorer"] .card[data-title="Find and rank"]>*{margin-left:var(--s4);margin-right:var(--s4)}
+  #view[data-page="explorer"] .card[data-title="Find and rank"]::before{margin-left:var(--s4)}
   #view[data-page="explorer"] .xp-controls{display:grid;align-items:stretch}
   #view[data-page="explorer"] .xp-field input[type=search],#view[data-page="explorer"] .xp-field select{width:100%}
+  #view[data-page="explorer"] .xp-table,#view[data-page="explorer"] .xp-table tbody{display:block}
+  #view[data-page="explorer"] .xp-table caption{display:block;padding:var(--s3) var(--s4) var(--s2)}
+  #view[data-page="explorer"] .xp-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  #view[data-page="explorer"] .xp-table tr[data-id]{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s2) var(--s4);padding:var(--s4);border-bottom:1px solid var(--line)}
+  #view[data-page="explorer"] .xp-table tr.sel{background:var(--oxy-soft);box-shadow:inset 2px 0 0 var(--oxy)}
+  #view[data-page="explorer"] .xp-table tr.sel>td{background:none;box-shadow:none}
+  #view[data-page="explorer"] .xp-table tr[data-id]>td{display:block;border:0;padding:0;min-width:0;max-width:none;width:auto;text-align:left}
+  #view[data-page="explorer"] .xp-table tr[data-id]>td::before{content:attr(data-label);display:block;font:600 var(--t1) var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+  #view[data-page="explorer"] .xp-table td.xp-inv{grid-column:1;grid-row:1}
+  #view[data-page="explorer"] .xp-table tr[data-id]>td.xp-rel{grid-column:2;grid-row:1;text-align:right}
+  #view[data-page="explorer"] .xp-table td.xp-rel .xp-bar{margin-left:auto}
+  #view[data-page="explorer"] .xp-table td.xp-inv::before,#view[data-page="explorer"] .xp-table td.xp-cmpcell::before{display:none}
+  #view[data-page="explorer"] .xp-table td.xp-meas,#view[data-page="explorer"] .xp-table td.xp-rows{grid-column:1 / -1}
+  #view[data-page="explorer"] .xp-table tr[data-id]>td.xp-cmpcell{text-align:right;align-self:end}
+  #view[data-page="explorer"] .xp-table tr.xp-detail,#view[data-page="explorer"] .xp-table tr.xp-ghead{display:block}
+  #view[data-page="explorer"] .xp-table tr.xp-detail[hidden]{display:none}
+  #view[data-page="explorer"] .xp-table tr.xp-detail>td{display:block;padding:var(--s3) var(--s4)}
+  #view[data-page="explorer"] .xp-table tr.xp-ghead>th{display:block;padding:var(--s4) var(--s4) var(--s2)}
+  #view[data-page="explorer"] .xp-kv{grid-template-columns:1fr}
 }

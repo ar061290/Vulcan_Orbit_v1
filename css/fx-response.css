@@ -1,45 +1,46 @@
-/* fx-response: the "Response evidence for this fire" card (js/fig_response.js, package P3-C).
-   Unscoped .resp- classes (REBUILD_PLAN §0 rule 9): the card can be mounted on more than one page.
-   Colours come from the tokens in css/tokens.css, so Day and Night both work. Nothing here animates. */
-.resp-card .resp-disclaimer{margin:0 0 12px;padding:8px 12px;border-left:3px solid var(--accent);background:var(--accent-soft);color:var(--ink);border-radius:0 8px 8px 0;max-width:var(--measure)}
+/* fx-response: the "Response evidence for this fire" card (js/fig_response.js, package P3-C; restyled for v3).
+   Unscoped .resp- classes (REBUILD_PLAN §0 rule 9): the card can be mounted on more than one page (today only #/respond).
+   v3: no boxes inside the figure; evidence lines are separated by 1 px rules. Sizes only from css/tokens.css scales.
+   Colours come from the tokens, so Day and Night both work. Nothing here animates. */
+.resp-card .resp-disclaimer{margin:0 0 var(--s4);padding:var(--s1) 0 var(--s1) var(--s3);border-left:2px solid var(--accent);color:var(--ink);max-width:var(--measure)}
 .resp-chipslot:empty{display:none}
-.resp-chipslot{margin:0 0 10px}
+.resp-chipslot{margin:0 0 var(--s3)}
 .resp-chipslot .seg-row{flex-wrap:wrap}
 .resp-chipslot .seg{flex-wrap:wrap}
 .resp-chipslot .seg button{white-space:normal;text-align:left;max-width:100%}
-.resp-body{display:grid;gap:14px;min-width:0}
+.resp-body{display:grid;gap:0;min-width:0}
 .resp-body[aria-busy=true]>*:not(.resp-wait){opacity:.6}
-.resp-wait{color:var(--mute);font-size:.92rem}
-.resp-fire{margin:0;font-size:.98rem;color:var(--ink2);max-width:var(--measure)}
+.resp-wait{color:var(--mute);font-size:var(--t2)}
+.resp-fire{margin:0 0 var(--s4);font-size:var(--t3);color:var(--ink-2);max-width:var(--measure)}
 .resp-preset{color:var(--mute)}
-.resp-group{margin:6px 0 -4px;font:700 11.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
-.resp-line{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--surface);min-width:0}
-.resp-line-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 8px;font:700 1.02rem/1.3 var(--display);overflow-wrap:anywhere}
-.resp-line p{margin:6px 0;max-width:var(--measure)}
-.resp-line .empty{margin-top:8px}
+.resp-group{margin:var(--s5) 0 0;padding-bottom:var(--s2);font:600 var(--t1) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);border-bottom:1px solid var(--line-2)}
+.resp-line{border:0;border-bottom:1px solid var(--line);padding:var(--s4) 0;background:none;min-width:0}
+.resp-line-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--s2) var(--s3);margin:0 0 var(--s2);font:650 var(--t3)/1.3 var(--display);overflow-wrap:anywhere}
+.resp-line p{margin:var(--s2) 0;max-width:var(--measure)}
+.resp-line .empty{margin-top:var(--s2)}
 /* gap flag: a word and a shape, never colour alone (spec D5.12) */
-.resp-flag{display:flex;gap:6px;align-items:baseline;font-size:.9rem;color:var(--ink2);margin:0 0 8px}
+.resp-flag{display:flex;gap:6px;align-items:baseline;font-size:var(--t2);color:var(--ink-2);margin:0 0 var(--s2)}
 .resp-flag-mark{flex:none;font-size:.8em;line-height:1}
 .resp-flag.gap .resp-flag-mark,.resp-flag.gap b{color:var(--crit)}
 .resp-flag.ok .resp-flag-mark,.resp-flag.ok b{color:var(--good)}
-.resp-list{margin:6px 0;padding-left:20px;display:grid;gap:4px}
+.resp-list{margin:var(--s2) 0;padding-left:var(--s5);display:grid;gap:var(--s1)}
 .resp-list li{max-width:var(--measure)}
 .resp-list small{color:var(--mute)}
-.resp-quote{font-size:.92rem;color:var(--ink2)}
+.resp-quote{font-size:var(--t2);color:var(--ink-2)}
 .resp-quote q{font-style:italic}
 .resp-quote cite{font-style:normal;font-family:var(--mono);font-size:.85em}
-.resp-note{font-size:.88rem;color:var(--mute)}
-.resp-more{font-size:.9rem}
-.resp-table{margin:8px 0}
+.resp-note{font-size:var(--t2);color:var(--mute)}
+.resp-more{font-size:var(--t2)}
+.resp-table{margin:var(--s2) 0}
 .resp-table caption{text-align:left}
 .resp-table td .badge{vertical-align:middle}
 .resp-verdict .resp-vlabel{font-family:var(--mono);font-weight:700}
-.resp-probe{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:12px;align-items:start}
+.resp-probe{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:var(--s5);align-items:start}
 @media (max-width:560px){.resp-probe{grid-template-columns:minmax(0,1fr)}}
-.resp-team{display:inline-block;font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border:1.5px dashed var(--axis);border-radius:6px;color:var(--ink2)}
-.resp-level-row{display:flex;align-items:baseline;gap:8px}
-.resp-level{font:700 1.4rem/1.1 var(--mono);letter-spacing:-.01em;color:var(--ink)}
+.resp-team{display:inline-block;font:600 var(--t1) var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:var(--s1) var(--s2);border:1px dashed var(--line-2);border-radius:var(--r);color:var(--ink-2)}
+.resp-level-row{display:flex;align-items:baseline;gap:var(--s3)}
+.resp-level{font:600 var(--t5)/1 var(--mono);letter-spacing:-.02em;color:var(--ink)}
 .resp-level[data-level=High]{color:var(--crit)}
 .resp-level[data-level=Elevated]{color:var(--warn)}
 .resp-level[data-level=Low]{color:var(--good)}
-@media (max-width:420px){.resp-line{padding:12px 12px}.resp-card .resp-disclaimer{padding:8px 10px}}
+@media (max-width:680px){.resp-level{font-size:var(--t4)}}

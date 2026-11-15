@@ -1,19 +1,68 @@
-/* Page CSS for #/design (the Design kit). Every rule is scoped under #view[data-page="design"]. */
-#view[data-page="design"] .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:0 0 14px}
-#view[data-page="design"] .sw{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
-#view[data-page="design"] .sw i{display:block;height:56px;border-bottom:1px solid var(--line)}
-#view[data-page="design"] .sw div{padding:8px 10px;font:12px/1.45 var(--mono);color:var(--ink2);overflow-wrap:anywhere}
-#view[data-page="design"] .sw b{font-family:var(--font);color:var(--ink);font-size:13.5px}
-#view[data-page="design"] .dk-theme{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin:0 0 16px}
-#view[data-page="design"] .dk-theme h3{margin:0 0 12px;font-size:1.05rem}
-#view[data-page="design"] .dk-chip{display:inline-flex;align-items:center;gap:8px}
-#view[data-page="design"] .dk-chip i{display:inline-block;width:16px;height:16px;border-radius:4px}
-#view[data-page="design"] .typescale>*{margin:0 0 10px;display:block}
-#view[data-page="design"] .dk-display{font:800 clamp(34px,5vw,56px)/.95 var(--display);letter-spacing:-.05em;color:var(--ink);overflow-wrap:anywhere}
-#view[data-page="design"] .dk-body{font:400 20px/1.4 var(--font);color:var(--ink);margin-top:14px}
-#view[data-page="design"] .dk-mono{font:600 30px/1.1 var(--mono);color:var(--ink);margin-top:14px}
-#view[data-page="design"] .dk-caslon{font:400 clamp(28px,4vw,40px)/1.1 var(--caslon);color:var(--ink);margin-top:14px}
-#view[data-page="design"] .dk-elite{font:400 22px/1.2 var(--elite);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin-top:14px}
-#view[data-page="design"] .dk-stamps{gap:8px}
-#view[data-page="design"] .rules li{margin-bottom:8px;color:var(--ink2)}
-@media (max-width:680px){#view[data-page="design"] .swatches{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}}
+/* Page CSS for #/design (the Design kit, v3 "Ember on ink"). Every rule is scoped under #view[data-page="design"].
+   Sizes come only from the token scales. */
+#view[data-page="design"] .dk-intro .card p{font-size:var(--t2);margin:0}
+#view[data-page="design"] .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;margin:0 0 var(--s4);background:var(--line);border:1px solid var(--line)}
+#view[data-page="design"] .sw{background:var(--panel)}
+#view[data-page="design"] .sw i{display:block;height:var(--s7);border-bottom:1px solid var(--line)}
+#view[data-page="design"] .sw div{padding:var(--s2) var(--s3);font:var(--t1)/1.5 var(--mono);color:var(--ink-2);overflow-wrap:anywhere}
+#view[data-page="design"] .sw b{font:700 var(--t2) var(--font);color:var(--ink)}
+#view[data-page="design"] .sw code{background:none;padding:0;font-size:var(--t1)}
+#view[data-page="design"] .sw span{font-family:var(--font);color:var(--mute)}
+#view[data-page="design"] .dk-theme{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s4);margin:0 0 var(--s4)}
+#view[data-page="design"] .dk-theme h3{margin:0 0 var(--s3);font-size:var(--t3)}
+#view[data-page="design"] .dk-chip{display:inline-flex;align-items:center;gap:var(--s2)}
+#view[data-page="design"] .dk-chip i{display:inline-block;width:var(--s4);height:var(--s4);border-radius:var(--r);border:1px solid var(--line)}
+#view[data-page="design"] .dk-stamps{gap:var(--s2)}
+
+/* type scale */
+#view[data-page="design"] .dk-scale{display:grid;border-top:1px solid var(--line);margin:0 0 var(--s5)}
+#view[data-page="design"] .dk-step{display:grid;grid-template-columns:220px minmax(0,1fr);gap:var(--s5);align-items:baseline;padding:var(--s4) 0;border-bottom:1px solid var(--line)}
+#view[data-page="design"] .dk-step-k{display:grid;grid-template-columns:auto auto;justify-content:start;gap:var(--s1) var(--s3);align-items:baseline}
+#view[data-page="design"] .dk-step-k small{grid-column:1/-1;font-size:var(--t1)}
+#view[data-page="design"] .dk-step-s{color:var(--ink);line-height:1.05;overflow-wrap:anywhere;min-width:0}
+#view[data-page="design"] .dk-f-display{font-family:var(--display);font-weight:700;font-stretch:112%;letter-spacing:-.02em}
+#view[data-page="design"] .dk-f-body{font-family:var(--font)}
+#view[data-page="design"] .dk-f-mono{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+#view[data-page="design"] .dk-fams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s5);margin:0 0 var(--s4)}
+#view[data-page="design"] .dk-fam{font-size:var(--t4);color:var(--ink);margin:0 0 var(--s2)}
+#view[data-page="design"] .dk-fams small{font-size:var(--t2)}
+#view[data-page="design"] .dk-history{margin:0;color:var(--ink)}
+#view[data-page="design"] .dk-caslon{font:400 var(--t4)/1.2 var(--caslon)}
+#view[data-page="design"] .dk-elite{font:400 var(--t3)/1.2 var(--elite);letter-spacing:.08em;text-transform:uppercase}
+
+/* spacing and radius */
+#view[data-page="design"] .dk-space{display:grid;gap:var(--s2);margin:0 0 var(--s5)}
+#view[data-page="design"] .dk-sp{display:grid;grid-template-columns:4.5em 5em minmax(0,1fr);gap:var(--s3);align-items:center;font-size:var(--t2)}
+#view[data-page="design"] .dk-sp i{display:block;height:var(--s3);max-width:100%;background:var(--ink-2)}
+#view[data-page="design"] .dk-radii{display:flex;flex-wrap:wrap;gap:var(--s5)}
+#view[data-page="design"] .dk-rad{display:grid;gap:var(--s1);justify-items:start;font-size:var(--t2)}
+#view[data-page="design"] .dk-rad i{display:block;width:var(--s8);height:var(--s7);border:1px solid var(--ink-2)}
+
+/* components */
+#view[data-page="design"] .dk-stats{display:grid;grid-template-columns:repeat(2,minmax(0,220px));gap:var(--s5);margin:0 0 var(--s4)}
+#view[data-page="design"] .dk-madeby,#view[data-page="design"] .dk-more{margin:var(--s4) 0}
+#view[data-page="design"] .card .numfield{max-width:420px}
+
+/* fire palette */
+#view[data-page="design"] .dk-fire{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:0 0 var(--s5);border:1px solid var(--line);background:var(--line)}
+#view[data-page="design"] .dk-fire-s{background:var(--panel);display:grid;gap:var(--s1);padding:0 0 var(--s3);font-size:var(--t2)}
+#view[data-page="design"] .dk-fire-s i{display:block;height:var(--s8)}
+#view[data-page="design"] .dk-fire-s b,#view[data-page="design"] .dk-fire-s code{margin:0 var(--s3);color:var(--ink)}
+#view[data-page="design"] .dk-fire-s code{background:none;padding:0;color:var(--ink-2);font-size:var(--t1)}
+
+#view[data-page="design"] .rules{padding-left:var(--s5)}
+#view[data-page="design"] .rules li{margin-bottom:var(--s2);color:var(--ink-2);max-width:var(--measure)}
+
+@media (max-width:900px){
+ #view[data-page="design"] .dk-fams{grid-template-columns:1fr}
+ #view[data-page="design"] .dk-step{grid-template-columns:1fr;gap:var(--s2)}
+}
+@media (max-width:680px){
+ #view[data-page="design"] .swatches{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+ #view[data-page="design"] .dk-fire{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #view[data-page="design"] .dk-stats{grid-template-columns:1fr 1fr}
+ #view[data-page="design"] .dk-sp{grid-template-columns:4em 4.5em minmax(0,1fr)}
+}
+#view[data-page="design"] td code{white-space:nowrap}
+#view[data-page="design"] td{white-space:nowrap}
+#view[data-page="design"] td:nth-child(2):not(:last-child){white-space:normal}

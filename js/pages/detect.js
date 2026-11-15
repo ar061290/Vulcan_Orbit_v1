@@ -16,7 +16,7 @@ export default async function render(root, ctx = {}) {
     gasCard(gas),
     rateCard(ror),
     sensitivityCard(sens),
-    h('div', { class: 'grid g2' }, blindSpotCard(lat), smokeMissCard(smoke)),
+    h('div', { class: 'figs det-pair' }, blindSpotCard(lat), smokeMissCard(smoke)),   // v3: the shared figure grid (two across only when both fit)
     daftCard(daft)));
 }
 

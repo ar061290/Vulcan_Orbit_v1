@@ -1,46 +1,82 @@
-/* Page CSS for #/evidence (Checks). Every rule is scoped under #view[data-page="evidence"] (site/REBUILD_PLAN.md §0 rule 9).
-   Ported from main's freefall.css (.trust, .xcheck) and app.css (td b), plus the new check-row notes. */
+/* Page CSS for #/evidence (Checks), v3. Every rule is scoped under #view[data-page="evidence"] (site/REBUILD_PLAN.md §0 rule 9).
+   Reads like a dense audit table: words carry pass/fail (the dot only repeats them), numbers in tabular mono,
+   failed rows marked on the left edge, big counts above the table. On phones the audit tables stack, one row per block. */
 #view[data-page="evidence"] td b{color:var(--ink);font-weight:600}
-#view[data-page="evidence"] td small{color:var(--ink2);line-height:1.45}
-#view[data-page="evidence"] td code{font:12.5px var(--mono);color:var(--ink);overflow-wrap:anywhere}
-#view[data-page="evidence"] .checks td:first-child code{white-space:nowrap;overflow-wrap:normal}
-/* result pills hold long text (and glossary terms): flow it as text, not as flex items */
-#view[data-page="evidence"] td .status{display:inline}
-#view[data-page="evidence"] td .status::before{display:inline-block;margin-right:6px;vertical-align:.05em}
+#view[data-page="evidence"] td small{color:var(--ink-2);line-height:1.45;font-size:var(--t1)}
+#view[data-page="evidence"] td code{font:500 var(--t1) var(--mono);color:var(--ink);overflow-wrap:anywhere}
+#view[data-page="evidence"] td{font-variant-numeric:tabular-nums}
 
-/* Can you trust this? */
+/* ---------- the scoreboard: big counts ---------- */
+#view[data-page="evidence"] .ck-board{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--s5) var(--s6);margin:0 0 var(--s5);padding:var(--s4) 0;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line)}
+#view[data-page="evidence"] .ck-tile{display:grid;gap:var(--s1);min-width:7em}
+#view[data-page="evidence"] .ck-tile b{font:600 var(--t5)/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--ink)}
+#view[data-page="evidence"] .ck-tile span{display:flex;align-items:center;gap:var(--s2);font:600 var(--t1) var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+#view[data-page="evidence"] .ck-tile span::before{content:"";width:8px;height:8px;flex:none;background:var(--mute)}
+#view[data-page="evidence"] .ck-tile.pass span::before{background:var(--good)}
+#view[data-page="evidence"] .ck-tile.fail b{color:var(--accent-ink)}
+#view[data-page="evidence"] .ck-tile.fail span::before{background:var(--crit)}
+#view[data-page="evidence"] .ck-tile.todo span::before{background:transparent;border:1px solid var(--mute)}
+#view[data-page="evidence"] .ck-tile.scrap span::before{background:transparent;border:1px dashed var(--mute)}
+#view[data-page="evidence"] .ck-of{margin:0 0 var(--s1);font:500 var(--t2) var(--mono);color:var(--mute)}
+
+/* ---------- result words with their dot; text flows (glossary terms sit inside) ---------- */
+#view[data-page="evidence"] td .status{display:inline;font-size:var(--t2);color:var(--ink)}
+#view[data-page="evidence"] td .status::before{display:inline-block;margin-right:var(--s2);vertical-align:.08em}
+#view[data-page="evidence"] tr.ck-fail td:first-child{box-shadow:inset 2px 0 0 var(--crit)}
+#view[data-page="evidence"] tr.ck-fail td .status{font-weight:700}
+
+/* ---------- Checks ---------- */
+#view[data-page="evidence"] .checks td:first-child{width:1%;white-space:nowrap;padding-right:var(--s3)}
+#view[data-page="evidence"] .checks td:first-child code{white-space:nowrap;overflow-wrap:normal;background:none;padding:0;font-weight:600}
+#view[data-page="evidence"] .checks td:nth-child(2){min-width:12em}
+#view[data-page="evidence"] .checks td:nth-child(4){min-width:8em}
+#view[data-page="evidence"] .checks td.ck-result{min-width:14em}
+#view[data-page="evidence"] tr.ck-scrapped td{color:var(--mute)}
+#view[data-page="evidence"] tr.ck-scrapped td b{color:var(--ink-2);font-weight:600}
+#view[data-page="evidence"] tr.ck-added td:first-child code{border-bottom:1px dashed var(--line-2)}
+#view[data-page="evidence"] .ck-source{display:inline-block;margin-top:var(--s1)}
+#view[data-page="evidence"] .ck-source code{font-size:var(--t1);background:none;padding:0;color:var(--ink-2)}
+#view[data-page="evidence"] .ck-proposed{font-style:italic}
+#view[data-page="evidence"] .ck-per{font-size:var(--t2);color:var(--ink-2);margin:0 0 var(--s3)}
+#view[data-page="evidence"] .ck-reading{max-width:var(--measure);color:var(--ink-2);margin:var(--s3) 0 0}
+
+/* ---------- Can you trust this? ---------- */
 #view[data-page="evidence"] .trust td{vertical-align:top}
-#view[data-page="evidence"] .trust .num{font:600 15px var(--mono);color:var(--ink)}
-#view[data-page="evidence"] .trust-dots{font:600 13px var(--mono);white-space:nowrap;color:var(--ink)}
-#view[data-page="evidence"] .ck-draft{display:inline-block;margin-left:6px;font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;
-  color:var(--ink2);border:1px dashed var(--axis);border-radius:4px;padding:1px 5px}
+#view[data-page="evidence"] .trust .num{font:600 var(--t3) var(--mono);color:var(--ink);white-space:nowrap}
+#view[data-page="evidence"] .trust-dots{font:600 var(--t2) var(--mono);white-space:nowrap;color:var(--accent-ink);letter-spacing:1px}
+#view[data-page="evidence"] .ck-draft{display:inline-block;margin-left:var(--s2);font:600 var(--t1) var(--mono);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-2);border:1px dashed var(--line-2);border-radius:var(--r);padding:1px var(--s1)}
 
-/* NASA says / we get */
-#view[data-page="evidence"] .xcheck td{vertical-align:top;font-size:14px}
-#view[data-page="evidence"] .xcheck td:nth-child(2){font-style:italic;color:var(--ink2)}
+/* ---------- NASA says / we get ---------- */
+#view[data-page="evidence"] .xcheck td{vertical-align:top}
+#view[data-page="evidence"] .xcheck td:nth-child(2){color:var(--ink-2)}
 #view[data-page="evidence"] .xcheck td:nth-child(2) small{font-style:normal}
 
-/* Checks and Simulation checks */
-#view[data-page="evidence"] .checks td:nth-child(2){min-width:14em}
-#view[data-page="evidence"] .checks td.ck-result{min-width:13em}
-#view[data-page="evidence"] .checks .status,#view[data-page="evidence"] .simchecks .status{color:var(--ink)}
-#view[data-page="evidence"] tr.ck-scrapped td{color:var(--mute)}
-#view[data-page="evidence"] tr.ck-scrapped td b{color:var(--ink2);font-weight:600}
-#view[data-page="evidence"] tr.ck-added td:first-child code{border-bottom:1px dashed var(--axis)}
-#view[data-page="evidence"] .ck-source code{font-size:12px}
-#view[data-page="evidence"] .ck-proposed{font-style:italic}
+/* ---------- Simulation checks ---------- */
 #view[data-page="evidence"] .simchecks td:nth-child(3){min-width:16em}
-#view[data-page="evidence"] .ck-per{font-size:14px;color:var(--ink2);margin:0 0 10px}
-#view[data-page="evidence"] .ck-reading{max-width:var(--measure);color:var(--ink2);margin:12px 0 0}
+#view[data-page="evidence"] .checks .status,#view[data-page="evidence"] .simchecks .status{color:var(--ink)}
 
-/* Where each number comes from */
+/* ---------- Where each number comes from ---------- */
 #view[data-page="evidence"] .manifest td:first-child{white-space:nowrap}
 
-/* Known limits */
-#view[data-page="evidence"] .ck-limits{margin:0;padding-left:18px;color:var(--ink2);max-width:var(--measure)}
-#view[data-page="evidence"] .ck-limits li{margin-bottom:6px}
+/* ---------- Known limits ---------- */
+#view[data-page="evidence"] .ck-limits{margin:0;padding-left:var(--s5);color:var(--ink-2);max-width:var(--measure)}
+#view[data-page="evidence"] .ck-limits li{margin-bottom:var(--s2)}
 
-@media (max-width:520px){
-  #view[data-page="evidence"] .checks td:nth-child(2),#view[data-page="evidence"] .simchecks td:nth-child(3){min-width:11em}
-  #view[data-page="evidence"] .manifest td:first-child{white-space:normal}
+/* ---------- phones: the audit tables stack, each row a block with its column names ---------- */
+@media (max-width:680px){
+  #view[data-page="evidence"] .ck-board{gap:var(--s4) var(--s5)}
+  #view[data-page="evidence"] .ck-tile{min-width:0}
+  #view[data-page="evidence"] .ck-tile b{font-size:calc(var(--t5) * .8)}
+  #view[data-page="evidence"] :is(.checks,.simchecks,.trust,.xcheck,.manifest) thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  #view[data-page="evidence"] :is(.checks,.simchecks,.trust,.xcheck,.manifest),
+  #view[data-page="evidence"] :is(.checks,.simchecks,.trust,.xcheck,.manifest) tbody{display:block;width:100%}
+  #view[data-page="evidence"] :is(.checks,.simchecks,.trust,.xcheck,.manifest) tr{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s1);padding:var(--s3) 0 var(--s3) var(--s3);border-bottom:1px solid var(--line)}
+  #view[data-page="evidence"] :is(.checks,.simchecks,.trust,.xcheck,.manifest) td{display:block;border:0;padding:0;min-width:0!important;width:auto;white-space:normal!important;text-align:left}
+  #view[data-page="evidence"] :is(.checks,.simchecks,.trust,.xcheck,.manifest) td[data-label]::before{content:attr(data-label);display:block;font:600 var(--t1) var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-top:var(--s2)}
+  #view[data-page="evidence"] .checks td:first-child{font-size:var(--t2)}
+  #view[data-page="evidence"] .checks td:nth-child(2)::before{display:none}
+  #view[data-page="evidence"] tr.ck-fail td:first-child{box-shadow:none}
+  #view[data-page="evidence"] tr.ck-fail{box-shadow:inset 2px 0 0 var(--crit)}
+  #view[data-page="evidence"] tbody tr:hover td{background:none}
 }
