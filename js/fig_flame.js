@@ -34,6 +34,10 @@ const mmNote = d => h('p', { class: 'mm-note' }, mmStamp(), ' ', d?.gravity_note
 // ---------- the switch ----------
 /** A single aria-pressed toggle, off by default. el.set(v) changes it without calling onChange. */
 export function moonMarsSwitch(onChange, { value = false } = {}) {
+  // Moon and Mars removed 15 Nov 2026 (AGENTS.md "Claims we never make"; audit): the data files hold only 0 g and Earth,
+  // so there is no switch to show. Callers still get an element with set/get, kept hidden.
+  const off = h('span', { hidden: true }); off.set = () => {}; off.get = () => false; return off;
+  // eslint-disable-next-line no-unreachable
   let on = !!value;
   const btn = h('button', { type: 'button', class: 'mm-btn', 'aria-pressed': on }, h('span', { class: 'mm-box', 'aria-hidden': 'true' }), 'Show Moon and Mars (model only)');
   const el = h('div', { class: 'mm-switch' }, btn, h('small', {}, 'NASA has no flame data between 0 g and 1 g, so these cases come from the model alone.'));
@@ -290,7 +294,7 @@ export function survivalMapCard(sp, opts = {}) {
   const setCaveat = () => {
     const orbit = maps.find(x => x.gravity === '0 g' && x.P_kPa === st.p) || maps.find(x => x.gravity === '0 g');
     caveat.textContent = 'Limits are set by a Damköhler-number criterion tuned on one BASS-II blow-off and one quench point, so treat the edges as approximate. '
-      + (orbit ? `BASS-II saw spread down to about 16–17% O2; the model's ${Math.round(orbit.min_O2 * 100)}% minimum in orbit${ps.length > 1 ? ` at ${orbit.P_kPa} kPa` : ''} is probably too low.` : 'BASS-II saw spread down to about 16–17% O2.');
+      + (orbit ? `BASS-II saw steady spread down to 13.6% O2 on acrylic rods, and opposed spread on other samples not below about 16.4%; the model's ${Math.round(orbit.min_O2 * 100)}% minimum in orbit${ps.length > 1 ? ` at ${orbit.P_kPa} kPa` : ''} is probably too low.` : 'BASS-II saw steady spread down to 13.6% O2 on acrylic rods, and opposed spread on other samples not below about 16.4%.');
   };
   setCaveat();
   const presRow = seg({ label: 'Pressure', options: ps.map(p => [p, `${p} kPa`]), value: st.p, onChange: v => { st.p = v; draw(); setCaveat(); } });
@@ -335,9 +339,7 @@ export function flameLimitsCard(fs, sp, opts = {}) {
   let showMM = !!opts.showMM;
   const fileLimits = [...(isMissing(fs) ? [] : fs.limits || []), ...(isMissing(sp) ? [] : sp.limits || [])];
   const mmLine = h('li', {});
-  const setMM = () => put(mmLine, showMM
-    ? 'Moon and Mars cases are shown because "Show Moon and Mars (model only)" is on. They are model output only: NASA has no flame data between 0 g and 1 g, so nothing could check them.'
-    : 'Moon and Mars are hidden unless you switch on "Show Moon and Mars (model only)": NASA has no flame data between 0 g and 1 g, so nothing could check them.');
+  const setMM = () => put(mmLine, 'Moon and Mars are not modelled: NASA has no flame data between 0 g and 1 g, so nothing could check them. Orbit and Earth are the two ends.');
   setMM();
   const el = card(T, (!isMissing(fs) && fs.status) || (!isMissing(sp) && sp.status) || 'missing', null,
     fileLimits.length ? null : empty('Waiting for the flame model', 'flame_static', 'Run python models/flame-sim/build.py', null),

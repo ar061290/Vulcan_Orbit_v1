@@ -5,7 +5,7 @@
   {
    "id": "qa-saffire-latency",
    "title": "How long did the smoke detector take to notice a real fire in orbit?",
-   "text": "In Saffire-III, a real fire on an uncrewed Cygnus cargo ship, the flame radiometers responded 7 s after ignition of Sample 1. The cabin smoke detector's scatter channel crossed our alarm rule after 92 s (plus or minus 10 s; 72 s with a looser threshold). Its obscuration channel never rose. The alarm rule is ours (baseline + 5 SD), because the file holds raw counts, not the vehicle's setpoint.",
+   "text": "In Saffire-III, a real fire on an uncrewed Cygnus cargo ship, the flame radiometers in the flow duct crossed our alarm rule by 7 s after ignition of Sample 1 (they update only every 5 s). The cabin smoke detector's scatter channel crossed our alarm rule after 92 s (plus or minus 10 s; 72 s with a looser threshold). Its obscuration channel never rose past its alarm level. The alarm rule is ours (baseline + 5 SD), because the file holds raw counts, not the vehicle's setpoint, and the cabin still held smoke from the previous test, which slows the rule down.",
    "source": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",
    "url": "https://doi.org/10.60555/040q-4h36",
    "file": "data/saffire_latency.json burns[s1].channels[radiometer, scatter, obscuration].alarm_s"
@@ -117,7 +117,7 @@
   {
    "id": "qa-min-oxygen",
    "title": "What is the lowest oxygen level at which a thin sheet can burn in orbit?",
-   "text": "Our flame-spread model gives 11% oxygen at about 2.7 cm/s airflow for thin acrylic in orbit. That is probably too low: BASS-II observed spread only down to about 16 to 17%.",
+   "text": "Our flame-spread model gives 11% oxygen at about 2.7 cm/s airflow for thin acrylic in orbit. That is probably too low: BASS-II saw steady spread down to 13.6% O2 on acrylic rods, and opposed spread on other samples not below about 16.4% (NASA NTRS 20160000593).",
    "source": "BASS-II summary report, NASA/TM-20210011385",
    "url": "https://ntrs.nasa.gov/citations/20210011385",
    "file": "data/flame_spread.json flammability_maps[0 g, 101.3].min_O2"
@@ -171,17 +171,17 @@
    "file": "data/models.json"
   },
   {
-   "id": "model-smoke-miss",
-   "title": "Will the detector miss this smoke?",
-   "text": "Question: Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)? Data: 16 SAME-2 flight tests (Kapton, lampwick, Teflon) from Urban et al. 2012, AIAA 2012-3536, Figures 6-8, read from the PDF's vector drawing; Table 1 for the baseline Method: Logistic regression on material and air velocity; label from the lognormal mass median diameter (Hatch-Choate, from each test's count-mean and average-mass diameters) Tested: leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples Score: AUC 0.746 range [0.436, 1.0]; baseline Material only (Table 1) None. Limits: 16 tests, 3 materials, unaged smoke only, airflow 0 to 8 cm/s. A test bench result in orbit, not a detector certification. Detector limit is a choice (300/500/1000 nm reported).",
+   "id": "model-m6",
+   "title": "Flame spread over PMMA slabs (BASS-II)",
+   "text": "Question: How fast does a flame spread over a solid fuel in microgravity, given airflow speed, oxygen level, pressure and fuel? Data: NASA BASS-II, PSI-25 (doi:10.60555/4qc4-de67): 39 measured opposed-flow spread rates from 18 PMMA slab tests (1-5 mm thick, 1.2 or 2.2 cm wide, one- or two-sided) on the ISS in 7 sessions, 2-21 cm/s, 16.8-22.2% O2, about 1 atm. Spread rates are NASA's own measurements as printed in Table 5.1 of the BASS-II Summary Report (NASA/TM-20210011385, a PSI-25 file), transcribed by us; session and O2 come from the PSI-25 experimental table, which matches the report. Method: de Ris thermal-regime spread formula (thin or thick by burning half-thickness; coefficients from Bhattacharjee et al. 2016, flame coefficient scaled with O2) multiplied by a learned correction of log(observed/de Ris). Tried, simplest first: one constant, linear regression, Gaussian process, small gradient-boosted trees. Kept: de Ris x one fitted constant (simplest within the best model's range). Tested: Whole ISS sessions held out: leave one session out (7 sessions, grouped by GMT day). Score = R2 on the pooled held-out predictions; range = 95% session bootstrap. Holding out single tests instead gives R2 -0.77. Score: R² (held-out sessions, spread rate in mm/s) -0.6797 range [-3.8668, -0.1401]; baseline de Ris -40.0264. Limits: PMMA slabs in opposed flow at about 1 atm only: other fuels, thin films, rods, fabrics, concurrent flow and other pressures are outside the data, and pressure could not be tested. Mean error 0.033 mm/s (de Ris alone 0.163 mm/s; the textbook formula over-predicts these slabs about 3.5-fold). The other corrections on held-out sessions: linear-regression correction R² 0.26 (range -2.3 to 0.58); Gaussian-process correction R² 0.01 (range -5.1 to 0.76); small gradient-boosted-tree correction R² 0.33 (range -2.3 to 0.81); the rule fixed before training keeps the simplest model within the best one's range. Below the 0.6 target. O2 per flow step is estimated from start and end readings. Only 39 points from 7 sessions, so ranges are wide. Microgravity only: nothing here applies to Moon or Mars gravity, and a slow spread rate does not make a material or atmosphere safe.",
    "source": "Vulcan Orbit models",
    "url": "#/predict",
    "file": "data/models.json"
   },
   {
-   "id": "model-m6",
-   "title": "Flame spread over PMMA slabs (BASS-II)",
-   "text": "Question: How fast does a flame spread over a solid fuel in microgravity, given airflow speed, oxygen level, pressure and fuel? Data: NASA BASS-II, PSI-25 (doi:10.60555/4qc4-de67): 39 measured opposed-flow spread rates from 18 PMMA slab tests (1-5 mm thick, 1.2 or 2.2 cm wide, one- or two-sided) on the ISS in 7 sessions, 2-21 cm/s, 16.8-22.2% O2, about 1 atm. Spread rates are NASA's own measurements as printed in Table 5.1 of the BASS-II Summary Report (NASA/TM-20210011385, a PSI-25 file), transcribed by us; session and O2 come from the PSI-25 experimental table, which matches the report. Method: de Ris thermal-regime spread formula (thin or thick by burning half-thickness; coefficients from Bhattacharjee et al. 2016, flame coefficient scaled with O2) multiplied by a learned correction of log(observed/de Ris). Tried, simplest first: one constant, linear regression, Gaussian process, small gradient-boosted trees. Kept: de Ris x one fitted constant (simplest within the best model's range). Tested: Whole ISS sessions held out: leave one session out (7 sessions, grouped by GMT day). Score = R2 on the pooled held-out predictions; range = 95% session bootstrap. Holding out single tests instead gives R2 -0.77. Score: R² (held-out sessions, spread rate in mm/s) -0.6797 range [-3.8668, -0.1401]; baseline de Ris -40.0264. Limits: PMMA slabs in opposed flow at about 1 atm only: other fuels, thin films, rods, fabrics, concurrent flow and other pressures are outside the data, and pressure could not be tested. Mean error 0.033 mm/s (de Ris alone 0.163 mm/s; the textbook formula over-predicts these slabs about 3.5-fold). The other corrections on held-out sessions: linear-regression correction R² 0.26 (range -2.3 to 0.58); Gaussian-process correction R² 0.01 (range -5.1 to 0.76); small gradient-boosted-tree correction R² 0.33 (range -2.3 to 0.81); the rule fixed before training keeps the simplest model within the best one's range. Below the 0.6 target. O2 per flow step is estimated from start and end readings. Only 39 points from 7 sessions, so ranges are wide. Microgravity only: nothing here applies to Moon or Mars gravity, and a slow spread rate does not make a material or atmosphere safe.",
+   "id": "model-smoke-miss",
+   "title": "Will the detector miss this smoke?",
+   "text": "Question: Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)? Data: 16 SAME-2 flight tests (Kapton, lampwick, Teflon) from Urban et al. 2012, AIAA 2012-3536, Figures 6-8, read from the PDF's vector drawing; Table 1 for the baseline Method: Logistic regression on material and air velocity; label from the lognormal mass median diameter (Hatch-Choate, from each test's count-mean and average-mass diameters) Tested: leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples Score: AUC 0.746 range [0.436, 1.0]; baseline Material only (logistic, leave one test out) 0.683. Limits: 16 tests, 3 materials, unaged smoke only, airflow 0 to 8 cm/s. A test bench result in orbit, not a detector certification. Detector limit is a choice (300/500/1000 nm reported).",
    "source": "Vulcan Orbit models",
    "url": "#/predict",
    "file": "data/models.json"
@@ -293,7 +293,7 @@
   {
    "id": "gap-3",
    "title": "What NASA has not tested",
-   "text": "32% O2 at 55.2 kPa (8.0 psia, NASA EAWG 2010 recommendation): no solids, no liquid droplets tests within 3 O2 points and 10 kPa.",
+   "text": "34% O2 at 56.5 kPa (8.2 psia, NASA EAWG 2010 recommendation): no solids, no liquid droplets tests within 3 O2 points and 10 kPa.",
    "source": "Computed from the PSI tables listed under 'tested'",
    "url": "#/predict",
    "file": "data/gaps.json"

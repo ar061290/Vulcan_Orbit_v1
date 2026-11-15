@@ -8,3 +8,6 @@ node_modules/
 .runs/
 research_notes/
 reports/
+
+# local screenshots from the v2 build (48 MB), not for the repo
+site/shots/

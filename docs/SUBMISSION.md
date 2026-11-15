@@ -15,8 +15,9 @@ Hyderabad deadline on the event page before relying on any limit below.**
 ## Summary (short field)
 
 Vulcan Orbit asks one question of NASA's orbital fire data: when would a spacecraft's sensors notice a fire? On NASA's
-Saffire-III fires in a Cygnus cargo ship, a flame light sensor crossed our stated alarm rule 7 s after ignition; the cabin
-smoke detector took 92-127 s and its second channel never alarmed. NASA's later Saffire VI test found much of the hazardous gas
+Saffire-III fires in a Cygnus cargo ship, a flame light sensor in the flow duct crossed our stated alarm rule within 7 s of
+ignition (it updates every 5 s); the cabin smoke detector took 72-92 s and 27-127 s depending on the threshold, partly because smoke
+from the earlier test was still in the cabin, and its second channel never rose past its alarm level. NASA's later Saffire VI test found much of the hazardous gas
 already released by the time smoke reached its alarm level. Around that finding we model where smoke drifts with no buoyancy,
 which droplet flames go out, and what NASA has not yet tested. Every figure says what made it and how much to trust it.
 
@@ -52,7 +53,7 @@ A ready-made draft is in `docs/demo/vulcan_orbit_30s.mp4` (captions only, no voi
 | Time | On screen | Caption |
 |---|---|---|
 | 0-4 s | Home page title and porthole flame | "When would a spacecraft's sensors notice a fire? Built on NASA's orbital fire data." |
-| 4-16 s | Replay, Sample 1 burn, press Play | "Real NASA telemetry. Flame sensor: 7 s. Smoke detector: 92 s. Alarm rule is ours, stated." |
+| 4-16 s | Replay, Sample 1 burn, press Play | "Real NASA telemetry. Flame sensor: within 7 s. Smoke detector: 72-92 s. Alarm rule is ours, stated." |
 | 16-23 s | "The alarm can come after the gas" figure | "In NASA's Saffire VI test, much of the toxic gas was out before the smoke alarm." |
 | 23-28 s | Open a "Made by" box: credibility strip, a failed pass rule | "Every figure says what made it and how much to trust it, failures included." |
 | 28-30 s | Gap map | "Microgravity and Earth only. No Moon or Mars guesses." |
@@ -66,7 +67,7 @@ Backup: a 60 s screen capture of the same path, in case the 2026 limit is longer
 | 0-4 s | History page title card | "February 1997. Space station Mir. Six crew. An oxygen canister catches fire." |
 | 4-9 s | Mir plaque quote | "'I've never seen smoke spread like it did on Mir.' Astronaut Jerry Linenger" |
 | 9-12 s | Home porthole, gravity switched to orbit | "In orbit, smoke doesn't rise. There is no 'up'." |
-| 12-19 s | Ticking clock running | "Our analysis of NASA's orbital fire data: flame sensor 7 s. Smoke detector 92-127 s." |
+| 12-19 s | Ticking clock running | "Our analysis of NASA's orbital fire data: flame sensor within 7 s. Cabin smoke detector 27 to 127 s, depending on the alarm rule." |
 | 19-24 s | "The alarm can come after the gas" figure | "NASA found that by smoke-alarm level, much of the hazardous gas was already out." |
 | 24-30 s | Gap map | "Vulcan Orbit: which sensor speaks first, and which air NASA hasn't tested yet." |
 

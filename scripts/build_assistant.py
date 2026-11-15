@@ -38,9 +38,9 @@ def refuse(id, q, a, keys, sources=None, hard=None):
 # ---- detection ----
 s1 = next(b for b in lat["burns"] if b["key"] == "s1"); ch = {c["key"]: c for c in s1["channels"]}
 ans("saffire-latency", "How long did the smoke detector take to notice a real fire in orbit?",
-    f"In Saffire-III, a real fire on an uncrewed Cygnus cargo ship, the flame radiometers responded {ch['radiometer']['alarm_s']:.0f} s after ignition of Sample 1. "
+    f"In Saffire-III, a real fire on an uncrewed Cygnus cargo ship, the flame radiometers in the flow duct crossed our alarm rule by {ch['radiometer']['alarm_s']:.0f} s after ignition of Sample 1 (they update only every {ch['radiometer']['resolution_s']:.0f} s). "
     f"The cabin smoke detector's scatter channel crossed our alarm rule after {ch['scatter']['alarm_s']:.0f} s (plus or minus {ch['scatter']['resolution_s']:.0f} s; "
-    f"{ch['scatter']['alarm_s_range'][0]:.0f} s with a looser threshold). Its obscuration channel never rose. The alarm rule is ours (baseline + 5 SD), because the file holds raw counts, not the vehicle's setpoint.",
+    f"{ch['scatter']['alarm_s_range'][0]:.0f} s with a looser threshold). Its obscuration channel never rose past its alarm level. The alarm rule is ours (baseline + 5 SD), because the file holds raw counts, not the vehicle's setpoint, and the cabin still held smoke from the previous test, which slows the rule down.",
     [SRC["psi100"], SRC["site"]("detect", "Detect page, Blind Spot panel")], ["smoke", "detector", "alarm", "notice", "slow", "saffire", "latency", "orbit", "fire", "long", "time", "detect"],
     "data/saffire_latency.json burns[s1].channels[radiometer, scatter, obscuration].alarm_s")
 ans("saffire-what", "What was Saffire-III?",
@@ -116,7 +116,7 @@ ans("spread", "How fast does fire spread over plastic in microgravity?",
     [SRC["bass2tm"], SRC["bass2"], SRC["site"]("flame", "Flame page, spread panel")], ["spread", "fire", "plastic", "acrylic", "pmma", "fast", "solid", "bass"], "data/flame_spread.json bass_ii_groups")
 mp = next(m for m in sp["flammability_maps"] if m["gravity"] == "0 g" and m["P_kPa"] == 101.3)
 ans("min-oxygen", "What is the lowest oxygen level at which a thin sheet can burn in orbit?",
-    f"Our flame-spread model gives {pct(mp['min_O2'])} oxygen at about {100 * mp['min_O2_flow_m_s']:.1f} cm/s airflow for thin acrylic in orbit. That is probably too low: BASS-II observed spread only down to about 16 to 17%.",
+    f"Our flame-spread model gives {pct(mp['min_O2'])} oxygen at about {100 * mp['min_O2_flow_m_s']:.1f} cm/s airflow for thin acrylic in orbit. That is probably too low: BASS-II saw steady spread down to 13.6% O2 on acrylic rods, and opposed spread on other samples not below about 16.4% (NASA NTRS 20160000593).",
     [SRC["bass2tm"], SRC["site"]("flame", "Flame page, survival map")], ["lowest", "oxygen", "minimum", "burn", "limit", "sheet", "thin", "flammability"], "data/flame_spread.json flammability_maps[0 g, 101.3].min_O2")
 # ---- gaps, efield, data ----
 ans("gaps", "What has NASA not tested?",
@@ -131,7 +131,7 @@ ans("datasets", "Which NASA datasets does this project use?",
 # ---- refusals ----
 refuse("moon", "How fast will a fire spread on the Moon?", "No NASA evidence. The archives we use have no combustion data at lunar gravity. Microgravity and Earth results can bound the answer, but we do not predict a value in between.",
        ["moon", "lunar"], hard=["moon", "lunar"])
-refuse("mars", "Would a fire behave differently on Mars?", "No NASA evidence at Martian gravity in the archives we use. Our flame model draws Mars cases only as model output between the 0 g and 1 g results, and labels them as not validated.",
+refuse("mars", "Would a fire behave differently on Mars?", "No NASA evidence at Martian gravity in the archives we use, so we make no Mars prediction. Microgravity and Earth results can only be shown as the two ends.",
        ["mars", "martian"], hard=["mars", "martian"])
 refuse("safe", "Is a 34% oxygen cabin safe?", "We do not say whether any atmosphere or material is safe. The gap map shows that NASA's archives hold no solid-fuel or gas-flame tests near 34% oxygen at 70.3 kPa.",
        ["safe", "safety", "certify", "certified", "34"], hard=["safe", "certify", "certified"])

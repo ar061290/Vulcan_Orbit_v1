@@ -4,7 +4,7 @@
     python models/flame-sim/build.py      # data/flame_static.json, data/flame_spread.json, models/flame-sim/results.json
 
 Reduced-order physics only (no combustion CFD). Status of all outputs: "model". NASA data exists only at 0 g and 1 g;
-Moon and Mars outputs are labelled "model only, not validated; lies between NASA's microgravity and Earth results".
+Only 0 g and Earth gravity are computed. Moon and Mars are left out: NASA has no flame data at those gravities to check against.
 """
 import csv, json, math, sys, time, re, warnings
 from datetime import datetime
@@ -21,7 +21,7 @@ import chem, droplet, shape, surface, spread
 
 SEED = 42
 G0 = 9.80665
-GRAV = [("0 g", 0.0), ("Moon 0.16 g", 0.16), ("Mars 0.38 g", 0.38), ("Earth 1 g", 1.0)]
+GRAV = [("0 g", 0.0), ("Earth 1 g", 1.0)]   # Moon and Mars removed 15 Nov: no NASA data to check them (AGENTS.md)
 LBL_MODEL = "model only, not validated; lies between NASA's microgravity and Earth results"
 FUELS = ["methane", "ethylene", "propane", "n-heptane", "ethanol"]
 CHECK_ONLY = ["methanol"]
@@ -199,7 +199,7 @@ def stage1(res):
             for p in PRESS:
                 a = [c["aspect"] for c in cases if c["fuel"] == fuel and c["X_O2"] == x and c["P_kPa"] == p and c["flow_m_s"] == 0]
                 mono &= all(a[k] <= a[k + 1] + 1e-9 for k in range(len(a) - 1))
-    log("S1-order", mono, "aspect ratio does not decrease from 0 g to Moon to Mars to 1 g at zero forced flow, in every fuel/O2/pressure case")
+    log("S1-order", mono, "aspect ratio does not decrease from 0 g to 1 g at zero forced flow, in every fuel/O2/pressure case")
     # ---- 1 g flame height vs Roper correlation (circular port, laminar)
     roper = []
     for fuel in ("methane", "ethylene", "propane"):

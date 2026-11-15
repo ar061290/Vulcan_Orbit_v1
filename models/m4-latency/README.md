@@ -10,7 +10,7 @@ Pass rules: `RULES.md` (committed before any check ran).
 
 ## Data
 NASA PSI-100, Saffire-III flight telemetry, doi 10.60555/040q-4h36. Columns used, as named in the file:
-- `sfsHk.Radiometer1value` to `Radiometer4value`: flame radiation, about 1 reading per second; fill value about -4000.
+- `sfsHk.Radiometer1value` to `Radiometer4value`: flame radiation, logged about once a second but sample-and-hold, so values change only about every 5 s; fill value about -4000.
 - `CDH_F2PCM_SMK_DET_SCAT_SENS_P` and `CDH_F2PCM_SMK_DET_OBS_SENS_P`: the Cygnus cabin smoke detector's scatter and
   obscuration channels, raw counts, about every 10 s (each logged twice). The F1 detector channels are zero throughout.
 - `SmokeWireCurrent`, `Sample1IgniterCurrent`, `Sample2IgniterCurrent`: when each event was switched on (current above 0.3 A).
@@ -42,3 +42,20 @@ counts only rises, so it stays "no alarm" here, with this note.
 - **E3 not run.** No published Saffire-III detector alarm time was found to compare against.
 - The radiometers measure the flame inside the Saffire flow unit; the smoke detector sits in the Cygnus cabin. The gap
   between them combines detector type and the distance smoke had to travel.
+
+## Corrections after an independent audit (15 Nov 2026)
+
+The pass rules in RULES.md are unchanged. These are disclosures and bug fixes:
+
+- **Radiometer timing.** The radiometers are logged about once a second, but their values are sample-and-hold and change only
+  about every 5 s. "7 s" therefore means the signal crossed the alarm rule somewhere between 2 and 7 s. The data file now reports
+  `resolution_s: 5` for the radiometers, and the site shows "7 s ± 5".
+- **Smoke baselines.** Before Sample 2 and Sample 1 the cabin smoke detector still reads smoke left from the event before. This raises
+  the 60 s baseline and its spread, so the smoke alarm times move a lot with the threshold (Sample 2: 27 s at 3 SD, 127 s at 5 SD).
+  We tried a clean baseline from before the smoke wire; the leftover smoke trips it within seconds, so it is not a fair measure either.
+  Headlines now give the range, not one number.
+- **Placement.** The radiometers look at the sample inside the flow duct; the smoke detector is in the Cygnus cabin. The comparison
+  mixes sensor type with position, and the headline says so.
+- **3 SD on radiometers.** At 3 SD, radiometer 4 alarms 34 s into the smoke-wire puff, which has no flame. New check L1b reports this
+  as a FAIL, and the 3 SD low end is no longer reported for radiometers.
+- **Smoke-wire switch-off.** The wire pulses twice in the record; the build now takes the first pulse (on for 11 s), not a capped value.

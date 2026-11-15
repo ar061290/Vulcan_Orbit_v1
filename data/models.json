@@ -1867,7 +1867,7 @@
     }
    ],
    "limits": "Microgravity droplets only (two fuels, 1.1-4.7 mm). NASA does not define 'Test end' publicly; with Disruption burns dropped the AUC is 0.89, and with whole atmospheres held out it is 0.90. The FLEX plan aimed at near-limit conditions, so the chance shown is for those conditions, not for cabin fires in general. A low chance of extinction does not make an atmosphere safe, and nothing here applies to Moon or Mars gravity.",
-   "status": "real"
+   "status": "model"
   },
   {
    "id": "m7-burning-rate",
@@ -3706,7 +3706,7 @@
     }
    ],
    "limits": "Two fuels and the FLEX test range only. R\u00b2 on held-out sessions 0.67 (d-squared law 0.39). The textbook law with no fitted constant is off by a mean 0.60 mm\u00b2/s. Burning rate says how fast fuel is consumed, not whether a fire is dangerous.",
-   "status": "real"
+   "status": "model"
   },
   {
    "id": "m7-cool-flame",
@@ -4572,179 +4572,11 @@
     }
    ],
    "limits": "A visible flame going out does not mean the fire is out: in these burns a flame too dim for the colour camera kept consuming fuel. 'Used up' includes droplets finished off by a reignited hot flame (common above about 2 atm). Whether a cool flame appears at all is not modelled, because missing cool-flame data usually means the droplet drifted out of view. One fuel family, about 4-6 mm droplets, microgravity only; nothing here applies to Moon or Mars gravity.",
-   "status": "real"
-  },
-  {
-   "id": "smoke-miss",
-   "status": "model",
-   "name": "Will the detector miss this smoke?",
-   "question": "Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)?",
-   "data": "16 SAME-2 flight tests (Kapton, lampwick, Teflon) from Urban et al. 2012, AIAA 2012-3536, Figures 6-8, read from the PDF's vector drawing; Table 1 for the baseline",
-   "method": "Logistic regression on material and air velocity; label from the lognormal mass median diameter (Hatch-Choate, from each test's count-mean and average-mass diameters)",
-   "validation": "leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples",
-   "metric": "AUC",
-   "score": 0.746,
-   "score_range": [
-    0.436,
-    1.0
-   ],
-   "kind": "classifier",
-   "baseline_name": "Material only (Table 1)",
-   "baseline_score": null,
-   "baseline_metric_note": "material-only balanced accuracy 0.75; model balanced accuracy 0.76 [0.53, 0.94]",
-   "unit": "1 = likely missed",
-   "points": [
-    {
-     "obs": 0,
-     "pred": 0.074,
-     "x": 0,
-     "lo": null,
-     "hi": null,
-     "label": "LAM-1: Lampwick, 0 cm/s, mass median 1493 nm"
-    },
-    {
-     "obs": 0,
-     "pred": 0.074,
-     "x": 0,
-     "lo": null,
-     "hi": null,
-     "label": "LAM-2: Lampwick, 0 cm/s, mass median 946 nm"
-    },
-    {
-     "obs": 0,
-     "pred": 0.137,
-     "x": 2.0,
-     "lo": null,
-     "hi": null,
-     "label": "LAM-3: Lampwick, 2 cm/s, mass median 997 nm"
-    },
-    {
-     "obs": 0,
-     "pred": 0.719,
-     "x": 8.1,
-     "lo": null,
-     "hi": null,
-     "label": "LAM-4: Lampwick, 8 cm/s, mass median 1030 nm"
-    },
-    {
-     "obs": 0,
-     "pred": 0.405,
-     "x": 2.0,
-     "lo": null,
-     "hi": null,
-     "label": "KAP-1: Kapton, 2 cm/s, mass median 578 nm"
-    },
-    {
-     "obs": 0,
-     "pred": 0.555,
-     "x": 4.0,
-     "lo": null,
-     "hi": null,
-     "label": "KAP-2: Kapton, 4 cm/s, mass median 538 nm"
-    },
-    {
-     "obs": 1,
-     "pred": 0.767,
-     "x": 8.0,
-     "lo": null,
-     "hi": null,
-     "label": "KAP-3: Kapton, 8 cm/s, mass median 487 nm"
-    },
-    {
-     "obs": 1,
-     "pred": 0.773,
-     "x": 8.1,
-     "lo": null,
-     "hi": null,
-     "label": "KAP-4: Kapton, 8 cm/s, mass median 165 nm"
-    },
-    {
-     "obs": 1,
-     "pred": 0.773,
-     "x": 8.1,
-     "lo": null,
-     "hi": null,
-     "label": "KAP-5: Kapton, 8 cm/s, mass median 257 nm"
-    },
-    {
-     "obs": 1,
-     "pred": 0.773,
-     "x": 8.1,
-     "lo": null,
-     "hi": null,
-     "label": "KAP-6: Kapton, 8 cm/s, mass median 375 nm"
-    },
-    {
-     "obs": 1,
-     "pred": 0.773,
-     "x": 8.1,
-     "lo": null,
-     "hi": null,
-     "label": "KAP-7: Kapton, 8 cm/s, mass median 219 nm"
-    },
-    {
-     "obs": 1,
-     "pred": 0.002,
-     "x": 0,
-     "lo": null,
-     "hi": null,
-     "label": "TEF-1: Teflon, 0 cm/s, mass median 477 nm"
-    },
-    {
-     "obs": 0,
-     "pred": 0.181,
-     "x": 0,
-     "lo": null,
-     "hi": null,
-     "label": "TEF-2: Teflon, 0 cm/s, mass median 722 nm"
-    },
-    {
-     "obs": 0,
-     "pred": 0.304,
-     "x": 2.0,
-     "lo": null,
-     "hi": null,
-     "label": "TEF-3: Teflon, 2 cm/s, mass median 540 nm"
-    },
-    {
-     "obs": 1,
-     "pred": 0.672,
-     "x": 8.1,
-     "lo": null,
-     "hi": null,
-     "label": "TEF-4: Teflon, 8 cm/s, mass median 333 nm"
-    },
-    {
-     "obs": 0,
-     "pred": 0.876,
-     "x": 8.1,
-     "lo": null,
-     "hi": null,
-     "label": "TEF-5: Teflon, 8 cm/s, mass median 565 nm"
-    }
-   ],
-   "drivers": [
-    {
-     "name": "air velocity",
-     "share": 0.76
-    },
-    {
-     "name": "material",
-     "share": 0.24
-    }
-   ],
-   "coefficients": {
-    "Kapton": 0.494,
-    "Lampwick": -0.709,
-    "Teflon": 0.214,
-    "air velocity (per cm/s)": 0.325
-   },
-   "limits": "16 tests, 3 materials, unaged smoke only, airflow 0 to 8 cm/s. A test bench result in orbit, not a detector certification. Detector limit is a choice (300/500/1000 nm reported).",
-   "checks_note": "M5-lognormal FAIL; M5-trace pass; M5-auc FAIL; M5-bacc pass; M5-base reported; M5-drivers reported; M5-sens reported. Rules in models/m5-smoke-miss/RULES.md, written before training."
+   "status": "model"
   },
   {
    "id": "m6",
-   "status": "real",
+   "status": "model",
    "name": "Flame spread over PMMA slabs (BASS-II)",
    "question": "How fast does a flame spread over a solid fuel in microgravity, given airflow speed, oxygen level, pressure and fuel?",
    "data": "NASA BASS-II, PSI-25 (doi:10.60555/4qc4-de67): 39 measured opposed-flow spread rates from 18 PMMA slab tests (1-5 mm thick, 1.2 or 2.2 cm wide, one- or two-sided) on the ISS in 7 sessions, 2-21 cm/s, 16.8-22.2% O2, about 1 atm. Spread rates are NASA's own measurements as printed in Table 5.1 of the BASS-II Summary Report (NASA/TM-20210011385, a PSI-25 file), transcribed by us; session and O2 come from the PSI-25 experimental table, which matches the report.",
@@ -5057,6 +4889,174 @@
     }
    ],
    "limits": "PMMA slabs in opposed flow at about 1 atm only: other fuels, thin films, rods, fabrics, concurrent flow and other pressures are outside the data, and pressure could not be tested. Mean error 0.033 mm/s (de Ris alone 0.163 mm/s; the textbook formula over-predicts these slabs about 3.5-fold). The other corrections on held-out sessions: linear-regression correction R\u00b2 0.26 (range -2.3 to 0.58); Gaussian-process correction R\u00b2 0.01 (range -5.1 to 0.76); small gradient-boosted-tree correction R\u00b2 0.33 (range -2.3 to 0.81); the rule fixed before training keeps the simplest model within the best one's range. Below the 0.6 target. O2 per flow step is estimated from start and end readings. Only 39 points from 7 sessions, so ranges are wide. Microgravity only: nothing here applies to Moon or Mars gravity, and a slow spread rate does not make a material or atmosphere safe."
+  },
+  {
+   "id": "smoke-miss",
+   "status": "model",
+   "name": "Will the detector miss this smoke?",
+   "question": "Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)?",
+   "data": "16 SAME-2 flight tests (Kapton, lampwick, Teflon) from Urban et al. 2012, AIAA 2012-3536, Figures 6-8, read from the PDF's vector drawing; Table 1 for the baseline",
+   "method": "Logistic regression on material and air velocity; label from the lognormal mass median diameter (Hatch-Choate, from each test's count-mean and average-mass diameters)",
+   "validation": "leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples",
+   "metric": "AUC",
+   "score": 0.746,
+   "score_range": [
+    0.436,
+    1.0
+   ],
+   "kind": "classifier",
+   "baseline_name": "Material only (logistic, leave one test out)",
+   "baseline_score": 0.683,
+   "baseline_metric_note": "material-only AUC 0.68 (the earlier Table 1 rule, balanced accuracy 0.75, used 4 of the held-out tests); model balanced accuracy 0.76 [0.53, 0.94]",
+   "unit": "1 = likely missed",
+   "points": [
+    {
+     "obs": 0,
+     "pred": 0.074,
+     "x": 0,
+     "lo": 0.0,
+     "hi": 0.279,
+     "label": "LAM-1: Lampwick, 0 cm/s, mass median 1493 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.074,
+     "x": 0,
+     "lo": 0.0,
+     "hi": 0.278,
+     "label": "LAM-2: Lampwick, 0 cm/s, mass median 946 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.137,
+     "x": 2.0,
+     "lo": 0.004,
+     "hi": 0.332,
+     "label": "LAM-3: Lampwick, 2 cm/s, mass median 997 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.719,
+     "x": 8.1,
+     "lo": 0.352,
+     "hi": 0.973,
+     "label": "LAM-4: Lampwick, 8 cm/s, mass median 1030 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.405,
+     "x": 2.0,
+     "lo": 0.012,
+     "hi": 0.757,
+     "label": "KAP-1: Kapton, 2 cm/s, mass median 578 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.555,
+     "x": 4.0,
+     "lo": 0.18,
+     "hi": 0.778,
+     "label": "KAP-2: Kapton, 4 cm/s, mass median 538 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.767,
+     "x": 8.0,
+     "lo": 0.541,
+     "hi": 0.961,
+     "label": "KAP-3: Kapton, 8 cm/s, mass median 487 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.773,
+     "x": 8.1,
+     "lo": 0.516,
+     "hi": 0.962,
+     "label": "KAP-4: Kapton, 8 cm/s, mass median 165 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.773,
+     "x": 8.1,
+     "lo": 0.562,
+     "hi": 0.945,
+     "label": "KAP-5: Kapton, 8 cm/s, mass median 257 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.773,
+     "x": 8.1,
+     "lo": 0.55,
+     "hi": 0.962,
+     "label": "KAP-6: Kapton, 8 cm/s, mass median 375 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.773,
+     "x": 8.1,
+     "lo": 0.547,
+     "hi": 0.965,
+     "label": "KAP-7: Kapton, 8 cm/s, mass median 219 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.002,
+     "x": 0,
+     "lo": 0.001,
+     "hi": 0.019,
+     "label": "TEF-1: Teflon, 0 cm/s, mass median 477 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.181,
+     "x": 0,
+     "lo": 0.001,
+     "hi": 0.632,
+     "label": "TEF-2: Teflon, 0 cm/s, mass median 722 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.304,
+     "x": 2.0,
+     "lo": 0.005,
+     "hi": 0.661,
+     "label": "TEF-3: Teflon, 2 cm/s, mass median 540 nm"
+    },
+    {
+     "obs": 1,
+     "pred": 0.672,
+     "x": 8.1,
+     "lo": 0.358,
+     "hi": 0.973,
+     "label": "TEF-4: Teflon, 8 cm/s, mass median 333 nm"
+    },
+    {
+     "obs": 0,
+     "pred": 0.876,
+     "x": 8.1,
+     "lo": 0.704,
+     "hi": 0.978,
+     "label": "TEF-5: Teflon, 8 cm/s, mass median 565 nm"
+    }
+   ],
+   "drivers": [
+    {
+     "name": "air velocity",
+     "share": 0.76
+    },
+    {
+     "name": "material",
+     "share": 0.24
+    }
+   ],
+   "coefficients": {
+    "Kapton": 0.494,
+    "Lampwick": -0.709,
+    "Teflon": 0.214,
+    "air velocity (per cm/s)": 0.325
+   },
+   "limits": "16 tests, 3 materials, unaged smoke only, airflow 0 to 8 cm/s. A test bench result in orbit, not a detector certification. Detector limit is a choice (300/500/1000 nm reported).",
+   "checks_note": "M5-lognormal FAIL; M5-trace pass; M5-auc FAIL; M5-bacc pass; M5-base reported; M5-drivers reported; M5-sens reported; M5-base2 reported. Rules in models/m5-smoke-miss/RULES.md, written before training."
   }
  ],
  "source": "Trained by the scripts in models/m5-smoke-miss, models/m6-spread and models/m7-extinction on NASA PSI data and published NASA results; each entry names its data."

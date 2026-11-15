@@ -56,10 +56,10 @@ export async function short() {
   const w = await load('whatif');
   const c = !isMissing(w) && Array.isArray(w.layouts) ? w.layouts[0] : null;
   const out = ['With nothing to make it rise, smoke goes where the fans push it, not to the ceiling.'];
-  if (c && Number.isFinite(c.caught_120_at_10mg)) out.push(`In ${Number.isFinite(w.runs) ? fmt(w.runs, 0) : 'our'} simulated cabin fires, a ceiling detector at the station's alarm level caught only ${pct(c.caught_120_at_10mg, 1)} within 2 minutes.`);
+  if (c && Number.isFinite(c.caught_120_at_10mg)) out.push(`In ${Number.isFinite(w.runs) ? fmt(w.runs, 0) : 'our'} simulated cabin fires with small, slow smoke sources (an assumption, not a measurement), a ceiling detector set to the station's alarm level reached it within 2 minutes in only ${pct(c.caught_120_at_10mg, 1)} of runs.`);
   else out.push('The share of simulated fires a ceiling detector catches is not available yet (data/whatif.json missing).');
   // alarm levels: whatif.json alarm_mg_m3 (1, NASA ICES-2024-365) and alarm_hi_mg_m3 (10, the station level, NTRS 20170002629)
-  if (c && Number.isFinite(c.caught_120)) out.push(`A far more sensitive alarm level${Number.isFinite(w.alarm_mg_m3) ? ` (${fmt(w.alarm_mg_m3, 2)} mg/m³)` : ''} would catch about ${pct(c.caught_120)}. Where you put the detector matters less than how sensitive it is.`);
+  if (c && Number.isFinite(c.caught_120)) out.push(`A far more sensitive alarm level${Number.isFinite(w.alarm_mg_m3) ? ` (${fmt(w.alarm_mg_m3, 2)} mg/m³)` : ''} would catch about ${pct(c.caught_120)}. In this model, sensitivity mattered more than placement. It is a 2D model, not a test of the station's detectors.`);
   else out.push('The share caught at a more sensitive alarm level is not available yet (data/whatif.json missing).');
   return out;
 }

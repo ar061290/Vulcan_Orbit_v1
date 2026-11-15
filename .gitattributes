@@ -1,0 +1,2 @@
+# Keep NASA data files byte-for-byte as downloaded, so datasets/psi/MANIFEST.csv sha256 values verify
+datasets/** -text

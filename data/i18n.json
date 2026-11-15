@@ -4,7 +4,11 @@
  "what": "Telugu and Hindi strings for the Home short answer and the India card (draft until reviewed)",
  "drafted": "Drafted by an AI coding agent (Claude, site package P5-G) on 2026-11-15. Not yet checked by a native speaker; set reviewed to true only after a Telugu and a Hindi speaker have read every string.",
  "how": "Each entry keeps the English it translates in 'en'. The site shows a translation only while that English, filled with the same numbers, still matches the English on the page; otherwise it shows the English. Placeholders in braces, such as {n_fires}, are filled at run time from js/facts.js (data/saffire_latency.json, data/saffire_gas.json) or from data/india.json, so no number is typed here.",
- "languages": {"en": "English", "te": "తెలుగు", "hi": "हिन्दी"},
+ "languages": {
+  "en": "English",
+  "te": "తెలుగు",
+  "hi": "हिन्दी"
+ },
  "scope": "Translated: the Home short answer, and the India card's title, eyebrow, link text, labels and source levels. Kept in English with lang=\"en\": the India fact texts, their sources and the not-found list, so each one still matches its cited source word for word.",
  "strings": {
   "short.title": {
@@ -13,14 +17,14 @@
    "hi": "संक्षेप में जवाब"
   },
   "short.s1": {
-   "en": "In the {n_fires} real fires NASA lit in orbit, a flame light sensor would have noticed within {rad_s} s (using our alarm thresholds). The smoke detector took {smoke_min_s} to {smoke_max_s} s.",
-   "te": "నాసా కక్ష్యలో వెలిగించిన {n_fires} నిజమైన మంటల్లో, మంట వెలుతురును గుర్తించే సెన్సార్ {rad_s} సెకన్లలోపే గమనించేది (మా అలారం పరిమితుల ప్రకారం). పొగ డిటెక్టర్‌కు {smoke_min_s} నుంచి {smoke_max_s} సెకన్లు పట్టింది.",
-   "hi": "नासा ने कक्षा में जो {n_fires} असली आग जलाईं, उनमें लौ की रोशनी पहचानने वाला सेंसर {rad_s} सेकंड के भीतर आग पकड़ लेता (हमारी अलार्म सीमाओं के हिसाब से)। धुएँ के डिटेक्टर को {smoke_min_s} से {smoke_max_s} सेकंड लगे।"
+   "en": "In NASA's {n_fires} Saffire-III burns, a flame light sensor in the flow duct crossed our alarm rule within {rad_s} s (it updates only every 5 s). The cabin smoke detector took about {smoke_min_s} to {smoke_max_s} s at our rule; smoke left over from the earlier test makes that time depend a lot on the rule.",
+   "te": "నాసా చేసిన {n_fires} Saffire-III దహన పరీక్షల్లో, గాలి గొట్టంలోని మంట వెలుతురు సెన్సార్ {rad_s} సెకన్లలోపే మా అలారం నియమాన్ని దాటింది (ఇది ప్రతి 5 సెకన్లకు ఒకసారే నవీకరించబడుతుంది). క్యాబిన్ పొగ డిటెక్టర్‌కు మా నియమం ప్రకారం సుమారు {smoke_min_s} నుంచి {smoke_max_s} సెకన్లు పట్టింది; ముందటి పరీక్ష నుంచి మిగిలిన పొగ వల్ల ఈ సమయం నియమంపై ఎక్కువగా ఆధారపడుతుంది.",
+   "hi": "नासा के {n_fires} Saffire-III परीक्षणों में, हवा की नली में लगे लौ-रोशनी सेंसर ने {rad_s} सेकंड के भीतर हमारा अलार्म नियम पार किया (यह हर 5 सेकंड में ही अपडेट होता है)। केबिन के धुएँ के डिटेक्टर को हमारे नियम पर लगभग {smoke_min_s} से {smoke_max_s} सेकंड लगे; पिछले परीक्षण का बचा हुआ धुआँ इस समय को नियम पर बहुत निर्भर बनाता है।"
   },
   "short.s2": {
-   "en": "The second kind of smoke detector, which looks for dimmed light, never alarmed at all.",
-   "te": "కాంతి మసకబారడాన్ని చూసే రెండో రకం పొగ డిటెక్టర్ ఒక్కసారి కూడా అలారం మోగించలేదు.",
-   "hi": "दूसरी तरह के धुआँ डिटेक्टर ने, जो रोशनी के मंद पड़ने को देखता है, कभी अलार्म बजाया ही नहीं।"
+   "en": "The same detector's second channel, which looks for dimmed light, never rose past its alarm level.",
+   "te": "అదే డిటెక్టర్‌లో కాంతి మసకబారడాన్ని చూసే రెండో ఛానల్ ఒక్కసారి కూడా తన అలారం స్థాయిని దాటలేదు.",
+   "hi": "इसी डिटेक्टर का दूसरा चैनल, जो रोशनी के मंद पड़ने को देखता है, कभी अपनी अलार्म सीमा तक नहीं पहुँचा।"
   },
   "short.s3": {
    "en": "That matters: in NASA's later Saffire fires, carbon monoxide passed the 24-hour crew limit in {co_over} of {co_tests} tests, and a smoke monitor reached its alarm level only after much of the gas was out.",

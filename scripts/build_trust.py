@@ -6,6 +6,7 @@ from pathlib import Path
 R = Path(__file__).resolve().parents[1]
 J = lambda p: json.loads((R / p).read_text())
 models = {m["id"]: m for m in J("data/models.json")["models"]}
+tb = {r["name"].split(":")[0].split(" (")[0]: r for r in J("data/trivial_baselines.json")["rows"]}
 m7 = J("models/m7-extinction/results.json"); sp = J("data/spread_predictor.json"); cal = J("data/drift_calibration.json"); ror = J("data/rate_of_rise.json")
 rows = []
 def mrow(i, name, kind, passed, rule, page):
@@ -16,9 +17,10 @@ mrow("m7-burning-rate", "How fast does a droplet burn?", "Formula + trained corr
 mrow("m7-cool-flame", "Does a cool flame keep burning?", "Trained model", m7["cool_flame"]["pass"], "Lower end of the AUC range above 0.5 (R3). Note: its range overlaps a pressure-only rule.", "respond")
 mrow("smoke-miss", "Will the detector miss this smoke?", "Trained model", models["smoke-miss"]["score"] >= 0.75, "AUC at least 0.75 (models/m5-smoke-miss/RULES.md)", "predict")
 mrow("m6", "How fast does flame cross an acrylic slab? (M6)", "Formula + one fitted constant", models["m6"]["score"] >= 0.6, "Held-out R² at least 0.6 (models/m6-spread/RULES.md)", "predict")
+rows[-1].update(baseline="Training-set mean, no physics (added after audit)", baseline_score=tb["Training-set mean"]["r2"], caveat="Loses to simply predicting the average spread rate.")
 s = sp["scores"]
 rows.append(dict(id="m6b", name="Will it spread, and how fast? (M6b)", kind="Calibrated physics", metric="Mean error on held-out sessions, mm/s; range coverage",
-    score=s["opposed_heldout_mae_mm_s"], range=f"coverage {round(100*s['opposed_nested_coverage'])}% of real results", baseline="M6 one constant", baseline_score=0.033,
+    score=s["opposed_heldout_mae_mm_s"], range=f"coverage {round(100*s['opposed_nested_coverage'])}% of real results", baseline="Lookup by thickness and sides burning, no physics (added after audit)", baseline_score=tb["Lookup"]["mae_mm_s"], caveat="Meets its own rules, but a no-physics lookup is about as accurate on these 39 slabs.",
     tested="Whole ISS sessions held out; two independent Saffire-II rates", passed=True, rule="R1-R4 and growth checks G1-G5 (models/m6b-predictor/RULES.md)", page="predict"))
 b = cal["best"]
 rows.append(dict(id="drift", name="Where does the smoke go?", kind="Physics model, 4 tuned settings", metric="R² of detector signal",

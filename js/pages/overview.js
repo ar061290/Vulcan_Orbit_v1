@@ -105,9 +105,9 @@ function findingSection(facts, lat, gas, ctx) {
   }
   return h('section', { class: 'story', 'aria-labelledby': 'story-h' },
     h('p', { class: 'kicker' }, 'The finding'),
-    h('h2', { id: 'story-h' }, `On NASA's real orbital fires, a flame light sensor noticed in ${v.rad_s} seconds. The smoke detector took ${v.smoke_min_s} to ${v.smoke_max_s} seconds.`),
+    h('h2', { id: 'story-h' }, `In NASA's Saffire-III burns, a flame light sensor crossed our alarm rule within ${v.rad_s} seconds. The cabin smoke detector took ${v.smoke_min_s} to ${v.smoke_max_s} seconds.`),
     h('p', { class: 'story-stamps' }, badge(lat.status), ' Saffire-III alarm timing', v.obs_never ? [' · ', badge(isMissing(gas) ? 'reported' : gas.status), ' Saffire VI gas (ICES-2024-365)'] : null),
-    v.obs_never ? h('p', { class: 'story-sub' }, 'Alarm times use our own stated rule, because NASA published none. The detector\'s second smoke channel never alarmed at all. In NASA\'s later Saffire VI test, much of the hazardous gas had already been released by the time a smoke monitor reached its alarm level (ICES-2024-365).') : null,
+    v.obs_never ? h('p', { class: 'story-sub' }, 'Alarm times use our own stated rule, because NASA published none. The flame sensor updates only every 5 s and sits in the flow duct; the smoke detector is in the cabin, which still held smoke from the earlier test, so its time depends a lot on the rule. Its second channel never rose past its alarm level. In NASA\'s later Saffire VI test, much of the hazardous gas had already been released by the time a smoke monitor reached its alarm level (ICES-2024-365).') : null,
     ticking(lat, { ctx }),
     h('p', { class: 'story-links' }, h('a', { href: figLink('detect', 'Replay an orbital fire') }, 'Replay the real sensor data'), ' · ', h('a', { href: '#/memory' }, 'Why seconds matter: sixty years of fire')));
 }

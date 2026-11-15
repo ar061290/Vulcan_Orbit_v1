@@ -1,0 +1,42 @@
+{
+ "status": "model",
+ "source": "scripts/trivial_baselines.py on models/m6-spread/bass2_clean.csv (BASS-II opposed-flow PMMA slabs)",
+ "units": {
+  "mae": "mm/s",
+  "r2": "dimensionless"
+ },
+ "split": "leave one ISS session out (7 sessions, 39 slabs), the same split M6b reports",
+ "finding": "On 39 slabs, a lookup by thickness and sides burning, with no physics, scores as well as or better than the calibrated de Ris models. The physics adds no accuracy on this data; its value is that it can be applied outside the tested thicknesses, which these scores cannot check.",
+ "rows": [
+  {
+   "name": "Training-set mean (no physics)",
+   "kind": "trivial",
+   "r2": -0.061,
+   "mae_mm_s": 0.024
+  },
+  {
+   "name": "Training-set median (no physics)",
+   "kind": "trivial",
+   "r2": -0.11,
+   "mae_mm_s": 0.0232
+  },
+  {
+   "name": "Lookup: mean per thickness and sides burning (no physics)",
+   "kind": "trivial",
+   "r2": 0.424,
+   "mae_mm_s": 0.0185
+  },
+  {
+   "name": "M6 kept model: de Ris x one constant",
+   "kind": "model",
+   "r2": -0.68,
+   "mae_mm_s": 0.0329
+  },
+  {
+   "name": "M6b: de Ris x one factor per thin/thick regime",
+   "kind": "model",
+   "r2": 0.373,
+   "mae_mm_s": 0.02
+  }
+ ]
+}
