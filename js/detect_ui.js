@@ -1,5 +1,5 @@
 // #24 Saffire-III replay and #7 DAFT card. Data: saffire_latency.json (real), daft.json (real).
-import { h, card } from './lib.js';
+import { h, card, params } from './lib.js';
 import { SERIES, C, SCREEN } from './charts.js';
 export function replayCard(lat) {
   const sel = h('select', { 'aria-label': 'Event' }, ...lat.burns.map((b, i) => h('option', { value: i }, b.name)));
@@ -37,7 +37,8 @@ export function replayCard(lat) {
   btn.onclick = () => { if (playing) return stop(); if (f >= 1) f = 0; playing = true; last = 0; btn.textContent = '❚❚ Pause'; btn.setAttribute('aria-pressed', 'true'); raf = requestAnimationFrame(tick); };
   slider.oninput = () => { stop(); f = slider.value / 1000; draw(); };
   sel.onchange = () => { stop(); setup(); };
-  sel.value = String(Math.max(0, lat.burns.findIndex(b => /Sample 1/.test(b.name))));   // open on a real fire, not the smoke-wire puff
+  const want = { wire: /wire/i, s2: /Sample 2/, s1: /Sample 1/ }[params().event] || /Sample 1/;
+  sel.value = String(Math.max(0, lat.burns.findIndex(b => want.test(b.name))));   // ?event=s1|s2|wire opens that event   // open on a real fire, not the smoke-wire puff
   setup();
   return card('Replay an orbital fire', lat.status, 'Saffire-III telemetry, replayed at about 14 seconds per event. Each lane is one sensor, scaled so the dashed line is its alarm threshold. A dot marks the moment it would alarm.',
     h('div', { class: 'row' }, h('label', {}, 'Event ', sel), btn, clock), cv, slider, lamps,

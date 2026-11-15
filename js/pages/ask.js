@@ -2,6 +2,7 @@
 // matched to an answer by keywords; below the threshold the assistant refuses. The scorecard runs the fixed test set
 // through this same matcher, so the score shown is the score of what the visitor uses.
 import { h, load, page, card } from '../lib.js';
+import { askAI, retrieve } from '../llm.js';
 
 const STOP = new Set('a an the is are was were do does did of in on at to for and or what which how why who when where can will would should i we you it this that be by with from about any there their our your me my'.split(' '));
 const words = s => s.toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').split(/\s+/).filter(w => w && !STOP.has(w));
@@ -21,7 +22,8 @@ export function match(q, items) {
 }
 
 export default async function (root) {
-  const [c, gold] = await Promise.all([load('assistant_cache'), load('assistant_gold')]);
+  const [c, gold, kb, cfg] = await Promise.all([load('assistant_cache'), load('assistant_gold'), load('kb'), load('assistant_config')]);
+  const endpoint = cfg && cfg.status !== 'missing' ? cfg.endpoint : null;
   const items = c.items || [];
   const out = h('div', { class: 'answer' }, h('p', { class: 'muted' }, 'Pick a question, or type your own.'));
   const show = (it, asked) => {
@@ -33,7 +35,21 @@ export default async function (root) {
       h('div', { class: 'src' }, 'Sources: ', ...it.sources.flatMap((s, i) => [i ? '; ' : '', h('a', { href: s.url, target: s.url.startsWith('#') ? null : '_blank', rel: 'noopener' }, s.label)])));
   };
   const input = h('input', { type: 'search', placeholder: 'Ask about fire in orbit, e.g. "where should the smoke detector go?"', style: 'flex:1', 'aria-label': 'Ask a question' });
-  const ask = () => { const q = input.value.trim(); if (!q) return; document.querySelectorAll('.q').forEach(b => b.setAttribute('aria-pressed', 'false')); show(match(q, items).item, q); };
+  const aiOut = h('div', { class: 'ai-out', 'aria-live': 'polite' });
+  const aiShow = async q => {
+    if (!endpoint || kb.status === 'missing') { aiOut.replaceChildren(); return; }
+    const m = match(q, items); if (m.item && m.item.kind === 'refusal') { aiOut.replaceChildren(); return; }   // refusal topics never go to the AI
+    aiOut.replaceChildren(h('p', { class: 'muted' }, 'Asking the AI, using only the passages below…'));
+    try {
+      const r = await askAI(endpoint, q, kb);
+      if (r.refused) { aiOut.replaceChildren(h('p', {}, 'No NASA evidence in our library answers this.')); return; }
+      const src = h('ol', { class: 'ai-src' }, ...r.passages.map(p => h('li', {}, h('a', { href: p.url || '#', target: (p.url || '').startsWith('#') ? null : '_blank', rel: 'noopener' }, p.title), h('small', {}, ` · ${p.source} · ${p.file}`))));
+      aiOut.replaceChildren(h('div', { class: 'ai-head' }, h('span', { class: `badge ${r.bad.length ? 'missing' : 'model'}` }, r.bad.length ? 'Held back' : 'AI answer, numbers checked'), h('small', {}, ` ${r.model || ''}`)),
+        r.bad.length ? h('p', {}, `The AI answer used a number not found in our sources (${r.bad.join(', ')}), so it is not shown. The saved answer above is the one to trust.`) : h('p', { class: 'ans' }, r.answer),
+        h('p', {}, h('small', {}, 'Passages the AI was allowed to use ([P1] is the first):')), src);
+    } catch (e) { aiOut.replaceChildren(h('p', { class: 'muted' }, `${e.message}. The saved answer above still works.`)); }
+  };
+  const ask = () => { const q = input.value.trim(); if (!q) return; document.querySelectorAll('.q').forEach(b => b.setAttribute('aria-pressed', 'false')); show(match(q, items).item, q); aiShow(q); };
   input.addEventListener('keydown', e => { if (e.key === 'Enter') ask(); });
   const list = items.filter(it => it.kind === 'answer').map(it => { const b = h('button', { class: 'q', 'aria-pressed': 'false' }, it.q); b.addEventListener('click', () => { document.querySelectorAll('.q').forEach(x => x.setAttribute('aria-pressed', String(x === b))); show(it); }); return b; });
 
@@ -53,7 +69,8 @@ export default async function (root) {
   root.append(page('Ask the evidence', 'An assistant that answers only from NASA rows, NASA papers and our own model outputs, shows where each number came from, and says so when there is no evidence.',
     h('div', { class: 'grid g2' },
       card('Questions', c.status, `${list.length} answers, each written from a data file. Type a question or pick one.`, h('div', { class: 'row' }, input, h('button', { class: 'chip', onclick: ask }, 'Ask')), ...list),
-      card('Answer', null, null, out)),
+      card('Answer', null, null, out, aiOut,
+        h('p', {}, h('small', {}, endpoint ? 'Typed questions also get an AI answer (Claude Haiku via our Worker), written only from the passages listed under it; any number not found in them blocks the answer.' : 'AI answers are built but switched off: they turn on when the team deploys the Worker in worker/README.md. Until then every answer is a saved one.')))),
     score ? h('div', { style: 'margin-top:14px' }, score) : null,
     h('div', { style: 'margin-top:14px' }, card('How the assistant is kept honest', null, null, h('ul', { style: 'margin:0;padding-left:18px;color:var(--ink2)' },
       ...['No language model writes answers at run time. Each answer is generated from the data files by scripts/build_assistant.py, so every number traces to a file and field.',

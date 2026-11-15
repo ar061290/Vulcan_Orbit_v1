@@ -2,8 +2,12 @@ import { h, load, page, card, empty, fmt } from '../lib.js';
 import { scatter, C } from '../charts.js';
 import { driftCard, whatifCard, calibrationCard, robustCard, lbmWhatifCard } from '../drift_ui.js';
 import { gapCard as gapMap } from '../gaps_ui.js';
+import { spreadCard, growthCard } from '../spread_ui.js';
+import { cabin3d } from '../cabin3d.js';
+import { params } from '../lib.js';
 export default async function (root) {
-  const [m, drift, gaps, wi, cal, lbm, lwi] = await Promise.all([load('models'), load('drift'), load('gaps'), load('whatif'), load('drift_calibration'), load('drift_lbm'), load('drift_whatif')]);
+  const [m, drift, gaps, wi, cal, lbm, lwi, sp, gr] = await Promise.all([load('models'), load('drift'), load('gaps'), load('whatif'), load('drift_calibration'), load('drift_lbm'), load('drift_whatif'), load('spread_predictor'), load('growth_examples')]);
+  const q = params();
   const schema = '{ "status":"real", "models":[{\n   "id":"spread", "name":"Flame spread over PMMA", "question":"How fast does it spread?",\n   "data":"BASS-II (PSI-25)", "method":"de Ris formula + learned correction", "validation":"leave one session out",\n   "metric":"R2", "score":0.58, "score_range":[0.41,0.70], "baseline_name":"de Ris formula", "baseline_score":0.44,\n   "unit":"mm/s", "points":[{ "obs":1.2, "pred":1.1, "lo":0.8, "hi":1.5, "label":"21% O2, 10 cm/s" }],\n   "drivers":[{ "name":"Oxygen", "share":0.5 }], "limits":"..." }] }';
   const modelCards = m.status === 'missing'
     ? [card('Models trained on NASA tables', 'missing', 'Spread, extinction and cool-flame models appear here as they are trained.', empty('Waiting for model results', 'models', 'One entry per model. Predictions come from test sessions the model never saw.', schema))]
@@ -26,6 +30,9 @@ export default async function (root) {
     : gapMap(gaps);
   root.append(page('Predict', 'Small models fitted to NASA\'s own tables, each compared with the textbook formula and tested on sessions it never saw. Every prediction carries a range.',
     h('div', { class: 'grid g2' }, dCard, wiCard),
+    drift.status === 'missing' ? null : h('div', { style: 'margin-top:14px' }, cabin3d(drift)),
+    sp.status === 'missing' ? null : h('div', { style: 'margin-top:14px' }, spreadCard(sp, { case: q.fuel, o2: q.o2 && +q.o2, flow: q.flow && +q.flow })),
+    gr.status === 'missing' ? null : h('div', { style: 'margin-top:14px' }, growthCard(gr)),
     cal.status === 'missing' ? null : h('div', { class: 'grid g2', style: 'margin-top:14px' }, calibrationCard(cal), robustCard(wi)),
     lbm.status === 'missing' ? null : h('div', { class: 'grid g2', style: 'margin-top:14px' },
       driftCard(lbm, 'Second opinion: a cabin with racks', `Independent lattice Boltzmann air model, ${lbm.lx_m} × ${lbm.ly_m} m module cross-section with racks, airflow ${lbm.flow_m_s} m/s, no buoyancy. It agrees with the model above on alarm vs no alarm for 94% of fire-detector pairs.`),

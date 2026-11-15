@@ -3,7 +3,7 @@
 import { load } from './lib.js';
 const pct = (x, d = 0) => `${(100 * x).toFixed(d)}%`;
 const ok = d => d && d.status !== 'missing';
-export const KEEP = { flame: 1, detect: 2, predict: 1, respond: 2, evidence: 1, explorer: 1, locate: 1, ask: 1, about: 2, design: 3 };
+export const KEEP = { flame: 1, detect: 2, predict: 3, respond: 2, evidence: 1, explorer: 1, locate: 1, ask: 1, about: 2, design: 3 };
 export async function summary(id) {
   if (id === 'detect') {
     const [lat, gas] = await Promise.all([load('saffire_latency'), load('saffire_gas')]);

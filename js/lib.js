@@ -55,3 +55,6 @@ export function tip(evt, html) {
   t.style.left = x + 'px'; t.style.top = y + 'px';
 }
 export const untip = () => { tipEl().hidden = true; };
+
+/** Query parameters after the route in the hash, e.g. #/predict?o2=30&flow=10 → {o2:'30', flow:'10'}. Lets a link open an exact view. */
+export const params = () => Object.fromEntries(new URLSearchParams(location.hash.split('?')[1] || ''));
