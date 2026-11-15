@@ -140,14 +140,21 @@ export default async function render(root, ctx = {}) {
   const answers = items.filter(it => it.kind === 'answer');
   const list = answers.map(it => h('button', { type: 'button', class: 'q', 'aria-pressed': 'false' }, it.q));
   const press = b => list.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-  list.forEach((b, i) => b.addEventListener('click', () => { seq++; press(b); aiOut.replaceChildren(); show(answers[i]); }));
+  // v3 layout: on one-column screens the answer sits below the list, so bring it into view once it is filled
+  const reveal = () => {
+    if (ctx.detached || typeof matchMedia !== 'function' || !matchMedia('(max-width: 1279px)').matches) return;
+    const r = out.getBoundingClientRect(); if (r.top < innerHeight - 80 && r.top > 0) return;
+    out.closest('.card')?.scrollIntoView({ behavior: still() ? 'auto' : 'smooth', block: 'start' });
+  };
+  list.forEach((b, i) => b.addEventListener('click', () => { seq++; press(b); aiOut.replaceChildren(); show(answers[i]); reveal(); }));
   const ask = () => { const q = input.value.trim(); if (!q) return; const my = ++seq; press(null); show(match(q, items).item, q); aiShow(q, my); };
   input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ask(); } });
 
   const questions = haveCache
     ? card('Questions', c.status, `${list.length} answers, each written from a data file. Type a question or pick one.`,
         h('div', { class: 'ask-box' }, h('label', { for: 'ask-q' }, 'Type a question'),
-          h('div', { class: 'row' }, h('span', { class: 'ps', 'aria-hidden': 'true' }, '>'), input, h('button', { type: 'button', class: 'chip', onclick: ask }, 'Ask'))),
+          h('div', { class: 'row ask-row' }, h('span', { class: 'ps', 'aria-hidden': 'true' }, '>'), input, h('button', { type: 'button', class: 'chip ask-go', onclick: ask }, 'Ask'))),
+        h('p', { class: 'qlist-h', 'aria-hidden': 'true' }, 'Or pick a saved question'),
         h('div', { class: 'qlist', role: 'group', 'aria-label': 'Saved questions' }, list))
     : card('Questions', 'missing', null, empty('No saved answers yet', 'assistant_cache', 'The questions and their pre-written answers come from this file (scripts/build_assistant.py).', CACHE_SHAPE));
   const answer = haveCache
@@ -181,7 +188,7 @@ export default async function render(root, ctx = {}) {
       'The scorecard above runs the fixed test set through the same matcher every time the page loads.'].map(t => h('li', {}, t))));
 
   root.append(page('Ask the evidence', 'An assistant that answers only from NASA rows, NASA papers and our own model outputs, shows where each number came from, and says so when there is no evidence.',
-    h('div', { class: 'grid g2' }, questions, answer),
+    h('div', { class: 'grid g2 ask-grid' }, questions, answer),
     score,
     honest));
 }

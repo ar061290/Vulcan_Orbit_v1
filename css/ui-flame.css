@@ -1,14 +1,23 @@
 /* UI lock styles for #/flame (feat/ui-lock). Scope every rule under #view[data-page="flame"]. */
 
-/* the simulator becomes the hero: split screen full width, controls and words under it */
+/* feat/v3-merge layout. Wide screens (v3): the split stage is the wide simulator, beside a narrow controls column with a
+   1 px rule. Below 1100 px (UI lock): the stage runs full width and the controls and words sit under it, in two columns
+   that fold to one on phones. The stage never shares its row with anything else, so nothing competes for its space. */
 #view[data-page="flame"] .fl-sim{grid-template-columns:minmax(0,1fr);gap:var(--sp3)}
-#view[data-page="flame"] .fl-right{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--sp2) var(--sp4);align-items:start}
+#view[data-page="flame"] .fl-right{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--sp2) var(--sp4);align-items:start;
+  border-top:1px solid var(--line);padding-top:var(--sp2)}
 #view[data-page="flame"] .fl-controls{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:var(--sp1) var(--sp3);align-items:start}
+@media (min-width:1100px){
+  #view[data-page="flame"] .fl-sim{grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr)}
+  #view[data-page="flame"] .fl-right{grid-template-columns:minmax(0,1fr);border-top:0;padding-top:0;border-left:1px solid var(--line);padding-left:var(--sp3)}
+  #view[data-page="flame"] .fl-controls{grid-template-columns:minmax(0,1fr)}
+}
 
 /* stage: always-dark canvas, HUD brackets inside its clip */
 #view[data-page="flame"] .fl-stage{position:relative;overflow:hidden;border-radius:var(--r-panel);border:1px solid var(--line);background:#05070d;--split:50%}
 #view[data-page="flame"] .fl-stage.hud::after{inset:6px}
-#view[data-page="flame"] .fl-stage .fl-simcv{aspect-ratio:960/520;border-radius:0!important;cursor:grab;touch-action:pan-y;user-select:none;-webkit-tap-highlight-color:transparent;
+/* the canvas sets its own aspect-ratio inline (js/flame_sim.js): taller on a narrow stage so a phone gets a usable picture */
+#view[data-page="flame"] .fl-stage .fl-simcv{border-radius:0!important;cursor:grab;touch-action:pan-y;user-select:none;-webkit-tap-highlight-color:transparent;
   clip-path:inset(0 0 0 0);transition:clip-path var(--t-move) var(--ease-move)}
 #view[data-page="flame"] .fl-stage .fl-simcv.fl-dragging{cursor:grabbing}
 #view[data-page="flame"] .fl-stage .fl-simcv:focus-visible{outline:2px solid #EDE8DF;outline-offset:-4px}

@@ -16,6 +16,12 @@
 /* Day: the field is clipped to one host (the header, then this window once the header scrolls away, js/pages/earth.js).
    While the header is the host the window is a dark screen; as the host it stays transparent so the field shows through. */
 html[data-theme=day] #view[data-page="earth"] .ea-globe:not(.is-host){background:var(--screen)}
+/* ...and, so it is never an empty dark box, a still line drawing of the globe (Illustration) until the column is the host */
+#view[data-page="earth"] .ea-poster{display:none;position:absolute;inset:12%;width:76%;height:76%;margin:auto;color:var(--screen-ink);pointer-events:none}
+html[data-theme=day] #view[data-page="earth"] .ea-globe:not(.is-host) .ea-poster{display:block}
+#view[data-page="earth"] .ea-poster *{fill:none;stroke:currentColor;stroke-width:1;opacity:.32;vector-effect:non-scaling-stroke}
+#view[data-page="earth"] .ea-poster .ea-p-rim{opacity:.7;stroke-width:1.5}
+#view[data-page="earth"] .ea-poster .ea-p-orbit{stroke:#7AA2FF;opacity:.8;stroke-dasharray:2 6}
 html.nogl #view[data-page="earth"] .ea-globe{display:none}
 html.nogl #view[data-page="earth"] .ea-stage{grid-template-columns:minmax(0,1fr)}
 /* the field stays undimmed on this page, so the contents line sits on a panel */

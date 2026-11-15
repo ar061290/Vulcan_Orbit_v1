@@ -134,7 +134,9 @@ function longPress() {
 // ---------- first-visit loader: real asset-load percent ----------
 /** Show "IGNITING RENDERER n%" on the first visit while `tasks` (promises) settle and the page's fetches finish. */
 export function loader(tasks) {
-  if (store.get('ignited')) return Promise.all(tasks.map(p => p.catch(() => {})));
+  // merge/perf: no loader for Calm, reduced motion or a data-saver connection; it never sits over the page longer than 3 s
+  const saver = navigator.connection?.saveData === true;
+  if (store.get('ignited') || calm() || saver) return Promise.all(tasks.map(p => p.catch(() => {})));
   store.set('ignited', '1');
   const pct = h('b', {}, '0%'), bar = h('i');
   const el = h('div', { class: 'loader', role: 'status', 'aria-live': 'polite' }, h('div', { class: 'loader-in' }, h('p', {}, 'Igniting renderer ', pct), h('div', { class: 'loader-bar' }, bar)));
@@ -144,8 +146,8 @@ export function loader(tasks) {
   const upd = () => { const p = Math.round(100 * done / Math.max(1, total)); pct.textContent = `${p}%`; bar.style.width = `${p}%`; };
   window.fetch = (...a) => { total++; upd(); return of(...a).finally(() => { done++; upd(); }); };
   tasks.forEach(p => p.finally(() => { done++; upd(); }));
-  // never hold the site behind the loader for more than 6 s (a blocked font server must not stall it)
-  return Promise.race([Promise.all(tasks.map(p => p.catch(() => {}))), new Promise(r => setTimeout(r, 6000))]).then(() => {
+  // never hold the site behind the loader for more than 3 s (a blocked font server or a slow phone must not stall it)
+  return Promise.race([Promise.all(tasks.map(p => p.catch(() => {}))), new Promise(r => setTimeout(r, 3000))]).then(() => {
     window.fetch = of; done = total; upd();
     el.classList.add('done'); setTimeout(() => el.remove(), calm() ? 0 : 420);
   });
@@ -165,8 +167,12 @@ export function enterPage(view) {
 
 export function initEngine() {
   const top = document.querySelector('.top');
-  top?.append(h('div', { class: 'hud-right' }, missionClock(),
-    h('button', { type: 'button', class: 'hud-btn', onclick: openPalette, 'aria-keyshortcuts': 'Control+K Meta+K' }, 'Jump ', h('kbd', {}, '⌘K')), soundButton()));
+  const tools = [missionClock(),
+    h('button', { type: 'button', class: 'hud-btn hud-jump', onclick: openPalette, 'aria-keyshortcuts': 'Control+K Meta+K' }, 'Jump', h('kbd', {}, ' ⌘K')), soundButton()];
+  // merge: index.html already holds the HUD with the v3 data status pill in it (so the bar has its final height at first
+  // paint); the clock, Jump and Sound go in front of the pill
+  const hud = top?.querySelector('.hud-right');
+  if (hud) hud.prepend(...tools); else top?.append(h('div', { class: 'hud-right' }, ...tools));
   addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); pal && !pal.hidden ? closePalette() : openPalette(); }
   });

@@ -36,8 +36,8 @@ export default async function render(root, ctx = {}) {
   const sim = isMissing(fs) || !Array.isArray(fs.flames) || !fs.flames.length ? simMissing() : keep(flameSimCard(fs, gaps, ctx, o));
   root.append(page('A flame without gravity', LEAD,
     sim,
-    h('div', { class: 'grid g2' }, flexKCard(fs), keep(spreadCurvesCard(sp, o))),
-    h('div', { class: 'grid g2' }, keep(survivalMapCard(sp, o)), frontsCard(sp)),
+    h('div', { class: 'grid g2 fl-pair' }, flexKCard(fs), keep(spreadCurvesCard(sp, o))),
+    h('div', { class: 'grid g2 fl-pair' }, keep(survivalMapCard(sp, o)), frontsCard(sp)),
     flameChecksCard(fs, sp),
     keep(flameLimitsCard(fs, sp, o))));
 }

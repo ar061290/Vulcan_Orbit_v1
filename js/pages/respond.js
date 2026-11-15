@@ -43,9 +43,11 @@ export default async function render(root, ctx) {
     // two figures open and the figure numbers do not change (js/passes.js foldBlocks).
     h('div', { class: 'fr-top' }, dropletHero(models, m7, ctx), coverageCard(gaps, inv)),
     await responseBlock(ctx, examples),
-    h('div', { class: 'grid g2' }, extinctionCard(m7), coolFlameCard(m7)),
-    h('div', { class: 'grid g2' }, flexCard(fx, m7), efieldCard(ef)),
-    h('div', { class: 'grid g2' }, mistTrialCard(tr), readingCard())));
+    // v3 layout: chart and table figures share a figure grid (side by side only when each gets >= 520 px);
+    // the two short text figures sit side by side from 320 px each (css/p-respond.css).
+    h('div', { class: 'grid fr-figs' }, extinctionCard(m7), coolFlameCard(m7)),
+    h('div', { class: 'grid fr-figs' }, flexCard(fx, m7), efieldCard(ef)),
+    h('div', { class: 'grid fr-duo' }, mistTrialCard(tr), readingCard())));
 }
 
 /** "The short answer": main's summaries.js sentences; line 3 ends "Bench mist trial: not completed." (C6). */

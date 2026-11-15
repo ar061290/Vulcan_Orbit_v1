@@ -1,26 +1,47 @@
-/* Page CSS for #/ask. Every rule is scoped under #view[data-page="ask"] (site/REBUILD_PLAN.md §0 rule 9).
-   Ported from main's css/app.css (.q, .ans, .src) and css/freefall.css (.ai-out, .ai-src, .ai-head). */
+/* Page CSS for #/ask (v3 + UI lock merge). Every rule is scoped under #view[data-page="ask"] (site/REBUILD_PLAN.md §0 rule 9).
+   The console look (prompt row, ">" suggestion buttons, terminal answer panel, source chips) is css/ui-ask.css, loaded
+   after this file. From v3: the two-column app layout with the answer sticky beside the questions on wide screens, the
+   "Or pick a saved question" label, 48 px controls, and the answer scrolled into view on one-column screens (js). */
 #view[data-page="ask"] .muted{color:var(--mute)}
-#view[data-page="ask"] .ask-box{display:grid;gap:6px;margin-bottom:4px}
-#view[data-page="ask"] .ask-box > label{font-weight:700;color:var(--ink)}
-#view[data-page="ask"] .ask-box .row{flex-wrap:nowrap}
-#view[data-page="ask"] .ask-box input[type=search]{flex:1 1 auto;min-width:0;width:100%}
-#view[data-page="ask"] .ask-box .chip{flex:0 0 auto}
-#view[data-page="ask"] .qlist{display:grid;gap:6px}
-#view[data-page="ask"] .q{display:block;width:100%;text-align:left;background:var(--raise);color:var(--ink);border:1.5px solid var(--grid);border-radius:8px;padding:9px 11px;font:inherit;font-size:.9rem;line-height:1.4;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
-#view[data-page="ask"] .q:hover{border-color:var(--ink2)}
-#view[data-page="ask"] .q[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
-#view[data-page="ask"] .answer > p{margin:10px 0 0}
-#view[data-page="ask"] .answer > .matched{margin-top:8px}
-#view[data-page="ask"] .ans{white-space:pre-wrap;color:var(--ink);overflow-wrap:anywhere}
-#view[data-page="ask"] .src{font-size:.82rem;color:var(--mute);margin-top:10px;overflow-wrap:anywhere}
-#view[data-page="ask"] .src a{color:var(--s1)}
-#view[data-page="ask"] .ai-out:not(:empty){margin-top:16px;border-top:1px dashed var(--line);padding-top:12px}
-#view[data-page="ask"] .ai-src{font-size:.85rem;padding-left:20px;overflow-wrap:anywhere}
-#view[data-page="ask"] .ai-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-#view[data-page="ask"] .ask-stats{margin-bottom:10px}
-#view[data-page="ask"] .ask-foot{font-size:.85rem;color:var(--ink2);margin:10px 0 0}
-#view[data-page="ask"] .honest{margin:0;padding-left:18px;color:var(--ink2)}
-#view[data-page="ask"] .honest li{margin-bottom:6px}
-#view[data-page="ask"] .page > .card{margin-top:14px}
-@media (max-width:420px){#view[data-page="ask"] .ask-box .row{flex-wrap:wrap}}
+
+/* two columns: questions (narrower) | answer (wider, sticky under the top bar) */
+#view[data-page="ask"] .ask-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:var(--sp3);align-items:start}
+#view[data-page="ask"] .ask-grid>.card:last-child{position:sticky;top:calc(var(--top-h,72px) + var(--sp2))}
+
+/* the question box */
+#view[data-page="ask"] .ask-box{display:grid;gap:var(--sp1);margin:0 0 var(--sp3)}
+#view[data-page="ask"] .ask-box .row{flex-wrap:nowrap;margin:0}
+#view[data-page="ask"] .ask-box input[type=search]{flex:1 1 auto;min-width:0;width:100%;min-height:48px}
+#view[data-page="ask"] .ask-box .ask-go{flex:0 0 auto;min-height:48px;min-width:64px}
+
+/* saved questions */
+#view[data-page="ask"] .qlist-h{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 var(--sp1)}
+#view[data-page="ask"] .qlist{display:grid;gap:var(--sp1)}
+#view[data-page="ask"] .q{display:block;width:100%;min-height:44px;text-align:left;color:var(--ink);cursor:pointer}
+
+/* the answer */
+#view[data-page="ask"] .answer>p{margin:12px 0 0}
+#view[data-page="ask"] .answer>.matched{margin-top:var(--sp1)}
+#view[data-page="ask"] .ans{white-space:pre-wrap;overflow-wrap:anywhere}
+#view[data-page="ask"] .src{color:var(--ink2);overflow-wrap:anywhere}
+#view[data-page="ask"] .ai-out:not(:empty){margin-top:var(--sp3);padding-top:var(--sp2)}
+#view[data-page="ask"] .ai-src{font-size:.875rem;padding-left:var(--sp3);overflow-wrap:anywhere}
+#view[data-page="ask"] .ai-head{display:flex;gap:var(--sp1);align-items:center;flex-wrap:wrap}
+
+/* scorecard and the honesty list */
+#view[data-page="ask"] .ask-stats{margin-bottom:var(--sp2)}
+#view[data-page="ask"] .ask-foot{font-size:.875rem;color:var(--ink2);margin:12px 0 0}
+#view[data-page="ask"] .honest{margin:0;padding-left:var(--sp3);color:var(--ink2);max-width:var(--measure)}
+#view[data-page="ask"] .honest li{margin-bottom:var(--sp1)}
+#view[data-page="ask"] td code{white-space:nowrap}
+#view[data-page="ask"] .page>.card{margin-top:var(--sp2)}
+
+@media (max-width:1279px){
+  #view[data-page="ask"] .ask-grid{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="ask"] .ask-grid>.card:last-child{position:static}
+}
+@media (max-width:420px){
+  #view[data-page="ask"] .ask-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  #view[data-page="ask"] .ask-stats .stat{font-size:1.375rem}
+  #view[data-page="ask"] td code{white-space:normal;overflow-wrap:anywhere}
+}

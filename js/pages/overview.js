@@ -10,7 +10,17 @@
 //    data/i18n.json; the numbers are the same facts.detectFacts() vars the English uses (js/i18n.js).
 //  - (UI lock) the porthole and its own WebGL context are gone: a pinned ~300vh scroll story drives the shared field
 //    (js/field.js) and draws the real Saffire-III Sample 1 traces; every other section is a one-line ledger row.
-import { h, add, load, badge, card, empty, isMissing } from '../lib.js';
+//  - (v3 merge, feat/v3-merge) Home = the UI-lock story, then exactly two visible sections, then the ledger:
+//      1. "The finding" band (v3): giant numerals over the ember noise field (js/fx/noise.js) with the fire fluid trail
+//         (js/fx/fluid.js) on the same host. Both WebGL effects exist only while the band is on screen, on a fine
+//         pointer, with effects allowed; they are released 2 s after it leaves the screen and in ctx.onLeave. Phones,
+//         Calm, reduced motion and Effects Off get v3's still ember (.fx-noise-still), never a second context.
+//      2. "Our answer" (v3): the live camera -> growth -> risk demo (the Assess code path, assess_core.computeAssessment).
+//    New ledger rows from v3: why it happens (drift loop from data/drift.json, catch share from data/whatif.json, the
+//    gravity points toy, labelled Illustration), why you can trust it (check counts, models meeting their rule, NASA
+//    datasets with PSI ids), the oxygen gap line in the mission check, and every section as tiles. Rows that hold heavy
+//    data (drift.json, models.json) load it only when first opened, so Home's first paint stays small.
+import { h, add, load, loadPath, badge, card, empty, isMissing, sig, fmt as fmtN, announce } from '../lib.js';
 import { loadI18n, langSwitch, draftNote, shortLines, tr, currentLang } from '../i18n.js';
 import { annotate } from '../glossary.js';
 import { setField, bindOrbit, fieldOk } from '../field.js';
@@ -20,17 +30,27 @@ import { tourButton } from '../tour.js';
 import { missionCheck, coverageLine } from '../mission.js';
 import { detectFacts } from '../facts.js';
 import { figLink } from '../passes.js';
-import { pageById } from '../site.js';
-import { SCRAPPED } from '../overlays.js';
+import { pageById, TOP, MORE } from '../site.js';
+import { SCRAPPED, evidenceRows, E4_SOURCE } from '../overlays.js';
+import { loadAssessData, computeAssessment } from '../assess_core.js';
+import { stopGrowth } from '../growth_run.js';
+import { checkCounts } from '../fig_checks.js';
+import { driftOK, driftSummary } from '../fig_drift.js';
+import { lineChart, SERIES, DASH } from '../charts.js';
+import * as store from '../store.js';
+import { fxAllowed, finePointer, isNight, onFxChange, lowEnd } from '../fx/loop.js';
 
 const NS = 'http://www.w3.org/2000/svg';
+const isNum = v => typeof v === 'number' && Number.isFinite(v);
+const n4 = v => sig(v, 4);                       // the Assess number format (js/fig_assess.js n4)
 
 export default async function render(root, ctx = {}) {
   const [man, india, lat, gas, gaps, i18n] = await Promise.all([load('manifest'), load('india'), load('saffire_latency'), load('saffire_gas'), load('gaps'), loadI18n()]);
   const st = n => (Array.isArray(man.files) ? man.files : []).find(f => f.name === n)?.status || 'missing';
-  const facts = detectFacts(lat, gas), v = facts.vars;
-  // UI lock: one pinned scroll story on top (the shared field does the drawing), then every other section as a
-  // one-line row of a console ledger. The rows hold the existing content unchanged.
+  const facts = detectFacts(lat, gas);
+  const live = !ctx.detached && typeof ctx.onMount === 'function';
+  // UI lock: one pinned scroll story on top (the shared field does the drawing), then (v3 merge) two visible sections,
+  // then every other section as a one-line row of a console ledger.
   let n = 0;
   const row = (title, hint, kids, { open = false } = {}) => h('details', { class: 'hrow', open },
     h('summary', {},
@@ -39,23 +59,40 @@ export default async function render(root, ctx = {}) {
       h('span', { class: 'hrow-hint' }, hint),
       h('span', { class: 'hrow-plus', 'aria-hidden': 'true' })),
     h('div', { class: 'hrow-body' }, kids));
-  const findingHint = v.rad_s != null && v.smoke_min_s != null
-    ? `Flame sensor ${v.rad_s} s · cabin smoke detector ${v.smoke_min_s}–${v.smoke_max_s} s`
-    : 'Alarm timing on NASA\'s orbital fires: not available yet';
+  // a row whose body is built (and whose data is fetched) only the first time it opens; the site map builds it at once
+  const lazyRow = (title, hint, fill) => {
+    const body = h('div', { class: 'hrow-lazy' }, h('p', { class: 'hrow-wait' }, 'Loading…'));
+    const r = row(title, hint, body);
+    let done = false;
+    const go = () => {
+      if (done) return; done = true;
+      Promise.resolve().then(fill).then(kids => {
+        body.replaceChildren(); add(body, kids);
+        if (body.isConnected) { try { annotate(body); } catch (e) { console.error(e); } }
+      }).catch(e => { console.error(e); body.replaceChildren(h('p', {}, `This section could not be built: ${e?.message || e}`)); });
+    };
+    r.addEventListener('toggle', () => { if (r.open) go(); });
+    if (!live) go();
+    return r;
+  };
   const missionOpen = !!(ctx.params && ctx.params.atm);
   root.append(h('div', { class: 'page home' },
     storySection(lat, ctx),
+    findingBand(facts, lat, gas, ctx),
+    answerSection(ctx),
     h('p', { class: 'hero-lead home-lead' }, 'Without gravity, flames turn into dim blue balls and smoke drifts wherever the fans push it. We used NASA\'s own space-station fire experiments to answer three questions: where is the fire, what will it do, and what puts it out.'),
     h('section', { class: 'ledger', 'aria-labelledby': 'ledger-h' },
       h('h2', { id: 'ledger-h', class: 'ledger-h' }, 'Everything on this page'),
-      row('From camera to risk', 'One fire, three steps, each on its own page', pipelineCard(st)),
-      row('The finding', findingHint, findingSection(facts, lat, gas, ctx)),
       row('The short answer', 'In English, తెలుగు or हिन्दी', shortAnswer(facts, lat, gas, i18n, ctx)),
+      row('From camera to risk', 'One fire, three steps, each on its own page', pipelineCard(st)),
+      lazyRow('Why it happens', 'Smoke goes where the fans push it: a drift model and a gravity toy', () => whyBody(ctx)),
       row('The three questions', 'Locate, predict, respond', [
         h('p', { class: 'story-map' }, 'The challenge asks teams to summarise, rank and interpret NASA\'s fire data. We do that as three questions:'),
         questions(st)]),
-      row('Also on this site', 'Assess and Flame lab', alsoLinks()),
+      lazyRow('Why you can trust it', 'Checks passed and failed, and the NASA datasets we used', () => trustBody()),
+      row('Also on this site', 'Assess, Flame lab and every other section', [alsoLinks(), exploreTiles()]),
       row('Mission check', 'Is there NASA data for your cabin air?', [
+        gapLine(gaps),
         isMissing(gaps) ? null : h('p', { class: 'coverage' }, coverageLine(gaps)),
         isMissing(gaps)
           ? card('Mission check: is there NASA data for your cabin air?', 'missing', null,
@@ -227,14 +264,26 @@ function storySection(lat, ctx) {
   if (!live) return pin;   // site map: static DOM, start nothing
 
   let raf = 0, unbind = null, pinned = false, topH = 0, sent = '';
-  const stick = pin.querySelector('.story-stick');
+  const stick = pin.querySelector('.story-stick'), inner = pin.querySelector('.story-in');
+  const copy = pin.querySelector('.story-top'), stage = pin.querySelector('.story-stage');
   const send = v => { const k = JSON.stringify(v); if (k !== sent) { sent = k; setField(v); } };
   const layout = () => (innerWidth > 900 ? { offx: 0.22 * innerWidth / innerHeight } : { offx: 0, dist: 6.2 });
+  // v3 merge: pin only when the copy (headline + buttons), the flame strip and the tallest stage item (the flight-data
+  // panel) all fit in one screen, measured in the pinned layout. Otherwise the story is stacked, so the panel can never
+  // be drawn over the buttons (it was, on short laptop screens) and nothing is clipped at the bottom.
+  const fits = () => {
+    const cs = getComputedStyle(inner), gap = parseFloat(cs.rowGap) || 0;
+    const ds = getComputedStyle(drag), flow = ds.position !== 'absolute';
+    const need = copy.offsetHeight + stage.offsetHeight + gap + (flow ? (parseFloat(ds.minHeight) || 0) + gap : 0)
+      + (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    return need <= stick.clientHeight + 1;
+  };
   const measure = () => {
     const top = document.querySelector('.top');
     topH = top && getComputedStyle(top).position === 'sticky' ? top.offsetHeight : 0;
     pin.style.setProperty('--top-h', `${topH}px`);
-    pinned = canPin();
+    pin.classList.remove('is-static');           // measure in the pinned layout (resize only, never on scroll)
+    pinned = canPin() && fits();
     pin.classList.toggle('is-static', !pinned);
     if (!pinned) { caps.forEach(c => { c.style.opacity = ''; c.style.transform = ''; }); panel.el.style.opacity = ''; railSeg.forEach(s => s.style.removeProperty('--f')); panel.draw(1, true); }
   };
@@ -256,16 +305,25 @@ function storySection(lat, ctx) {
     send({ g: 1 - smooth(s1), smoke: smooth(s2), dim: dim + (DIM_AFTER - dim) * after, ...layout() });
   };
   const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
-  const onResize = () => { measure(); onScroll(); };
+  // phones fire resize when the address bar slides; re-measure only on a real change (width, or height by > 120 px),
+  // so the story never flips between pinned and stacked in the middle of a scroll
+  let rzT = 0, lastW = innerWidth, lastH = innerHeight;
+  const onResize = () => {
+    if (innerWidth === lastW && Math.abs(innerHeight - lastH) <= 120) { onScroll(); return; }
+    lastW = innerWidth; lastH = innerHeight;
+    clearTimeout(rzT); rzT = setTimeout(() => { if (pin.isConnected) { measure(); onScroll(); } }, 120);
+  };
   ctx.onMount(() => {
     measure(); update();
+    // the display font changes the headline's height once it loads: measure again then
+    try { document.fonts?.ready?.then(() => { if (pin.isConnected) { measure(); onScroll(); } }); } catch { /* old browser */ }
     if (fieldOk()) unbind = bindOrbit(drag);
     else { drag.setAttribute('aria-label', 'Illustration of a fuel droplet flame: not shown, because this browser has no WebGL 2. The rest of the site works without it.'); drag.removeAttribute('tabindex'); pin.classList.add('no-field'); }
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onResize);
   });
   ctx.onLeave(() => {
-    removeEventListener('scroll', onScroll); removeEventListener('resize', onResize);
+    removeEventListener('scroll', onScroll); removeEventListener('resize', onResize); clearTimeout(rzT);
     if (raf) cancelAnimationFrame(raf); raf = 0;
     if (unbind) unbind(); unbind = null;
   });
@@ -293,22 +351,285 @@ function pipelineCard(st) {
         [[rules, 'Risk rules, to be approved']], [[figLink('assess', 'Risk: the parts and the rule that fired'), 'The rule that fired'], ['#/respond', 'Put it out']])));
 }
 
-// ---------- "The finding" ----------
-function findingSection(facts, lat, gas, ctx) {
+// ---------- "The finding" (v3 band): giant numerals over the ember noise field, the fire trail on the same host ----------
+// The band is always dark (data-theme="night" on the section, so the theme tokens inside are Night's in both themes).
+// It starts as v3's still ember (.fx-noise-still): that is what phones, Calm, reduced motion, Effects Off, the site map
+// and browsers without WebGL keep. bandEffects() swaps in the live effects only while the band is on screen.
+function findingBand(facts, lat, gas, ctx) {
   const v = facts.vars;
   if (isMissing(lat) || v.rad_s == null || v.smoke_min_s == null) {
-    return h('section', { class: 'story', 'aria-labelledby': 'story-h' },
-      h('p', { class: 'kicker' }, 'The finding'),
-      h('h2', { id: 'story-h' }, 'The finding', ' ', badge('missing')),
-      empty('The finding', 'saffire_latency', 'Alarm timing on NASA\'s orbital fires is not available yet, so the headline cannot be computed.'));
+    return h('section', { class: 'fd bleed', 'aria-labelledby': 'story-h' },
+      h('div', { class: 'fd-in' },
+        h('p', { class: 'kicker' }, 'The finding'),
+        h('h2', { id: 'story-h' }, 'The finding', ' ', badge('missing')),
+        empty('The finding', 'saffire_latency', 'Alarm timing on NASA\'s orbital fires is not available yet, so the headline cannot be computed.'),
+        ticking(lat, { ctx })));
   }
-  return h('section', { class: 'story', 'aria-labelledby': 'story-h' },
-    h('p', { class: 'kicker' }, 'The finding'),
-    h('h2', { id: 'story-h' }, `In NASA's Saffire-III burns, a flame light sensor crossed our alarm rule within ${v.rad_s} seconds. The cabin smoke detector took ${v.smoke_min_s} to ${v.smoke_max_s} seconds.`),
-    h('p', { class: 'story-stamps' }, badge(lat.status), ' Saffire-III alarm timing', v.obs_never ? [' · ', badge(isMissing(gas) ? 'reported' : gas.status), ' Saffire VI gas (ICES-2024-365)'] : null),
-    v.obs_never ? h('p', { class: 'story-sub' }, 'Alarm times use our own stated rule, because NASA published none. The flame sensor updates only every 5 s and sits in the flow duct; the smoke detector is in the cabin, which still held smoke from the earlier test, so its time depends a lot on the rule. Its second channel never rose past its alarm level. In NASA\'s later Saffire VI test, much of the hazardous gas had already been released by the time a smoke monitor reached its alarm level (ICES-2024-365).') : null,
-    ticking(lat, { ctx }),
-    h('p', { class: 'story-links' }, h('a', { href: figLink('detect', 'Replay an orbital fire') }, 'Replay the real sensor data'), ' · ', h('a', { href: '#/memory' }, 'Why seconds matter: sixty years of fire')));
+  const sec = h('section', { class: 'fd bleed fx-noise-still', 'data-theme': 'night', 'aria-labelledby': 'story-h' },
+    h('div', { class: 'fd-in' },
+      h('p', { class: 'kicker' }, 'The finding'),
+      h('div', { class: 'fd-nums', 'aria-hidden': 'true' },
+        h('div', { class: 'fd-n fd-rad' }, h('b', {}, String(v.rad_s)), h('span', {}, 's'), h('small', {}, 'flame light sensor')),
+        h('div', { class: 'fd-vs' }, 'vs'),
+        h('div', { class: 'fd-n fd-smoke' }, h('b', {}, `${v.smoke_min_s}–${v.smoke_max_s}`), h('span', {}, 's'), h('small', {}, 'cabin smoke detector'))),
+      h('h2', { id: 'story-h', class: 'fd-h' }, `In NASA's Saffire-III burns, a flame light sensor crossed our alarm rule within ${v.rad_s} seconds. The cabin smoke detector took ${v.smoke_min_s} to ${v.smoke_max_s} seconds.`),
+      v.obs_never ? h('p', { class: 'fd-never' }, 'The detector\'s second channel never rose past its alarm level.') : null,
+      ticking(lat, { ctx }),
+      h('p', { class: 'story-stamps' }, badge(lat.status), ' Saffire-III alarm timing', v.obs_never ? [' · ', badge(isMissing(gas) ? 'reported' : gas.status), ' Saffire VI gas (ICES-2024-365)'] : null),
+      v.obs_never ? h('details', { class: 'fold fd-more' }, h('summary', {}, 'How the alarm times were set'),
+        h('p', { class: 'story-sub' }, 'Alarm times use our own stated rule, because NASA published none. The flame sensor updates only every 5 s and sits in the flow duct; the smoke detector is in the cabin, which still held smoke from the earlier test, so its time depends a lot on the rule. Its second channel never rose past its alarm level. In NASA\'s later Saffire VI test, much of the hazardous gas had already been released by the time a smoke monitor reached its alarm level (ICES-2024-365).')) : null,
+      h('p', { class: 'story-links' }, h('a', { href: figLink('detect', 'Replay an orbital fire') }, 'Replay the real sensor data'), h('a', { href: '#/memory' }, 'Why seconds matter: sixty years of fire')),
+      h('p', { class: 'fd-illus' }, h('span', { class: 'illus-tag' }, 'Illustration'), ' The glow behind this band is decoration, not data.')));
+  if (!ctx.detached && typeof ctx.onMount === 'function') {
+    let stop = null;
+    ctx.onMount(() => { stop = bandEffects(sec); });
+    ctx.onLeave(() => { if (stop) stop(); stop = null; });
+  }
+  return sec;
+}
+
+/** Mount the ember noise (WebGL 1) and the fire trail (WebGL 2) on host only while it is on screen; release both
+ *  contexts (WEBGL_lose_context, inside each effect's destroy) 2 s after it leaves the screen, when effects turn off,
+ *  and on page leave. Never on a coarse pointer. The fire trail only in Night (it hides itself in Day). Returns stop(). */
+function bandEffects(host) {
+  let vis = false, stopped = false, failed = false, token = 0, offT = 0, noise = null, fluid = null, mods = null;
+  const still = on => host.classList.toggle('fx-noise-still', on);
+  const can = () => !failed && fxAllowed() && finePointer();
+  const kill = fx => { try { fx?.destroy?.(); } catch (e) { console.error(e); } return null; };
+  const drop = () => { token++; clearTimeout(offT); offT = 0; noise = kill(noise); fluid = kill(fluid); still(true); };
+  const ensure = async () => {
+    const my = ++token;
+    if (!mods) {
+      try { mods = await Promise.all([import('../fx/noise.js'), import('../fx/fluid.js')]); }
+      catch (e) { console.warn('Home band effects not started', e); failed = true; drop(); return; }
+    }
+    if (my !== token || stopped || !vis || document.hidden || !can()) return;
+    const [N, F] = mods;
+    // below v3's .55: the small light text over it keeps >= 4.5:1 at the brightest spots. The noise effect creates its
+    // canvas lazily (its own IntersectionObserver), so .el is null here; it keeps .fx-noise-still on the host until its
+    // first live frame, and for good without WebGL, so this function never touches the still class itself.
+    if (!noise) noise = N.noiseField(host, { strength: 0.4 });
+    // the fire trail is a second effect context on the same band: only on capable machines (not lowEnd), and only in Night
+    if (isNight() && !lowEnd && !fluid) fluid = F.fluidTrail(host);
+    if ((!isNight() || lowEnd) && fluid) fluid = kill(fluid);           // Day: give the WebGL 2 context back
+  };
+  const sync = () => {
+    if (stopped || document.hidden) return;          // a hidden tab is handled by onHide (release after 2 s)
+    if (!can()) { drop(); return; }
+    if (vis) { clearTimeout(offT); offT = 0; ensure(); }
+    else if ((noise || fluid) && !offT) offT = setTimeout(() => { offT = 0; if (!vis) drop(); }, 2000);
+  };
+  let io = null;
+  if ('IntersectionObserver' in window) {
+    io = new IntersectionObserver(es => { for (const e of es) vis = e.isIntersecting; sync(); });
+    io.observe(host);
+  }
+  const unFx = onFxChange(sync);
+  const onHide = () => { if (document.hidden && (noise || fluid)) { clearTimeout(offT); offT = setTimeout(() => { offT = 0; if (document.hidden) drop(); }, 2000); } else if (!document.hidden) sync(); };
+  document.addEventListener('visibilitychange', onHide);
+  return () => { stopped = true; io?.disconnect(); unFx(); document.removeEventListener('visibilitychange', onHide); drop(); };
+}
+
+// ---------- "Our answer" (v3): camera -> growth -> risk, run live in the browser on the example reading ----------
+// The same path as Assess: the default worked example for the fuel and cabin, the flame from data/cv_example.json
+// (checked by store.applyFlameState as Assess checks it), then assess_core.computeAssessment. Nothing is typed in.
+function answerSection(ctx) {
+  const out = h('div', { class: 'ans-out' },
+    h('p', { class: 'ans-idle' }, 'Press the button to run the growth model in your browser on the example reading.'));
+  const lvl = h('div', { class: 'ans-risk' }, h('p', { class: 'ans-k' }, 'Risk level'), h('p', { class: 'ans-level' }, '—'),
+    h('p', { class: 'ans-why' }, badge('team'), ' Team choice, to be approved'));
+  const open = h('a', { class: 'btn ans-open', href: '#/assess' }, 'Open the full assessment');
+  const btn = h('button', { type: 'button', class: 'btn primary ans-load' }, 'Load example camera reading');
+  let busy = false;
+  btn.addEventListener('click', async () => {
+    if (busy) return; busy = true; btn.setAttribute('aria-busy', 'true');
+    out.replaceChildren(h('p', { class: 'ans-idle' }, 'Running the growth model…'));
+    try {
+      const [ex, data] = await Promise.all([load('cv_example'), loadAssessData()]);
+      if (isMissing(ex)) { out.replaceChildren(empty('No example camera reading yet', 'cv_example', 'The example button needs this demo file.')); return; }
+      const list = Array.isArray(data.examples?.examples) ? data.examples.examples : [];
+      const base = list.find(e => e.id === store.DEFAULT_PRESET) || list[0];
+      if (!base) { out.replaceChildren(empty('No worked examples yet', 'growth_examples', 'The demo needs the worked examples for the fuel and cabin.')); return; }
+      store.set(store.fromPreset(base), { url: false });
+      const r0 = store.applyFlameState(ex, 'example');
+      if (!r0.ok) { out.replaceChildren(h('p', {}, `The example reading was not used: ${r0.errors.join(' ')}`)); return; }
+      const inputs = store.get();
+      const res = await computeAssessment(inputs, data);
+      if (!out.isConnected) return;
+      showResult(res, inputs, data);
+    } catch (e) {
+      if (e?.name === 'AbortError') return;
+      console.error(e); out.replaceChildren(h('p', {}, `The growth model could not run: ${e?.message || e}`));
+    } finally { busy = false; btn.removeAttribute('aria-busy'); }
+  });
+  function showResult(r, inputs, data) {
+    const q = store.toQuery(inputs); open.setAttribute('href', `#/assess${q ? '?' + q : ''}`);
+    const risk = r.risk || {};
+    lvl.querySelector('.ans-level').textContent = risk.level || 'none given';
+    lvl.dataset.level = risk.level || '';
+    lvl.querySelector('.ans-why').replaceChildren(badge(isMissing(data.rules) ? 'missing' : (data.rules.status || 'team')), risk.approved ? ' Team rule' : ' Team choice, to be approved',
+      risk.fired ? h('span', { class: 'ans-rule' }, ` · Rule ${risk.fired.id}${risk.fired.label ? ` (${risk.fired.label})` : ''}`) : null);
+    if (r.kind !== 'growth' || !r.growth) { out.replaceChildren(h('p', {}, (r.sentences || []).join(' ') || 'No growth curve for these inputs.')); return; }
+    const g = r.growth, t = g.t_abs_s || g.t_s || [], A = g.area_cm2 || {}, mid = (g.summary || {}).mid || {};
+    const pts = k => t.map((x, i) => [x, isNum(A[k]?.[i]) ? A[k][i] : null]);
+    const band = t.map((x, i) => [x, Math.min(A.lo?.[i], A.hi?.[i]), Math.max(A.lo?.[i], A.hi?.[i])]);
+    const chart = lineChart({ title: 'Burning area over time, worked example', xLabel: 'Time after ignition, s', yLabel: 'Burning area, cm²', unit: ' cm²',
+      series: [
+        { name: 'Slow run (lo)', points: pts('lo'), color: SERIES[0], dash: DASH[1] },
+        { name: 'Middle run (mid)', points: pts('mid'), band, color: SERIES[1], dash: '' },
+        { name: 'Fast run (hi)', points: pts('hi'), color: SERIES[3], dash: DASH[3] }] });
+    out.replaceChildren(
+      h('div', { class: 'ans-tiles' },
+        h('div', {}, h('b', {}, n4(mid.max_area_cm2)), h('span', {}, 'cm²'), h('small', {}, 'largest burning area (mid)')),
+        h('div', {}, h('b', {}, n4(mid.t_max_s)), h('span', {}, 's'), h('small', {}, 'time to the largest area (mid)')),
+        h('div', {}, h('b', {}, n4(mid.t_end_s)), h('span', {}, 's'), h('small', {}, 'the fire stops (mid)'))),
+      chart,
+      h('p', { class: 'ans-src' }, badge('demo'), ' Example camera reading (data/cv_example.json) · ', badge(r.status || 'model'), ' Growth model (M6b)'));
+    announce(`Worked example: largest burning area ${n4(mid.max_area_cm2)} square centimetres; risk level ${risk.level || 'none given'}.`);
+  }
+  if (ctx?.onLeave) ctx.onLeave(() => { try { stopGrowth(); } catch { /* nothing running */ } });
+  return h('section', { class: 'ans', 'aria-labelledby': 'ans-h' },
+    h('div', { class: 'ans-head' },
+      h('p', { class: 'kicker' }, 'Our answer'),
+      h('h2', { id: 'ans-h' }, 'Camera → growth → risk'),
+      h('p', {}, 'One flame reading goes in; our spread model, calibrated on NASA flights, grows it forward and team rules give a risk level.')),
+    h('div', { class: 'ans-app' },
+      h('div', { class: 'ans-ctl' }, btn, h('small', {}, badge('demo'), ' A copy of worked example 1\'s flame, not a camera measurement.'), lvl, open),
+      out));
+}
+
+// ---------- "Why it happens" row (v3): the drift loop and the gravity points toy, built when the row first opens ----------
+async function whyBody(ctx) {
+  const [drift, w] = await Promise.all([load('drift'), load('whatif')]);
+  const L = !isMissing(w) && Array.isArray(w.layouts) ? (w.layouts.find(x => /air return/i.test(x?.name || '')) || null) : null;
+  const share = L && isNum(L.caught_120) ? `${Math.round(L.caught_120 * 100)}%` : null;
+  const grav = h('div', { class: 'why-grav' }, h('p', { class: 'hrow-wait' }, 'Loading the gravity illustration…'));
+  if (ctx.detached || typeof ctx.onMount !== 'function') {   // site map: static text, start nothing
+    grav.replaceChildren(h('p', {}, h('span', { class: 'illus-tag' }, 'Illustration'), ' On Home, a toy shows motes drifting with the cabin airflow, and falling once you turn gravity on.'));
+    return whyLayout(L, share, w, drift, ctx, grav);
+  }
+  import('../fx/gravity.js').then(m => {
+    const fig = m.gravityPoints();
+    grav.replaceChildren(fig);
+    // touch: a tap on the motes does what the button does (the button stays the keyboard control)
+    const stage = fig.querySelector('.fx-grav-stage'), b = fig.querySelector('.fx-grav-btn');
+    if (stage && b) stage.addEventListener('click', () => b.click());
+  }).catch(e => { console.warn('gravity illustration not started', e); grav.replaceChildren(h('p', {}, 'The gravity illustration could not start; the rest of the page works without it.')); });
+  return whyLayout(L, share, w, drift, ctx, grav);
+}
+function whyLayout(L, share, w, drift, ctx, grav) {
+  return h('div', { class: 'why' },
+    h('div', { class: 'why-text' },
+      h('h3', {}, 'Smoke goes where the fans push it.'),
+      share
+        ? h('p', {}, `With nothing to make it rise, smoke never reaches the ceiling on its own. In ${fmtN(w.runs, 0)} simulated cabin fires, a detector ${L.name.toLowerCase()} caught `, h('b', { class: 'why-share' }, share), ' within 2 minutes. ', badge(w.status))
+        : h('p', {}, 'With nothing to make it rise, smoke never reaches the ceiling on its own. The share of simulated fires a detector catches is not available yet (data/whatif.json).')),
+    h('div', { class: 'why-vis' }, driftLoop(drift, ctx)),
+    grav);
+}
+
+// a small looping drift map from data/drift.json (v3). Effects Off, Calm and reduced motion: the still opening frame.
+const RAMP = [[12, 15, 21], [16, 52, 104], [44, 104, 196], [116, 169, 255], [214, 230, 255]];   // drawing choice (cool ramp)
+const rampC = x => { x = Math.max(0, Math.min(1, x)) * (RAMP.length - 1); const i = Math.min(RAMP.length - 2, Math.floor(x)), f = x - i; return RAMP[i].map((a, k) => Math.round(a + (RAMP[i + 1][k] - a) * f)); };
+function driftLoop(d, ctx) {
+  if (!driftOK(d)) return empty('Waiting for the drift simulation', 'drift', 'A grid of smoke concentration per time step.');
+  const n = d.frames.length, W = 480, Hh = Math.round(W * d.ly_m / d.lx_m);
+  const still = Math.floor(n * 0.12);   // driftCard's opening frame (12 %)
+  const cv = h('canvas', { width: W, height: Hh, class: 'why-cv', role: 'img', 'aria-label': `Smoke drift model: ${driftSummary(d, still)}` });
+  const g = cv.getContext('2d'), off = document.createElement('canvas'); off.width = d.nx; off.height = d.ny;
+  const og = off.getContext('2d'), img = og?.createImageData(d.nx, d.ny);
+  const X = x => x / d.lx_m * W, Y = y => Hh - y / d.ly_m * Hh;
+  const t = h('output', { class: 'why-t' }, '');
+  let k = still, raf = 0, last = 0, acc = 0, paused = false, vis = false;
+  const draw = () => {
+    if (!g || !img) return;
+    const fr = d.frames[k] || [];
+    for (let p = 0; p < fr.length; p++) { const c = rampC(fr[p] / 255); const o = p * 4; img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = 255; }
+    og.putImageData(img, 0, 0); g.imageSmoothingEnabled = true; g.drawImage(off, 0, 0, W, Hh);
+    g.strokeStyle = 'rgba(237,232,223,.28)'; g.lineWidth = 1;
+    for (const [x, y, u, v] of d.arrows || []) { const x0 = X(x), y0 = Y(y); g.beginPath(); g.moveTo(x0, y0); g.lineTo(x0 + u * 90, y0 - v * 90); g.stroke(); }
+    g.fillStyle = '#FF7A3D'; g.beginPath(); g.arc(X(d.fire[0]), Y(d.fire[1]), 5, 0, 6.283); g.fill();
+    for (const det of d.detectors) {
+      const on = det.alarm_s != null && k * (d.frame_dt_s ?? 0) >= det.alarm_s;
+      g.beginPath(); g.arc(Math.min(W - 8, Math.max(8, X(det.x))), Math.min(Hh - 8, Math.max(8, Y(det.y))), 6, 0, 6.283);
+      g.fillStyle = on ? '#fab219' : 'rgba(0,0,0,.6)'; g.fill(); g.strokeStyle = '#EDE8DF'; g.lineWidth = 1.5; g.stroke();
+    }
+    t.textContent = `${fmtN(k * (d.frame_dt_s ?? 0), 0)} s after the fire starts`;
+  };
+  const moving = () => !paused && fxAllowed() && vis && !document.hidden && cv.isConnected;
+  const step = now => {
+    raf = 0; if (!moving()) { last = 0; return; }
+    acc += last ? now - last : 0; last = now;
+    if (acc > 140) { acc = 0; k = (k + 1) % n; draw(); }   // about 7 frames a second: the file's own frames, nothing tweened
+    raf = requestAnimationFrame(step);
+  };
+  const kick = () => { if (!raf && moving()) raf = requestAnimationFrame(step); };
+  const btn = h('button', { type: 'button', class: 'chip why-pause', 'aria-pressed': 'false' }, 'Pause');
+  const sync = () => {
+    const ok = fxAllowed();
+    btn.hidden = !ok;                                       // no loop at all under Calm / reduced motion / Effects Off
+    btn.textContent = paused ? 'Play' : 'Pause'; btn.setAttribute('aria-pressed', String(paused));
+    if (!ok && k !== still) { k = still; draw(); }
+  };
+  btn.addEventListener('click', () => { paused = !paused; sync(); kick(); });
+  cv.addEventListener('click', () => { if (fxAllowed()) btn.click(); });   // touch: tap the map to pause or play
+  draw(); sync();
+  if (ctx && typeof ctx.onMount === 'function' && !ctx.detached) {
+    let io = null;
+    const onP = () => { sync(); kick(); };
+    const unFx = onFxChange(onP);
+    if ('IntersectionObserver' in window) { io = new IntersectionObserver(([e]) => { vis = e.isIntersecting; kick(); }); io.observe(cv); } else { vis = true; kick(); }
+    document.addEventListener('visibilitychange', kick);
+    ctx.onLeave?.(() => { io?.disconnect(); unFx(); document.removeEventListener('visibilitychange', kick); if (raf) cancelAnimationFrame(raf); raf = 0; });
+  }
+  return h('figure', { class: 'why-fig' }, h('div', { class: 'why-stage' }, cv),
+    h('figcaption', {}, h('span', { class: 'why-legend' }, h('i', { class: 'f' }), 'fire', h('i', { class: 'd' }), 'detector (amber: alarm)'), t, btn,
+      h('span', {}, badge(d.status), ' 2D model, data/drift.json · ', h('a', { href: figLink('predict', 'Where the smoke goes') }, 'Open the full drift map'))));
+}
+
+// ---------- "Why you can trust it" row (v3): counts from the checks list and the models, NASA datasets as chips ----------
+async function trustBody() {
+  const [trust, inv, ev, models, m6b] = await Promise.all([load('trust'), load('investigations'), load('evidence'), load('models'), loadPath(E4_SOURCE)]);
+  let counts = null;
+  try { if (!isMissing(ev)) counts = checkCounts(evidenceRows(ev, { m6bResults: isMissing(m6b) ? null : m6b, models: isMissing(models) ? null : models })); } catch (e) { console.error(e); }
+  const rows = !isMissing(trust) && Array.isArray(trust.rows) ? trust.rows : null;
+  const met = rows ? rows.filter(r => r.passed).length : null;
+  const items = !isMissing(inv) && Array.isArray(inv.items) ? inv.items : [];
+  const big = (v, label, cls) => h('div', { class: `tr-n ${cls || ''}` }, h('b', {}, v == null ? 'n/a' : String(v)), h('span', {}, label));
+  return h('div', { class: 'tr' },
+    h('div', { class: 'tr-head' },
+      h('h3', {}, 'Failures stay on the page.'),
+      h('p', {}, counts ? `We wrote down ${counts.n} checks, each with its pass limit set before running it.` : 'The list of checks is not available yet (data/evidence.json).',
+        rows ? ` ${met} of ${rows.length} models met the rule we wrote before running them; the rest are shown as misses.` : ''),
+      h('a', { class: 'btn', href: '#/evidence' }, 'See every check')),
+    h('div', { class: 'tr-nums' },
+      big(counts?.pass, 'checks passed', 'pass'), big(counts?.fail, 'failed, kept on record', 'fail'), big(counts?.todo, 'still to run'),
+      h('p', { class: 'tr-src' }, badge(isMissing(ev) ? 'missing' : ev.status), ' data/evidence.json · ', badge(isMissing(trust) ? 'missing' : trust.status), ' data/trust.json')),
+    h('div', { class: 'tr-data' },
+      h('p', { class: 'tr-k' }, `NASA datasets used (${items.length})`, ' ', badge(isMissing(inv) ? 'missing' : inv.status)),
+      items.length ? h('ul', { class: 'tr-chips' }, items.map(x => h('li', {}, x.doi
+        ? h('a', { href: `https://doi.org/${x.doi}`, target: '_blank', rel: 'noopener' }, h('b', {}, x.name), h('span', {}, x.psi), h('span', { class: 'sr' }, ' (opens in a new tab)'))
+        : h('span', {}, h('b', {}, x.name), h('span', {}, x.psi)))))
+        : empty('Waiting for the investigation list', 'investigations', 'The NASA investigations the site draws on, each with its PSI id and DOI.')));
+}
+
+// ---------- the oxygen gap (v3), at the top of the mission check: station air vs a richer-oxygen cabin, from gaps.json ----------
+function gapLine(gaps) {
+  const probes = !isMissing(gaps) && Array.isArray(gaps.probes) ? gaps.probes : [];
+  const iss = probes[0], rich = probes.find(p => p !== iss && isNum(p.o2) && isNum(iss?.o2) && p.o2 > iss.o2);
+  const kind = rich ? Object.keys(rich.counts || {}).find(k => rich.counts[k] === 0 && isNum(iss?.counts?.[k])) : null;
+  if (!iss || !rich || !kind) return null;
+  return h('div', { class: 'here-gap' },
+    h('p', { class: 'here-n', 'aria-hidden': 'true' }, h('b', {}, String(iss.counts[kind])), h('span', {}, '→'), h('b', { class: 'zero' }, String(rich.counts[kind]))),
+    h('p', {}, `NASA microgravity tests on ${kind}: ${iss.counts[kind]} in ${iss.atmosphere || `${iss.o2}% oxygen at ${iss.kpa} kPa`}, ${rich.counts[kind]} near ${rich.atmosphere || `${rich.o2}% oxygen at ${rich.kpa} kPa`}.`, ' ', badge(gaps.status)));
+}
+
+// ---------- every section as tiles (v3 explore), inside the "Also on this site" row ----------
+function exploreTiles() {
+  const skip = new Set(['overview', 'detect', 'predict', 'respond', 'assess', 'flame']);   // the three questions and alsoLinks() have these
+  const tile = p => h('li', {}, h('a', { class: 'ex-tile', href: `#/${p.id}` }, h('b', {}, p.label), p.title ? h('span', {}, p.title) : null));
+  const group = (name, list) => { const ps = list.filter(p => !skip.has(p.id)); return ps.length ? h('div', { class: 'ex-g' }, h('p', { class: 'ex-gh' }, name), h('ul', {}, ps.map(tile))) : null; };
+  return h('nav', { class: 'ex-all', 'aria-label': 'Every section' }, group('Main menu', TOP), group('More', MORE));
 }
 
 // ---------- the Home short answer, in English, తెలుగు or हिन्दी (P5-G) ----------

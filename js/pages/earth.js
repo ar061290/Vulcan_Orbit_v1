@@ -119,7 +119,11 @@ function dataTable(spec, files, used) {
   const heads = spec.columns.map(col => h('span', {}, inline(col.label, files, used)));
   const body = rows.map(row => spec.columns.map(col => show(resolvePath(row, col.path), col) ?? 'n/a'));
   spec.columns.forEach(col => used.push({ ok: true, file: spec.file, path: `${spec.path}[*].${col.path}`, status: d.status, text: `${rows.length} rows` }));
-  return table(heads, body, { caption: spec.caption || null });
+  const out = table(heads, body, { caption: spec.caption || null, cls: 'ea-table' });
+  // v3 layout: a column whose every cell is a number is right-aligned in tabular figures (no value changes)
+  const numCol = spec.columns.map((_, j) => body.every(r => /^[\d.,%\s–-]+$/.test(String(r[j]))));
+  out.querySelectorAll('tr').forEach(tr => [...tr.cells].forEach((c, j) => { if (numCol[j]) c.classList.add('num'); }));
+  return out;
 }
 
 /** The card text: {h} starts a new block (heading + paragraph); a table item gets its own place in the block. */
@@ -204,8 +208,8 @@ export default async function render(root, ctx) {
   // "earth"); dragging it turns the planet. Illustration only: no number is drawn on it.
   const globe = h('div', {
     class: 'ea-globe hud', role: 'group', 'aria-roledescription': '3D illustration', tabindex: ctx.detached ? null : '0',
-    'aria-label': 'Illustration: the Earth. Drag or use the arrow keys to spin it.',
-  }, h('span', { class: 'ea-gtag', 'aria-hidden': 'true' }, 'Illustration'),
+    'aria-label': 'Illustration: the Earth. Drag or use the arrow keys to spin it.', 'data-drag': '1',
+  }, poster(), h('span', { class: 'ea-gtag', 'aria-hidden': 'true' }, 'Illustration'),
     h('span', { class: 'ea-ghint', 'aria-hidden': 'true' }, 'Drag to spin', h('kbd', {}, '\u2190'), h('kbd', {}, '\u2192')));
   const pg = page('On Earth',
     'Three findings from this site, each linked to an Earth use. The NASA tests ran in orbit, so they point to questions worth asking on Earth; they do not answer them. Every number is read from a data file when the page loads.',
@@ -214,18 +218,41 @@ export default async function render(root, ctx) {
   if (!ctx.detached) mountGlobe(pg, globe, ctx);
 }
 
+/** A still line drawing of a globe (Illustration, no data). Day theme only, while the field is clipped to the page
+ *  header and not to this column (css/ui-earth.css), so the column is never an empty dark box. */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function poster() {
+  const sv = (tag, a) => { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(a)) e.setAttribute(k, String(v)); return e; };
+  const svg = sv('svg', { class: 'ea-poster', viewBox: '-110 -110 220 220', 'aria-hidden': 'true', focusable: 'false' });
+  svg.append(sv('circle', { class: 'ea-p-rim', r: 96 }));
+  for (const rx of [32, 64, 88]) svg.append(sv('ellipse', { rx, ry: 96 }));            // meridians
+  for (const y of [-64, -32, 0, 32, 64]) { const w = Math.sqrt(96 * 96 - y * y); svg.append(sv('line', { x1: -w, x2: w, y1: y, y2: y })); } // parallels
+  svg.append(sv('ellipse', { class: 'ea-p-orbit', rx: 108, ry: 22, transform: 'rotate(-18)' }));
+  return svg;
+}
+
 /** Drag (or arrow keys) on the globe column spins the planet, with a fling and spring settle (js/spring.js; instant
- *  under Calm). The field is shown, undimmed, through the page header while it is on screen, then through the column. */
+ *  under Calm). The field is shown, undimmed, through whichever of the page header and this column shows more of
+ *  itself on screen (the Day theme clips the field to one host, js/field.js). Pressing or focusing the column makes it
+ *  the host at once, so a spin is always visible. */
 function mountGlobe(pg, globe, ctx) {
   let drag = null, io = null;
   ctx.onMount(() => {
     drag = draggable(globe, { axis: 'x', step: 80, onMove: p => setField({ spin: -p / 260 }) });
     const head = pg.querySelector('.phead');
-    const host = el => { globe.classList.toggle('is-host', el === globe); setHost(el, { noDim: true }); };
+    let cur = null;
+    const host = el => { if (el === cur) return; cur = el; globe.classList.toggle('is-host', el === globe); setHost(el, { noDim: true }); };
     host(head || globe);
+    const take = () => host(globe);
+    globe.addEventListener('pointerdown', take); globe.addEventListener('focus', take);
     if (head && 'IntersectionObserver' in window) {
-      io = new IntersectionObserver(([e]) => host(e.isIntersecting && e.intersectionRatio > .25 ? head : globe), { threshold: [0, .25, .5, 1] });
-      io.observe(head);
+      const seen = new Map();
+      const area = e => (e.isIntersecting ? e.intersectionRect.width * e.intersectionRect.height : 0);
+      io = new IntersectionObserver(es => {
+        es.forEach(e => seen.set(e.target, area(e)));
+        host((seen.get(head) || 0) > (seen.get(globe) || 0) ? head : globe);
+      }, { threshold: [0, .1, .25, .5, .75, 1] });
+      io.observe(head); io.observe(globe);
     }
   });
   ctx.onLeave(() => { drag?.destroy(); io?.disconnect(); drag = io = null; });

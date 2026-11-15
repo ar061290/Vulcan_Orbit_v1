@@ -18,12 +18,10 @@
 #view[data-page="overview"] .pipe-stamps>span{display:inline-flex;gap:6px;align-items:center}
 #view[data-page="overview"] .pipe-links{font-weight:700}
 
-/* ---------- "The finding" ---------- */
-#view[data-page="overview"] .story{margin:34px 0 26px}
-#view[data-page="overview"] .story>h2{font:700 clamp(24px,3.4vw,40px)/1.12 var(--display);letter-spacing:-.03em;max-width:28ch;margin:10px 0 12px}
+/* ---------- "The finding" ---------- (v3 merge: now a dark band after the story; its rules are in css/ui-overview.css §3) */
 #view[data-page="overview"] .story-stamps{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;color:var(--ink2);margin:0 0 10px}
-#view[data-page="overview"] .story-sub{font-size:1.1rem;color:var(--ink2);max-width:62ch;margin:0 0 18px}
-#view[data-page="overview"] .story-links{margin:10px 0 0;font-weight:700}
+#view[data-page="overview"] .story-sub{font-size:1.05rem;color:var(--ink2);max-width:62ch;margin:8px 0 0}
+#view[data-page="overview"] .story-links{display:flex;flex-wrap:wrap;gap:8px 24px;margin:10px 0 0;font-weight:700}
 #view[data-page="overview"] .story-map{font-weight:700;color:var(--ink);margin:26px 0 10px}
 
 /* ---------- the three questions ---------- */

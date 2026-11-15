@@ -185,7 +185,7 @@ function dialCtl({ id, name, unit, min, max, step, value, marks = [], detents = 
   const dec = decimalsOf(step);
   const round = v => Number(Number(v).toFixed(dec));
   // a value set from outside (a preset, a link, the exact field) is shown as it is; a value the dial produced is rounded to the step
-  let lo = min, hi = max, ctl = null, face = null, cur = value, bands = [], given = value;
+  let lo = min, hi = max, ctl = null, face = null, cur = value, bands = [], given = value, desc = null;
   const fmtv = v => `${plain(v === given ? v : round(v))} ${unit}`;
   const ticks = sv('g', { class: 'as-dial-ticks' }), bandG = sv('g', { class: 'as-dial-band' });
   const svg = sv('svg', { viewBox: '0 0 100 100', 'aria-hidden': 'true', focusable: 'false' },
@@ -217,7 +217,8 @@ function dialCtl({ id, name, unit, min, max, step, value, marks = [], detents = 
   const showVal = v => { val.textContent = fmtv(v); };
   const majors = () => uniqSorted(marks.filter(m => m.major).map(m => m.v)).filter(v => v >= lo - 1e-9 && v <= hi + 1e-9);
   const bind = v => {
-    const f = h('div', { class: 'as-dial-face', id: `${id}-dial` });
+    // data-keynav: the site crosshair cursor (js/fx/cursor.js) shows its "press" ring over a dial
+    const f = h('div', { class: 'as-dial-face', id: `${id}-dial`, 'data-keynav': '' });
     f.append(svg);
     if (face) face.replaceWith(f); else el.append(f, val, tag);
     face = f;
@@ -225,6 +226,7 @@ function dialCtl({ id, name, unit, min, max, step, value, marks = [], detents = 
       step: detents ? null : step, label: `${name}, ${unit}`, format: fmtv,
       onChange: x => { const r = round(x); cur = r; showVal(r); onInput(r); } });
     face.setAttribute('aria-valuetext', fmtv(v));
+    if (desc) face.setAttribute('aria-describedby', desc);
     face.addEventListener('keydown', e => {
       if (e.key !== 'PageUp' && e.key !== 'PageDown') return;
       const pts = majors(); if (!pts.length) return;
@@ -242,6 +244,8 @@ function dialCtl({ id, name, unit, min, max, step, value, marks = [], detents = 
     limits(a, b) { if (!isNum(a) || !isNum(b) || b <= a || (a === lo && b === hi)) return; lo = a; hi = b; bind(cur); },
     bands(list) { bands = Array.isArray(list) ? list : []; drawBands(); },
     out(on) { el.classList.toggle('out', !!on); tag.hidden = !on; },
+    /** Link (or unlink, with null) the out-of-box flag text to the dial, so a screen reader hears it with the value. */
+    describe(flagId) { desc = flagId || null; if (desc) face.setAttribute('aria-describedby', desc); else face.removeAttribute('aria-describedby'); },
   };
 }
 
@@ -279,7 +283,7 @@ function platePanel({ onStart, detached }) {
   const art = sv('g', { role: 'img', 'aria-label': '' },
     cabin, cabinIn, bolts, tagL, tagR, sv('g', { 'clip-path': 'url(#as-plate-clip)' }, gridG, fuelR, disc, ringG), fuelT, axX, axY, tagG, bar, barT, arrow, airT, stT);
   const focusC = sv('circle', { class: 'as-hfocus', r: 15 });
-  const handle = sv('g', { class: 'as-start', tabindex: 0, role: 'application', 'aria-roledescription': 'draggable point', 'aria-describedby': 'as-plate-help' },
+  const handle = sv('g', { class: 'as-start', tabindex: 0, role: 'application', 'data-keynav': '', 'aria-roledescription': 'draggable point', 'aria-describedby': 'as-plate-help' },
     sv('circle', { class: 'as-hhit', r: 22 }), focusC, sv('path', { class: 'as-hcross', d: 'M-11 0H-4M4 0H11M0 -11V-4M0 4V11' }), sv('circle', { class: 'as-hdot', r: 3.5 }));
   const svg = sv('svg', { class: 'as-plate-svg', role: 'group', 'aria-label': 'Cabin plate: the fire start point and the burning-area rings' },
     sv('defs', {}, clip), art, handle);
@@ -579,12 +583,33 @@ export function inputsCard(store, data, ctx = {}) {
   const dP = nfP ? mkDial('p', 'as-p', 'Pressure', 'atm', B.pressure_atm.min, B.pressure_atm.max, 0.001, S.conditions?.pressure_atm, nfP, v => setCond('pressure_atm', v), marksOf('pressure_atm')) : null;
 
   // ---- one field = slider + where its limits came from; the out-of-box flags sit under the dials, always visible
-  const flags = {};
+  const flags = {}, fields = {}, exacts = [];
   const flag = key => { const f = h('p', { class: 'as-flag', hidden: true, id: `as-flag-${key}` }); flags[key] = f; return f; };
-  const field = (key, nf, from) => h('div', { class: 'as-field' }, nf, from);
+  const field = (key, nf, from) => (fields[key] = h('div', { class: 'as-field' }, nf, from));
   const dialRow = (...ds) => h('div', { class: 'as-dials' }, ds.filter(Boolean).map(d => d.el));
   const flagRow = (...keys) => h('div', { class: 'as-flags' }, keys.map(flag));
-  const exact = (...kids) => h('details', { class: 'as-exact' }, h('summary', {}, 'Exact values'), h('div', { class: 'as-exact-body' }, ...kids));
+  const exact = (...kids) => {
+    const n = h('span', { class: 'as-exact-n', hidden: true });
+    const d = h('details', { class: 'as-exact' }, h('summary', {}, 'Exact values', n), h('div', { class: 'as-exact-body' }, ...kids));
+    exacts.push({ d, n }); return d;
+  };
+  // v3: an extrapolated input is flagged on the control itself: the dial turns amber (dialCtl .out), the exact number
+  // field gets an amber edge, and the flag text joins both controls' descriptions (aria-describedby)
+  const markExt = (key, on) => {
+    const id = `as-flag-${key}`, w = fields[key];
+    dials[key]?.describe(on ? id : null);
+    if (!w) return;
+    w.classList.toggle('is-ext', on);
+    w.querySelectorAll('input').forEach(i => {
+      const ids = (i.getAttribute('aria-describedby') || '').split(/\s+/).filter(x => x && x !== id);
+      if (on) ids.push(id);
+      if (ids.length) i.setAttribute('aria-describedby', ids.join(' ')); else i.removeAttribute('aria-describedby');
+    });
+  };
+  const exactCounts = () => exacts.forEach(({ d, n }) => {
+    const k = d.querySelectorAll('.as-field.is-ext').length;
+    n.hidden = !k; n.textContent = k ? ` · ${k} outside the calibration box` : '';
+  });
   function flameLimits() {
     const am = areaMax();
     if (isNum(am) && am > 0) { setLimits(nfArea, 0.1, am, 'cm²'); dials.a?.limits(0.1, am); }
@@ -597,7 +622,6 @@ export function inputsCard(store, data, ctx = {}) {
   const fs = (legendText, ...kids) => h('fieldset', { class: 'as-group' }, h('legend', {}, legendText), ...kids);
   const dirFrom = '0 degrees: the air moves along +x, the fuel length; 90 degrees: along +y, across it (fuel coordinates, models/m6b-predictor/CONTRACT_PROPOSAL.md).';
   const c = card(TITLES.inputs, data.examples.status || 'model', 'Set the flame, the fuel and the cabin air, or start from a worked example. Values outside the calibration box are allowed and flagged.',
-    plate.el,
     h('div', { class: 'as-preset' }, h('label', { for: 'as-preset' }, 'Start from a worked example'), presetSel, presetWhy),
     h('div', { class: 'as-groups' },
       fs('Flame now', typeSeg, dialRow(dA), flagRow('a', 'x', 'y'), flameNote, dropNote,
@@ -657,9 +681,13 @@ export function inputsCard(store, data, ctx = {}) {
       add(flags[key], h('b', {}, 'Outside the calibration box'), ` (${fieldName(b.field)} ${boxText(b)}): this value is extrapolated, not validated.`);
     }
     for (const [dk, d] of Object.entries(dials)) { d.bands(bands[dk] || []); d.out(!!outs[dk]); }
+    for (const k of new Set([...Object.keys(flags), ...Object.keys(fields)])) markExt(k, !!outs[k] && !!flags[k] && !flags[k].hidden);
+    exactCounts();
     plate.result(result);
   };
   c.sync(S);
+  /** The cabin plate is placed by the page (the centre column of the app screen, js/pages/assess.js), not in this card. */
+  c.plate = plate.el;
   return c;
 }
 
@@ -729,16 +757,19 @@ export function cameraCard(store, data) {
     now.textContent = `Latest camera reading (data/cv_latest.json): ${cv.flame_type || 'unknown'} flame${isNum(cv.area_cm2) ? `, area ${plain(cv.area_cm2)} cm²` : ''}${Array.isArray(cv.centroid_cm) ? ` at (${cv.centroid_cm.map(plain).join(', ')}) cm` : ''}${isNum(cv.frame_time_s) ? `, frame at ${plain(cv.frame_time_s)} s` : ''}${isNum(cv.confidence) ? `, confidence ${plain(cv.confidence)}` : ''}.`;
   }
   const c = card(TITLES.camera, hasCV ? cv.status : 'missing', 'Fill the flame fields from the camera model\'s reading, a JSON file or a paste. A reading is checked field by field and never used in part.',
+    // v3: the quick actions first, the file and paste boxes in a fold, so the camera card stays short in the inputs column
     hasCV ? h('div', { class: 'as-cam-latest' }, now, latestBtn) : h('div', { class: 'as-cam-latest' },
-      h('p', { class: 'as-cam-none' }, h('b', {}, 'Camera model not connected yet: using the sliders.')),
-      empty('No camera reading yet', 'cv_latest', 'The camera owner adds this file when the camera model runs on the bench rig.', CV_SHAPE)),
-    h('div', { class: 'as-cam-in' },
-      h('div', { class: 'as-field' }, h('label', { for: 'as-cam-file' }, 'Load a camera file (JSON)'), file),
-      h('div', { class: 'as-field' }, h('label', { for: 'as-cam-paste' }, 'Or paste a camera reading (JSON)'), paste,
-        h('small', { id: 'as-cam-shape', class: 'as-from' }, 'Shape: models/m6b-predictor/CONTRACT_PROPOSAL.md (coordinates must be "fuel": x along the length, y across the width, in cm).'), useBtn),
-      h('div', { class: 'as-example' }, exBtn, badge('demo'),
-        h('small', {}, 'A demo copy of worked example 1\'s flame (data/cv_example.json), not a camera measurement.'))),
-    msg, smoke);
+      h('p', { class: 'as-cam-none' }, h('b', {}, 'Camera model not connected yet: using the sliders.'))),
+    h('div', { class: 'as-example' }, exBtn, badge('demo'),
+      h('small', {}, 'A demo copy of worked example 1\'s flame (data/cv_example.json), not a camera measurement.')),
+    msg,
+    h('details', { class: 'fold as-cam-fold' }, h('summary', {}, 'Use your own reading: a file or a paste'),
+      h('div', { class: 'as-cam-in' },
+        h('div', { class: 'as-field' }, h('label', { for: 'as-cam-file' }, 'Load a camera file (JSON)'), file),
+        h('div', { class: 'as-field' }, h('label', { for: 'as-cam-paste' }, 'Or paste a camera reading (JSON)'), paste,
+          h('small', { id: 'as-cam-shape', class: 'as-from' }, 'Shape: models/m6b-predictor/CONTRACT_PROPOSAL.md (coordinates must be "fuel": x along the length, y across the width, in cm).'), useBtn)),
+      hasCV ? null : empty('No camera reading yet', 'cv_latest', 'The camera owner adds this file when the camera model runs on the bench rig.', CV_SHAPE)),
+    smoke);
   c.apply = apply;
   c.sync = () => {};
   return c;
@@ -828,10 +859,11 @@ export function outputsCard(result) {
     const mid = sm.mid || {};
     setBody(c,
       h('div', { class: 'as-stats' },
-        stat('Largest burning area (mid)', `${n4(mid.max_area_cm2)} cm²`, rangeTxt(mx, 'cm²')),
-        stat('Time to the largest area (mid)', `${n4(mid.t_max_s)} s`, rangeTxt(tm, 's')),
-        stat('The fire stops at (mid)', `${n4(mid.t_end_s)} s`, rangeTxt(te, 's')),
-        stat('Why it stops', reasons.length === 1 ? reasons[0] : reasons.join('; ') || 'n/a', reasons.length > 1 ? 'differs between runs' : '')),
+        // v3 big stat tiles: the number large, its unit small beside it, the lo–hi range under it
+        stat('Largest burning area (mid)', [n4(mid.max_area_cm2), h('span', { class: 'as-unit' }, ' cm²')], rangeTxt(mx, 'cm²')),
+        stat('Time to the largest area (mid)', [n4(mid.t_max_s), h('span', { class: 'as-unit' }, ' s')], rangeTxt(tm, 's')),
+        stat('The fire stops at (mid)', [n4(mid.t_end_s), h('span', { class: 'as-unit' }, ' s')], rangeTxt(te, 's')),
+        Object.assign(stat('Why it stops', reasons.length === 1 ? reasons[0] : reasons.join('; ') || 'n/a', reasons.length > 1 ? 'differs between runs' : ''), { className: 'statbox as-stop' })),
       chart,
       numbers(`${TITLES.curve}: burning area of each run`, ['Time after ignition, s', 'Slow run (lo), cm²', 'Middle run (mid), cm²', 'Fast run (hi), cm²'],
         t.map((x, i) => [x, A.lo?.[i] ?? 'n/a', A.mid?.[i] ?? 'n/a', A.hi?.[i] ?? 'n/a']),
@@ -883,7 +915,8 @@ const valuesText = v => {
 
 /** "Risk: the parts and the rule that fired": the parts first, then the level, the rule that fired and every rule. */
 export function riskCard(result, rules) {
-  const c = card(TITLES.risk, 'team', 'The parts behind the level are shown first. Written team rules turn them into Low, Elevated or High.', body('as-risk'));
+  // The level leads (it is the top of the sticky risk rail, v3); the parts behind it follow, then every rule.
+  const c = card(TITLES.risk, 'team', 'The level and the rule that fired, then the parts behind them. Written team rules turn the parts into Low, Elevated or High.', body('as-risk'));
   c.update = (r, state) => {
     if (!r) return;
     const risk = r.risk || null, d = r.detection || {}, g = r.kind === 'growth' ? r.growth : null, sm = g?.summary || {};
@@ -905,20 +938,24 @@ export function riskCard(result, rules) {
     ];
     const level = risk?.level;
     const evaluated = Array.isArray(risk?.evaluated) ? risk.evaluated : [];
+    // v3 rail: the level box first (label, big level, three-step scale, the rule that fired), then the approval banner,
+    // the parts and every rule in a fold. v3's noise "fire band" on High is not used here: a second WebGL context for an
+    // 8 px strip competes with the shared field and the cabin plate; the High level keeps its red top edge instead.
     setBody(c,
+      risk ? h('div', { class: 'as-levelbox', 'data-level': level },
+        h('p', { class: 'as-level' }, h('span', { class: 'as-level-k' }, 'Risk level: '), h('b', {}, level || 'none given'),
+          h('span', { class: 'as-scale', 'aria-hidden': 'true' }, LEVELS.map(l => h('i', { class: l === level ? 'on' : null }, l)))),
+        h('p', { class: 'as-fired' }, h('b', {}, `Rule that fired: ${risk.fired?.id || 'none'}${risk.fired?.label ? ` (${risk.fired.label})` : ''}. `), risk.fired?.reason || '')) : null,
       approved ? null : h('p', { class: 'as-banner', role: 'note' }, h('b', {}, 'Rules are a team choice, to be approved.'), ' They are not a NASA rule.'),
+      isMissing(rules) ? empty('No risk rules yet', 'risk_rules', 'The level needs the team\'s written rules.', '{status:"team", approved:false, default:{level, reason}, rules:[{id, level, test, reason}]}') : null,
       h('div', { class: 'as-parts' }, h('h3', {}, 'The parts'), h('dl', { class: 'kv' }, parts.flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]))),
       h('p', { class: 'as-note' }, '* Times after ignition on NASA\'s Saffire-III burns, a different fire, shown for scale and not as a prediction for this one. The detection shares are smoke-drift model runs, not NASA data.'),
-      isMissing(rules) ? empty('No risk rules yet', 'risk_rules', 'The level needs the team\'s written rules.', '{status:"team", approved:false, default:{level, reason}, rules:[{id, level, test, reason}]}') : null,
-      risk ? h('div', { class: 'as-levelbox', 'data-level': level },
-        h('p', { class: 'as-level' }, 'Risk level: ', h('b', {}, level || 'none given'),
-          h('span', { class: 'as-scale', 'aria-hidden': 'true' }, LEVELS.map(l => h('i', { class: l === level ? 'on' : null }, l)))),
-        h('p', {}, h('b', {}, `Rule that fired: ${risk.fired?.id || 'none'}${risk.fired?.label ? ` (${risk.fired.label})` : ''}. `), risk.fired?.reason || '')) : null,
-      evaluated.length ? table(['Rule', 'Level if it matches', 'Result', 'Tests', 'Reason'],
-        evaluated.map(e => [`${e.id}${e.label ? ': ' + e.label : ''}`, e.level || 'no level',
-          e.fired ? h('b', {}, e.matched ? 'Matched: fired' : 'Fired') : e.matched === true ? 'Matched (an earlier rule fired)' : e.matched === null ? 'Could not be checked' : 'Did not match',
-          Array.isArray(e.tests) && e.tests.length ? e.tests.join('; ') : valuesText(e.values), e.reason || '']),
-        { caption: 'Every rule, checked in file order (the first match fires)' }) : null);
+      evaluated.length ? h('details', { class: 'fold as-rules' }, h('summary', {}, `Every rule, checked in file order (${evaluated.length})`),
+        table(['Rule', 'Level if it matches', 'Result', 'Tests', 'Reason'],
+          evaluated.map(e => [`${e.id}${e.label ? ': ' + e.label : ''}`, e.level || 'no level',
+            e.fired ? h('b', {}, e.matched ? 'Matched: fired' : 'Fired') : e.matched === true ? 'Matched (an earlier rule fired)' : e.matched === null ? 'Could not be checked' : 'Did not match',
+            Array.isArray(e.tests) && e.tests.length ? e.tests.join('; ') : valuesText(e.values), e.reason || '']),
+          { caption: 'Every rule, checked in file order (the first match fires)' })) : null);
   };
   if (result) c.update(result);
   return c;

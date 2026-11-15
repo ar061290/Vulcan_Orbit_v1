@@ -40,7 +40,8 @@ const latEmpty = () => empty('Waiting for Saffire-III telemetry', 'saffire_laten
 const TRACE = ['#7AA2FF', C.s3, C.s4, C.s1];
 const ALARM = '#FF7A3D', INK = '#EDE8DF', MUTE = '#8C8A93', BG = '#05060E';
 const LABEL_FONT = '500 11px "IBM Plex Mono", ui-monospace, monospace';
-const isCalm = () => document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+let rmq = null;   // one MediaQueryList, read on every frame (no new matchMedia per draw)
+const isCalm = () => document.documentElement.dataset.motion === 'calm' || !!(rmq ||= window.matchMedia?.('(prefers-reduced-motion: reduce)'))?.matches;
 const tLab = t => (t < 0 ? `T−${fmt(-t, 0)} S` : `T+${fmt(t, 0)} S`);
 /** a "nice" major graticule step (s) for a visible span: about one labelled major per 110 px */
 const niceStep = (span, count) => {
@@ -72,10 +73,10 @@ export function replayCard(lat, params = {}, ctx = {}) {
   const scope = h('div', { class: 'det-scope hud' },
     h('div', { class: 'det-top', 'aria-hidden': 'true' }, h('div', { class: 'det-top-l' }, h('span', { class: 'det-k' }, 'Saffire-III · telemetry'), evRead), h('div', { class: 'det-top-r' }, tRead, chRead)),
     h('div', { class: 'det-plot' }, cv, h('div', { class: 'det-ph', 'aria-hidden': 'true' }, grip)),
-    h('div', { class: 'det-foot', 'aria-hidden': 'true' }, winRead, h('span', { class: 'det-tip' }, 'Drag to scrub · pinch or ctrl+wheel to zoom · double-click resets')));
+    h('div', { class: 'det-foot', 'aria-hidden': 'true' }, winRead, h('span', { class: 'det-tip' }, window.matchMedia?.('(pointer: coarse)')?.matches ? 'Swipe sideways to scrub · pinch to zoom · Reset zoom shows it all' : 'Drag to scrub · pinch or ctrl+wheel to zoom · double-click resets')));
   const g = cv.getContext('2d');
   let b, T0, T1, v0, v1, now = 0, prevNow = null, raf = 0, timer = 0, playing = false, last = 0;
-  let W = 0, H = 0, dpr = 1, onScreen = true, cancelSpring = () => {};
+  let W = 0, H = 0, dpr = 1, onScreen = true, cancelSpring = () => {}, drawRaf = 0, dirty = false;
   const items = [];   // keyboard stops (one per reading); mutated in place so keyNav always reads the current event
   const PL = () => (W < 560 ? 34 : 46), PR = 12, PT = 6, PB = 26;
   const plotW = () => Math.max(1, W - PL() - PR);
@@ -87,11 +88,23 @@ export function replayCard(lat, params = {}, ctx = {}) {
   const idxAt = t => { let k = -1; for (let j = 0; j < b.t.length && b.t[j] <= t + 1e-9; j++) k = j; return k; };
 
   // ---------- drawing ----------
+  // backing store at most 1.5x CSS pixels (phones at DPR 3 would otherwise fill 4x the pixels for no visible gain);
+  // it is only reallocated when the size really changed, because setting canvas.width clears and reallocates it
   const size = () => {
     if (ctx.detached) { W = 960; H = 340; dpr = 1; }
     else { const r = cv.getBoundingClientRect(); if (!r.width || !r.height) return false; W = r.width; H = r.height; dpr = Math.min(1.5, window.devicePixelRatio || 1); }
-    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    const cw = Math.round(W * dpr), ch = Math.round(H * dpr);
+    if (cv.width === cw && cv.height === ch) return false;
+    cv.width = cw; cv.height = ch;
     return true;
+  };
+  // redraw only when something changed, at most once per frame, and never while the scope is off screen
+  // (a change made off screen marks it dirty; it is drawn when the scope scrolls back in)
+  const paint = () => {
+    if (ctx.detached) return draw();
+    // off screen: skip the canvas, but keep the text controls (slider, clock, lamps) current, since they can be in view
+    if (!onScreen || document.hidden) { dirty = true; if (b) { lamps.querySelectorAll('.lamp').forEach((el, i) => { const c = b.channels[i]; el.classList.toggle('on', !!c && c.alarm_s != null && now >= c.alarm_s); }); readouts(idxAt(now)); } return; }
+    if (!drawRaf) drawRaf = requestAnimationFrame(() => { drawRaf = 0; dirty = false; draw(); });
   };
   const trace = (c, from, to, laneY) => {
     g.beginPath(); let n = 0;
@@ -101,7 +114,8 @@ export function replayCard(lat, params = {}, ctx = {}) {
     }
   };
   const draw = () => {
-    if (!g || !b || (!W && !size())) return;
+    if (!W) size();
+    if (!g || !b || !W) return;
     const calmNow = isCalm(), span = v1 - v0, pl = PL(), pw = plotW(), n = b.channels.length;
     const plotH = H - PT - PB, rowH = plotH / n;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -205,16 +219,17 @@ export function replayCard(lat, params = {}, ctx = {}) {
     else if (now > v1) { v1 = Math.min(T1, now + span * 0.1); v0 = v1 - span; }
     if (v0 < T0) { v0 = T0; v1 = T0 + span; }
   };
-  const setNow = (t, check = true) => { now = clampT(t); if (check) crossCheck(); else prevNow = now; follow(); draw(); };
+  // now: true from inside an animation frame (playback, the fling spring), which draws at once; input handlers coalesce
+  const setNow = (t, check = true, nowDraw = false) => { now = clampT(t); if (check) crossCheck(); else prevNow = now; follow(); if (nowDraw) draw(); else paint(); };
   const zoomAt = (factor, x) => {   // factor < 1 zooms in; x (canvas px) stays fixed
     const tc = invX(x), frac = (x - PL()) / plotW();
     const span = Math.max(minSpan(), Math.min(T1 - T0, (v1 - v0) * factor));
     v0 = tc - frac * span; v1 = v0 + span;
     if (v0 < T0) { v0 = T0; v1 = T0 + span; } if (v1 > T1) { v1 = T1; v0 = T1 - span; }
-    draw();
+    paint();
   };
-  const panBy = dt => { const span = v1 - v0; v0 = Math.max(T0, Math.min(T1 - span, v0 + dt)); v1 = v0 + span; draw(); };
-  const resetZoom = () => { v0 = T0; v1 = T1; draw(); };
+  const panBy = dt => { const span = v1 - v0; v0 = Math.max(T0, Math.min(T1 - span, v0 + dt)); v1 = v0 + span; paint(); };
+  const resetZoom = () => { v0 = T0; v1 = T1; paint(); };
 
   // ---------- playback (rAF only while playing, paused off-screen and in hidden tabs; Calm: still frames) ----------
   const stop = () => {
@@ -226,7 +241,7 @@ export function replayCard(lat, params = {}, ctx = {}) {
     if (!playing) return;
     if (!onScreen || document.hidden) { last = 0; return; }   // resumed by the observer / visibilitychange
     const dt = last ? Math.min(0.1, (ts - last) / 1000) : 0; last = ts;
-    setNow(now + dt / REPLAY_S * (T1 - T0));
+    setNow(now + dt / REPLAY_S * (T1 - T0), true, true);
     if (now >= T1) stop(); else raf = requestAnimationFrame(tick);
   };
   const calmStep = () => {   // reduced motion: one still frame per second, no animation loop
@@ -276,7 +291,7 @@ export function replayCard(lat, params = {}, ctx = {}) {
       const span = Math.max(minSpan(), Math.min(T1 - T0, span0 * pinch.d / d)), frac = (cx - PL()) / plotW();
       v0 = tc - frac * span; v1 = v0 + span;
       if (v0 < T0) { v0 = T0; v1 = T0 + span; } if (v1 > T1) { v1 = T1; v0 = T1 - span; }
-      draw(); return;
+      paint(); return;
     }
     if (!drag) return;
     const x = localX(e);
@@ -294,7 +309,7 @@ export function replayCard(lat, params = {}, ctx = {}) {
     if (Math.abs(v) < 40) return;
     // fling: the playhead glides on with its release speed and settles on a spring (spring.js), inside the window
     const x0 = X(now), target = Math.max(PL(), Math.min(PL() + plotW(), x0 + v * 0.18));
-    cancelSpring(); cancelSpring = spring(x0, v, target, x => setNow(invX(x)));
+    cancelSpring(); cancelSpring = spring(x0, v, target, x => setNow(invX(x), true, true));
   };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   cv.addEventListener('dblclick', e => { e.preventDefault(); resetZoom(); });
@@ -365,13 +380,15 @@ export function replayCard(lat, params = {}, ctx = {}) {
 
   // ---------- lifecycle: crisp redraw on resize, pause off-screen, stop everything on leave ----------
   if (!ctx.detached) {
-    const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(() => { if (size()) draw(); }) : null;
+    const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(() => { if (size()) { dirty = true; paint(); } }) : null;
     ro?.observe(cv);
-    const io = typeof IntersectionObserver === 'function' ? new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; if (onScreen) resume(); }) : null;
+    const io = typeof IntersectionObserver === 'function' ? new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; if (onScreen) { if (dirty) paint(); resume(); } }) : null;
     io?.observe(scope);
-    const vis = () => { if (!document.hidden) resume(); };
+    const vis = () => { if (!document.hidden) { if (dirty) paint(); resume(); } };
     document.addEventListener('visibilitychange', vis);
-    ctx.onLeave?.(() => { stop(); cancelSpring(); ro?.disconnect(); io?.disconnect(); document.removeEventListener('visibilitychange', vis); });
+    // the lane labels use IBM Plex Mono: redraw once when the web font arrives (no redraw loop waiting for it)
+    document.fonts?.ready?.then(() => { if (b) { dirty = true; paint(); } }).catch(() => {});
+    ctx.onLeave?.(() => { stop(); cancelSpring(); cancelAnimationFrame(drawRaf); drawRaf = 0; ro?.disconnect(); io?.disconnect(); document.removeEventListener('visibilitychange', vis); });
   }
 
   const blindLink = h('a', { href: figLink('detect', T_BLIND), onclick: e => {
@@ -400,12 +417,16 @@ export function gasCard(g) {
     empty('Waiting for the Saffire IV-VI cabin gas table', 'saffire_gas', 'One row per test: carbon monoxide and carbon dioxide rise, with the crew limits the paper cites.',
       '{ "status":"reported", "source":"...", "tests":[{ "test":"...", "material":"...", "co_rise":"<ppm>", "co2_rise_mmHg":"<mmHg>" }], "limits":{ "co_smac_24h_ppm":"<ppm>", "co_smac_1h_ppm":"<ppm>", "co2_1h_mmHg":"<mmHg>", "source":"..." }, "alarm":{ "note":"..." }, "takeaway":"..." }'));
   const L = g.limits;
+  // phones (v3 report: the 640-wide bars drew about 8 px text at 390 px): a 360-wide layout with each test's name on
+  // its own line above its bar, so the text renders near its set size. Same values, same table; decided at build time.
+  const narrow = !!window.matchMedia?.('(max-width:560px)')?.matches;
   const panel = (title, key, lines, unit) => {
     lines = lines.filter(([l]) => Number.isFinite(l));
     const vals = g.tests.map(t => t[key]).filter(Number.isFinite);
     // axis end: the largest value or limit plus 8 % room (main typed 460 ppm and 4 mmHg; this derives them from the file)
     const max = Math.max(...vals, ...lines.map(([l]) => l), 1e-9) * 1.08;
-    const W = 640, rowH = 30, m = { l: 150, r: 170, t: 26, b: 30 }, Hh = m.t + g.tests.length * rowH + m.b;
+    const W = narrow ? 360 : 640, rowH = narrow ? 40 : 30, m = narrow ? { l: 8, r: 72, t: 26, b: 30 } : { l: 150, r: 170, t: 26, b: 30 }, Hh = m.t + g.tests.length * rowH + m.b;
+    const nameY = narrow ? 12 : 18, barY = narrow ? 17 : 6, valY = narrow ? 29 : 18;
     const X = v => m.l + v / max * (W - m.l - m.r);
     const label = `${title}, by test, with crew limits`;
     const svg = sv('svg', { viewBox: `0 0 ${W} ${Hh}`, class: 'chart', role: 'img' });
@@ -414,14 +435,16 @@ export function gasCard(g) {
     const overOf = v => { const hit = lines.filter(([l]) => v > l).sort((a, b2) => b2[0] - a[0])[0]; return hit ? hit[1] : null; };
     g.tests.forEach((t, i) => {
       const y = m.t + i * rowH, v = t[key], over = Number.isFinite(v) ? overOf(v) : null, name = `${t.test} · ${String(t.material).split(',')[0]}`;
-      svg.append(sv('text', { x: m.l - 8, y: y + 18, 'text-anchor': 'end', class: 'ch-ink' }, name));
+      const nameEl = sv('text', narrow ? { x: m.l, y: y + nameY, class: 'ch-ink' } : { x: m.l - 8, y: y + nameY, 'text-anchor': 'end', class: 'ch-ink' }, name);
+      svg.append(nameEl);
       if (!Number.isFinite(v)) {
-        const na = sv('text', { x: m.l + 4, y: y + 18 }, 'n/a'); svg.append(na);
+        const na = sv('text', { x: m.l + 4, y: y + valY }, 'n/a'); svg.append(na);
         items.push({ html: `<b>${esc(name)}</b><br>${esc(title)}: n/a`, anchor: na }); rows.push([t.test, t.material, 'n/a', '']); return;
       }
-      const r = sv('rect', { x: m.l, y: y + 6, width: Math.max(2, X(v) - m.l), height: 16, rx: 3, fill: over ? C.s2 : C.s1 });
-      const lab = sv('text', { x: X(v) + 6, y: y + 18, class: 'ch-ink' }, `${v} ${unit}`);
-      if (over) lab.append(sv('tspan', { style: 'font-weight:700' }, ` · over ${over}`));   // text marker, not colour alone
+      const r = sv('rect', { x: m.l, y: y + barY, width: Math.max(2, X(v) - m.l), height: narrow ? 14 : 16, rx: 2, fill: over ? C.s2 : C.s1 });
+      const lab = sv('text', { x: X(v) + 6, y: y + valY, class: 'ch-ink' }, `${v} ${unit}`);
+      // text marker, not colour alone; on phones it joins the name line, which has the room
+      if (over) (narrow ? nameEl : lab).append(sv('tspan', { style: 'font-weight:700' }, ` · over ${over}`));
       svg.append(r, lab);
       const html = `<b>${esc(t.test)} · ${esc(t.material)}</b><br>${esc(title)}: <b>${esc(v)} ${esc(unit)}</b><br>${over ? `Over the ${esc(over)}` : 'Below the limits shown'}`;
       r.addEventListener('pointermove', e => tip(e, html)); r.addEventListener('pointerdown', e => tip(e, html)); r.addEventListener('pointerleave', untip);

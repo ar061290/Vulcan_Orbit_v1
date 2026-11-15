@@ -5,7 +5,10 @@
    card padding, so nothing pokes past the card and nothing scrolls sideways at 320 px) */
 #view[data-page="detect"] .card.det-osc{--det-pad:var(--sp3);padding:var(--det-pad)}
 #view[data-page="detect"] .det-osc .replay-ctl{gap:var(--sp1) 12px;align-items:center;flex-wrap:wrap}
-#view[data-page="detect"] .det-osc .replay-ctl .btn{padding:11px 14px}
+#view[data-page="detect"] .det-osc .replay-ctl .btn{padding:11px 14px;min-height:44px}
+/* phones: the event picker and the buttons are primary touch controls (>= 44 px) */
+#view[data-page="detect"] .det-osc .replay-ctl select{min-height:44px}
+#view[data-page="detect"] .det-osc .replay-time input[type=range]{min-height:44px}
 #view[data-page="detect"] .det-osc .det-reset[aria-disabled=true]{cursor:default}
 /* Day: lock.css puts #05060E text on the Day fire (#c2410c), about 3.9:1; white text there is about 5.2:1 */
 html[data-theme=day] #view[data-page="detect"] .det-osc .det-play:not(:hover){color:#fff}
@@ -30,7 +33,7 @@ html[data-theme=day] #view[data-page="detect"] .det-osc .det-play:not(:hover){co
 
 /* the plot: full-bleed canvas, crisp at DPR (js sizes the backing store), one-finger vertical scroll passes through */
 #view[data-page="detect"] .det-plot{position:relative}
-#view[data-page="detect"] .det-scope canvas.replay{display:block;width:100%;height:clamp(260px,30vw,440px);aspect-ratio:auto;margin:0;border:0;border-radius:0!important;background:#05060E;touch-action:pan-y;cursor:ew-resize;user-select:none;-webkit-user-select:none}
+#view[data-page="detect"] .det-scope canvas.replay{display:block;width:100%;height:clamp(260px,30vw,440px);aspect-ratio:auto;margin:0;border:0;border-radius:0!important;background:#05060E;touch-action:pan-y;cursor:ew-resize;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 #view[data-page="detect"] .det-scope canvas.replay:focus-visible{outline:2px solid #7AA2FF;outline-offset:-2px}
 #view[data-page="detect"] .det-ph{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #view[data-page="detect"] .det-grip{position:absolute;left:-6px;top:0;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid #EDE8DF;will-change:transform}
@@ -58,7 +61,7 @@ html[data-theme=day] #view[data-page="detect"] .det-osc .det-play:not(:hover){co
 @media (max-width:560px){
   #view[data-page="detect"] .card.det-osc{--det-pad:var(--sp2)}
   #view[data-page="detect"] .det-t{font-size:22px}
-  #view[data-page="detect"] .det-tip{display:none}
+  #view[data-page="detect"] .det-foot{display:grid;gap:4px}
 }
 
 /* ---------- the other Find it cards: console look (mono labels, hairlines), CSS only ---------- */

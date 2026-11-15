@@ -230,3 +230,16 @@ See `AI_LOG.md`.
 | axe-core 4.10.2 (Deque Systems, MPL-2.0) | site/tools/axe.mjs accessibility scan only; installed outside the repo, injected at test time, never a site dependency |
 | playwright-core 1.56.1 (Apache-2.0), headless Chromium | site/tools/*.mjs crawls (parity, screenshots, reachability, keyboard, coverage); installed outside the repo, already listed above |
 | WCAG 2.2 (W3C Recommendation, https://www.w3.org/TR/WCAG22/): SC 1.4.3 contrast, 1.4.10 reflow, 2.1.1 keyboard, 2.3.1 three flashes, 2.4.7 and 2.4.11 focus visible and not obscured | Phase 7 checks and fixes (Night red text colour, keyboard-scrollable tables, glossary focus ring, dock size on phones, wrapping long paths) |
+
+## Site v3 effects kept in the merge (ideas only, no code copied)
+
+Every effect in `js/fx/` was written from scratch for this repo (AGENTS.md rule 9). These are the ideas they follow.
+
+| Source | Used for |
+|---|---|
+| Cursor Structule, Framer Marketplace component, https://www.framer.com/marketplace/components/cursor-structule/ | Idea for the crosshair cursor with full-viewport hairlines and a ring on hover (js/fx/cursor.js) |
+| Flowing Cursor, Framer Marketplace component, https://www.framer.com/marketplace/components/flowing-cursor/ | Idea for the pointer fluid trail, recoloured as fire to smoke (js/fx/fluid.js) |
+| Jos Stam, "Stable Fluids", SIGGRAPH 1999; Mark Harris, "Fast Fluid Dynamics Simulation on the GPU", GPU Gems ch. 38 (NVIDIA, 2004) | Method of the fluid trail: semi-Lagrangian advection, vorticity confinement, Jacobi pressure solve (js/fx/fluid.js) |
+| SpectraNoise, Framer Marketplace component, https://www.framer.com/marketplace/components/spectranoise/ | Idea for the slow warped glow with grain and scanlines, recoloured as embers (js/fx/noise.js) |
+| Inigo Quilez, "Domain warping" (article), https://iquilezles.org/articles/warp/ | Method of the warped noise in js/fx/noise.js |
+| Akimitsu Hamamuro, "Gravity Points" (CodePen), https://codepen.io/akm2/pen/AGgarW | Idea for the "Turn gravity on" mote illustration, labelled "Illustration, not data" (js/fx/gravity.js) |

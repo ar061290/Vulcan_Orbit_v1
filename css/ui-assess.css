@@ -1,9 +1,10 @@
-/* UI lock styles for #/assess (feat/ui-lock). Scope every rule under #view[data-page="assess"].
-   The cabin plate (rings from the growth run) and the dials sit at the top of "Flame now, fuel and cabin";
-   the number fields fold under "Exact values". Colours: tokens only, so Day and Night both work. No shadows, no gradients. */
+/* UI lock styles for #/assess (feat/ui-lock, merged with the v3 app screen). Scope every rule under #view[data-page="assess"].
+   The cabin plate (rings from the growth run) sits at the top of the centre column (css/p-assess.css has the layout);
+   the dials are in "Flame now, fuel and cabin" in the inputs column, with the number fields folded under "Exact values".
+   Colours: tokens only, so Day and Night both work. No shadows, no gradients. */
 
 /* ---------- the cabin plate ---------- */
-#view[data-page="assess"] .as-plate{margin:var(--sp2,16px) 0 var(--sp3,24px)}
+#view[data-page="assess"] .as-plate{margin:0 0 var(--sp2,16px)}
 #view[data-page="assess"] .as-plate-frame{border-radius:var(--r-panel,14px)}
 #view[data-page="assess"] .as-plate-svg{display:block;width:100%;height:auto;max-width:100%;user-select:none;-webkit-user-select:none}
 #view[data-page="assess"] .as-cabin{fill:var(--raise);stroke:var(--axis);stroke-width:1}
@@ -49,12 +50,14 @@
 #view[data-page="assess"] .as-plate-help{margin:var(--sp1,8px) 0 0;font-size:13px;line-height:1.5;color:var(--mute);max-width:78ch}
 
 /* ---------- inputs: groups, dials, exact values ---------- */
-#view[data-page="assess"] .as-group{border:1px solid var(--line);border-radius:var(--r-panel,14px);padding:var(--sp2,16px) var(--sp2,16px) var(--sp1,8px)}
-#view[data-page="assess"] .as-group>legend{font:var(--label,500 11px var(--mono));letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+/* groups in the narrow inputs column: flat, split by a rule (v3), so no nested boxes eat the width */
+#view[data-page="assess"] .as-group{margin:0;min-width:0;border:0;border-top:1px solid var(--line);border-radius:0;padding:12px 0 var(--sp1,8px)}
+#view[data-page="assess"] .as-group>legend{float:left;width:100%;margin:0 0 10px;padding:0;font:var(--label,500 11px var(--mono));letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+#view[data-page="assess"] .as-group>legend+*{clear:both}
 #view[data-page="assess"] select,#view[data-page="assess"] .as-other input,#view[data-page="assess"] textarea{border-radius:var(--r-data,2px);border-width:1px}
 #view[data-page="assess"] .as-preset{margin:0 0 var(--sp2,16px)}
 
-#view[data-page="assess"] .as-dials{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:var(--sp2,16px) var(--sp1,8px);margin:var(--sp1,8px) 0 var(--sp1,8px)}
+#view[data-page="assess"] .as-dials{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:var(--sp2,16px) var(--sp1,8px);margin:var(--sp1,8px) 0 var(--sp1,8px)}
 #view[data-page="assess"] .as-dial{display:grid;justify-items:center;align-content:start;gap:4px;text-align:center;min-width:0}
 #view[data-page="assess"] .as-dial-label{font:var(--label,500 11px var(--mono));letter-spacing:.14em;text-transform:uppercase;color:var(--mute);overflow-wrap:anywhere}
 #view[data-page="assess"] .as-dial-face{width:88px;height:88px;border-radius:50%;cursor:ns-resize;outline:none}
@@ -75,6 +78,13 @@
 #view[data-page="assess"] .as-dial.out .as-dial-ptr circle{fill:var(--warn)}
 #view[data-page="assess"] .as-dial.out .as-dial-val{color:var(--warn)}
 #view[data-page="assess"] .as-flags .as-flag{margin:4px 0 8px}
+/* v3: an extrapolated exact-value field carries the same amber flag on the control itself */
+#view[data-page="assess"] .as-field.is-ext{position:relative;padding-left:10px}
+#view[data-page="assess"] .as-field.is-ext::before{content:"";position:absolute;left:0;top:0;bottom:6px;width:3px;background:var(--warn)}
+#view[data-page="assess"] .as-field.is-ext input[type=number]{border-color:var(--warn)}
+#view[data-page="assess"] .as-field.is-ext input[type=range]{accent-color:var(--warn)}
+#view[data-page="assess"] .as-exact-n{color:var(--warn);letter-spacing:.08em}
+#view[data-page="assess"] .as-exact-n[hidden]{display:none}
 
 #view[data-page="assess"] .as-exact{margin:var(--sp1,8px) 0;border-top:1px solid var(--line)}
 #view[data-page="assess"] .as-exact>summary{font:var(--label,500 11px var(--mono));letter-spacing:.14em;text-transform:uppercase;color:var(--mute);cursor:pointer;padding:10px 0;min-height:24px}
@@ -85,6 +95,7 @@
 
 @media (max-width:640px){
   #view[data-page="assess"] .as-dials{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #view[data-page="assess"] .as-plate-help{font-size:12.5px}
   #view[data-page="assess"] .as-ring-key{gap:4px 16px}
 }
 @media (max-width:360px){

@@ -1,18 +1,20 @@
 /* Page CSS for #/memory. Every rule is scoped under #view[data-page="memory"] (site/REBUILD_PLAN.md §0 rule 9).
    "Sixty years of fire": museum documentary page. Colours, fonts and layout are main's css/freefall.css verbatim, with
    three changes: the full-bleed band uses the .page grid's .bleed column (no 100vw, so no sideways scroll); small text
-   sizes are in rem so the A+ and A++ text sizes scale them; the page is dark in both themes, like main. Contrast measured
+   sizes are in rem so the A+ and A++ text sizes scale them; the page is dark in both themes, like main.
+   feat/v3-merge (from site v3): no drop shadows under the reel frame or the plaques (rings and inset only), a 1 px frame ring. Contrast measured
    (WCAG): plaque tag #7a5a2c on the plaque 4.7:1 or more, foot line #a89a80 on #15120e 6.8:1, all other text 6:1 or more. */
 #view[data-page="memory"] .retro{margin-top:-32px;margin-bottom:0;background:#15120e radial-gradient(1200px 600px at 50% 0,#2a231a,transparent 70%);color:#efe6d2;padding-bottom:80px;position:relative;overflow:hidden}
 #view[data-page="memory"] .retro::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.08;mix-blend-mode:screen;
  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 #view[data-page="memory"] .reel{padding:64px 24px 40px;display:grid;place-items:center;position:relative}
 #view[data-page="memory"] .reel-frame{position:relative;width:min(100%,920px);aspect-ratio:4/3;max-height:70vh;display:grid;align-content:center;justify-items:center;text-align:center;padding:40px;
- background:radial-gradient(ellipse at center,#3b3122 0,#1b1610 62%,#0b0907 100%);border-radius:28px/22px;box-shadow:0 0 0 10px #0b0907,0 0 0 12px #3a3125,0 40px 80px -30px #000,inset 0 0 120px rgba(0,0,0,.85);overflow:hidden}
+ background:radial-gradient(ellipse at center,#3b3122 0,#1b1610 62%,#0b0907 100%);border-radius:28px/22px;box-shadow:0 0 0 10px #0b0907,0 0 0 11px #3a3125,inset 0 0 120px rgba(0,0,0,.85);overflow:hidden}
 /* scan lines: a slow 4 s opacity change, under 1 change per second (D5.10: never more than 3 flashes per second); off in Calm */
 #view[data-page="memory"] .reel-frame::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 4px);animation:mem-flick 4s steps(1) infinite}
 @keyframes mem-flick{0%,100%{opacity:.9}7%{opacity:.75}8%{opacity:.95}53%{opacity:.82}54%{opacity:.92}}
 html[data-motion=calm] #view[data-page="memory"] .reel-frame::after{animation:none}
+html[data-effects=off] #view[data-page="memory"] .reel-frame::after{animation:none}   /* Read your way "Effects: Off" (site v3): no loop either */
 @media (prefers-reduced-motion:reduce){#view[data-page="memory"] .reel-frame::after{animation:none}}
 #view[data-page="memory"] .reel-kicker{font:400 .875rem var(--elite);letter-spacing:.2em;text-transform:uppercase;color:#c9b48a;margin:0 0 18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
 #view[data-page="memory"] .reel h1{font:400 clamp(44px,8vw,104px)/.95 var(--caslon);letter-spacing:-.02em;color:#f6ead2;text-shadow:0 0 30px rgba(255,200,120,.25);margin:0 0 22px}
@@ -21,7 +23,7 @@ html[data-motion=calm] #view[data-page="memory"] .reel-frame::after{animation:no
 #view[data-page="memory"] .retro-intro{font:italic 400 1.2rem/1.6 var(--caslon);color:#e4d6b9;max-width:none;text-align:center;margin:10px auto 40px}
 #view[data-page="memory"] .timeline-plaques{position:relative;display:grid;gap:26px;padding-left:140px}
 #view[data-page="memory"] .timeline-plaques::before{content:"";position:absolute;left:109px;top:8px;bottom:8px;width:2px;background:linear-gradient(#5b4a32,#8a6d43,#5b4a32)}
-#view[data-page="memory"] .plaque{position:relative;background:#efe6d2 linear-gradient(180deg,#f4ecdb,#e9dec6);color:#2a2219;border-radius:4px;padding:26px 30px 22px;box-shadow:0 2px 0 #c9b48a inset,0 24px 50px -24px #000,0 0 0 1px #c9b48a}
+#view[data-page="memory"] .plaque{position:relative;background:#efe6d2 linear-gradient(180deg,#f4ecdb,#e9dec6);color:#2a2219;border-radius:4px;padding:26px 30px 22px;box-shadow:0 2px 0 #c9b48a inset,0 0 0 1px #c9b48a}
 #view[data-page="memory"] .plaque-year{position:absolute;left:-150px;top:22px;width:96px;text-align:right;white-space:nowrap;font:400 1.1875rem var(--elite);color:#e4c88f}
 #view[data-page="memory"] .plaque::before{content:"";position:absolute;left:-38px;top:26px;width:14px;height:14px;border-radius:50%;background:#15120e;border:2px solid #c9a36a}
 #view[data-page="memory"] .plaque.loss::before{background:#c9a36a}

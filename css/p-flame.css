@@ -1,63 +1,73 @@
-/* Page CSS for #/flame (package P5-A). Every rule is scoped under #view[data-page="flame"] (site/REBUILD_PLAN.md §0 rule 9). */
+/* Page CSS for #/flame (package P5-A). Every rule is scoped under #view[data-page="flame"] (site/REBUILD_PLAN.md §0 rule 9).
+   feat/v3-merge: the v3 restyle (rules and outlines instead of filled boxes, figure pairs that only sit side by side when
+   each gets >= 560 px, tables that never break a number) written in the UI-lock tokens. The simulator layout itself
+   (wide split stage beside a narrow controls column) lives in css/ui-flame.css. */
 
 /* ---------- Flame simulator ---------- */
-#view[data-page="flame"] .fl-sim{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+#view[data-page="flame"] .fl-sim{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp3);align-items:start}
 #view[data-page="flame"] .fl-left,#view[data-page="flame"] .fl-right{min-width:0}
-#view[data-page="flame"] .fl-simcv{display:block;width:100%;height:auto;aspect-ratio:760/470;border-radius:12px;background:#05070d}
-#view[data-page="flame"] .fl-simcv:focus-visible,#view[data-page="flame"] .fl-mapcv:focus-visible{outline:3px solid var(--oxy);outline-offset:3px}
-#view[data-page="flame"] .fl-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:10px 0 6px}
-#view[data-page="flame"] .fl-play{min-width:6.5em}
+#view[data-page="flame"] .fl-simcv{display:block;width:100%;height:auto;aspect-ratio:960/520;background:#05070d}
+#view[data-page="flame"] .fl-simcv:focus-visible,#view[data-page="flame"] .fl-mapcv:focus-visible{outline:2px solid var(--oxy);outline-offset:3px}
+#view[data-page="flame"] .fl-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0 var(--sp1)}
+#view[data-page="flame"] .fl-play{min-width:6.5em;min-height:44px}
 #view[data-page="flame"] .fl-play:disabled{opacity:.6;cursor:not-allowed}
 #view[data-page="flame"] .fl-calm{color:var(--mute)}
-#view[data-page="flame"] .fl-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0;font-size:13px;color:var(--ink2)}
+#view[data-page="flame"] .fl-legend{display:flex;flex-wrap:wrap;gap:4px var(--sp2);margin:var(--sp1) 0;font-size:14px;color:var(--ink2)}
 #view[data-page="flame"] .fl-legend span{display:inline-flex;align-items:center;gap:6px}
-#view[data-page="flame"] .fl-sw{display:inline-block;width:14px;height:4px;border-radius:2px;flex:none}
-#view[data-page="flame"] .fl-sw.wide{width:28px;height:10px;border-radius:3px}
-#view[data-page="flame"] .fl-sw.round{width:10px;height:10px;border-radius:50%}
+#view[data-page="flame"] .fl-sw{display:inline-block;width:14px;height:4px;border-radius:1px;flex:none}
+#view[data-page="flame"] .fl-sw.wide{width:28px;height:8px;border-radius:var(--r-data)}
+#view[data-page="flame"] .fl-sw.round{width:8px;height:8px;border-radius:50%}
 #view[data-page="flame"] .fl-sw.dash{width:22px;height:0;border-top:2px dashed rgb(160,200,255);border-radius:0}
-#view[data-page="flame"] .fl-look{margin:4px 0 0;color:var(--mute)}
+#view[data-page="flame"] .fl-look{margin:4px 0 0;color:var(--mute);font-size:14px}
 #view[data-page="flame"] .fl-controls{display:grid;gap:2px}
-#view[data-page="flame"] .fl-labels{margin-top:6px}
-#view[data-page="flame"] .dom{font-size:14px;padding:9px 12px;border-radius:10px;margin:0 0 8px;background:var(--raise)}
-#view[data-page="flame"] .dom.ok{background:var(--oxy-soft)}
-#view[data-page="flame"] .dom.out{background:var(--accent-soft);color:var(--accent-ink)}
-#view[data-page="flame"] .fl-valid{font-size:14px;color:var(--ink2);margin:0 0 8px}
-#view[data-page="flame"] .fl-stats{margin-top:16px}
-#view[data-page="flame"] .fl-stats.mm .statbox{outline:1.5px dashed var(--warn);outline-offset:-1.5px}
-#view[data-page="flame"] .fl-sumwrap{margin-top:14px}
-#view[data-page="flame"] .fl-sum{max-width:var(--measure, 70ch);color:var(--ink2);margin:0 0 8px}
-#view[data-page="flame"] .fl-map .fl-sum{margin-top:10px}
+#view[data-page="flame"] .fl-labels{margin-top:var(--sp1)}
+/* v3: notes are outlined with a 2 px status rule on the left, not filled */
+#view[data-page="flame"] .dom{font-size:14px;padding:var(--sp1) 12px;border-radius:var(--r-data);margin:0 0 var(--sp1);border:1px solid var(--line);border-left:2px solid var(--mute);background:transparent;color:var(--ink2)}
+#view[data-page="flame"] .dom.ok{border-left-color:var(--oxy)}
+#view[data-page="flame"] .dom.out{border-left-color:var(--accent);color:var(--ink)}
+#view[data-page="flame"] .fl-valid{font-size:14px;color:var(--ink2);margin:0 0 var(--sp1)}
+/* the six result tiles: big numbers across the full card width */
+#view[data-page="flame"] .fl-stats{margin-top:var(--sp3);grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));column-gap:var(--sp3);row-gap:var(--sp1)}
+#view[data-page="flame"] .fl-stats.mm .statbox{outline:1px dashed var(--warn);outline-offset:-1px;padding-inline:var(--sp1)}
+#view[data-page="flame"] .fl-sumwrap{margin-top:var(--sp2)}
+#view[data-page="flame"] .fl-sum{max-width:var(--measure);color:var(--ink2);margin:0 0 var(--sp1)}
+#view[data-page="flame"] .fl-map .fl-sum{margin-top:12px}
 
 /* ---------- Show Moon and Mars (model only) ---------- */
-#view[data-page="flame"] .mm-switch{display:grid;gap:4px;margin:0 0 14px}
+#view[data-page="flame"] .mm-switch{display:grid;gap:4px;margin:0 0 var(--sp2)}
 #view[data-page="flame"] .mm-switch small{color:var(--mute)}
-#view[data-page="flame"] .mm-btn{display:inline-flex;align-items:center;gap:10px;justify-self:start;min-height:44px;padding:8px 14px;border-radius:10px;
-  border:1.5px dashed var(--axis);background:var(--raise);color:var(--ink);font:700 14px var(--font);cursor:pointer;text-align:left}
+#view[data-page="flame"] .mm-btn{display:inline-flex;align-items:center;gap:12px;justify-self:start;min-height:44px;padding:var(--sp1) var(--sp2);border-radius:var(--r-data);
+  border:1px dashed var(--axis);background:transparent;color:var(--ink);font:700 14px var(--font);cursor:pointer;text-align:left}
 #view[data-page="flame"] .mm-btn:hover{border-color:var(--warn)}
 #view[data-page="flame"] .mm-btn[aria-pressed=true]{border-color:var(--warn);border-style:solid}
-#view[data-page="flame"] .mm-box{width:18px;height:18px;flex:none;border-radius:4px;border:2px solid var(--ink2);position:relative}
+#view[data-page="flame"] .mm-box{width:16px;height:16px;flex:none;border-radius:var(--r-data);border:1px solid var(--ink2);position:relative}
 #view[data-page="flame"] .mm-btn[aria-pressed=true] .mm-box{border-color:var(--warn);background:var(--warn)}
-#view[data-page="flame"] .mm-btn[aria-pressed=true] .mm-box::after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid var(--page, #000);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+#view[data-page="flame"] .mm-btn[aria-pressed=true] .mm-box::after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid var(--page, #000);border-width:0 2px 2px 0;transform:rotate(45deg)}
 #view[data-page="flame"] .badge.mm{border:1px dashed var(--warn);color:var(--warn);background:transparent}
-#view[data-page="flame"] .seg button.mm{border:1.5px dashed var(--warn)}
-#view[data-page="flame"] .mm-note{font-size:13.5px;color:var(--ink2);margin:8px 0;padding:8px 10px;border-left:3px dashed var(--warn);background:var(--raise);border-radius:0 8px 8px 0}
+#view[data-page="flame"] .seg button.mm{border:1px dashed var(--warn)}
+#view[data-page="flame"] .mm-note{font-size:14px;color:var(--ink2);margin:var(--sp1) 0;padding:var(--sp1) 12px;border-left:2px dashed var(--warn);background:transparent}
 
 /* ---------- figures 2 to 7 ---------- */
-#view[data-page="flame"] .fl-key{font-size:13px;color:var(--mute);margin:6px 0 10px}
-#view[data-page="flame"] .card h3{margin:16px 0 8px}
+/* v3 pairs: side by side only when each figure gets >= 560 px, otherwise full width (no cramped tables) */
+#view[data-page="flame"] .grid.fl-pair{grid-template-columns:repeat(auto-fit,minmax(min(100%,560px),1fr));gap:var(--sp3);align-items:start}
+#view[data-page="flame"] .fl-key{font-size:14px;color:var(--mute);margin:var(--sp1) 0 12px}
+#view[data-page="flame"] .card h3{margin:var(--sp2) 0 var(--sp1)}
 #view[data-page="flame"] .fl-chart{min-width:0}
 #view[data-page="flame"] .fl-mapcv{display:block;width:100%;height:auto;aspect-ratio:640/340}
-#view[data-page="flame"] .fl-min,#view[data-page="flame"] .fl-band{margin:8px 0 0;font-size:14.5px}
+#view[data-page="flame"] .fl-min,#view[data-page="flame"] .fl-band{margin:var(--sp1) 0 0;font-size:14.5px}
 #view[data-page="flame"] .fl-band b{color:var(--ink)}
-#view[data-page="flame"] .fl-fronts{margin-top:10px}
-#view[data-page="flame"] .fl-count{margin:0 0 10px;color:var(--ink2)}
-#view[data-page="flame"] .fl-limits{margin:0;padding-left:18px;color:var(--ink2)}
+#view[data-page="flame"] .fl-fronts{margin-top:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:var(--sp1) var(--sp3)}
+#view[data-page="flame"] .fl-count{margin:0 0 12px;color:var(--ink2)}
+#view[data-page="flame"] .fl-limits{margin:0;padding-left:var(--sp3);color:var(--ink2);max-width:var(--measure)}
 #view[data-page="flame"] .fl-limits li{margin-bottom:4px}
+/* v3: check ids stay on one line; numbers in tables never break mid-value */
+#view[data-page="flame"] td code{white-space:nowrap;overflow-wrap:normal}
+#view[data-page="flame"] td.num{white-space:nowrap}
 
-@media (max-width:900px){
-  #view[data-page="flame"] .fl-sim{grid-template-columns:1fr}
+@media (max-width:680px){
+  #view[data-page="flame"] .fl-stats{grid-template-columns:1fr 1fr}
+  #view[data-page="flame"] .fl-stats .stat{font-size:1.6rem}
 }
 @media (max-width:420px){
   #view[data-page="flame"] .mm-btn{width:100%}
-  #view[data-page="flame"] .fl-stats{grid-template-columns:1fr 1fr}
 }

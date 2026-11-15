@@ -2,6 +2,8 @@
 // map and the what-if runs show first; everything else sits under "Show N more figures" (the tour and ?fig= open it).
 // Every card renders even when its file is missing (an empty state, never a dropped card), except the robustness card,
 // which is drawn when data/whatif.json has its "robustness" block (or as an empty state when the file is missing).
+// Layout (feat/v3-merge, from site v3): .pr-pair = two figures side by side, .pr-stack = full width, .pr-models = one model
+// card per row with its chart beside the facts (css/p-predict.css).
 // Figures: js/fig_drift.js and js/fig_cabin3d.js (package P4-B), js/fig_spread.js, js/fig_models.js, js/fig_gaps.js.
 import { h, load, loadPath, page, card, empty, isMissing, fmt, pct, params as urlParams } from '../lib.js';
 import { driftCard, whatifCard, calibrationCard, robustCard, lbmWhatifCard, lbmAgreement } from '../fig_drift.js';
@@ -35,17 +37,17 @@ export default async function render(root, ctx = {}) {
   const showRobust = isMissing(wi) || Array.isArray(wi.robustness);
   const lbmTitle = 'Second opinion: a cabin with racks';
   root.append(page('What will it do?', LEAD,
-    h('div', { class: 'grid g2' }, driftCard(drift, {}, ctx), whatifCard(wi)),
+    h('div', { class: 'grid g2 pr-pair' }, driftCard(drift, {}, ctx), whatifCard(wi)),
     cabin3dCard(drift, ctx, { sources: isMissing(wi) ? null : wi.sources }),
-    h('div', { class: 'grid g2' }, calibrationCard(cal), showRobust ? robustCard(wi) : null),
-    h('div', { class: 'grid g2' },
+    h('div', { class: 'grid pr-stack' }, calibrationCard(cal), showRobust ? robustCard(wi) : null),
+    h('div', { class: 'grid g2 pr-pair' },
       driftCard(lbm, { title: lbmTitle, sub: isMissing(lbm) ? null : lbmSub(lbm, lwi), file: 'drift_lbm' }, ctx),
       lbmWhatifCard(lwi, isMissing(lbm) ? undefined : lbm.lx_m, isMissing(lbm) ? undefined : lbm.ly_m)),
     spreadCard(sp, { case: q.fuel, o2: q.o2, flow: q.flow, ctx }),
     growthCard(gr),
     m6bCard(sp, m6bRes),
     m6bSpreadChartCard(sp, { case: q.fuel, o2: q.o2 }),
-    h('div', { class: 'grid g2 pr-models' }, modelCards(m, m6Res)),
+    h('div', { class: 'grid pr-models' }, modelCards(m, m6Res)),
     gapCard(gaps),
     nextExperimentCard(gaps),
     moonMarsCard()));

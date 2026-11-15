@@ -1,0 +1,81 @@
+/* shell-merge.css: the shell after merging the UI lock (mission console) with site v3 ("Ember on ink").
+   Loaded last. UI lock wins on layout and look: numbered top nav, HUD row, one fixed WebGL field, 2 px data corners.
+   From v3: the data status pill + popover in the top bar (replaces the full-width #demo-banner strip), the Effects row in
+   Read your way, the crosshair cursor (css/fx-effects.css), phone wrap fixes, and the Home bar rule that appears on scroll.
+   Nothing here adds a fixed layer: the pill's popover lives inside the sticky header. */
+
+/* ---------- the HUD row: clock, Jump, Sound, then the data status pill at the far right ---------- */
+.top .hud-right{display:flex;align-items:center;gap:6px;min-width:0}
+.pill-wrap{position:relative;flex:none}
+.pill{display:inline-flex;align-items:center;gap:8px;font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+ color:var(--ink2);background:transparent;border:1px solid var(--line);border-radius:var(--r-data);padding:8px 9px;cursor:pointer;
+ white-space:nowrap;touch-action:manipulation;transition:color var(--t-micro),border-color var(--t-micro)}
+.pill:hover,.pill[aria-expanded=true]{color:var(--ink);border-color:var(--mute)}
+.pill i{width:8px;height:8px;flex:none;background:var(--crit);border-radius:1px}
+.pill.ok i{background:var(--good)}
+/* the words reserve their final width, so filling them from data/manifest.json never shifts the HUD */
+.pill-n{display:inline-block;min-width:calc(15 * (1ch + .14em))}
+.pill-c{display:none;min-width:2ch;text-align:center;color:var(--ink)}
+
+/* the popover (scoped to .pill-pop: Checks uses a .pop class on its stamps): inside the header (its own stacking context), so it never competes with the dock, tour or palette */
+.pill-pop{position:absolute;right:0;top:calc(100% + 8px);z-index:60;width:min(380px,calc(100vw - 2 * var(--gutter)));
+ max-height:calc(100vh - var(--top-h,72px) - 88px);max-height:calc(100dvh - var(--top-h,72px) - 88px);overflow:auto;overscroll-behavior:contain;
+ background:var(--surface);border:1px solid var(--axis);border-radius:var(--r-panel);padding:16px;box-shadow:none;color:var(--ink2)}
+.pill-pop[hidden]{display:none}
+.pop-h{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 12px}
+.pill-pop ul{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:12px}
+.pill-pop li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;font-size:.875rem;color:var(--ink2);padding-bottom:12px;border-bottom:1px solid var(--line)}
+.pill-pop li:last-child{border-bottom:0;padding-bottom:0}
+.pill-pop li code{grid-column:1;grid-row:1;justify-self:start;font-size:.75rem}
+.pill-pop li .badge{grid-column:2;grid-row:1}
+.pill-pop li>span:not(.badge){grid-column:1 / -1}
+.pop-note{font-size:.875rem;margin:0;color:var(--ink2)}
+/* the old full-width strip is gone; if anything still renders a .banner, it stays out of the way */
+#demo-banner.banner{display:none}
+
+/* ---------- Home: v3's 'scrolled' bar, contrast-safe version ----------
+   v3 made the bar see-through over its hero. Here the bar's text sits over the live WebGL field, so its panel stays;
+   only the bottom rule waits until the page scrolls. */
+html[data-vtpage=overview] .top:not(.scrolled){border-bottom-color:transparent}
+
+/* ---------- performance: the header blur re-samples the moving field every frame. Keep it only on wide screens with a
+   fine pointer (laptops and desktops); phones, tablets and Calm get a solid bar, which is also higher contrast ---------- */
+@media (max-width:1023px),(pointer:coarse){.top{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--page)}}
+html[data-motion=calm] .top{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--page)}
+@media (prefers-reduced-transparency:reduce){.top{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--page)}}
+.foot{content-visibility:auto;contain-intrinsic-size:auto 240px}
+
+/* ---------- v3 phone wrap fixes: long words and file paths never push the page sideways ---------- */
+.card>h2,.phead h1,#view>.page>h1:first-child{overflow-wrap:break-word}
+dl.made dd,.empty pre,.empty,.pill-pop code{overflow-wrap:anywhere}
+button,a,summary,[role=button]{touch-action:manipulation}
+
+/* ---------- widths ---------- */
+/* up to 900 px: the pill shows its square and the count; the full words stay in its aria-label */
+@media (max-width:900px){
+ .pill-n{display:none}
+ .pill-c{display:inline-block}
+}
+@media (max-width:680px){
+ /* the HUD takes its own full row under the brand and Menu; the pill comes first and keeps a fixed width */
+ .top .hud-right{flex:1 0 100%;order:3;margin:0;gap:6px}
+ .top .pill-wrap{order:-1;margin-right:auto}
+ .pill-pop{left:0;right:auto}
+}
+@media (max-width:400px){
+ /* the tagline wrapped into two or three lines here and made the sticky bar tall; the name alone is the brand */
+ .brand small{display:none}
+}
+
+/* ---------- touch: primary header controls are at least 44 px; no keyboard hint where there is no keyboard ---------- */
+@media (pointer:coarse){
+ .pill,.hud-btn,.menu,.judge,.more-btn,.dock>button.dock-toggle,.dock .seg button,.btn{min-height:44px}
+ .pill{min-width:44px;justify-content:center}
+ .hud-btn{display:inline-flex;align-items:center}
+ .hud-jump kbd{display:none}
+ #nav a{display:inline-flex;align-items:center;min-height:40px}
+}
+@media (pointer:coarse) and (max-width:680px){#nav a{min-height:44px}}
+
+@media print{.pill-wrap,.hud-right{display:none!important}}
+@media (forced-colors:active){.pill i{forced-color-adjust:none}}

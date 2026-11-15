@@ -45,11 +45,12 @@ function errorCard(e) {
   return h('div', {}, h('div', { class: 'page' }, h('div', { class: 'empty' }, h('h3', {}, 'This page failed to load'), h('pre', {}, String(e?.stack || e)))));
 }
 
-function closeMenus() {
+function setMenu(open) {
   const nav = $('nav'), menu = document.querySelector('.menu');
-  nav?.classList.remove('open'); menu?.setAttribute('aria-expanded', 'false');
-  setMore(false);
+  nav?.classList.toggle('open', open); menu?.setAttribute('aria-expanded', String(open));
+  menu?.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');   // v3: the button says what it will do
 }
+function closeMenus() { setMenu(false); setMore(false); }
 function markCurrent(id) {
   document.querySelectorAll('#nav a[data-id]').forEach(a => (a.dataset.id === id ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
   document.querySelector('.more-btn')?.classList.toggle('has-current', MORE.some(p => p.id === id));
@@ -131,8 +132,11 @@ function buildNav() {
     h('button', { type: 'button', class: 'judge', onclick: () => { closeMenus(); startTour(); }, title: 'A 1-minute guided tour of the key results' }, 'Judge mode'));
   const top = document.querySelector('.top');      // the sticky header's height, so revealed figures are not hidden under it
   if (top && 'ResizeObserver' in window) new ResizeObserver(() => document.documentElement.style.setProperty('--top-h', `${Math.round(top.getBoundingClientRect().height)}px`)).observe(top);
-  menu?.addEventListener('click', () => { const o = nav.classList.toggle('open'); menu.setAttribute('aria-expanded', String(o)); });
-  addEventListener('keydown', e => { if (e.key === 'Escape' && nav.classList.contains('open')) { nav.classList.remove('open'); menu?.setAttribute('aria-expanded', 'false'); menu?.focus(); } });
+  menu?.addEventListener('click', () => setMenu(!nav.classList.contains('open')));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && nav.classList.contains('open')) { setMenu(false); menu?.focus(); } });
+  // v3 phone fixes: a tap outside the open menu closes it, and so does widening the window past the phone layout
+  document.addEventListener('click', e => { if (nav.classList.contains('open') && !nav.contains(e.target) && !menu?.contains(e.target)) setMenu(false); });
+  try { matchMedia('(min-width: 681px)').addEventListener('change', e => { if (e.matches) setMenu(false); }); } catch { /* old browser */ }
 }
 
 let startedRouter = false;

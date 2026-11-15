@@ -75,6 +75,19 @@
 #view[data-page="models"] .mcd-full{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);padding:14px 4px;text-underline-offset:4px}
 #view[data-page="models"] .mcd :focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
 
+/* feat/v3-merge: both faces read like the v3 spec sheet. The first score is the big number under a 2 px ink rule, the
+   others sit under 1 px rules (no boxes), and the back's caveat list is a ruled table. Same copied words and numbers. */
+#view[data-page="models"] .mcd-stats{gap:0}
+#view[data-page="models"] .mcd-stats .statbox{border:0;border-top:1px solid var(--line);border-radius:0;padding:var(--sp1) 0;background:transparent}
+#view[data-page="models"] .mcd-stats .statbox:first-child{border-top:2px solid var(--ink);padding-top:10px}
+#view[data-page="models"] .mcd-stats .statbox:first-child .stat{font-size:2.25rem;line-height:1;letter-spacing:-.04em}
+#view[data-page="models"] .mcd-stats .statbox:first-child .stat small{font:500 12.5px/1.45 var(--mono);margin-top:8px}
+#view[data-page="models"] .mcd-use{border-top:1px solid var(--line);padding-top:var(--sp1)}
+#view[data-page="models"] .mcd-lim{border-bottom:1px solid var(--line)}
+#view[data-page="models"] .mcd-lim dt{border-top:1px solid var(--line);padding-top:var(--sp1);margin-top:0}
+#view[data-page="models"] .mcd-lim dd{padding-bottom:var(--sp1)}
+#view[data-page="models"] .mcd-scroll .mc-verdict{border-radius:0;border-left-width:2px;padding:4px 0 4px 12px}
+
 /* "Show all as a list": the same cards in a wrapping grid, no drag, no transform */
 #view[data-page="models"] .mcd.as-list .mcd-vp{overflow:visible;padding:0;margin:0}
 #view[data-page="models"] .mcd.as-list .mcd-track{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,20rem),1fr));transform:none!important;cursor:auto;user-select:auto;-webkit-user-select:auto}

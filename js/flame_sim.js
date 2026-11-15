@@ -40,8 +40,16 @@ const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 // feat/ui-lock split screen: orbit (0 g) always on the left, Earth (1 g) on the right, same fuel and conditions, one scale.
 // View feel only (team choices, not data): divider range and keyboard steps, pixels of drag per airflow step.
 const LEFT_G = '0 g', RIGHT_G = 'Earth 1 g', SPLIT_MIN = 0.15, SPLIT_MAX = 0.85, SPLIT_STEP = 0.05, FLOW_PX = 44;
-const reduced = () => calm() || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
-const LBL = '500 11px "IBM Plex Mono", ui-monospace, monospace';
+// Calm, reduced motion and Read your way "Effects: Off" (html[data-effects=off], site v3) all give still frames
+const reduced = () => calm() || document.documentElement.dataset.effects === 'off' || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const LBL_PX = 11, lbl = px => `500 ${px}px "IBM Plex Mono", ui-monospace, monospace`;   // canvas labels: 11 CSS px at any width
+// performance and phones (feat/v3-merge): the bitmap follows the canvas's CSS size under a pixel budget (fewer pixels and
+// tracers on touch screens and low-end machines), and a narrow stage gets a taller picture so each half stays readable.
+const mq = q => { try { return matchMedia(q).matches; } catch { return false; } };
+const lowEnd = () => mq('(pointer:coarse)') || (typeof navigator !== 'undefined' && ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4));
+const PX_LOW = 350000, PX_HIGH = 1200000;
+/** Logical canvas height for a stage this many CSS px wide (width is always 960 logical units). */
+const heightFor = cssW => (cssW && cssW < 520 ? 880 : cssW && cssW < 760 ? 680 : 520);
 const INK_C = '#EDE8DF', MUTE_C = '#8C8A93';   // text on the always-dark canvas
 
 // How many NASA tests ran near these conditions (same window as the gap map: 3 oxygen points, 10 kPa), by fire type.
@@ -61,11 +69,25 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
   const G = gravities(fs.flames);
   const st = saved || (saved = { fuel: 'n-heptane', g: '0 g', o2: 0.21, p: 101.3, flow: 0, look: 'real' });
   if (!showMM && G.find(x => x.g === st.g)?.mm) st.g = '0 g';
-  const W = 960, H = 520, dpr = Math.min(2, (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1);
+  const W = 960, dpr = Math.min(2, (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1);
+  let H = 520, u = 1, lu = 1;   // logical height; logical units per CSS px (labels, offsets) and its capped form (line widths)
+  const low = lowEnd(), MAXP = low ? 70 : 140;
   const sumId = `flsim-sum-${Math.random().toString(36).slice(2, 8)}`;
   const cvId = `${sumId}-cv`;
-  const cv = h('canvas', { width: W * dpr, height: H * dpr, class: 'fl-simcv', id: cvId, 'aria-describedby': sumId });
-  const g2 = cv.getContext('2d'); if (g2) g2.scale(dpr, dpr);
+  const cv = h('canvas', { width: W, height: H, class: 'fl-simcv', id: cvId, 'aria-describedby': sumId, style: `aspect-ratio:${W} / ${H}` });
+  const g2 = cv.getContext('2d');
+  /** Size the bitmap to the stage: logical height for the width, then CSS px × DPR under the pixel budget. */
+  function fit(cssW) {
+    const cw = cssW || cv.clientWidth || W;
+    const nh = heightFor(cw); if (nh !== H) { H = nh; cv.style.aspectRatio = `${W} / ${H}`; }
+    u = Math.max(1, W / cw); lu = Math.min(2, u);
+    let d = Math.min(dpr, low ? 1.5 : 2), bw = cw * d, bh = bw * H / W;
+    const budget = low ? PX_LOW : PX_HIGH; if (bw * bh > budget) { const f = Math.sqrt(budget / (bw * bh)); bw *= f; bh *= f; }
+    bw = Math.max(1, Math.round(bw)); bh = Math.max(1, Math.round(bh));
+    if (cv.width !== bw || cv.height !== bh) { cv.width = bw; cv.height = bh; }
+    g2?.setTransform(bw / W, 0, 0, bh / H, 0, 0);
+  }
+  const blurPx = px => `blur(${(px * (cv.width / W)).toFixed(1)}px)`;   // canvas filters work in bitmap pixels, not logical units
   const readout = h('div', { class: 'grid g3 fl-stats' }), labelBox = h('div', { class: 'fl-labels' });
   const summary = h('p', { class: 'fl-sum', id: sumId }), tableSlot = h('div');
 
@@ -146,8 +168,8 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
     ctx2.imageSmoothingEnabled = true; ctx2.imageSmoothingQuality = 'high';
     sides.forEach((sd, i) => drawSide(ctx2, sd, i, S, e, tt, dt, isStill));
     // scale bar: one for both halves (same scale)
-    const nice = [1, 2, 5, 10, 20, 50, 100, 200, 500].find(n => n * S > 70) || 500;
-    ctx2.fillStyle = '#c3c2b7'; ctx2.fillRect(18, H - 22, nice * S, 2); ctx2.font = LBL; ctx2.textAlign = 'left'; ctx2.fillText(`${nice} MM · BOTH HALVES`, 18, H - 30);
+    const nice = [1, 2, 5, 10, 20, 50, 100, 200, 500].find(n => n * S > 70 * u) || 500;
+    ctx2.fillStyle = '#c3c2b7'; ctx2.fillRect(18 * u, H - 22 * u, nice * S, 2 * lu); ctx2.font = lbl(LBL_PX * u); ctx2.textAlign = 'left'; ctx2.fillText(`${nice} MM · BOTH HALVES`, 18 * u, H - 30 * u);
   }
 
   /** One half of the split: the same drawing as the single view had, clipped to its pane and centred in it. */
@@ -155,7 +177,7 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
     const [a, b] = paneOf(i), f = sd.cur, pw = b - a;
     ctx2.save(); ctx2.beginPath(); ctx2.rect(a, 0, pw, H); ctx2.clip();
     if (!f) {
-      ctx2.font = LBL; ctx2.fillStyle = MUTE_C; ctx2.textAlign = 'left'; ctx2.fillText('NO CASE IN THE FILE', a + 16, H / 2); ctx2.restore(); return;
+      ctx2.font = lbl(LBL_PX * u); ctx2.fillStyle = MUTE_C; ctx2.textAlign = 'left'; ctx2.fillText('NO CASE IN THE FILE', a + 16 * u, H / 2); ctx2.restore(); return;
     }
     const prev = sd.prev && tt < 1 ? sd.prev : null;
     const tv = viewOf(f), v = prev && sd.from ? { cx: lerp(sd.from.cx, tv.cx, e), cz: lerp(sd.from.cz, tv.cz, e) } : tv; sd.view = { cx: v.cx, cz: v.cz, S, a, b };
@@ -166,34 +188,34 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
     ctx2.save(); if (look === 'real') ctx2.globalCompositeOperation = 'lighter';
     if (prev) blit(prev, 1 - e); blit(f, prev ? e : 1); ctx2.restore();
     // glow: a blurred copy gives the bright core a soft halo
-    ctx2.save(); ctx2.globalCompositeOperation = 'lighter'; ctx2.filter = look === 'real' ? 'blur(18px)' : 'blur(10px)'; blit(f, look === 'real' ? 0.7 : 0.35); ctx2.restore(); ctx2.filter = 'none';
+    ctx2.save(); ctx2.globalCompositeOperation = 'lighter'; ctx2.filter = blurPx(look === 'real' ? 18 : 10); blit(f, look === 'real' ? 0.7 : 0.35); ctx2.restore(); ctx2.filter = 'none';
     // hot-gas tracers carried by the model's effective flow (frozen in a still frame)
     const g = f.U_buoy_m_s || 0, u = f.flow_m_s || 0, sp = Math.hypot(u, g);
     const slow = sp > 0 ? Math.max(1, sp * 1000 * S / 90) : 1;               // so the fastest tracer moves ~90 px/s
     const cont = resample(f.contour_mm, 72);
-    if (!isStill && sd.parts.length < 140 && Math.random() < 0.9) { const p = cont[Math.floor(Math.random() * cont.length)]; sd.parts.push({ x: p[0] * (0.6 + 0.4 * Math.random()), z: p[1] * (0.6 + 0.4 * Math.random()), life: 1 }); }
+    if (!isStill && sd.parts.length < MAXP && Math.random() < 0.9) { const p = cont[Math.floor(Math.random() * cont.length)]; sd.parts.push({ x: p[0] * (0.6 + 0.4 * Math.random()), z: p[1] * (0.6 + 0.4 * Math.random()), life: 1 }); }
     ctx2.save(); ctx2.globalCompositeOperation = 'lighter';
     sd.parts = sd.parts.filter(p => p.life > 0);
     for (const p of sd.parts) {
       let vx = u * 1000 / slow, vz = g * 1000 / slow;
       if (sp === 0) { const r = Math.hypot(p.x, p.z) || 1; vx = p.x / r * 6; vz = p.z / r * 6; }   // no flow, no rise: gas only spreads outward
       if (dt > 0) { p.x += (vx + (Math.random() - 0.5) * 8) * dt; p.z += (vz + (Math.random() - 0.5) * 8) * dt; p.life -= dt * 0.45; }
-      ctx2.fillStyle = `rgba(255,170,90,${(look === 'real' ? 0.12 : 0.22) * p.life})`; ctx2.beginPath(); ctx2.arc(X(p.x), Y(p.z), 1.6, 0, 6.283); ctx2.fill();
+      ctx2.fillStyle = `rgba(255,170,90,${(look === 'real' ? 0.12 : 0.22) * p.life})`; ctx2.beginPath(); ctx2.arc(X(p.x), Y(p.z), 1.6 * lu, 0, 6.283); ctx2.fill();
     }
     ctx2.restore();
     // flame sheet (stoichiometric surface): morphs between cases; dashed for Moon and Mars (model only)
     const pc = prev ? resample(prev.contour_mm, 72) : null;
     ctx2.beginPath(); cont.forEach((p, k) => { const x = pc ? lerp(pc[k][0], p[0], e) : p[0], z = pc ? lerp(pc[k][1], p[1], e) : p[1]; if (k) ctx2.lineTo(X(x), Y(z)); else ctx2.moveTo(X(x), Y(z)); }); ctx2.closePath();
-    ctx2.setLineDash(mm ? [9, 7] : []);
+    ctx2.setLineDash(mm ? [9 * lu, 7 * lu] : []);
     if (look === 'real') {
       // blue light from the reaction zone, strongest where fresh oxygen meets fuel: all round in orbit, near the base when buoyancy lifts the flame
       const zs = cont.map(p => p[1]), zmin = Math.min(...zs), zmax = Math.max(...zs), lift = Math.min(1, (f.U_buoy_m_s || 0) / 0.3);
       const gr = ctx2.createLinearGradient(0, Y(zmin), 0, Y(zmax));
       gr.addColorStop(0, 'rgba(90,140,255,1)'); gr.addColorStop(0.35, `rgba(90,140,255,${1 - 0.8 * lift})`); gr.addColorStop(1, `rgba(90,140,255,${1 - 0.95 * lift})`);
       ctx2.save(); ctx2.globalCompositeOperation = 'lighter'; ctx2.strokeStyle = gr; ctx2.lineJoin = 'round';
-      for (const [w, al, bl] of [[14, 0.18, 12], [6, 0.35, 4], [2.2, 0.9, 0]]) { ctx2.globalAlpha = al; ctx2.lineWidth = w; ctx2.filter = bl ? `blur(${bl}px)` : 'none'; ctx2.stroke(); }
+      for (const [w, al, bl] of [[14, 0.18, 12], [6, 0.35, 4], [2.2, 0.9, 0]]) { ctx2.globalAlpha = al; ctx2.lineWidth = w * lu; ctx2.filter = bl ? blurPx(bl) : 'none'; ctx2.stroke(); }
       ctx2.restore(); ctx2.filter = 'none';
-    } else { ctx2.strokeStyle = 'rgba(160,200,255,.9)'; ctx2.lineWidth = 1.5; ctx2.stroke(); }
+    } else { ctx2.strokeStyle = 'rgba(160,200,255,.9)'; ctx2.lineWidth = 1.5 * lu; ctx2.stroke(); }
     ctx2.setLineDash([]);
     // fuel source to scale
     const src = f.source; ctx2.fillStyle = '#d9d7cf';
@@ -203,18 +225,18 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
     else { ctx2.fillRect(X(0) - 3, Y(0), 6, 14); }
     // the half names, gravity and airflow are DOM labels over the canvas (they stay readable on a phone); the canvas keeps
     // only the tracer speed, drawn when the canvas is shown wide enough to read it
-    ctx2.font = LBL; try { ctx2.letterSpacing = '1.5px'; } catch { /* older canvas */ }
-    if (mm) { ctx2.textAlign = 'left'; ctx2.fillStyle = '#fab219'; ctx2.fillText('MODEL ONLY · NOT VALIDATED', a + 16, 84); }
+    ctx2.font = lbl(LBL_PX * u); try { ctx2.letterSpacing = `${(1.5 * u).toFixed(1)}px`; } catch { /* older canvas */ }
+    if (mm) { ctx2.textAlign = 'left'; ctx2.fillStyle = '#fab219'; ctx2.fillText('MODEL ONLY · NOT VALIDATED', a + 16 * u, 84 * u); }
     ctx2.textAlign = 'right'; ctx2.fillStyle = MUTE_C;
     const l2 = !animating() ? (reduced() ? 'CALM MOTION: STILL FRAME' : 'TRACERS PAUSED') : slow > 1.5 ? `TRACERS ${Math.round(slow)}× SLOWER` : 'TRACERS AT REAL SPEED';
-    if (cv.clientWidth >= 600 && ctx2.measureText(l2).width < pw - 32 - (i === 0 ? 150 : 0)) ctx2.fillText(l2, b - 16, H - 40);
+    if (cv.clientWidth >= 600 && ctx2.measureText(l2).width < pw - 32 * u - (i === 0 ? 150 * u : 0)) ctx2.fillText(l2, b - 16 * u, H - 40 * u);
     try { ctx2.letterSpacing = '0px'; } catch { /* older canvas */ }
     ctx2.textAlign = 'left';
     // keyboard focus ring on the grid cell being read (only on the half being read)
     if (focusCell >= 0 && f === cur) {
       const x = f.grid.x_mm, z = f.grid.z_mm, nx = x.length, dx = (x[nx - 1] - x[0]) / (nx - 1), dz = (z[z.length - 1] - z[0]) / (z.length - 1);
       const ii = focusCell % nx, jj = z.length - 1 - Math.floor(focusCell / nx);
-      ctx2.strokeStyle = INK_C; ctx2.lineWidth = 2; ctx2.strokeRect(X(x[ii] - dx / 2), Y(z[jj] + dz / 2), dx * S, dz * S);
+      ctx2.strokeStyle = INK_C; ctx2.lineWidth = 2 * lu; ctx2.strokeRect(X(x[ii] - dx / 2), Y(z[jj] + dz / 2), dx * S, dz * S);
     }
     ctx2.restore();
   }
@@ -362,7 +384,7 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
   }
 
   // ---------- the divider between the halves (js/spring.js draggable: fling, spring settle, arrow keys) ----------
-  const handle = h('div', { class: 'fl-divider', role: 'separator', tabindex: '0', 'aria-orientation': 'vertical', 'aria-controls': cvId,
+  const handle = h('div', { class: 'fl-divider', role: 'separator', tabindex: '0', 'data-drag': '', 'aria-orientation': 'vertical', 'aria-controls': cvId,
     'aria-label': 'Divider between the orbit and Earth flames', 'aria-valuemin': String(SPLIT_MIN * 100), 'aria-valuemax': String(SPLIT_MAX * 100) },
     h('span', { class: 'fl-div-line', 'aria-hidden': 'true' }), h('span', { class: 'fl-div-grip', 'aria-hidden': 'true' }));
   const live = !ctx.detached && typeof ctx.onMount === 'function';
@@ -401,11 +423,12 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
       snap: () => Array.from({ length: Math.round((SPLIT_MAX - SPLIT_MIN) / SPLIT_STEP) + 1 }, (_, i) => (SPLIT_MIN + i * SPLIT_STEP) * width()),
       onMove: p => setSplit(p / width()) });
     let w0 = width();
-    if (typeof ResizeObserver === 'function') { ro = new ResizeObserver(() => { const w = width(); if (Math.abs(w - w0) > 1) { w0 = w; divApi.set(split * w, false); } }); ro.observe(stage); }
+    if (typeof ResizeObserver === 'function') { ro = new ResizeObserver(() => { const w = width(); if (Math.abs(w - w0) > 1) { w0 = w; fit(w); divApi.set(split * w, false); if (!animating()) stillSoon(); } }); ro.observe(stage); }
   }
 
   if (live) {
     ctx.onMount(() => {
+      fit(stage.clientWidth);
       startDivider();
       // the divider sweeps in from the centre outward (CSS, --ease-move); instant under Calm or reduced motion
       if (stage.classList.contains('fl-pre')) { requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('fl-pre'))); setTimeout(() => stage.classList.remove('fl-pre'), 1500); }

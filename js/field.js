@@ -2,13 +2,26 @@
 // One fixed full-screen canvas and ONE WebGL 2 context for the whole visit. Each tab is a "station": a set of uniforms
 // (camera distance, yaw, pitch, flame gravity, smoke, dim, Earth) that is tweened over 900 ms on a route change.
 // The flame shader is gl_hero.js's ray-marched droplet flame; the Earth is gl_banner.js's limb, both reused here.
-//  - Rendered at half resolution, devicePixelRatio capped at 1.5, adaptive down to 0.3x if frames run slow.
-//  - Paused while the browser tab is hidden. When the reader is deep in a page (the field is mostly dimmed) it renders
-//    one frame in four.
+//  - Performance budget (merged site, runs on phones and low-end laptops):
+//    * Rendered at half resolution, devicePixelRatio capped at 1.5, and the ray-march capped at 120k pixels in total
+//      (90k on low-end devices) whatever the screen size; the canvas is stretched by CSS. Adaptive down to 0.3x more
+//      if frames still run slow.
+//    * March steps are a compile-time #define: 56 on desktops, 32 on low-end devices (4 or fewer cores, 4 GB or less
+//      memory, or a coarse pointer; js/fx/loop.js lowEnd), with one fewer noise octave there.
+//    * At most 60 fps while something moves (drag, inertia, station tween, Home story scroll); 30 fps when only the
+//      flame itself flickers. Deep in a page (the field mostly dimmed) it draws ONE still frame and stops until the
+//      reader scrolls, drags or changes tab. Day theme with the host off screen: no frames at all.
+//    * No own requestAnimationFrame: it ticks from js/fx/loop.js, the one animation loop of the site. Effects Off does
+//      not stop the field (it follows Motion only).
+//  - Paused while the browser tab is hidden.
 //  - Calm motion / prefers-reduced-motion: no loop and no camera moves. Each station is drawn once, as a still poster.
 //  - Day theme: the field shows only inside the current "host" (the page header or the Home story), clipped to it.
 //  - No WebGL 2: the canvas is removed and html gets .nogl; every page still works.
 // Every constant here is a drawing parameter of the illustration, not a measured value.
+import { register, wake, lowEnd } from './fx/loop.js';
+
+const STEPS = lowEnd ? 32 : 56, OCT = lowEnd ? 3 : 4;          // ray-march steps and flame noise octaves
+const MAXPX = lowEnd ? 90000 : 120000;                          // total ray-marched pixels, whatever the screen
 
 const VS = `#version 300 es
 in vec2 p; out vec2 uv; void main(){ uv = p * .5 + .5; gl_Position = vec4(p, 0., 1.); }`;
@@ -20,7 +33,7 @@ float h3(vec3 p){ p = fract(p * .3183099 + .1); p *= 17.; return fract(p.x * p.y
 float vn(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3. - 2. * f);
   return mix(mix(mix(h3(i), h3(i + vec3(1,0,0)), f.x), mix(h3(i + vec3(0,1,0)), h3(i + vec3(1,1,0)), f.x), f.y),
              mix(mix(h3(i + vec3(0,0,1)), h3(i + vec3(1,0,1)), f.x), mix(h3(i + vec3(0,1,1)), h3(i + vec3(1,1,1)), f.x), f.y), f.z); }
-float fbm(vec3 p){ float a = .5, s = 0.; for (int k = 0; k < 4; k++) { s += a * vn(p); p = p * 2.03 + 1.7; a *= .5; } return s; }
+float fbm(vec3 p){ float a = .5, s = 0.; for (int k = 0; k < OCT; k++) { s += a * vn(p); p = p * 2.03 + 1.7; a *= .5; } return s; }
 vec3 fq(vec3 p){
   float fl = g * (.035 * sin(t * 8.3 + p.y * 5.) + .02 * sin(t * 13.1 + p.y * 9.));
   vec3 q = p; q.x += fl * smoothstep(-.2, 1.2, p.y);
@@ -45,7 +58,7 @@ vec3 flame(vec2 sp){
   vec3 acc = vec3(0.); float tr = 1.;
   if (hh > 0.) {
     float t0 = max(0., -b - sqrt(hh)), t1 = min(-b + sqrt(hh), tD);
-    const int N = 56; float dt = (t1 - t0) / float(N);
+    const int N = STEPS; float dt = (t1 - t0) / float(N);
     float jit = h3(vec3(gl_FragCoord.xy, t * 60.));
     float Rsm = .7 + smoke * 2.2;
     for (int i = 0; i < N; i++) {
@@ -137,18 +150,18 @@ const KEYS = Object.keys(BASE);
 const calmNow = () => document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ease = x => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);   // cubic-bezier(.65,0,.35,1)-like "move"
 
-let cv = null, gl = null, U = null, raf = 0, ok = false, scale = 1, slow = 0, frameN = 0;
+let cv = null, gl = null, U = null, want = false, ok = false, scale = 1, slow = 0, lastDraw = 0;
 let cur = { ...BASE }, from = { ...BASE }, to = { ...BASE }, tw0 = 0, twDur = 900;
 let over = {};          // live overrides from the page (Home story, Respond drag): drawn on top of the station
 let host = null, clock = 0, lastT = 0, dirty = true, scrollDim = 0;
 let drag = null, vYaw = 0, vPitch = 0, userYaw = 0, userPitch = 0;
-const fps = { n: 0, t0: 0, value: 0 };
+const fps = { n: 0, t0: 0, value: 0, d: 0 };   // window.__voFps = animation frames per second (display rate); __voField.drawFps = field draws
 
 function compile() {
-  try { gl = cv.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance' }); } catch { gl = null; }
+  try { gl = gl || cv.getContext('webgl2', { antialias: false, alpha: false, depth: false, stencil: false, powerPreference: lowEnd ? 'default' : 'high-performance' }); } catch { gl = null; }
   if (!gl) return false;
   try {
-    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) || 'compile'); return s; };
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src.replace('#version 300 es', `#version 300 es\n#define STEPS ${STEPS}\n#define OCT ${OCT}`)); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) || 'compile'); return s; };
     const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
     if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr) || 'link');
     gl.useProgram(pr);
@@ -160,9 +173,11 @@ function compile() {
 }
 
 function size() {
+  // half resolution of a 1.5-capped devicePixelRatio, then capped at MAXPX pixels in total, then the adaptive scale
   const dpr = Math.min(devicePixelRatio || 1, 1.5);
-  const w = Math.max(1, Math.round(innerWidth * dpr * scale * .5 * 2) >> 1), hh = Math.max(1, Math.round(innerHeight * dpr * scale * .5 * 2) >> 1);
-  // half resolution: half the pixels of a 1.5-capped devicePixelRatio (scale 1), lower if frames run slow
+  let fw = innerWidth * dpr * .5, fh = innerHeight * dpr * .5;
+  const px = fw * fh; if (px > MAXPX) { const f = Math.sqrt(MAXPX / px); fw *= f; fh *= f; }
+  const w = Math.max(1, Math.round(fw * scale)), hh = Math.max(1, Math.round(fh * scale));
   if (cv.width !== w || cv.height !== hh) { cv.width = w; cv.height = hh; }
   gl.viewport(0, 0, w, hh);
 }
@@ -179,6 +194,7 @@ function clip() {
 }
 
 function draw() {
+  fps.d++;
   size();
   const v = { ...cur, ...over };
   v.yaw += userYaw; v.pitch = Math.max(-1.5, Math.min(1.53, v.pitch + userPitch));
@@ -189,7 +205,7 @@ function draw() {
 }
 
 function frame(now) {
-  raf = 0;
+  want = false;
   if (!ok || document.hidden) { lastT = 0; return; }
   const still = calmNow();
   const dt = lastT ? Math.min(.1, (now - lastT) / 1000) : .016; lastT = now;
@@ -198,26 +214,38 @@ function frame(now) {
   for (const key of KEYS) cur[key] = from[key] + (to[key] - from[key]) * e;
   // drag inertia
   if (!drag && !still) { userYaw += vYaw; userPitch += vPitch; vYaw *= .93; vPitch *= .9; if (Math.abs(vYaw) < 1e-5) vYaw = 0; if (Math.abs(vPitch) < 1e-5) vPitch = 0; }
-  const moving = k < 1 || drag || vYaw || vPitch || dirty;
-  if (!still) clock += dt;
-  // deep in a page the field is mostly dimmed: draw one frame in four
+  const moving = k < 1 || !!drag || !!vYaw || !!vPitch;
+  fps.n++; if (!fps.t0) fps.t0 = now; if (now - fps.t0 > 1000) { fps.value = Math.round(fps.n * 1000 / (now - fps.t0)); if (window.__voField) window.__voField.drawFps = Math.round(fps.d * 1000 / (now - fps.t0)); fps.n = fps.d = 0; fps.t0 = now; window.__voFps = fps.value; }
+  // Day theme with the host off screen: the canvas is hidden, so draw nothing; the next scroll or station kicks it
+  if (cv.hidden) { lastT = 0; return; }
+  // Calm, or deep in a page (the field mostly dimmed) with nothing moving: one still frame, then the loop stops
   const thin = scrollDim > .55 && !moving;
-  if (!thin || (frameN++ & 3) === 0) {
-    draw(); dirty = false;
-    // adaptive resolution: 20 slow frames drop the render scale 15 %, floor 0.3
-    if (dt > .028) { if (++slow > 20 && scale > .3) { scale = Math.max(.3, scale * .85); slow = 0; } } else slow = Math.max(0, slow - 1);
+  if (still || thin) {
+    if (dirty && now - lastDraw >= (still ? 0 : 60)) { draw(); dirty = false; lastDraw = now; }
+    if (moving || dirty) want = true; else lastT = 0;
+    return;
   }
-  fps.n++; if (!fps.t0) fps.t0 = now; if (now - fps.t0 > 1000) { fps.value = Math.round(fps.n * 1000 / (now - fps.t0)); fps.n = 0; fps.t0 = now; window.__voFps = fps.value; }
-  if (!still || moving) raf = requestAnimationFrame(frame);
-  else lastT = 0;
+  clock += dt;
+  // 60 fps cap while something moves (also on 120 Hz screens), 30 fps when only the flame flickers
+  const gap = moving || dirty ? 15 : 31;
+  if (now - lastDraw >= gap) {
+    const took = now - lastDraw;
+    draw(); dirty = false; lastDraw = now;
+    // adaptive resolution: 20 slow frames (well over the target interval) drop the render scale 15 %, floor 0.3
+    if (took < 500 && took > gap * 1.8) { if (++slow > 20 && scale > .3) { scale = Math.max(.3, scale * .85); slow = 0; } } else slow = Math.max(0, slow - 1);
+  }
+  want = true;
 }
-const kick = () => { clip(); if (ok && !raf && !document.hidden) raf = requestAnimationFrame(frame); };
+const kick = () => { clip(); if (ok && !document.hidden) { want = true; wake(); } };
 
 function onScroll() {
   const y = scrollY, H = innerHeight;
+  const was = scrollDim;
   scrollDim = Math.max(0, Math.min(.75, (y - H * .25) / H * .8));
   if (host?.dataset.fieldNoDim) scrollDim = 0;
-  clip(); if (calmNow()) dirty = true; kick();
+  // the still frames (Calm, deep in a page) only redraw when the dim really changed
+  if (calmNow() || Math.abs(scrollDim - was) > .004) dirty = true;
+  clip(); kick();
 }
 
 /** Create the field (once). Returns true when WebGL 2 runs. */
@@ -228,10 +256,20 @@ export function initField() {
   ok = compile();
   if (!ok) { cv.remove(); document.documentElement.classList.add('nogl'); return false; }
   cv.addEventListener('webglcontextlost', e => { e.preventDefault(); ok = false; cv.hidden = true; document.documentElement.classList.add('nogl'); });
+  cv.addEventListener('webglcontextrestored', () => {
+    ok = compile();
+    if (ok) { document.documentElement.classList.remove('nogl'); cv.hidden = false; dirty = true; kick(); }
+  });
+  register({
+    active: () => want,
+    tick(t) { try { frame(t); } catch (e) { console.warn('field: frame failed; the field stops.', e); want = false; } },
+  });
   addEventListener('resize', () => { dirty = true; kick(); });
+  try { matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', () => { dirty = true; kick(); }); } catch { /* old browser */ }
   addEventListener('scroll', onScroll, { passive: true });
   document.addEventListener('visibilitychange', () => { lastT = 0; kick(); });
   new MutationObserver(() => { dirty = true; kick(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion', 'data-theme'] });
+  window.__voField = { steps: STEPS, maxPx: MAXPX, lowEnd, drawFps: 0 };
   kick();
   return true;
 }

@@ -15,7 +15,7 @@ in vec2 p; out vec2 uv; void main(){ uv = p * .5 + .5; gl_Position = vec4(p, 0.,
 const FS = `#version 300 es
 precision highp float; in vec2 uv; out vec4 o;
 uniform vec2 res; uniform float yaw, pitch, dist, t, smax; uniform sampler2D smoke; uniform vec3 L; uniform vec2 fire;
-uniform vec2 dets[${MAXDET}]; uniform float don[${MAXDET}]; uniform int nd; uniform vec4 vents;
+uniform vec2 dets[${MAXDET}]; uniform float don[${MAXDET}]; uniform int nd, ns; uniform vec4 vents;
 float h1(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 vec2 box(vec3 ro, vec3 rd, vec3 b0, vec3 b1){ vec3 i = 1. / rd, t0 = (b0 - ro) * i, t1 = (b1 - ro) * i; vec3 a = min(t0, t1), b = max(t0, t1);
   return vec2(max(max(a.x, a.y), a.z), min(min(b.x, b.y), b.z)); }
@@ -41,9 +41,9 @@ void main(){
     float vr = step(abs(pw.x - L.x), .02) * step(vents.z, pw.y) * step(pw.y, vents.w);
     wall = mix(wall, vec3(.25, .3, .38), max(vs, vr));
     col = wall * .42;
-    float t0 = max(hb.x, 0.), dt = (hb.y - t0) / 72., T = 1.; vec3 acc = vec3(0);
+    float t0 = max(hb.x, 0.), dt = (hb.y - t0) / float(ns), T = 1.; vec3 acc = vec3(0);
     float jit = h1(gl_FragCoord.xy + t);
-    for (int i = 0; i < 72; i++) { vec3 p = ro + rd * (t0 + (float(i) + jit) * dt); float d = dens(p);
+    for (int i = 0; i < 72; i++) { if (i >= ns) break; vec3 p = ro + rd * (t0 + (float(i) + jit) * dt); float d = dens(p);
       if (d > .05) { float a = 1. - exp(-d * dt * .09); vec3 sc = mix(vec3(.80, .82, .86), vec3(1., .98, .95), clamp(p.y / L.y, 0., 1.)); acc += T * a * sc; T *= 1. - a; }
       float fd = length(p - vec3(fire, c.z)); acc += T * vec3(.35, .55, 1.) * exp(-fd * 14.) * dt * 9.;
       // detector lamps (feat/ui-lock): dim slate while quiet, fire orange (#FF7A3D) once the file's alarm time is reached
@@ -62,7 +62,13 @@ const VIEW0 = { yaw: 0.7, pitch: 0.25 }, DIST = 5.2, PMIN = -0.6, PMAX = 1.2, ST
 const KEY_YAW = Math.PI / 12, KEY_PITCH = 0.15;   // keyboard and button step (team choice: 15° turn, 0.15 rad tilt)
 // feat/ui-lock view feel (team choices, not data): zoom range in camera distance, zoom step, inertia decay, fly-in start
 const DMIN = 2.4, DMAX = 10, ZOOM_STEP = 1.18, SPIN_TAU = 380, FLY_FROM = 10, FLY_YAW = 0.55, FLY_MS = 1500;
-const still = () => document.documentElement.dataset.motion === 'calm' || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+// camera motion (fly-in, inertia) also stops when Read your way sets Effects: Off (html[data-effects=off], site v3 merge)
+const still = () => document.documentElement.dataset.motion === 'calm' || document.documentElement.dataset.effects === 'off' || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+// performance budget (feat/v3-merge): phones and low-end laptops get fewer pixels and ray-march steps; the GL context
+// exists only while the cabin is on screen and is handed back 2 s after it leaves (or at once on page leave)
+const mq = q => { try { return matchMedia(q).matches; } catch { return false; } };
+const lowEnd = () => mq('(pointer:coarse)') || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+const PX_LOW = 250000, PX_HIGH = 900000, STEPS_LOW = 40, STEPS_HIGH = 72, RELEASE_MS = 2000;
 const easeMove = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);   // close to --ease-move cubic-bezier(.65,0,.35,1)
 const words = ['no', 'one', 'two', 'three', 'four'];
 
@@ -236,6 +242,8 @@ export function cabin3dCard(d, ctx, { sources } = {}) {
     gl.uniform1f(U('smax'), d.scale_max_mg_m3 > 0 ? d.scale_max_mg_m3 : 0);   // no stated scale: no smoke drawn rather than a guessed one
     const dv = new Float32Array(MAXDET * 2); dets.forEach((x, i) => { dv[i * 2] = x.x; dv[i * 2 + 1] = x.y; });
     gl.uniform2fv(U('dets'), dv); gl.uniform1i(U('nd'), dets.length);
+    const low = lowEnd();
+    gl.uniform1i(U('ns'), low ? STEPS_LOW : STEPS_HIGH);
     const setLamps = on => { gl.useProgram(pr); const a = new Float32Array(MAXDET); on.forEach((x, i) => { if (i < MAXDET) a[i] = x ? 1 : 0; }); gl.uniform1fv(U('don'), a); };
     setLamps(dets.map(det => det.alarm_s != null && k * (d.frame_dt_s ?? 0) >= det.alarm_s));
     // vents: the shader draws a ceiling supply and a right-wall return, the defaults the file uses; other walls are not drawn
@@ -243,11 +251,11 @@ export function cabin3dCard(d, ctx, { sources } = {}) {
     const s = sw === 'top' && Array.isArray(d.supply) ? [d.supply[0] * d.lx_m, d.supply[1] * d.lx_m] : [-1, -1];
     const r = rw === 'right' && Array.isArray(d.ret) ? [d.ret[0] * d.ly_m, d.ret[1] * d.ly_m] : [-1, -1];
     gl.uniform4f(U('vents'), s[0], s[1], r[0], r[1]);
-    let raf = 0, last = 0, vis = true, dead = false, prevNow = 0, inRender = false;
-    const scale = Math.min(devicePixelRatio || 1, 1.5);
+    let raf = 0, last = 0, dead = false, prevNow = 0, inRender = false;
+    const scale = Math.min(devicePixelRatio || 1, low ? 1 : 1.5), budget = low ? PX_LOW : PX_HIGH;
     const upload = () => { gl.bindTexture(gl.TEXTURE_2D, tex); gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, d.nx, d.ny, gl.RED, gl.UNSIGNED_BYTE, new Uint8Array(d.frames[k])); };
     const render = now => {
-      raf = 0; if (dead || !vis || document.hidden) { prevNow = 0; return; }
+      raf = 0; if (dead || !onScreen || document.hidden) { prevNow = 0; return; }
       inRender = true;
       const moving = motion(now, prevNow ? Math.min(50, now - prevNow) : 16); prevNow = now;
       if (playing && now - last > STEP_MS) {
@@ -255,7 +263,8 @@ export function cabin3dCard(d, ctx, { sources } = {}) {
         if (k >= n - 1) { if (calm()) setPlaying(false); else { setK(0, 'gl'); upload(); } }   // loops as on main; in Calm it stops at the end
         else { setK(k + 1, 'gl'); upload(); }
       }
-      const rc = cv.getBoundingClientRect(), w = Math.max(1, Math.round(rc.width * scale)), hh = Math.max(1, Math.round(rc.height * scale));
+      const rc = cv.getBoundingClientRect(), px = rc.width * rc.height * scale * scale, f = px > budget ? scale * Math.sqrt(budget / px) : scale;   // pixel cap; CSS stretches the rest
+      const w = Math.max(1, Math.round(rc.width * f)), hh = Math.max(1, Math.round(rc.height * f));
       if (cv.width !== w || cv.height !== hh) { cv.width = w; cv.height = hh; }
       gl.viewport(0, 0, w, hh); gl.uniform2f(U('res'), w, hh); gl.uniform1f(U('yaw'), yaw); gl.uniform1f(U('pitch'), pitch); gl.uniform1f(U('dist'), dist);
       gl.uniform1f(U('t'), calm() ? 0 : now / 1000);   // Calm: the ray-march dither stays still
@@ -263,31 +272,59 @@ export function cabin3dCard(d, ctx, { sources } = {}) {
       inRender = false;
       if (playing || drag || pinch || moving) raf = requestAnimationFrame(render); else prevNow = 0;
     };
-    const kick = () => { if (!raf && !inRender && vis && !dead && !document.hidden) raf = requestAnimationFrame(render); };
-    // off screen or a hidden tab: no frames. The fly-in waits for the first time the cabin is actually on screen.
-    const io = typeof IntersectionObserver === 'function' ? new IntersectionObserver(([e]) => { vis = e.isIntersecting; if (vis) beginFly(); kick(); }) : null;
-    io?.observe(wrap);
-    if (!io) beginFly();
+    const kick = () => { if (!raf && !inRender && onScreen && !dead && !document.hidden) raf = requestAnimationFrame(render); };
+    // off screen or a hidden tab: no frames (the on-screen watch lives in begin(), which also hands the context back)
     const onVis = () => { if (!document.hidden) kick(); };
     document.addEventListener('visibilitychange', onVis);
     const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(kick) : null;
     ro?.observe(wrap);
-    const lost = e => { e.preventDefault(); dead = true; fail('The WebGL drawing was stopped by the browser.'); };
+    const lost = () => { dead = true; if (!releasing) { api = null; fail('The WebGL drawing was stopped by the browser.'); } };
     cv.addEventListener('webglcontextlost', lost);
     upload(); kick();
     return {
       frame: () => { upload(); kick(); }, kick, lamps: on => { if (!dead) { setLamps(on); kick(); } },
-      stop: () => { dead = true; if (raf) cancelAnimationFrame(raf); raf = 0; io?.disconnect(); ro?.disconnect(); document.removeEventListener('visibilitychange', onVis); cv.removeEventListener('webglcontextlost', lost); try { gl.getExtension('WEBGL_lose_context')?.loseContext(); } catch { /* ignore */ } },
+      stop: () => {
+        dead = true; if (raf) cancelAnimationFrame(raf); raf = 0; ro?.disconnect(); document.removeEventListener('visibilitychange', onVis); cv.removeEventListener('webglcontextlost', lost);
+        releasing = true; try { const x = gl.getExtension('WEBGL_lose_context'); loseExt = x || loseExt; x?.loseContext(); } catch { /* ignore */ } releasing = false;
+      },
     };
   }
-
-  const begin = () => {
-    if (api) return;
-    flyPending = !still(); if (flyPending) { dist = FLY_FROM; yaw = VIEW0.yaw + FLY_YAW; showView(); }   // calm: the normal view, no flight
+  // a context we handed back is asked for again with restoreContext (a lost canvas cannot make a new one); preventDefault
+  // on every loss keeps that possible. A loss the browser forces shows the fallback text (handled in startGL).
+  let loseExt = null, releasing = false, restoring = false, onScreen = false, wanted = false, offT = 0, io = null;
+  cv.addEventListener('webglcontextlost', e => e.preventDefault());
+  cv.addEventListener('webglcontextrestored', () => { restoring = false; if (wanted && onScreen && !api) { api = startGL(); if (playing && api) setPlaying(true); api?.kick(); } else if (!api) { releasing = true; try { loseExt?.loseContext(); } catch { /* ignore */ } releasing = false; } });
+  const acquire = () => {
+    if (api || restoring || cv.hidden || !cv.isConnected) return;   // cv.hidden: the fallback text is already showing
+    let gl = null; try { gl = cv.getContext('webgl2', { antialias: false }); } catch { gl = null; }
+    if (gl && gl.isContextLost()) {
+      if (!loseExt) return;
+      restoring = true; try { loseExt.restoreContext(); } catch { restoring = false; fail0('This view could not restart its WebGL 2 drawing.'); return; }
+      setTimeout(() => { if (restoring) { restoring = false; fail0('This view could not restart its WebGL 2 drawing.'); } }, 3000);   // no restore event: say so, never a blank box
+      return;
+    }
     api = startGL();
-    if (!api) { flyPending = false; dist = DIST; yaw = VIEW0.yaw; showView(); }
   };
-  const end = () => { setPlaying(false); spin = null; fly = null; flyPending = false; pts.clear(); drag = null; pinch = null; api?.stop(); api = null; };
+  const release = () => { clearTimeout(offT); offT = 0; if (api) { api.stop(); api = null; if (playing) setPlaying(true); } };   // playing on: the summary keeps stepping
+  const fail0 = why => { cv.hidden = true; fallback.hidden = false; fallback.textContent = `${why} The 2D map in "Where the smoke goes" shows the same model, and the summary and table below give its values.`; };
+
+  const show = on => {
+    onScreen = on;
+    if (on) {
+      clearTimeout(offT); offT = 0; acquire(); if (playing && api) setPlaying(true);   // hand playback back to the GL loop
+      if (api) beginFly(); else if (!restoring && flyPending) { flyPending = false; dist = DIST; yaw = VIEW0.yaw; showView(); }   // no WebGL: the normal view
+      api?.kick();
+    }
+    else if (api && !offT) offT = setTimeout(release, RELEASE_MS);   // scrolled away: give the GPU context back after 2 s
+  };
+  const begin = () => {
+    if (wanted) return;
+    wanted = true;
+    flyPending = !still(); if (flyPending) { dist = FLY_FROM; yaw = VIEW0.yaw + FLY_YAW; showView(); }   // calm: the normal view, no flight
+    if (typeof IntersectionObserver === 'function') { io = new IntersectionObserver(([e]) => show(e.isIntersecting), { rootMargin: '120px 0px' }); io.observe(wrap); }
+    else show(true);
+  };
+  const end = () => { wanted = false; io?.disconnect(); io = null; onScreen = false; setPlaying(false); spin = null; fly = null; flyPending = false; pts.clear(); drag = null; pinch = null; release(); };
   if (ctx && typeof ctx.onMount === 'function') { if (!ctx.detached) { ctx.onMount(begin); ctx.onLeave?.(end); } }
   else queueMicrotask(begin);   // called without a ctx: start once the card is in the page
   setK(k, 'gl'); showView();

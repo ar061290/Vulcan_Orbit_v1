@@ -7,7 +7,7 @@
 // store subscription and the URL mirror start in ctx.onMount and stop in ctx.onLeave. A detached render (the Sources
 // site map) runs nothing: it shows the titles and a one-line note.
 // Live region (D5.9): one announce() when the verdict or the risk level changes, never per slider step.
-import { h, page, announce, isMissing } from '../lib.js';
+import { h, page, announce, isMissing, sig } from '../lib.js';
 import { loadAssessData, computeAssessment } from '../assess_core.js';
 import { stopGrowth } from '../growth_run.js';
 import { setField } from '../field.js';
@@ -37,20 +37,43 @@ export default async function render(root, ctx = {}) {
   const respondWhy = h('small', {}, 'The response evidence card on Put it out reads the same inputs, so the link carries them.');
   cRisk.append(h('p', { class: 'as-next' }, toRespond, ' ', respondWhy));
 
+  // One app screen (v3 layout, UI-lock instruments). Wide (>= 1100 px): inputs | cabin plate, stat tiles and curve |
+  // sticky risk rail. Tablet: inputs | (centre, then the rail). Phones: one column plus a mini bar pinned to the bottom.
+  // Left = how the fire starts (camera, then the dials and presets); centre = the cabin plate (UI lock: drag the start
+  // point, rings from the growth run) and the burning area over time; right = the risk level, the verdict and the
+  // limits of the run. The DOM order is the keyboard order: inputs -> plate and chart -> risk.
+  // Figures are found by title (figLink slugs), so their numbers follow this order.
+  const col = (cls, label, ...kids) => h('div', { class: `as-col ${cls}`, role: 'region', 'aria-label': label }, ...kids);
+  const plateWrap = cInputs.plate ? h('div', { class: 'as-plate-wrap' }, cInputs.plate) : null;
+  const miniLevel = h('b', { class: 'as-mini-level' }, '…'), miniArea = h('b', { class: 'as-mini-area' }, '…');
+  // phones: a bar pinned to the bottom repeats the two headline values. It is a visual copy of the rail and the curve
+  // (both stay in the page for screen readers), so it is hidden from assistive technology and never takes focus.
+  const mini = h('div', { class: 'as-mini', 'aria-hidden': 'true' },
+    h('span', {}, h('small', {}, 'Risk'), miniLevel), h('span', {}, h('small', {}, 'Largest area (mid)'), miniArea));
   const pg = page('How bad will it get?', LEAD,
-    cInputs,
-    cCamera,
-    cVerdict,
-    h('div', { class: 'grid g2 as-pair' }, cCurve, cLists),
-    cRisk);
+    h('div', { class: 'as-app' },
+      col('as-col-in', 'Inputs: camera, flame, fuel and cabin', cCamera, cInputs),
+      col('as-col-main', 'Result: cabin plate and burning area over time', plateWrap, cCurve),
+      col('as-rail', 'Risk level, verdict and limits', cRisk, cVerdict, cLists)),
+    ctx.detached || !store ? null : mini);
   root.append(pg);
+  const setMini = r => {
+    const lvl = r?.risk?.level || null;
+    miniLevel.textContent = lvl || 'none'; mini.dataset.level = lvl || '';
+    const a = r?.kind === 'growth' ? r.growth?.summary?.mid?.max_area_cm2 : null;
+    miniArea.textContent = typeof a === 'number' && Number.isFinite(a) ? `${sig(a, 4)} cm²` : 'n/a';
+  };
+  // a column gets a tab stop only while it really scrolls on its own (wide screens; WCAG 2.1.1)
+  const scrollStops = () => pg.querySelectorAll('.as-col').forEach(c => {
+    if (c.scrollHeight > c.clientHeight + 2 && getComputedStyle(c).overflowY !== 'visible') c.tabIndex = 0; else c.removeAttribute('tabindex');
+  });
 
   if (ctx.detached || !store) {
     idle(live, store ? 'Open this page to run the growth model on these inputs.' : 'The Assess store is not available, so nothing was run.');
     return;
   }
 
-  let seq = 0, running = false, queued = false, left = false, first = true, unsub = null;
+  let seq = 0, running = false, queued = false, left = false, first = true, unsub = null, io = null, ro = null;
   let lastVerdict = null, lastLevel = null;
 
   const shortList = () => pg.querySelector('.short ol');
@@ -83,6 +106,7 @@ export default async function render(root, ctx = {}) {
     cLists.update(r, state);
     cRisk.update(r, state);
     setBusy(live, false);
+    setMini(r); scrollStops();
     showShort(r.sentences);
     const verdict = r.kind === 'growth' ? (r.growth?.verdict?.label ?? null) : r.kind;
     const level = r.risk?.level ?? null;
@@ -106,10 +130,22 @@ export default async function render(root, ctx = {}) {
     setLink();
     unsub = store.subscribe(st => { cInputs.sync(st); setLink(); run(); });
     run();
+    // the mini bar steps aside while the risk card it copies is on screen (no duplicate in view), and while the
+    // phone keyboard is up (css: hidden when a text field inside the page has focus)
+    if (typeof IntersectionObserver === 'function') {
+      io = new IntersectionObserver(es => { for (const e of es) mini.classList.toggle('is-off', e.isIntersecting); }, { threshold: 0 });
+      io.observe(cRisk);
+    }
+    // a column starts or stops scrolling when the window resizes (the app surface resizes) or a fold inside it opens
+    if (typeof ResizeObserver === 'function') { ro = new ResizeObserver(() => scrollStops()); ro.observe(pg.querySelector('.as-app')); }
+    pg.addEventListener('toggle', scrollStops, true);
+    scrollStops();
   });
   ctx.onLeave?.(() => {
     left = true;
     unsub?.(); unsub = null;
+    io?.disconnect(); io = null; ro?.disconnect(); ro = null;
+    pg.removeEventListener('toggle', scrollStops, true);
     stopGrowth();                             // a run still waiting rejects with AbortError and is dropped
   });
 }

@@ -13,6 +13,10 @@
 #view[data-page="respond"] .fr-stage:focus-visible{outline:3px solid var(--oxy);outline-offset:3px}
 #view[data-page="respond"] .fr-stage svg{display:block;width:100%;height:100%;overflow:visible}
 #view[data-page="respond"] .fr-hint{margin-top:var(--sp1)}
+/* touch: the O₂ rail over the scale is the drag surface (js/fig_respond.js); the rest of the stage scrolls the page */
+#view[data-page="respond"] .fr-stage.is-touch{cursor:auto}
+#view[data-page="respond"] .fr-rail{position:absolute;top:4%;bottom:4%;right:0;width:max(56px,20%);border-left:1px dashed var(--axis);border-radius:0 var(--r-data) var(--r-data) 0;touch-action:none;-webkit-tap-highlight-color:transparent;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px}
+#view[data-page="respond"] .fr-rail span{font:var(--label);letter-spacing:.14em;color:var(--mute)}
 
 /* SVG parts (illustration; sizes and the ring come from data) */
 #view[data-page="respond"] .fr-ring-track{fill:none;stroke:var(--line);stroke-width:6}
@@ -47,10 +51,30 @@
 #view[data-page="respond"] .fr-read dt{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);padding-right:var(--sp1)}
 #view[data-page="respond"] .fr-read dd{font:500 13px/1.45 var(--mono);color:var(--ink);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
 #view[data-page="respond"] .fr-note{margin:var(--sp2) 0 0;font-size:14px;line-height:1.6;color:var(--mute);max-width:72ch}
+/* folds inside the hero: secondary readouts and the method note (open on wide screens, folded on phones) */
+#view[data-page="respond"] .fr-more,#view[data-page="respond"] .fr-how{min-width:0}
+#view[data-page="respond"] .fr-more>summary,#view[data-page="respond"] .fr-how>summary{min-height:44px;display:flex;align-items:center;gap:var(--sp1);cursor:pointer;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--line)}
+#view[data-page="respond"] .fr-more>summary:focus-visible,#view[data-page="respond"] .fr-how>summary:focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+#view[data-page="respond"] .fr-more .fr-read-2{margin-top:0;border-top:0}
+#view[data-page="respond"] .fr-how{margin-top:var(--sp2)}
+#view[data-page="respond"] .fr-how .fr-note{margin-top:var(--sp1)}
 
 @media (max-width:760px){
   #view[data-page="respond"] .fr-hero-grid{grid-template-columns:minmax(0,1fr);gap:var(--sp2)}
-  #view[data-page="respond"] .fr-stage{max-width:360px;margin:0 auto}
+  #view[data-page="respond"] .fr-stage{max-width:300px;margin:0 auto}
+  #view[data-page="respond"] .fr-hint{text-align:center}
+}
+/* phones: a compact hero so the first figure is not pushed far below the fold; the scale labels are drawn larger
+   in SVG units so they still render at about 9 px on a 240 px stage */
+@media (max-width:560px){
+  #view[data-page="respond"] .fr-stage{max-width:min(240px,100%)}
+  #view[data-page="respond"] .fr-hero-top{margin-bottom:var(--sp1)}
+  #view[data-page="respond"] .fr-svg-lab{font-size:14px}
+  #view[data-page="respond"] .fr-svg-on{font-size:15px}
+  #view[data-page="respond"] .fr-ptext{font-size:10px}   /* inside the ring: stays at its set size so it clears the ring */
+  #view[data-page="respond"] .fr-mmbar text{font-size:12px}
+  #view[data-page="respond"] .fr-read dt,#view[data-page="respond"] .fr-read dd{padding:5px 0}
+  #view[data-page="respond"] .fr-burns{margin-top:0}
 }
 @media (max-width:400px){
   #view[data-page="respond"] .fr-hero{padding:var(--sp2)}

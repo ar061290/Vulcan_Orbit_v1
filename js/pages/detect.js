@@ -16,7 +16,8 @@ export default async function render(root, ctx = {}) {
     gasCard(gas),
     rateCard(ror),
     sensitivityCard(sens),
-    h('div', { class: 'grid g2' }, blindSpotCard(lat), smokeMissCard(smoke)),
+    // v3 figure grid: the pair sits side by side only when each figure gets at least 520 px (css/p-detect.css)
+    h('div', { class: 'grid det-pair' }, blindSpotCard(lat), smokeMissCard(smoke)),
     daftCard(daft)));
 }
 

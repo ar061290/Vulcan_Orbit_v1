@@ -1,9 +1,21 @@
-/* Page CSS for #/locate. Every rule is scoped under #view[data-page="locate"] (site/REBUILD_PLAN.md §0 rule 9).
+/* Page CSS for #/locate (v3 restyle merged with the UI lock; the rig line drawing is css/ui-locate.css, loaded after this). Every rule is scoped under #view[data-page="locate"] (site/REBUILD_PLAN.md §0 rule 9).
    The shared mist-trial card (fig_respond) uses its own unscoped .mist- classes in fx-response.css. */
-#view[data-page="locate"] .bench-steps{margin:0 0 14px;padding-left:1.4em;display:grid;gap:8px;max-width:var(--measure)}
-#view[data-page="locate"] .bench-steps li::marker{font:600 .85rem var(--mono);color:var(--accent-ink)}
+/* the explainer is the wide figure, the limits sit in a narrower column beside it */
+#view[data-page="locate"] .bench-top{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:var(--sp3);align-items:start}
+#view[data-page="locate"] .bench-steps{margin:0 0 var(--sp2);padding:0;list-style:none;counter-reset:bs;display:grid;gap:0;max-width:var(--measure)}
+#view[data-page="locate"] .bench-steps li{counter-increment:bs;position:relative;padding:12px 0 12px var(--sp4);border-top:1px solid var(--line)}
+#view[data-page="locate"] .bench-steps li:first-child{border-top:0}
+#view[data-page="locate"] .bench-steps li::before{content:counter(bs,decimal-leading-zero);position:absolute;left:0;top:12px;font:600 .75rem/1.9 var(--mono);color:var(--accent-ink)}
 #view[data-page="locate"] .bench-steps b{color:var(--ink)}
 #view[data-page="locate"] .bench-absent{font-style:italic;color:var(--mute)}
-#view[data-page="locate"] .bench-pending{margin:0 0 10px;padding-left:1.1em;display:grid;gap:6px}
-#view[data-page="locate"] .card>h3{margin-top:18px}
+#view[data-page="locate"] .bench-pending{margin:0 0 12px;padding-left:1.1em;display:grid;gap:var(--sp1)}
+#view[data-page="locate"] .card>h3{margin-top:var(--sp3)}
 #view[data-page="locate"] .card table td:nth-child(2){font-family:var(--mono);overflow-wrap:anywhere}
+/* the three pending camera checks: a row of equal panels that wraps to one column early, so none gets cramped */
+#view[data-page="locate"] .bench-checks{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+/* "not measured yet" inside a figure: one quiet ruled note, not a box inside a box */
+#view[data-page="locate"] .card .card{background:transparent;border:0;border-left:2px solid var(--axis);border-radius:0;padding:4px 0 4px var(--sp2)}
+#view[data-page="locate"] .card .empty{border:0;border-left:2px dashed var(--axis);border-radius:0;padding:4px 0 4px var(--sp2)}
+@media (max-width:1100px){
+  #view[data-page="locate"] .bench-top{grid-template-columns:minmax(0,1fr)}
+}

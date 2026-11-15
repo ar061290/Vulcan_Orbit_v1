@@ -1,61 +1,79 @@
 /* Page CSS for #/models (Model cards). Every rule is scoped under #view[data-page="models"] (site/REBUILD_PLAN.md §0 rule 9).
-   Package P5-C. Colours come from tokens.css only, so Day and Night both work. */
-#view[data-page="models"] .mcard{margin-top:14px}
-#view[data-page="models"] .mcard h3{font:700 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:18px 0 8px}
+   Package P5-C. feat/v3-merge: each full card reads like a v3 spec sheet, written in the UI-lock tokens. The held-out
+   score is the big mono number (sized by the width of its own strip), the baseline and the pass rule sit beside it, and
+   every key-value block is a dense ruled table. Rules instead of filled boxes; colours from tokens.css only (Day and Night). */
+#view[data-page="models"] .mcard{margin-top:var(--sp3)}
+#view[data-page="models"] .mcard h3{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:var(--sp3) 0 var(--sp1)}
+#view[data-page="models"] .mc-k{display:block;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
 
-/* Use it for / Not for (main's SCOPE text) */
-#view[data-page="models"] .mc-scope{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
-#view[data-page="models"] .mc-scope > div{padding:10px 14px;border-radius:12px;background:var(--raise);border-left:4px solid var(--good)}
-#view[data-page="models"] .mc-scope > .mc-not{border-left:4px dashed var(--crit)}
-#view[data-page="models"] .mc-scope p{margin:4px 0 0;color:var(--ink)}
-#view[data-page="models"] .mc-k{font:700 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+/* Use it for / Not for: two ruled columns, no boxes */
+#view[data-page="models"] .mc-scope{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:var(--sp2) 0;border-top:1px solid var(--axis);border-bottom:1px solid var(--line)}
+#view[data-page="models"] .mc-scope > div{padding:12px var(--sp2) var(--sp2);border-left:2px solid var(--good)}
+#view[data-page="models"] .mc-scope > .mc-not{border-left:2px dashed var(--crit)}
+#view[data-page="models"] .mc-scope p{margin:4px 0 0;color:var(--ink);font-size:.875rem}
 
-/* score boxes */
-#view[data-page="models"] .mc-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:10px;margin:12px 0}
-#view[data-page="models"] .mc-stats .stat{font-size:1.6rem;overflow-wrap:anywhere}
-#view[data-page="models"] .mc-stats .stat small{display:block;margin:4px 0 0;line-height:1.4;font-size:12.5px;color:var(--ink2)}
-#view[data-page="models"] .mc-stats .stat-label{font-size:13px;color:var(--ink2)}
+/* the score strip: the held-out score big on the left, baseline and own pass rule stacked beside it */
+#view[data-page="models"] .mc-stats{container-type:inline-size;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);column-gap:var(--sp4);row-gap:var(--sp1);margin:var(--sp3) 0 var(--sp2)}
+#view[data-page="models"] .mc-stats > .statbox{grid-column:2;border:0;border-top:1px solid var(--line);border-radius:0;padding:var(--sp1) 0}
+#view[data-page="models"] .mc-stats > .statbox:first-child{grid-column:1;grid-row:1 / span 3;align-content:start;border-top:2px solid var(--ink)}
+#view[data-page="models"] .mc-stats .stat{font-size:1.375rem;overflow-wrap:anywhere;letter-spacing:-.02em}
+#view[data-page="models"] .mc-stats > .statbox:first-child .stat{font-size:clamp(2.5rem,11cqi,4.5rem);line-height:.95;letter-spacing:-.04em}
+#view[data-page="models"] .mc-stats .stat small{display:block;margin:var(--sp1) 0 0;line-height:1.45;font:400 .875rem/1.45 var(--font);color:var(--ink2);letter-spacing:0}
+#view[data-page="models"] .mc-stats > .statbox:first-child .stat small{font:500 .875rem/1.45 var(--mono);margin-top:12px}
+#view[data-page="models"] .mc-stats .stat-label{color:var(--mute)}
 
 /* the sub-model parts (M3 grid model and lattice Boltzmann; M4 rate-of-rise extension) */
-#view[data-page="models"] .mc-part{margin:16px 0 0;padding:4px 0 0 14px;border-left:2px solid var(--line)}
-#view[data-page="models"] .mc-part > h3{margin-top:6px;color:var(--ink);font:700 15px var(--font);letter-spacing:0;text-transform:none}
+#view[data-page="models"] .mc-part{margin:var(--sp3) 0 0;padding:0 0 0 var(--sp2);border-left:1px solid var(--axis)}
+#view[data-page="models"] .mc-part > h3{margin-top:0;color:var(--ink);font:650 1rem var(--display);letter-spacing:0;text-transform:none}
 
-#view[data-page="models"] dl.made.mc{padding-left:0;padding-right:0;font-size:14px}
-#view[data-page="models"] .mc-quote{font-size:14px;color:var(--ink2);margin:10px 0}
+/* key-value blocks: a dense ruled table */
+#view[data-page="models"] dl.made.mc{grid-template-columns:minmax(9rem,max-content) minmax(0,1fr);gap:0;margin:var(--sp2) 0;padding-left:0;padding-right:0;font-size:.875rem;border-bottom:1px solid var(--line)}
+#view[data-page="models"] dl.made.mc > dt,#view[data-page="models"] dl.made.mc > dd{padding:var(--sp1) 0;border-top:1px solid var(--line)}
+#view[data-page="models"] dl.made.mc > dt{padding-right:var(--sp2);padding-top:calc(var(--sp1) + 3px)}
+#view[data-page="models"] dl.made.mc > dd{max-width:var(--measure);margin:0}
+#view[data-page="models"] .mc-quote{font-size:.875rem;color:var(--ink2);margin:12px 0}
 #view[data-page="models"] .mc-quote q{font-style:italic}
-#view[data-page="models"] .mc-verdict{margin:12px 0;padding:10px 14px;border-radius:12px;background:var(--raise);border-left:4px solid var(--crit);color:var(--ink)}
+#view[data-page="models"] .mc-verdict{margin:var(--sp2) 0;padding:var(--sp1) var(--sp2);border-left:2px solid var(--crit);color:var(--ink);font-size:.875rem;max-width:var(--measure)}
 
 /* M6 findings first */
-#view[data-page="models"] .mc-find{margin:6px 0 10px;padding-left:1.3em;color:var(--ink)}
+#view[data-page="models"] .mc-find{margin:var(--sp1) 0 12px;padding-left:1.4em;color:var(--ink);font-size:.875rem}
 #view[data-page="models"] .mc-find li{margin:4px 0}
+#view[data-page="models"] .mc-find li::marker{font:600 .75rem var(--mono);color:var(--mute)}
 
 /* drivers: the share is printed as text; the bar is decoration (aria-hidden) */
-#view[data-page="models"] .mc-drivers{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-width:36rem}
-#view[data-page="models"] .mc-drivers li{display:grid;grid-template-columns:minmax(8rem,14rem) 1fr 3.5em;gap:10px;align-items:center;font-size:14px}
+#view[data-page="models"] .mc-drivers{list-style:none;margin:0;padding:0;display:grid;gap:4px;max-width:40rem}
+#view[data-page="models"] .mc-drivers li{display:grid;grid-template-columns:minmax(8rem,14rem) 1fr 4em;gap:12px;align-items:center;font-size:.875rem;min-height:24px}
 #view[data-page="models"] .mc-dn{color:var(--ink);overflow-wrap:anywhere}
-#view[data-page="models"] .mc-bar{height:8px;border-radius:4px;background:var(--grid);overflow:hidden}
-#view[data-page="models"] .mc-bar > span{display:block;height:100%;background:var(--s1)}
-#view[data-page="models"] .mc-ds{font:600 13px var(--mono);color:var(--ink);text-align:right}
+#view[data-page="models"] .mc-bar{height:6px;background:var(--raise);overflow:hidden;border-radius:0}
+#view[data-page="models"] .mc-bar > span{display:block;height:100%;background:var(--oxy)}
+#view[data-page="models"] .mc-ds{font:600 .875rem var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);text-align:right}
 
-/* pass-rule results */
-#view[data-page="models"] .mc-checks ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-#view[data-page="models"] .mc-checks li{font-size:14px;color:var(--ink2);line-height:1.45;overflow-wrap:anywhere}
-#view[data-page="models"] .mc-checks li b{color:var(--ink);font:600 13px var(--mono)}
+/* pass-rule results: one ruled line each */
+#view[data-page="models"] .mc-checks ul{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+#view[data-page="models"] .mc-checks li{font-size:.875rem;color:var(--ink2);line-height:1.45;overflow-wrap:anywhere;padding:var(--sp1) 0;border-bottom:1px solid var(--line)}
+#view[data-page="models"] .mc-checks li b{color:var(--ink);font:600 .8125rem var(--mono)}
 #view[data-page="models"] .mc-checks .status{display:inline;color:var(--ink);font-weight:700}
 #view[data-page="models"] .mc-checks .status::before{display:inline-block;margin-right:6px;vertical-align:.05em}
 #view[data-page="models"] .mc-checks li[data-state="fail"] .status{color:var(--crit)}
-#view[data-page="models"] .mc-count{margin:0 0 8px;font-size:13.5px;color:var(--ink2)}
-#view[data-page="models"] .mc-checks details.fold{margin-top:8px}
+#view[data-page="models"] .mc-count{margin:0 0 var(--sp1);font-size:.875rem;color:var(--ink2)}
+#view[data-page="models"] .mc-checks details.fold{margin-top:var(--sp1)}
 
-#view[data-page="models"] .mc-links{margin:14px 0 4px}
-#view[data-page="models"] .mc-links ul{margin:4px 0 0;padding-left:1.2em}
-#view[data-page="models"] .mc-links li{margin:2px 0}
-#view[data-page="models"] .cred{padding-left:0;padding-right:0;margin-top:14px}
-#view[data-page="models"] .mc-foot{margin-top:22px}
+#view[data-page="models"] .mc-links{margin:var(--sp3) 0 4px;padding-top:12px;border-top:1px solid var(--line)}
+#view[data-page="models"] .mc-links ul{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px var(--sp3)}
+#view[data-page="models"] .mc-links li{margin:0;font-size:.875rem}
+#view[data-page="models"] .mc-links a{display:inline-block;padding:10px 0}   /* 44 px tall tap row on phones */
+#view[data-page="models"] .cred{padding:12px 0 0;margin-top:var(--sp3);border-top:1px solid var(--line);border-bottom:0}
+#view[data-page="models"] .mc-foot{margin-top:var(--sp4)}
 
-@media (max-width:600px){
+@media (max-width:680px){
   #view[data-page="models"] .mc-scope{grid-template-columns:1fr}
-  #view[data-page="models"] .mc-drivers li{grid-template-columns:1fr 3.5em}
+  #view[data-page="models"] .mc-scope > div + div{border-top:1px solid var(--line)}
+  #view[data-page="models"] .mc-stats{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="models"] .mc-stats > .statbox,#view[data-page="models"] .mc-stats > .statbox:first-child{grid-column:1;grid-row:auto}
+  #view[data-page="models"] dl.made.mc{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="models"] dl.made.mc > dd{border-top:0;padding-top:0}
+  #view[data-page="models"] dl.made.mc > dt{padding-bottom:4px}
+  #view[data-page="models"] .mc-drivers li{grid-template-columns:minmax(0,1fr) 4em}
   #view[data-page="models"] .mc-drivers .mc-bar{grid-column:1 / -1;grid-row:2}
-  #view[data-page="models"] .mc-part{padding-left:10px}
+  #view[data-page="models"] .mc-part{padding-left:12px}
 }

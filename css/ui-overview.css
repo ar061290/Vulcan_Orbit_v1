@@ -89,6 +89,14 @@
 #view[data-page="overview"] .story-pin.is-static .sd-band{opacity:.18}
 #view[data-page="overview"] .story-pin.is-static .sd-trace{stroke-dashoffset:0!important}
 
+/* v3 merge: the copy and the stage never shrink into each other (the flame strip gives way first), and on wide screens
+   the flight-data panel is narrowed on short screens so headline + buttons + panel fit one screen. js/pages/overview.js
+   measures the same thing and stacks the story when they still do not fit, so the panel can never cover the buttons. */
+#view[data-page="overview"] .story-top,#view[data-page="overview"] .story-stage{flex-shrink:0}
+@media (min-width:901px){
+  #view[data-page="overview"] .story-stage{max-width:min(680px,56%,calc((100vh - var(--top-h,0px)) * 1.2 - 290px));max-width:min(680px,56%,calc((100svh - var(--top-h,0px)) * 1.2 - 290px))}
+}
+
 /* the paragraph that used to sit in the hero, now the first words under the visual */
 #view[data-page="overview"] .home-lead{font-size:1.15rem;line-height:1.6;color:var(--ink2);max-width:60ch;margin:clamp(28px,6vh,56px) 0 clamp(20px,4vh,36px)}
 
@@ -148,3 +156,145 @@
 @media (prefers-reduced-motion:reduce){#view[data-page="overview"] .hrow[open]>.hrow-body{animation:none}}
 html[data-motion=calm] #view[data-page="overview"] .hrow[open]>.hrow-body{animation:none}
 html[data-motion=calm] #view[data-page="overview"] .hrow-plus,html[data-motion=calm] #view[data-page="overview"] .sd-rev{transition:none}
+#view[data-page="overview"] .hrow-wait{color:var(--mute);margin:0}
+
+/* ---------- 3. v3 merge: "The finding" band ----------
+   Always dark: the section carries data-theme="night", so the tokens inside are Night's in both themes. It starts as
+   v3's still ember (.fx-noise-still, css/fx-effects.css: background-image only is used, the colour is set here); on a
+   desktop with effects on, js/pages/overview.js mounts the noise canvas (z 0) and the fire trail canvas (z 1) inside it.
+   The band is opaque, so the shared field is never visible through it: one WebGL picture per place. */
+#view[data-page="overview"] .fd{position:relative;isolation:isolate;overflow:hidden;background-color:#05060E;color:var(--ink);margin:0 0 clamp(28px,6vh,56px);padding:clamp(48px,10vh,112px) 0 clamp(56px,11vh,120px)}
+#view[data-page="overview"] .fd>.fx-noise{z-index:0}
+#view[data-page="overview"] .fd>.fx-fluid{z-index:1}
+#view[data-page="overview"] .fd-in{position:relative;z-index:2;box-sizing:border-box;max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
+#view[data-page="overview"] .fd-in>h2:not(.fd-h){font:700 clamp(24px,3.4vw,40px)/1.12 var(--display);letter-spacing:-.03em;margin:10px 0 12px}
+#view[data-page="overview"] .fd-nums{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 40px;margin:24px 0 32px}
+#view[data-page="overview"] .fd-n{display:grid;grid-template-columns:auto auto;align-items:baseline;column-gap:8px;min-width:0}
+#view[data-page="overview"] .fd-n b{font:600 clamp(48px,11vw,168px)/.85 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.05em;color:var(--ink)}
+#view[data-page="overview"] .fd-rad b{color:#7AA2FF}      /* the same colours as the story's traces: flame sensor orbit blue, smoke fire */
+#view[data-page="overview"] .fd-smoke b{color:#FF7A3D}
+#view[data-page="overview"] .fd-n>span{font:500 clamp(22px,3.6vw,52px)/1 var(--mono);color:var(--ink2)}
+#view[data-page="overview"] .fd-n small{grid-column:1/-1;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-top:12px}
+#view[data-page="overview"] .fd-vs{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);padding-bottom:36px}
+#view[data-page="overview"] .fd-h{font:500 clamp(19px,1.9vw,26px)/1.4 var(--font);letter-spacing:0;max-width:60ch;color:var(--ink);margin:0 0 12px}
+#view[data-page="overview"] .fd-never{color:var(--ink);margin:0 0 20px;max-width:62ch}
+#view[data-page="overview"] .fd .tick{max-width:900px;margin:0 0 16px;border-radius:var(--r-panel)}
+/* small text over the ember glow is the light ink (>= 4.5:1 even at the glow's brightest, capped spots); links are
+   underlined ink rather than orbit blue for the same reason */
+#view[data-page="overview"] .fd .kicker,#view[data-page="overview"] .fd .story-stamps,#view[data-page="overview"] .fd .story-sub{color:var(--ink)}
+#view[data-page="overview"] .fd .kicker::before{background:#FF7A3D}
+#view[data-page="overview"] .fd-more{max-width:66ch;margin:4px 0 0}
+#view[data-page="overview"] .fd-more>summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--ink)}
+#view[data-page="overview"] .fd a{color:var(--ink);text-decoration:underline;text-decoration-color:#7AA2FF;text-underline-offset:4px}
+#view[data-page="overview"] .fd a:focus-visible,#view[data-page="overview"] .fd summary:focus-visible{outline:2px solid #7AA2FF;outline-offset:3px}
+#view[data-page="overview"] .fd .story-links a{min-height:44px;display:inline-flex;align-items:center}
+#view[data-page="overview"] .fd-illus{margin:20px 0 0;font-size:.85rem;color:var(--ink)}
+#view[data-page="overview"] .fd-illus .illus-tag,#view[data-page="overview"] .fx-grav-cap .illus-tag,#view[data-page="overview"] .why-grav .illus-tag{position:static;color:var(--ink2)}
+#view[data-page="overview"] .fd-illus .illus-tag{color:var(--ink)}
+
+/* ---------- 4. v3 merge: "Our answer", the live camera -> growth -> risk panel ---------- */
+#view[data-page="overview"] .ans{margin:0 0 clamp(28px,6vh,56px)}
+#view[data-page="overview"] .ans-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 48px;align-items:end;margin-bottom:24px}
+#view[data-page="overview"] .ans-head .kicker{grid-column:1/-1}
+#view[data-page="overview"] .ans-head h2{margin:0;font:800 clamp(28px,3.6vw,48px)/1 var(--display);letter-spacing:-.03em}
+#view[data-page="overview"] .ans-head p{margin:0;color:var(--ink2);max-width:60ch}
+#view[data-page="overview"] .ans-app{display:grid;grid-template-columns:minmax(240px,320px) minmax(0,1fr);border:1px solid var(--line);border-radius:var(--r-panel);background:var(--surface)}
+#view[data-page="overview"] .ans-ctl{display:grid;gap:16px;align-content:start;padding:24px;border-right:1px solid var(--line);min-width:0}
+#view[data-page="overview"] .ans-ctl .btn{min-height:44px;justify-content:center;text-align:center}
+#view[data-page="overview"] .ans-ctl small{display:block;line-height:1.5;color:var(--ink2)}
+#view[data-page="overview"] .ans-load[aria-busy=true]{opacity:.7;cursor:progress}
+#view[data-page="overview"] .ans-risk{border-top:1px solid var(--line);padding-top:16px}
+#view[data-page="overview"] .ans-risk p{margin:0}
+#view[data-page="overview"] .ans-k{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="overview"] .ans-level{font:800 clamp(26px,3vw,40px)/1.1 var(--display);color:var(--ink);margin:8px 0!important}
+#view[data-page="overview"] .ans-risk[data-level=High] .ans-level{color:var(--accent-ink)}
+#view[data-page="overview"] .ans-why{font-size:.9rem;color:var(--ink2)}
+#view[data-page="overview"] .ans-rule{display:block;margin-top:4px}
+#view[data-page="overview"] .ans-out{padding:24px;min-width:0;min-height:260px}
+#view[data-page="overview"] .ans-idle{color:var(--mute);margin:72px auto;text-align:center;max-width:40ch}
+#view[data-page="overview"] .ans-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-bottom:16px}
+#view[data-page="overview"] .ans-tiles>div{display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:8px;border-top:1px solid var(--line);padding-top:12px;min-width:0}
+#view[data-page="overview"] .ans-tiles b{font:600 clamp(28px,3.4vw,44px)/1 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--ink)}
+#view[data-page="overview"] .ans-tiles span{font:500 1rem var(--mono);color:var(--ink2)}
+#view[data-page="overview"] .ans-tiles small{grid-column:1/-1;margin-top:4px;font-size:.85rem;color:var(--ink2)}
+#view[data-page="overview"] .ans-src{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.85rem;color:var(--ink2);margin:12px 0 0}
+
+/* ---------- 5. v3 merge: content of the new ledger rows ---------- */
+/* why it happens: text left, the drift loop right, the gravity toy under both */
+#view[data-page="overview"] .why{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:24px 40px;align-items:start}
+#view[data-page="overview"] .why-text h3,#view[data-page="overview"] .tr-head h3{font:700 1.45rem/1.15 var(--display);letter-spacing:-.02em;margin:0 0 10px}
+#view[data-page="overview"] .why-text p{color:var(--ink2);margin:0}
+#view[data-page="overview"] .why-share{font:600 1.6rem/1 var(--mono);color:var(--ink);margin:0 2px}
+#view[data-page="overview"] .why-fig{margin:0}
+#view[data-page="overview"] .why-stage{background:#05060E;border:1px solid var(--line);border-radius:var(--r-data);overflow:hidden;line-height:0}
+#view[data-page="overview"] .why-cv{width:100%;height:auto;display:block;cursor:pointer;touch-action:pan-y}
+#view[data-page="overview"] .why-fig figcaption{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:12px;font-size:.88rem;color:var(--ink2)}
+#view[data-page="overview"] .why-t{font:500 .88rem var(--mono);font-variant-numeric:tabular-nums;color:var(--ink)}
+#view[data-page="overview"] .why-pause{min-height:44px;min-width:72px}
+#view[data-page="overview"] .why-legend{display:inline-flex;align-items:center;gap:8px}
+#view[data-page="overview"] .why-legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+#view[data-page="overview"] .why-legend i.f{background:#FF7A3D}
+#view[data-page="overview"] .why-legend i.d{background:#05060E;border:1.5px solid var(--ink);margin-left:8px}
+#view[data-page="overview"] .why-grav{grid-column:1/-1;min-width:0}
+/* the gravity toy (css/fx-effects.css) uses v3 token names; give it the UI-lock ones here */
+#view[data-page="overview"] .fx-grav-stage{background:var(--surface);border-color:var(--line);border-radius:var(--r-data);cursor:pointer;touch-action:pan-y}
+#view[data-page="overview"] .fx-grav-cap{color:var(--ink2)}
+#view[data-page="overview"] .fx-grav-btn{min-height:44px}
+
+/* why you can trust it: counts as big numbers, NASA datasets as chips */
+#view[data-page="overview"] .tr{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:24px 40px}
+#view[data-page="overview"] .tr-head p{color:var(--ink2);margin:0 0 16px}
+#view[data-page="overview"] .tr-head .btn{min-height:44px}
+#view[data-page="overview"] .tr-nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-content:start}
+#view[data-page="overview"] .tr-n{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:12px;min-width:0}
+#view[data-page="overview"] .tr-n b{font:600 clamp(36px,5vw,72px)/.9 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.04em;color:var(--ink)}
+#view[data-page="overview"] .tr-n span{font:var(--label);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+#view[data-page="overview"] .tr-src{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:.85rem;color:var(--ink2);margin:0}
+#view[data-page="overview"] .tr-data{grid-column:1/-1}
+#view[data-page="overview"] .tr-k{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0}
+#view[data-page="overview"] .tr-chips{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+#view[data-page="overview"] .tr-chips li{margin:0}
+#view[data-page="overview"] .tr-chips a,#view[data-page="overview"] .tr-chips li>span{box-sizing:border-box;min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-data);text-decoration:none;color:var(--ink);font-size:.9rem}
+#view[data-page="overview"] .tr-chips a:hover{border-color:var(--mute)}
+#view[data-page="overview"] .tr-chips a:focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+#view[data-page="overview"] .tr-chips b{font-weight:700}
+#view[data-page="overview"] .tr-chips span span,#view[data-page="overview"] .tr-chips a span:not(.sr){font:500 .78rem var(--mono);color:var(--ink2)}
+
+/* the oxygen gap line at the top of the mission check */
+#view[data-page="overview"] .here-gap{margin:0 0 18px}
+#view[data-page="overview"] .here-gap>p{margin:0;max-width:62ch}
+#view[data-page="overview"] .here-n{display:flex;align-items:baseline;gap:16px;margin:0 0 6px!important}
+#view[data-page="overview"] .here-n b{font:600 clamp(44px,7vw,96px)/.9 var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.04em;color:var(--ink2)}
+#view[data-page="overview"] .here-n b.zero{color:var(--accent-ink)}
+#view[data-page="overview"] .here-n span{font:500 clamp(24px,3vw,40px)/1 var(--mono);color:var(--mute)}
+
+/* every section as tiles */
+#view[data-page="overview"] .ex-all{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 40px;margin:20px 0 0}
+#view[data-page="overview"] .ex-gh{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 8px}
+#view[data-page="overview"] .ex-g ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0 16px}
+#view[data-page="overview"] .ex-g li{margin:0}
+#view[data-page="overview"] .ex-tile{box-sizing:border-box;min-height:44px;display:grid;gap:2px;align-content:center;padding:10px 0;border-top:1px solid var(--line);text-decoration:none;color:var(--ink)}
+#view[data-page="overview"] .ex-tile b{font:600 1rem/1.3 var(--display)}
+#view[data-page="overview"] .ex-tile span{font-size:.88rem;color:var(--ink2)}
+#view[data-page="overview"] .ex-tile:hover b{text-decoration:underline;text-underline-offset:3px}
+#view[data-page="overview"] .ex-tile:focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+
+@media (max-width:1023px){
+  #view[data-page="overview"] .why,#view[data-page="overview"] .tr,#view[data-page="overview"] .ans-head{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:760px){
+  #view[data-page="overview"] .ans-app{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="overview"] .ans-ctl{border-right:0;border-bottom:1px solid var(--line);padding:16px}
+  #view[data-page="overview"] .ans-out{padding:16px;min-height:200px}
+  #view[data-page="overview"] .ans-idle{margin:48px auto}
+  #view[data-page="overview"] .ans-tiles{grid-template-columns:minmax(0,1fr);gap:12px}
+  #view[data-page="overview"] .ex-all{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="overview"] .fd-vs{padding-bottom:20px}
+  #view[data-page="overview"] .tr-nums{gap:10px}
+  #view[data-page="overview"] .tr-n span{font-size:10px;letter-spacing:.08em}
+}
+@media (max-width:420px){
+  #view[data-page="overview"] .fd-nums{gap:12px 20px}
+  #view[data-page="overview"] .tr-n b{font-size:clamp(28px,10vw,40px)}
+}
+@media print{#view[data-page="overview"] .fd{background:none!important;color:#000}}

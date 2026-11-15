@@ -142,7 +142,7 @@ function m7Line(m7, gaps, inputs, store) {
   const gasName = g => (g === 'no added gas' ? 'No added gas' : `${g} for N₂`);   // main's row label
   const ex = m7.extinction;
   return line('m7', title, m7.status, fl,
-    h('div', { class: 'scroll resp-table' }, h('table', {},
+    h('div', { class: 'scroll resp-table', tabindex: '0', role: 'region', 'aria-label': 'M7 model table' }, h('table', {},
       h('caption', {}, `M7 model, ${fmt(pNear, 2)} atm: oxygen at a 50% chance the flame goes out, with its 95% range`),
       h('thead', {}, h('tr', {}, ['Fuel', 'Added gas', 'O₂ at 50% chance [95% range]', `This cabin's ${isF(o2) ? fmt(o2, 2) + '%' : ''} O₂ is`].map(x => h('th', { scope: 'col' }, x)))),
       h('tbody', {}, rows.map(r => h('tr', {},
@@ -199,7 +199,8 @@ function verdictLine(sp, res, inputs, store) {
 }
 const rangeTxt = (lo, hi) => (isF(lo) && isF(hi) ? (num(lo) === num(hi) ? fmt(lo, 3) : `${fmt(lo, 3)}–${fmt(hi, 3)}`) : 'n/a');
 function tbl(headers, rows, caption) {
-  return h('div', { class: 'scroll resp-table' }, h('table', {},
+  // this card re-renders after the page passes ran, so it makes its own scroll region keyboard-reachable (axe, v3)
+  return h('div', { class: 'scroll resp-table', tabindex: '0', role: 'region', 'aria-label': caption }, h('table', {},
     h('caption', {}, caption),
     h('thead', {}, h('tr', {}, headers.map(x => h('th', { scope: 'col' }, x)))),
     h('tbody', {}, rows.map(r => h('tr', {}, r.map(c => h('td', {}, c)))))));

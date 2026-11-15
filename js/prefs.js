@@ -2,13 +2,15 @@
 // Choices are kept in this browser only (localStorage, prefix "vo.", every access wrapped in try/catch).
 // Dock text and behaviour carried over verbatim from main's js/theme.js; rows now have visible labels
 // tied to their button groups (spec D5.7).
+// Effects (v3): On/Off for the signature effects; sets html[data-effects]. Effects Off and Calm both stop them
+// (js/fx/loop.js fxAllowed). It does not re-render the page: each effect listens for the attribute change itself.
 // Events: 'vo:rerender' on theme and motion changes (the router re-renders the page, charts recolour);
 //         'vo:prefs' on any change (detail {key, value}).
 import { h } from './lib.js';
 import { setChartTheme } from './charts.js';
 
 const root = document.documentElement;
-const KEYS = ['theme', 'size', 'terms', 'motion', 'lang'];
+const KEYS = ['theme', 'size', 'terms', 'motion', 'lang', 'effects'];
 const mq = q => { try { return matchMedia(q).matches; } catch { return false; } };
 const DEFAULTS = {
   theme: () => 'night',   // UI lock: Night is the default; the Day toggle stays in Read your way
@@ -16,6 +18,9 @@ const DEFAULTS = {
   terms: () => 'on',
   motion: () => (mq('(prefers-reduced-motion: reduce)') ? 'calm' : 'full'),
   lang: () => 'en',
+  // v3 signature effects (crosshair cursor, Home fire trail, ember noise, gravity toy), separate from Motion. Off by default
+  // on a data-saver connection or a low-memory device (2 GB or less), so low-end machines start light; one click turns them on.
+  effects: () => { try { return navigator.connection?.saveData === true || (navigator.deviceMemory && navigator.deviceMemory <= 2) ? 'off' : 'on'; } catch { return 'on'; } },
 };
 const read = k => { try { return localStorage.getItem('vo.' + k); } catch { return null; } };
 const write = (k, v) => { try { localStorage.setItem('vo.' + k, v); } catch { /* storage blocked: the choice lasts for this visit */ } };
@@ -33,9 +38,9 @@ export const prefs = {
 };
 
 export function applyPrefs() {
-  root.dataset.theme = state.theme; root.dataset.size = state.size; root.dataset.terms = state.terms; root.dataset.motion = state.motion;
+  root.dataset.theme = state.theme; root.dataset.size = state.size; root.dataset.terms = state.terms; root.dataset.motion = state.motion; root.dataset.effects = state.effects;
   try { setChartTheme(state.theme); } catch (e) { console.error(e); }
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', state.theme === 'day' ? '#f3f0e8' : '#05060E');
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', state.theme === 'day' ? '#f4f6f9' : '#05060E');
 }
 
 // ---------- read aloud ----------
@@ -73,6 +78,7 @@ export function dock() {
     row('size', 'Text size', [['0', 'A'], ['1', 'A+'], ['2', 'A++']]),
     row('terms', 'Explain science words', [['on', 'On'], ['off', 'Off']]),
     row('motion', 'Motion', [['full', 'Full'], ['calm', 'Calm']]),
+    row('effects', 'Effects', [['on', 'On'], ['off', 'Off']]),
     listenBtn);
   const toggle = h('button', { type: 'button', class: 'dock-toggle', 'aria-expanded': 'false', 'aria-controls': 'dock-panel' },
     h('span', { 'aria-hidden': 'true' }, 'Aa'), h('span', { class: 'dock-label' }, 'Read your way'));

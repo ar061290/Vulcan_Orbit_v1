@@ -8,6 +8,7 @@ import { C, SERIES, bars, keyNav, numbers } from './charts.js';
 import { efieldText, sentences, SCRAPPED } from './overlays.js';
 import { figLink, revealFigure } from './passes.js';
 import { draggable } from './spring.js';
+import { onFxChange } from './fx/loop.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const sv = (tag, a = {}, text) => {
@@ -376,7 +377,8 @@ const CFI = 'cfi';
 const GAS_TXT = { none: 'No added gas', CO2: 'Added CO₂', He: 'Added helium' };
 const f2 = v => (isNum(v) ? v.toFixed(2) : 'n/a');
 const pctO2 = o => `${Math.round(o * 100)}`;
-const isCalm = () => document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Calm, reduced motion and v3's Effects Off (html[data-effects=off]) all give still frames instead of the burn loop
+const isCalm = () => { const d = document.documentElement.dataset; return d.motion === 'calm' || d.effects === 'off' || !!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches; };
 
 /** Parse the M7 per-burn points into burn records. Returns null when the entries are not in the file. */
 function m7Burns(models) {
@@ -442,7 +444,7 @@ export function dropletHero(models, m7, ctx = {}) {
   const shellA = sv('circle', { cx: CX, cy: CY, r: 0, class: 'fr-shell-a' }), shellB = sv('circle', { cx: CX, cy: CY, r: 0, class: 'fr-shell-b' });
   shell.append(shellB, shellA);
   const drop = sv('circle', { cx: CX, cy: CY, r: 0, class: 'fr-drop' });
-  const pText = sv('text', { x: CX, y: CY + RING - 22, 'text-anchor': 'middle', class: 'fr-svg-lab' });
+  const pText = sv('text', { x: CX, y: CY + RING - 22, 'text-anchor': 'middle', class: 'fr-svg-lab fr-ptext' });
   const scale = sv('g', { class: 'fr-scale' });
   const knob = sv('g', { class: 'fr-knob' }, null);
   knob.append(sv('path', { d: `M${TX - 14} 0L${TX - 4} -6L${TX - 4} 6Z` }), sv('line', { x1: TX - 4, x2: TX + 8, y1: 0, y2: 0 }));
@@ -450,21 +452,32 @@ export function dropletHero(models, m7, ctx = {}) {
   bar.append(sv('line', { x1: 18, x2: 18 + S, y1: V - 14, y2: V - 14 }), sv('text', { x: 18 + S + 6, y: V - 10 }, 'DROPLET SCALE 1 MM'));
   svg.append(band, ringTrack, ringFill, cool, shell, ghosts, drop, pText, scale, knob, bar);
 
-  const stage = h('div', { class: 'fr-stage', role: detached ? 'img' : 'slider', tabindex: detached ? null : '0', 'aria-orientation': detached ? null : 'vertical',
+  // Touch (coarse pointer): a vertical drag over the whole stage would trap the page's vertical scroll, so on phones
+  // and tablets only the O₂ rail over the scale (right edge, >= 56 px wide) takes the drag; the rest of the stage lets
+  // the page scroll. Mouse and pen keep the whole-stage drag. Decided once at build time.
+  const coarse = !detached && !!window.matchMedia?.('(pointer: coarse)')?.matches;
+  // phones: the hero is compacted (secondary readouts and the method note fold) so the first figure stays near the fold
+  const wide = detached || !window.matchMedia?.('(max-width: 760px)')?.matches;
+  const rail = coarse ? h('div', { class: 'fr-rail', 'aria-hidden': 'true' }, h('span', {}, 'O₂')) : null;
+  const stage = h('div', { class: `fr-stage${coarse ? ' is-touch' : ''}`, role: detached ? 'img' : 'slider', tabindex: detached ? null : '0', 'aria-orientation': detached ? null : 'vertical',
     'aria-label': detached ? 'Droplet flame illustration for one NASA burn; the readouts beside it give the values.'
-      : 'Oxygen level, % by volume. Drag up or down, or use the arrow keys; it snaps to levels NASA tested.' }, svg);
+      : 'Oxygen level, % by volume. Drag up or down, or use the arrow keys; it snaps to levels NASA tested.' }, svg, rail);
 
   // ---- readouts ----
-  const R = {};
-  const row = (k, label) => { R[k] = h('dd', {}); return [h('dt', {}, label), R[k]]; };
-  const dl = h('dl', { class: 'fr-read' }, row('o2', 'O₂'), row('burn', 'Burn'), row('k', 'K'), row('kmod', 'K, M7 model'), row('tb', 'd² law burnout'),
-    row('clock', 'Clock'), row('p', 'P(extinction)'), row('half', 'M7 50 % point'), row('out', 'NASA outcome'), row('cool', 'Cool flame'));
+  const R = {}, DT = {};
+  const row = (k, label) => { R[k] = h('dd', {}); DT[k] = h('dt', {}, label); return [DT[k], R[k]]; };
+  // the four readings that change most as you drag stay in view; the rest fold on phones (open on wide screens)
+  const dl = h('dl', { class: 'fr-read' }, row('o2', 'O₂'), row('p', 'P(extinction)'), row('clock', 'Clock'), row('out', 'NASA outcome'));
+  const dl2 = h('dl', { class: 'fr-read fr-read-2' }, row('burn', 'Burn'), row('k', 'K'), row('kmod', 'K, M7 model'), row('tb', 'd² law burnout'),
+    row('half', 'M7 50 % point'), row('cool', 'Cool flame'));
+  const more = h('details', { class: 'fr-more', open: wide || null }, h('summary', {}, 'All readings for this burn'), dl2);
   const live = h('p', { class: 'sr', 'aria-live': 'polite' });
   const prev = h('button', { type: 'button', class: 'btn fr-step', 'aria-label': 'Previous burn at this oxygen level' }, '‹');
   const next = h('button', { type: 'button', class: 'btn fr-step', 'aria-label': 'Next burn at this oxygen level' }, '›');
   const count = h('span', { class: 'fr-count' });
   const pause = h('button', { type: 'button', class: 'btn fr-pause', 'aria-pressed': 'false' }, 'Pause');
-  const stepper = h('div', { class: 'fr-burns' }, h('span', { class: 'fr-lab' }, 'Burns at this level'), prev, count, next, isCalm() || detached ? null : pause);
+  const stepper = h('div', { class: 'fr-burns' }, h('span', { class: 'fr-lab' }, 'Burns at this level'), prev, count, next, detached ? null : pause);
+  if (isCalm()) pause.hidden = true;
   const note = h('p', { class: 'fr-note' });
   let gasSeg = null;
   const gasHolder = h('div');
@@ -542,16 +555,15 @@ export function dropletHero(models, m7, ctx = {}) {
       ? `${b.id} · ${b.blend} · ${b.p} ATM · HE ${f2(b.he)} · d0 ${f2(b.d0)} MM · ${b.mount}`
       : `${b.id} · ${b.p.toFixed(2)} ATM · CO₂ ${f2(b.co2)} · HE ${f2(b.he)} · d0 ${f2(b.d0)} MM`;
     const unit = br?.unit ? String(br.unit).toUpperCase() : 'UNIT NOT STATED';
-    const lab = dl.querySelectorAll('dt');
-    lab[6].textContent = cfi ? 'P(droplet used up)' : 'P(extinction)';
+    DT.p.textContent = cfi ? 'P(droplet used up)' : 'P(extinction)';
     if (cfi) {
       R.k.textContent = 'NOT IN THE FILE FOR CFI BURNS'; R.kmod.textContent = '—'; R.tb.textContent = 'NO TIME SCALE: K NOT IN THE FILE';
       R.out.textContent = `VISIBLE FLAME OUT AT ${f2(b.dhot)} MM · ${b.dcool > 0 ? `COOL FLAME OUT AT ${f2(b.dcool)} MM` : 'DROPLET USED UP'}`;
       R.cool.textContent = `RECORDED IN THIS BURN: BURNED ON FROM ${f2(b.dhot)} MM TO ${b.dcool > 0 ? f2(b.dcool) + ' MM' : 'USED UP'}`;
       R.half.textContent = isNum(m7?.cool_flame?.pressure_at_half_atm) ? `${fmt(m7.cool_flame.pressure_at_half_atm, 2)} ATM FOR ${m7.cool_flame.pressure_at_half_case || 'the reference case'}` : 'NOT IN THE FILE';
-      lab[7].textContent = 'M7 50 % pressure';
+      DT.half.textContent = 'M7 50 % pressure';
     } else {
-      lab[7].textContent = 'M7 50 % point';
+      DT.half.textContent = 'M7 50 % point';
       R.k.textContent = b.k ? `${f2(b.k.obs)} ${unit} · NASA MEASURED` : 'NOT MEASURED FOR THIS BURN';
       R.kmod.textContent = b.k && isNum(b.k.pred) ? `${f2(b.k.pred)} (${f2(b.k.lo)}–${f2(b.k.hi)}) ${unit}` : '—';
       R.tb.textContent = b.k ? `d0²/K = ${(b.d0 * b.d0 / b.k.obs).toFixed(1)} S` : '—';
@@ -616,7 +628,8 @@ export function dropletHero(models, m7, ctx = {}) {
   let ctl = null, ro = null, io = null, quiet = false;
   const unit = () => (stage.clientHeight || V) / V;           // stage px per SVG unit
   if (!detached) {
-    ctl = draggable(stage, { axis: 'y', value: yOf(st.o2) * unit(),
+    // keys stay on the stage (the focusable slider) for every pointer type; the drag surface is the stage or the rail
+    ctl = draggable(rail || stage, { axis: 'y', value: yOf(st.o2) * unit(), keys: false, touch: rail ? 'none' : 'pan-x',
       bounds: () => [Y0 * unit(), Y1 * unit()],
       snap: () => tested().map(o => yOf(o) * unit()),
       onMove: pos => {
@@ -625,9 +638,15 @@ export function dropletHero(models, m7, ctx = {}) {
         if (o !== st.o2) { st.o2 = o; st.i = 0; const k = knob.getAttribute('transform'); commit(false); knob.setAttribute('transform', k); }
       },
       onEnd: pos => { const o = nearest(tested(), oOf(pos / unit())); if (o !== st.o2 || !quiet) { st.o2 = o; commit(!quiet); } } });
+    if (rail) stage.style.touchAction = 'pan-y';   // the page scrolls through the droplet; the rail takes the drag
     stage.addEventListener('keydown', e => {
-      if (e.key !== 'Home' && e.key !== 'End') return;
-      e.preventDefault(); const t = tested(); st.o2 = e.key === 'Home' ? t[0] : t.at(-1); st.i = 0; ctl.set(yOf(st.o2) * unit(), true);
+      const t = tested(); let o = null;
+      // Arrow Up = more oxygen (higher on the scale), Arrow Down = less; Home/End = the lowest/highest tested level
+      if (e.key === 'ArrowUp' || e.key === 'ArrowRight') o = t.find(v => v > st.o2) ?? t.at(-1);
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') o = [...t].reverse().find(v => v < st.o2) ?? t[0];
+      else if (e.key === 'Home') o = t[0]; else if (e.key === 'End') o = t.at(-1);
+      if (o == null) return;
+      e.preventDefault(); st.o2 = o; st.i = 0; ctl.set(yOf(st.o2) * unit(), true);
     });
     // re-place the drag position after a resize or a fuel/gas change, without announcing or restarting the loop
     const sync = () => { const y = yOf(st.o2) * unit(); if (!ctl || Math.abs(ctl.get() - y) < 0.5) return; quiet = true; ctl.set(y, false); quiet = false; };
@@ -640,14 +659,18 @@ export function dropletHero(models, m7, ctx = {}) {
       if (st.paused) stop(); else { t0 = 0; kick(); }
     });
     const onVis = () => { if (document.hidden) stop(); else kick(); };
+    // Read your way changes (Calm, Effects Off, reduced motion) take effect at once: rebuild this burn as stills or loop
+    let calmWas = isCalm(), offFx = null;
+    const onPrefs = () => { const c = isCalm(); if (c === calmWas) return; calmWas = c; pause.hidden = c; commit(false); };
     ctx.onMount?.(() => {
       sync();
       if ('ResizeObserver' in window) { ro = new ResizeObserver(sync); ro.observe(stage); }
       if ('IntersectionObserver' in window) { io = new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); if (visible) kick(); else stop(); }); io.observe(stage); }
       document.addEventListener('visibilitychange', onVis);
+      offFx = onFxChange(onPrefs);
       kick();
     });
-    ctx.onLeave?.(() => { stop(); anim = null; ctl?.destroy(); ro?.disconnect(); io?.disconnect(); document.removeEventListener('visibilitychange', onVis); });
+    ctx.onLeave?.(() => { stop(); anim = null; ctl?.destroy(); ro?.disconnect(); io?.disconnect(); offFx?.(); document.removeEventListener('visibilitychange', onVis); });
   }
 
   const drivers = (cf?.drivers || []).slice(0, 1).map(d => `${d.name} ${Math.round(d.share * 100)} %`).join('');
@@ -660,7 +683,7 @@ export function dropletHero(models, m7, ctx = {}) {
     h('div', { class: 'fr-hero-top' },
       h('p', { class: 'fr-tag' }, `Illustration · values from ${tagFile} (M7)`), badge(st0)),
     h('div', { class: 'fr-hero-grid' },
-      h('div', { class: 'fr-stage-wrap' }, stage, h('p', { class: 'fr-hint', 'aria-hidden': 'true' }, 'Drag the droplet up or down · O₂ snaps to tested levels')),
-      h('div', { class: 'fr-side' }, fuelSeg, gasHolder, stepper, dl, live)),
-    note);
+      h('div', { class: 'fr-stage-wrap' }, stage, h('p', { class: 'fr-hint', 'aria-hidden': 'true' }, coarse ? 'Drag the O₂ scale up or down · snaps to tested levels' : 'Drag the droplet up or down · O₂ snaps to tested levels')),
+      h('div', { class: 'fr-side' }, fuelSeg, gasHolder, stepper, dl, more, live)),
+    wide ? note : h('details', { class: 'fr-how' }, h('summary', {}, 'How the droplet is drawn'), note));
 }

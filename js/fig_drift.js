@@ -135,7 +135,7 @@ export function driftCard(d, { title = 'Where the smoke goes', sub = null, file 
     if (playing) return stop();
     if (k >= n - 1) k = 0;
     playing = true; btn.textContent = 'Pause'; btn.setAttribute('aria-pressed', 'true');
-    timer = setInterval(() => { if (!cv.isConnected || k >= n - 1) return stop(); k++; draw(); }, PLAY_MS);
+    timer = setInterval(() => { if (!cv.isConnected || k >= n - 1) return stop(); if (document.hidden) return; k++; draw(); }, PLAY_MS);   // a hidden tab holds the frame
   });
   slider.addEventListener('input', () => { stop(); k = +slider.value; draw(); });
   ctx?.onLeave?.(stop);
@@ -278,8 +278,10 @@ export function calibrationCard(c) {
       stat('Smoke cleared in', Array.isArray(c.clearance_s_range) ? `${fmt(c.clearance_s_range[0], 0)}–${fmt(c.clearance_s_range[1], 0)} s` : 'n/a'),
       stat('Held-out puff: peak', p.observed_peak_s == null ? 'n/a' : `${Math.round(p.observed_peak_s)} s`,
         [Array.isArray(r) ? `model ${Math.round(r[0])}–${Math.round(r[r.length - 1])} s` : null, p.shape_r2_median != null ? `shape R² ${Number(p.shape_r2_median).toFixed(2)}` : null].filter(Boolean).join('; '))),
-    h('h3', {}, 'Tuned on: Sample 1 burn'), burn,
-    h('h3', { class: 'drift-h3' }, 'Tested on: smoke-wire puff (held out)'), pulse, lg,
+    // feat/v3-merge: the tuned and the held-out charts sit side by side on wide screens (css/p-predict.css .drift-cal2)
+    h('div', { class: 'drift-cal2' },
+      h('div', {}, h('h3', {}, 'Tuned on: Sample 1 burn'), burn),
+      h('div', {}, h('h3', { class: 'drift-h3' }, 'Tested on: smoke-wire puff (held out)'), pulse)), lg,
     h('p', {}, h('small', {}, `${c.settings_kept} of ${c.settings_tried} settings fit the burn equally well; all of them feed the what-if runs.` +
       (Array.isArray(c.delay_s_range) ? ` Detector delay ${fmt(c.delay_s_range[0], 0)}–${fmt(c.delay_s_range[1], 0)} s. ` : ' ') + (c.limits || []).join(' ') + ' Source: NASA PSI-100, CC0.')));
 }
