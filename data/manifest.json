@@ -101,7 +101,7 @@
    "name": "flame_static",
    "status": "model",
    "owner": "Karthikeya",
-   "what": "Flame sim stages 1-2: droplet burning, flame shapes, flame on a plate (Moon/Mars cases model only)"
+   "what": "Flame sim stages 1-2: droplet burning, flame shapes, flame on a plate (orbit and Earth only)"
   },
   {
    "name": "flame_spread",
@@ -234,6 +234,12 @@
    "status": "team",
    "owner": "Team",
    "what": "Telugu and Hindi strings for the Home short answer and India card (draft until reviewed)"
+  },
+  {
+   "name": "trivial_baselines",
+   "status": "model",
+   "owner": "M6",
+   "what": "No-physics baselines beside M6 and M6b (added after audit)"
   }
  ]
 }

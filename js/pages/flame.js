@@ -42,7 +42,7 @@ export default async function render(root, ctx = {}) {
     keep(flameLimitsCard(fs, sp, o))));
 }
 
-/** "The short answer": main's summaries.js lines; line 3 reworded for the Moon and Mars switch (§3.8). */
+/** "The short answer": main's summaries.js lines (the Moon and Mars switch was removed after the 15 Nov audit). */
 export async function short() {
   const [fs, sp] = await Promise.all([load('flame_static'), load('flame_spread')]);
   const out = [];
@@ -52,6 +52,6 @@ export async function short() {
   out.push(isMissing(fs) && isMissing(sp)
     ? 'The flame model checks are not available yet (data/flame_static.json and data/flame_spread.json missing).'
     : 'This is a simplified physics model. It matches some NASA measurements and misses others; every check is listed below the simulator.');
-  out.push('NASA has no fire data at Moon or Mars gravity, so those settings stay hidden unless you switch on "Show Moon and Mars (model only)", and then they come from the model alone.');
+  out.push('NASA has no fire data at Moon or Mars gravity, so the simulator does not offer them.');
   return out;
 }

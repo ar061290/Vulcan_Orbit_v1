@@ -46,7 +46,7 @@ export function trustCard(t) {
         h('td', { class: 'num' }, f(r.score)),
         h('td', {}, h('small', {}, Array.isArray(r.range) ? `${f(r.range[0])} to ${f(r.range[1])}` : f(r.range))),
         h('td', {}, r.perm_p != null ? h('small', {}, `p = ${r.perm_p}`, h('br'), `${r.perm_n} label shuffles`) : h('small', {}, '—')),
-        h('td', {}, h('small', {}, r.baseline ? `${r.baseline}${r.baseline_score != null ? ': ' + f(r.baseline_score) : ''}` : '—')),
+        h('td', {}, h('small', {}, r.baseline ? `${r.baseline}${r.baseline_score != null ? ': ' + f(r.baseline_score) : ''}` : '—', r.caveat ? h('br') : null, r.caveat ? h('b', {}, r.caveat) : null)),
         h('td', {}, h('span', { class: `lvl ${r.passed ? 'real' : 'demo'}` }, r.passed ? 'Met' : 'Missed'), h('br'), h('small', {}, r.rule)),
         h('td', {}, trustDots(CRED[CK[r.id]]))))),
     h('p', {}, h('a', { href: '#/models' }, 'Open the full model cards →')),

@@ -9,7 +9,7 @@
    "baseline": -17.56218884416197,
    "sd": 0.14477784164773327,
    "threshold": -16.838299635923303,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": -17.13997688660107
   },
   {
@@ -21,7 +21,7 @@
    "baseline": -17.891407016487406,
    "sd": 0.17764837371430192,
    "threshold": -17.003165147915897,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": -17.45131974379493
   },
   {
@@ -33,7 +33,7 @@
    "baseline": -16.397856500951423,
    "sd": 0.1564417088034812,
    "threshold": -15.615647956934017,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": -16.07833592699933
   },
   {
@@ -45,7 +45,7 @@
    "baseline": -17.531005743283504,
    "sd": 0.2665959715297785,
    "threshold": -16.19802588563461,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": -16.70526391003435
   },
   {
@@ -53,7 +53,7 @@
    "channel": "Cabin smoke detector: scatter",
    "alarm_s": 23.492999999999483,
    "alarm_s_k3": 23.492999999999483,
-   "alarm_after_igniter_off_s": 73.49799999999959,
+   "alarm_after_igniter_off_s": 23.492999999999483,
    "baseline": 0.024999999999999998,
    "sd": 0.005,
    "threshold": 0.05,
@@ -81,7 +81,7 @@
    "baseline": -17.502441869035433,
    "sd": 0.18086225080757481,
    "threshold": -16.598130614997558,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": -16.89700585441979
   },
   {
@@ -93,7 +93,7 @@
    "baseline": -17.79980514072336,
    "sd": 0.22450477107843064,
    "threshold": -16.67728128533121,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": -4.453810110927048
   },
   {
@@ -105,7 +105,7 @@
    "baseline": -16.2409661592504,
    "sd": 0.09356002033178473,
    "threshold": -15.773166057591478,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": -15.84491371129779
   },
   {
@@ -117,7 +117,7 @@
    "baseline": -17.584343134426394,
    "sd": 0.4117984595222069,
    "threshold": -15.52535083681536,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": -6.462509351668627
   },
   {
@@ -153,7 +153,7 @@
    "baseline": -17.54625631746156,
    "sd": 0.19699797749720296,
    "threshold": -16.561266429975543,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": 149.173694641483
   },
   {
@@ -165,7 +165,7 @@
    "baseline": -17.849588768856005,
    "sd": 0.1789823096019791,
    "threshold": -16.95467722084611,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": 155.5248832207277
   },
   {
@@ -177,7 +177,7 @@
    "baseline": -16.3481107828511,
    "sd": 0.26057436050020066,
    "threshold": -15.045238980350097,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": 148.3676150347309
   },
   {
@@ -189,7 +189,7 @@
    "baseline": -17.481619270003055,
    "sd": 0.3419147921312434,
    "threshold": -15.772045309346838,
-   "resolution_s": 1.0,
+   "resolution_s": 5.0,
    "peak": 167.3028091561362
   },
   {
@@ -225,6 +225,12 @@
    "ok": true
   },
   {
+   "id": "L1b",
+   "what": "Same negative control at the 3 SD low end (added 15 Nov after an audit)",
+   "result": "radiometer alarms in the smoke-wire window at 3 SD: 1; so 3 SD is not reported for radiometers",
+   "ok": false
+  },
+  {
    "id": "L2",
    "what": "The rule can fail: the Sample 1 scatter channel replaced by its own baseline",
    "result": "alarm with flat signal: None",
@@ -251,7 +257,7 @@
   {
    "id": "L5",
    "what": "Threshold sensitivity, alarm time at 3 SD vs 5 SD",
-   "result": "wire scatter: [23.0, 23.0]; wire obscuration: [None, None]; s2 radiometer: [7.0, 7.0]; s2 scatter: [27.0, 127.0]; s2 obscuration: [None, None]; s1 radiometer: [7.0, 7.0]; s1 scatter: [72.0, 92.0]; s1 obscuration: [None, None]",
+   "result": "wire scatter: [23.0, 23.0]; wire obscuration: [None, None]; s2 scatter: [27.0, 127.0]; s2 obscuration: [None, None]; s1 scatter: [72.0, 92.0]; s1 obscuration: [None, None]",
    "ok": null
   }
  ]

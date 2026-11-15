@@ -46,6 +46,28 @@ def logo(rows, y):
     return p
 
 
+def logo_ranges(rows, y, n=500):
+    """Added 15 Nov 2026 (audit): a 95% range for each held-out prediction, from refits on bootstrap resamples of the other 15 tests."""
+    X = features(rows); lo, hi = np.zeros(len(rows)), np.zeros(len(rows)); rng = np.random.default_rng(SEED)
+    for i in range(len(rows)):
+        tr = np.flatnonzero(np.arange(len(rows)) != i); ps = []
+        for _ in range(n):
+            idx = rng.choice(tr, len(tr), replace=True)
+            if len(set(y[idx])) < 2: continue
+            ps.append(LogisticRegression(C=1.0, class_weight="balanced", max_iter=2000).fit(X[idx], y[idx]).predict_proba(X[i:i + 1])[0, 1])
+        lo[i], hi[i] = np.percentile(ps, 2.5), np.percentile(ps, 97.5)
+    return lo, hi
+
+
+def logo_material_only(rows, y):
+    """Added 15 Nov 2026 (audit): material-only logistic baseline, leave one test out, so the baseline never sees the held-out test."""
+    X = features(rows)[:, :3]; p = np.zeros(len(rows))
+    for i in range(len(rows)):
+        tr = np.arange(len(rows)) != i
+        p[i] = LogisticRegression(C=1.0, class_weight="balanced", max_iter=2000).fit(X[tr], y[tr]).predict_proba(X[i:i + 1])[0, 1]
+    return p
+
+
 def boot(y, p, fn, n=2000):
     rng = np.random.default_rng(SEED); out = []
     for _ in range(n):
@@ -129,12 +151,15 @@ def main():
                  note="Sizes are NASA's (SAME-2 flight, baseline runs at 8 cm/s). Mass shares below each detector limit are our lognormal calculation from them. "
                       "Sources disagree on where light-scattering detectors lose sensitivity, so the limit is a control (300, 500, 1000 nm), not a fixed fact.",
                  detector_thresholds_nm=[300, 500, 1000], materials=mats, units=dict(d_nm="nm", mass_below="share of smoke mass in smaller particles"))
-    pts = [dict(obs=int(y[i]), pred=round(float(p[i]), 3), x=round(max(0, r["v"]), 1), lo=None, hi=None, label=f"{r['test']}: {r['material']}, {max(0, r['v']):.0f} cm/s, mass median {r['MMD']*1000:.0f} nm") for i, r in enumerate(rows)]
+    plo, phi = logo_ranges(rows, y)
+    pm = logo_material_only(rows, y); m_auc = float(roc_auc_score(y, pm))
+    add("M5-base2", "Material-only logistic baseline, leave one test out (added 15 Nov 2026 after an audit; not a pass rule)", f"AUC {m_auc:.3f}", None)
+    pts = [dict(obs=int(y[i]), pred=round(float(p[i]), 3), x=round(max(0, r["v"]), 1), lo=round(float(plo[i]), 3), hi=round(float(phi[i]), 3), label=f"{r['test']}: {r['material']}, {max(0, r['v']):.0f} cm/s, mass median {r['MMD']*1000:.0f} nm") for i, r in enumerate(rows)]
     entry = dict(id="smoke-miss", status="model", name="Will the detector miss this smoke?", question="Is most of this smoke's mass in particles too small for a light-scattering detector (under 500 nm)?",
                  data="16 SAME-2 flight tests (Kapton, lampwick, Teflon) from Urban et al. 2012, AIAA 2012-3536, Figures 6-8, read from the PDF's vector drawing; Table 1 for the baseline",
                  method="Logistic regression on material and air velocity; label from the lognormal mass median diameter (Hatch-Choate, from each test's count-mean and average-mass diameters)",
                  validation="leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples", metric="AUC", score=round(float(auc), 3), score_range=auc_r, kind="classifier",
-                 baseline_name="Material only (Table 1)", baseline_score=None, baseline_metric_note=f"material-only balanced accuracy {b_bacc:.2f}; model balanced accuracy {bacc:.2f} [{bacc_r[0]:.2f}, {bacc_r[1]:.2f}]",
+                 baseline_name="Material only (logistic, leave one test out)", baseline_score=round(m_auc, 3), baseline_metric_note=f"material-only AUC {m_auc:.2f} (the earlier Table 1 rule, balanced accuracy {b_bacc:.2f}, used 4 of the held-out tests); model balanced accuracy {bacc:.2f} [{bacc_r[0]:.2f}, {bacc_r[1]:.2f}]",
                  unit="1 = likely missed", points=pts, drivers=drivers, coefficients=coef,
                  limits="16 tests, 3 materials, unaged smoke only, airflow 0 to 8 cm/s. A test bench result in orbit, not a detector certification. Detector limit is a choice (300/500/1000 nm reported).")
     entry["checks_note"] = "; ".join(f"{c['id']} {'pass' if c['ok'] else 'FAIL' if c['ok'] is False else 'reported'}" for c in checks) + ". Rules in models/m5-smoke-miss/RULES.md, written before training."

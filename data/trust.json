@@ -68,8 +68,8 @@
     0.436,
     1.0
    ],
-   "baseline": "Material only (Table 1)",
-   "baseline_score": null,
+   "baseline": "Material only (logistic, leave one test out)",
+   "baseline_score": 0.683,
    "tested": "leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples",
    "passed": false,
    "rule": "AUC at least 0.75 (models/m5-smoke-miss/RULES.md)",
@@ -87,12 +87,13 @@
     -3.8668,
     -0.1401
    ],
-   "baseline": "de Ris",
-   "baseline_score": -40.0264,
+   "baseline": "Training-set mean, no physics (added after audit)",
+   "baseline_score": -0.061,
    "tested": "Whole ISS sessions held out: leave one session out (7 sessions, grouped by GMT day). Score = R2 on the pooled held-out predictions; range = 95% session bootstrap. Holding out single tests instead gives R2 -0.77.",
    "passed": false,
    "rule": "Held-out R² at least 0.6 (models/m6-spread/RULES.md)",
-   "page": "predict"
+   "page": "predict",
+   "caveat": "Loses to simply predicting the average spread rate."
   },
   {
    "id": "m6b",
@@ -101,8 +102,9 @@
    "metric": "Mean error on held-out sessions, mm/s; range coverage",
    "score": 0.02005,
    "range": "coverage 87% of real results",
-   "baseline": "M6 one constant",
-   "baseline_score": 0.033,
+   "baseline": "Lookup by thickness and sides burning, no physics (added after audit)",
+   "baseline_score": 0.0185,
+   "caveat": "Meets its own rules, but a no-physics lookup is about as accurate on these 39 slabs.",
    "tested": "Whole ISS sessions held out; two independent Saffire-II rates",
    "passed": true,
    "rule": "R1-R4 and growth checks G1-G5 (models/m6b-predictor/RULES.md)",

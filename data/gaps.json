@@ -1785,13 +1785,13 @@
    }
   },
   {
-   "atmosphere": "32% O2 at 55.2 kPa (8.0 psia, NASA EAWG 2010 recommendation)",
-   "o2": 32,
-   "kpa": 55.2,
+   "atmosphere": "34% O2 at 56.5 kPa (8.2 psia, NASA EAWG 2010 recommendation)",
+   "o2": 34,
+   "kpa": 56.5,
    "counts": {
     "solids": 0,
     "liquid droplets": 0,
-    "gas flames": 14
+    "gas flames": 13
    }
   }
  ],
@@ -1809,7 +1809,7 @@
    "source": "Computed from the PSI tables listed under 'tested'"
   },
   {
-   "text": "32% O2 at 55.2 kPa (8.0 psia, NASA EAWG 2010 recommendation): no solids, no liquid droplets tests within 3 O2 points and 10 kPa.",
+   "text": "34% O2 at 56.5 kPa (8.2 psia, NASA EAWG 2010 recommendation): no solids, no liquid droplets tests within 3 O2 points and 10 kPa.",
    "source": "Computed from the PSI tables listed under 'tested'"
   },
   {

@@ -46,7 +46,7 @@ def merge_models(entries: list) -> dict:
     extra top-level keys (main's 'note' and 'source').
 
     File status: 'real' (all entries NASA-derived) or, as on main since M5 joined, 'model' with a status on every entry.
-    In the second case each M7 entry carries "status": "real" (its author's label)."""
+    In the second case each M7 entry carries "status": "model" (predictions and scores; corrected 15 Nov 2026 from "real" after an audit)."""
     if MODELS_JSON.exists():
         doc = json.loads(MODELS_JSON.read_bytes().decode("utf-8"))
     else:
@@ -57,7 +57,7 @@ def merge_models(entries: list) -> dict:
                          "Agree the file status with the team before merging.")
     per_entry = status != "real" or any("status" in m for m in doc.get("models", []))
     if per_entry:
-        entries = [{**{k: v for k, v in e.items() if k != "status"}, "status": "real"} for e in entries]   # last, as on main
+        entries = [{**{k: v for k, v in e.items() if k != "status"}, "status": "model"} for e in entries]   # last, as on main
     new = {e["id"]: e for e in entries}
     models, seen = [], set()
     for m in doc.get("models", []):

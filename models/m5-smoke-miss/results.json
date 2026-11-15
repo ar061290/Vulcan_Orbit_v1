@@ -148,6 +148,12 @@
    "what": "Same model at a 300 nm and a 1000 nm detector limit",
    "result": "{\"300 nm\": {\"note\": null, \"missed\": 3, \"seen\": 13, \"auc\": 0.85, \"balanced_accuracy\": 0.81, \"material_baseline\": 0.85}, \"1000 nm\": {\"note\": \"fewer than 3 cases in one class: scores not meaningful\", \"missed\": 14, \"seen\": 2, \"auc\": 0.0, \"balanced_accuracy\": 0.43, \"material_baseline\": 0.5}}",
    "ok": null
+  },
+  {
+   "id": "M5-base2",
+   "what": "Material-only logistic baseline, leave one test out (added 15 Nov 2026 after an audit; not a pass rule)",
+   "result": "AUC 0.683",
+   "ok": null
   }
  ]
 }

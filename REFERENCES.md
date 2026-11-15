@@ -25,7 +25,7 @@ Dataset file checksums: `datasets/psi/MANIFEST.csv`.
 | Bhattacharjee, S., Simsek, A., Olson, S., Ferkul, P., Combust. Flame 163 (2016) 472-477, doi:10.1016/j.combustflame.2015.10.023 | Reprinted in the TM above (Sec. 2.2); journal version not opened |
 | Bhattacharjee, S., Laue, M., Carmignani, L., Ferkul, P., Olson, S., Fire Safety J. 79 (2016) 111-118, doi:10.1016/j.firesaf.2015.11.011 | Reprinted in the TM above (Sec. 2.3); journal version not opened |
 | Ferkul, P. et al., BASS-II poster, ASGSR 2014, NTRS 20160000593 | Blow-off near 40 cm/s for 0.1 mm PMMA (slide 13), extinction calibration point |
-| Dietrich, D. L. et al., "Detailed Results From the Flame Extinguishment Experiment (FLEX)...", NASA/TP-2015-216046. NTRS 20150023456 | FLEX column definitions (Appendix A.1), K units mm2/s |
+| Dietrich, D. L. et al., "Detailed Results From the Flame Extinguishment Experiment (FLEX)...", NASA/TP-2015-216046. NTRS 20150023456 | FLEX column definitions (Appendix A.1), K units mm2/s. We found no definition of the outcome label `Test end` there or elsewhere (models/m7-extinction/DATA.md) |
 | Nayagam, V., Dietrich, D. L., Hicks, M. C., Williams, F. A., "Cool-flame extinction during n-alkane droplet combustion in microgravity", 2014, NTRS 20140006750 | Radiative extinction of large heptane droplets (context for the criterion) |
 | Zhao, X., T'ien, J. S., Ferkul, P. V., Olson, S. L., 9th US National Combustion Meeting 2015, NTRS 20150008962 | SIBAL thickness 0.32 mm, area density |
 | Olson, S. L. et al., "The effect of duct size, sample size, and fuel composition on concurrent flame spread over large cellulose samples in microgravity" (accepted manuscript), https://discovery.ucl.ac.uk/id/eprint/10164340/ | SIBAL composition, area density, specific heats, pyrolysis temperature |
@@ -160,7 +160,7 @@ See `AI_LOG.md`.
 |---|---|
 | Link & Balistreri, ICES 2015, NASA NTRS 20150009509, p. 10, https://ntrs.nasa.gov/api/citations/20150009509/downloads/20150009509.pdf | "an effective atmosphere velocity in the cabin aisleway must be maintained between 4.6 and 12.2 meters per minute" = 0.077 to 0.203 m/s. Both drift models now use this range; the earlier 0.05 m/s low end had no source and was removed. |
 | "Preliminary Results from the Saffire VI Experiment", ICES-2024-365, NASA NTRS 20240002981 | 1 mg/m3 called "a relatively tight alarm threshold"; far-field detector reached it at 981 s in Saffire VI-3. Used as the headline alarm level in both drift models. |
-| NASA NTRS 20170002629 (smoke detection and air filtration) | ISS detection threshold about 10 mg/m3; Space Shuttle 2 mg/m3. Drift what-if results now also reported at 10 mg/m3. |
+| Urban et al., "Fire Detection Tradeoffs as a Function of Vehicle Parameters", ICES 2016, NASA NTRS 20170002629 | ISS detection threshold about 10 mg/m3; Space Shuttle 2 mg/m3. Drift what-if results now also reported at 10 mg/m3. |
 | NASA NTRS 20170000248 | ISS detector: forward light scattering, calibrated to alarm at 1 %/ft obscuration for smolder smoke. |
 | NASA NTRS 20150010172 | Previously cited for SAME-R particle sizes. It is a presentation with no size numbers in its record; replaced by AIAA 2012-3536 (NTRS 20130000422). |
 | PMC7918997 | Previously listed on the About page; could not be opened to verify (site blocks automated access). Removed until a person checks it. |
@@ -177,14 +177,14 @@ See `AI_LOG.md`.
 | Starlust, 6 Sep 2026; CXO Digital Pulse (Lok Sabha reply, 29 Jul 2026) | India card: Gaganyaan schedule (official via news) |
 | Drishti IAS summary of The Hindu, 22 May 2026 | India card: Gaganyaan smoke detectors and water mist (news only) |
 | Competitor and NASA-results research, 14 Nov 2026 | reports/Flame in Free Fall research.md (every claim cited there) |
-| Google Fonts: Instrument Serif, Inter, JetBrains Mono (SIL Open Font License) | Site typography |
+| Google Fonts: Atkinson Hyperlegible, Bricolage Grotesque, IBM Plex Mono, Special Elite, Libre Caslon Text (SIL Open Font License) | Site typography (corrected 15 Nov 2026) |
 
 ## Added 14 Nov 2026 (evening)
 
 | Source | Used for |
 |---|---|
 | Urban, Ruff, Ferkul et al., Saffire VI preliminary results, ICES-2024-365, https://ntrs.nasa.gov/citations/20240002981 | data/saffire_gas.json (gas rise, heat release, 981 s alarm; reported); Saffire IV-VI points on the gap map |
-| NASA Exploration Atmospheres Working Group, NASA/TP-2010-216134 | 8.0 psia / 32% O2 probe on the gap map |
+| NASA Exploration Atmospheres Working Group, NASA/TP-2010-216134 | 8.2 psia / 34% O2 recommendation, used as a probe on the gap map (corrected 15 Nov 2026 from 8.0 psia / 32%) |
 | NASA-STD-7009A, Standard for Models and Simulations | Credibility factors in the "Made by" boxes (self-assessed) |
 | Rate-of-rise smoke alarm logic proposed for spacecraft light-scattering detectors (see reports/Elevating Vulcan Orbit for judges.md for the citation) | Idea tested in models/m4-latency/rate_of_rise.py |
 
@@ -193,7 +193,7 @@ See `AI_LOG.md`.
 | Source | Used for |
 |---|---|
 | Urban et al., ICES-2021-266 (Saffire IV-V), https://ntrs.nasa.gov/api/citations/20210011521/downloads/ICES%202021-266%200503-2021%20final.pdf | Saffire-III flow as flown (25 cm/s, Table 2); Saffire V "flame came back" plaque |
-| Meyer et al., Fire Safety Journal 98:74-81 (2018), doi:10.1016/j.firesaf.2018.04.004 | ISS detector would not have alarmed for over half of Kapton and two thirds of Teflon smoke tests |
+| Meyer et al., Fire Safety Journal 98:74-81 (2018), doi:10.1016/j.firesaf.2018.04.004; NIST summary via ScienceDaily (https://www.sciencedaily.com/releases/2018/05/180501161830.htm) | The ISS detector frequently failed to detect the smaller smoke particles from Teflon and Kapton |
 | NASA Glenn BASS-II page, https://www1.grc.nasa.gov/space/iss-research/msg/bass-2/ | "Models predict higher spread rates than observed" (cross-check with M6) |
 | NASA NTRS 20160000593 | BASS-II low-oxygen spread limits (cross-check with M6b) |
 | Dietrich et al. 2014, Microgravity Sci. Technol. 26:65-76; Nayagam et al., NTRS 20130014061 | FLEX limiting oxygen (cross-check with M7) |

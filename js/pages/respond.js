@@ -57,7 +57,7 @@ export async function short() {
   const auc = x?.extinction?.headline?.auc_median;
   out.push(isMissing(x) || !Number.isFinite(auc)
     ? 'The droplet extinction model is not available yet (data/m7_explorer.json missing).'
-    : `Our model predicts whether a droplet flame goes out from oxygen, pressure and added gas. It ranks the cases right ${Math.round(auc * 10)} times in 10 on test sessions it never saw.`);
+    : `Our model predicts whether a droplet flame goes out from oxygen, droplet size, fuel and added gas; oxygen matters most. It ranks the cases right ${Math.round(auc * 10)} times in 10 on test sessions it never saw.`);
   const n = mistRows(tr).length;
   const mist = n ? `Bench mist trial: ${n} mist run${n > 1 ? 's' : ''} measured on the dome, at Earth gravity.` : 'Bench mist trial: not completed.';
   out.push(isMissing(e)

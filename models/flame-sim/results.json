@@ -9,7 +9,7 @@
   "held_out_n": 108
  },
  "sibal_plate": "not computed: cotton heat of combustion and heat of gasification have no verified source (properties.json)",
- "emmons_smallB_f2": 0.33205493384731916,
+ "emmons_smallB_f2": 0.3320549338473188,
  "standoff_exponents": {
   "0 g 0.05 m/s": 0.5,
   "Earth 1 g 0.05 m/s": 0.257,
@@ -70,7 +70,7 @@
   {
    "id": "S1-order",
    "ok": true,
-   "result": "aspect ratio does not decrease from 0 g to Moon to Mars to 1 g at zero forced flow, in every fuel/O2/pressure case"
+   "result": "aspect ratio does not decrease from 0 g to 1 g at zero forced flow, in every fuel/O2/pressure case"
   },
   {
    "id": "S1-height",

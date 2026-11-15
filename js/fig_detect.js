@@ -109,7 +109,7 @@ export function replayCard(lat, params = {}, ctx = {}) {
   });
   slider.addEventListener('input', () => { stop(); f = (Number(slider.value) - T0) / (T1 - T0); f = Math.max(0, Math.min(1, f)); draw(); });
 
-  const alarmText = c => (c.alarm_s == null ? 'never alarmed' : `alarm at ${c.alarm_s} s`);
+  const alarmText = c => (c.alarm_s == null ? 'no alarm' : `alarm at ${c.alarm_s} s${c.resolution_s > 2 ? ` ± ${c.resolution_s}` : ''}`);
   const setup = () => {
     b = lat.burns[Number(sel.value)] || lat.burns[0];
     T0 = b.t[0]; T1 = b.t[b.t.length - 1]; f = 1;
@@ -279,7 +279,7 @@ export function blindSpotCard(lat) {
       : alarms.length === 1 ? 'Only one sensor type responded in this event.' : 'No sensor alarmed in this event.';
     const stats = b.channels.map((c, i) => h('div', { class: 'statbox' },
       h('span', { class: 'stat-label det-ch' }, swatch(i), c.name),
-      h('div', { class: 'stat' }, c.alarm_s == null ? 'never' : fmt(c.alarm_s, 0),
+      h('div', { class: 'stat' }, c.alarm_s == null ? 'no alarm' : fmt(c.alarm_s, 0),
         c.alarm_s != null ? h('small', {}, `s${c.resolution_s > 2 ? ` ± ${Math.round(c.resolution_s)}` : ''}`) : null),
       Array.isArray(c.alarm_s_range) && c.alarm_s != null && c.alarm_s_range[0] != null && c.alarm_s_range[0] !== c.alarm_s_range[1]
         ? h('small', {}, `${c.alarm_s_range[0]} s with a looser threshold`) : null));
@@ -290,7 +290,7 @@ export function blindSpotCard(lat) {
         markers: [{ x: 0, label: '', color: 'transparent' }, ...alarms.map((a, k) => ({ x: a.c.alarm_s, label: `${a.c.key || ''} ${a.c.alarm_s} s`.trim(), color: SERIES[a.i % SERIES.length], dy: k * 13 }))],
       }),
       h('p', { class: 'det-gap' }, gapText),
-      lat.threshold_rule ? h('p', {}, h('small', {}, [lat.threshold_rule, lat.resolution_note, lat.observation, lat.assumption].filter(Boolean).join(' '))) : null);
+      lat.threshold_rule ? h('p', {}, h('small', {}, [lat.threshold_rule, lat.resolution_note, lat.baseline_note, lat.placement_note, lat.observation, lat.assumption].filter(Boolean).join(' '))) : null);
   };
   sel.addEventListener('change', () => { draw(); announce(`${lat.burns[Number(sel.value)]?.name}. ${gapText}`); });
   draw();

@@ -30,8 +30,8 @@ export function detectFacts(lat, gas) {
     vars.smoke_min_s = sc.length ? Math.min(...sc) : null;
     vars.smoke_max_s = sc.length ? Math.max(...sc) : null;
     vars.obs_never = lat.burns.every(b => chan(b, OBSCURATION)?.alarm_s == null);
-    if (burns.length && sc.length) en.push(`In the ${vars.n_fires} real fires NASA lit in orbit, a flame light sensor would have noticed within ${vars.rad_s} s (using our alarm thresholds). The smoke detector took ${vars.smoke_min_s} to ${vars.smoke_max_s} s.`);
-    if (vars.obs_never) en.push('The second kind of smoke detector, which looks for dimmed light, never alarmed at all.');
+    if (burns.length && sc.length) en.push(`In NASA's ${vars.n_fires} Saffire-III burns, a flame light sensor in the flow duct crossed our alarm rule within ${vars.rad_s} s (it updates only every 5 s). The cabin smoke detector took about ${vars.smoke_min_s} to ${vars.smoke_max_s} s at our rule; smoke left over from the earlier test makes that time depend a lot on the rule.`);
+    if (vars.obs_never) en.push('The same detector\'s second channel, which looks for dimmed light, never rose past its alarm level.');
   } else {
     en.push(missingSentence('Alarm timing on NASA\'s orbital fires', 'saffire_latency'));
   }
