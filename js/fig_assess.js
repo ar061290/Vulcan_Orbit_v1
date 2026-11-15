@@ -221,8 +221,18 @@ export function inputsCard(store, data, ctx = {}) {
   const nfP = B.pressure_atm ? condNF('as-p', 'Pressure', 'atm', 'pressure_atm', 0.001) : null;
 
   // ---- one field = slider + where its limits came from + an out-of-box flag
-  const flags = {};
-  const field = (key, nf, from) => { const flag = h('p', { class: 'as-flag', hidden: true, id: `as-flag-${key}` }); flags[key] = flag; return h('div', { class: 'as-field' }, nf, from, flag); };
+  const flags = {}, fields = {};
+  const field = (key, nf, from) => { const flag = h('p', { class: 'as-flag', hidden: true, id: `as-flag-${key}` }); flags[key] = flag; return (fields[key] = h('div', { class: 'as-field' }, nf, from, flag)); };
+  // v3: an extrapolated input is flagged on the control itself (amber edge, and its flag text joins the inputs' description)
+  const markExt = (key, on) => {
+    const w = fields[key]; if (!w) return;
+    w.classList.toggle('is-ext', on);
+    w.querySelectorAll('input').forEach(i => {
+      const ids = (i.getAttribute('aria-describedby') || '').split(/\s+/).filter(x => x && x !== `as-flag-${key}`);
+      if (on) ids.push(`as-flag-${key}`);
+      if (ids.length) i.setAttribute('aria-describedby', ids.join(' ')); else i.removeAttribute('aria-describedby');
+    });
+  };
   function flameLimits() {
     const am = areaMax();
     if (isNum(am) && am > 0) setLimits(nfArea, 0.1, am, 'cm²');
@@ -270,9 +280,10 @@ export function inputsCard(store, data, ctx = {}) {
   /** Show an out-of-box flag beside each input the result checked. */
   c.update = result => {
     Object.values(flags).forEach(f => { f.hidden = true; f.textContent = ''; });
+    Object.keys(fields).forEach(k => markExt(k, false));
     for (const b of boxesOf(result)) {
       const key = BOX_TO_CONTROL[b.field]; if (!key || !flags[key] || b.inside) continue;
-      flags[key].hidden = false;
+      flags[key].hidden = false; markExt(key, true);
       add(flags[key], h('b', {}, 'Outside the calibration box'), ` (${fieldName(b.field)} ${boxText(b)}): this value is extrapolated, not validated.`);
     }
   };
@@ -347,15 +358,17 @@ export function cameraCard(store, data) {
   }
   const c = card(TITLES.camera, hasCV ? cv.status : 'missing', 'Fill the flame fields from the camera model\'s reading, a JSON file or a paste. A reading is checked field by field and never used in part.',
     hasCV ? h('div', { class: 'as-cam-latest' }, now, latestBtn) : h('div', { class: 'as-cam-latest' },
-      h('p', { class: 'as-cam-none' }, h('b', {}, 'Camera model not connected yet: using the sliders.')),
-      empty('No camera reading yet', 'cv_latest', 'The camera owner adds this file when the camera model runs on the bench rig.', CV_SHAPE)),
-    h('div', { class: 'as-cam-in' },
-      h('div', { class: 'as-field' }, h('label', { for: 'as-cam-file' }, 'Load a camera file (JSON)'), file),
-      h('div', { class: 'as-field' }, h('label', { for: 'as-cam-paste' }, 'Or paste a camera reading (JSON)'), paste,
-        h('small', { id: 'as-cam-shape', class: 'as-from' }, 'Shape: models/m6b-predictor/CONTRACT_PROPOSAL.md (coordinates must be "fuel": x along the length, y across the width, in cm).'), useBtn),
-      h('div', { class: 'as-example' }, exBtn, badge('demo'),
-        h('small', {}, 'A demo copy of worked example 1\'s flame (data/cv_example.json), not a camera measurement.'))),
-    msg, smoke);
+      h('p', { class: 'as-cam-none' }, h('b', {}, 'Camera model not connected yet: using the sliders.'))),
+    h('div', { class: 'as-example' }, exBtn, badge('demo'),
+      h('small', {}, 'A demo copy of worked example 1\'s flame (data/cv_example.json), not a camera measurement.')),
+    msg,
+    h('details', { class: 'fold as-cam-fold' }, h('summary', {}, 'Use your own reading: a file or a paste'),
+      h('div', { class: 'as-cam-in' },
+        h('div', { class: 'as-field' }, h('label', { for: 'as-cam-file' }, 'Load a camera file (JSON)'), file),
+        h('div', { class: 'as-field' }, h('label', { for: 'as-cam-paste' }, 'Or paste a camera reading (JSON)'), paste,
+          h('small', { id: 'as-cam-shape', class: 'as-from' }, 'Shape: models/m6b-predictor/CONTRACT_PROPOSAL.md (coordinates must be "fuel": x along the length, y across the width, in cm).'), useBtn)),
+      hasCV ? null : empty('No camera reading yet', 'cv_latest', 'The camera owner adds this file when the camera model runs on the bench rig.', CV_SHAPE)),
+    smoke);
   c.apply = apply;
   c.sync = () => {};
   return c;
@@ -445,10 +458,10 @@ export function outputsCard(result) {
     const mid = sm.mid || {};
     setBody(c,
       h('div', { class: 'as-stats' },
-        stat('Largest burning area (mid)', `${n4(mid.max_area_cm2)} cm²`, rangeTxt(mx, 'cm²')),
-        stat('Time to the largest area (mid)', `${n4(mid.t_max_s)} s`, rangeTxt(tm, 's')),
-        stat('The fire stops at (mid)', `${n4(mid.t_end_s)} s`, rangeTxt(te, 's')),
-        stat('Why it stops', reasons.length === 1 ? reasons[0] : reasons.join('; ') || 'n/a', reasons.length > 1 ? 'differs between runs' : '')),
+        stat('Largest burning area (mid)', [n4(mid.max_area_cm2), h('span', { class: 'as-unit' }, ' cm²')], rangeTxt(mx, 'cm²')),
+        stat('Time to the largest area (mid)', [n4(mid.t_max_s), h('span', { class: 'as-unit' }, ' s')], rangeTxt(tm, 's')),
+        stat('The fire stops at (mid)', [n4(mid.t_end_s), h('span', { class: 'as-unit' }, ' s')], rangeTxt(te, 's')),
+        Object.assign(stat('Why it stops', reasons.length === 1 ? reasons[0] : reasons.join('; ') || 'n/a', reasons.length > 1 ? 'differs between runs' : ''), { className: 'statbox as-stop' })),
       chart,
       numbers(`${TITLES.curve}: burning area of each run`, ['Time after ignition, s', 'Slow run (lo), cm²', 'Middle run (mid), cm²', 'Fast run (hi), cm²'],
         t.map((x, i) => [x, A.lo?.[i] ?? 'n/a', A.mid?.[i] ?? 'n/a', A.hi?.[i] ?? 'n/a']),
@@ -522,21 +535,32 @@ export function riskCard(result, rules) {
     ];
     const level = risk?.level;
     const evaluated = Array.isArray(risk?.evaluated) ? risk.evaluated : [];
+    c.dispose();
+    const fire = level === 'High' ? h('div', { class: 'as-fire', 'aria-hidden': 'true' }) : null;
     setBody(c,
+      risk ? h('div', { class: 'as-levelbox', 'data-level': level }, fire,
+        h('p', { class: 'as-level' }, h('span', { class: 'as-level-k' }, 'Risk level: '), h('b', {}, level || 'none given'),
+          h('span', { class: 'as-scale', 'aria-hidden': 'true' }, LEVELS.map(l => h('i', { class: l === level ? 'on' : null }, l)))),
+        h('p', { class: 'as-fired' }, h('b', {}, `Rule that fired: ${risk.fired?.id || 'none'}${risk.fired?.label ? ` (${risk.fired.label})` : ''}. `), risk.fired?.reason || '')) : null,
       approved ? null : h('p', { class: 'as-banner', role: 'note' }, h('b', {}, 'Rules are a team choice, to be approved.'), ' They are not a NASA rule.'),
+      isMissing(rules) ? empty('No risk rules yet', 'risk_rules', 'The level needs the team\'s written rules.', '{status:"team", approved:false, default:{level, reason}, rules:[{id, level, test, reason}]}') : null,
       h('div', { class: 'as-parts' }, h('h3', {}, 'The parts'), h('dl', { class: 'kv' }, parts.flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]))),
       h('p', { class: 'as-note' }, '* Times after ignition on NASA\'s Saffire-III burns, a different fire, shown for scale and not as a prediction for this one. The detection shares are smoke-drift model runs, not NASA data.'),
-      isMissing(rules) ? empty('No risk rules yet', 'risk_rules', 'The level needs the team\'s written rules.', '{status:"team", approved:false, default:{level, reason}, rules:[{id, level, test, reason}]}') : null,
-      risk ? h('div', { class: 'as-levelbox', 'data-level': level },
-        h('p', { class: 'as-level' }, 'Risk level: ', h('b', {}, level || 'none given'),
-          h('span', { class: 'as-scale', 'aria-hidden': 'true' }, LEVELS.map(l => h('i', { class: l === level ? 'on' : null }, l)))),
-        h('p', {}, h('b', {}, `Rule that fired: ${risk.fired?.id || 'none'}${risk.fired?.label ? ` (${risk.fired.label})` : ''}. `), risk.fired?.reason || '')) : null,
-      evaluated.length ? table(['Rule', 'Level if it matches', 'Result', 'Tests', 'Reason'],
-        evaluated.map(e => [`${e.id}${e.label ? ': ' + e.label : ''}`, e.level || 'no level',
-          e.fired ? h('b', {}, e.matched ? 'Matched: fired' : 'Fired') : e.matched === true ? 'Matched (an earlier rule fired)' : e.matched === null ? 'Could not be checked' : 'Did not match',
-          Array.isArray(e.tests) && e.tests.length ? e.tests.join('; ') : valuesText(e.values), e.reason || '']),
-        { caption: 'Every rule, checked in file order (the first match fires)' }) : null);
+      evaluated.length ? h('details', { class: 'fold as-rules' }, h('summary', {}, `Every rule, checked in file order (${evaluated.length})`),
+        table(['Rule', 'Level if it matches', 'Result', 'Tests', 'Reason'],
+          evaluated.map(e => [`${e.id}${e.label ? ': ' + e.label : ''}`, e.level || 'no level',
+            e.fired ? h('b', {}, e.matched ? 'Matched: fired' : 'Fired') : e.matched === true ? 'Matched (an earlier rule fired)' : e.matched === null ? 'Could not be checked' : 'Did not match',
+            Array.isArray(e.tests) && e.tests.length ? e.tests.join('; ') : valuesText(e.values), e.reason || '']),
+          { caption: 'Every rule, checked in file order (the first match fires)' })) : null);
+    // v3: a thin fire band (js/fx/noise.js) in the level box when the level is High; decoration only, optional
+    if (fire) {
+      import('./fx/noise.js')
+        .then(m => { if (c.contains(fire) && typeof m.noiseField === 'function') noiseFx = m.noiseField(fire, { strength: 0.6 }); })
+        .catch(() => fire.classList.add('as-fire-still'));
+    }
   };
+  let noiseFx = null;
+  c.dispose = () => { try { noiseFx?.destroy?.(); } catch { /* already gone */ } noiseFx = null; };
   if (result) c.update(result);
   return c;
 }
