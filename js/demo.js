@@ -168,3 +168,11 @@ if (!reduce && 'IntersectionObserver' in window) {
 } else document.querySelectorAll('#scope path.tr').forEach(p => { p.style.strokeDasharray = ''; p.style.strokeDashoffset = ''; });
 
 controls(); sync(); run();
+
+// click any gallery picture to see it full size; click or Esc to close
+document.addEventListener('click', e => {
+  const img = e.target.closest('.gallery img, .media img'); if (!img) return;
+  const z = document.createElement('div'); z.className = 'zoom'; z.innerHTML = `<img src="${img.src}" alt="${esc(img.alt)}">`;
+  const close = () => { z.remove(); removeEventListener('keydown', esc_); }; const esc_ = k => k.key === 'Escape' && close();
+  z.addEventListener('click', close); addEventListener('keydown', esc_); document.body.append(z);
+});
