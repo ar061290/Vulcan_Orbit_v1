@@ -25,14 +25,17 @@
 .pop[hidden]{display:none}
 .pop-h{font:600 var(--t1) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 var(--s3)}
 .pill-pop ul{list-style:none;margin:0 0 var(--s3);padding:0;display:grid;gap:var(--s3)}
-.pill-pop li{display:grid;grid-template-columns:auto 1fr;gap:var(--s1) var(--s3);align-items:baseline;font-size:var(--t2);color:var(--ink-2)}
-.pill-pop li code{font-size:var(--t1)}
-.pill-pop li span{grid-column:2}
+.pill-pop li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s1) var(--s3);align-items:center;font-size:var(--t2);color:var(--ink-2);padding-bottom:var(--s3);border-bottom:1px solid var(--line)}
+.pill-pop li:last-child{border-bottom:0;padding-bottom:0}
+.pill-pop li code{grid-column:1;grid-row:1;justify-self:start;font-size:var(--t1)}
+.pill-pop li .badge{grid-column:2;grid-row:1}
+.pill-pop li>span:not(.badge){grid-column:1 / -1}
 .pop-note{font-size:var(--t2);margin:0}
 
 /* Read your way: toggle in the bar, panel as a popover */
 .dock{position:relative}
-.dock>button.dock-toggle{display:inline-flex;align-items:center;gap:var(--s2);font:600 var(--t2)/1 var(--font);background:var(--ink);color:var(--bg);border:1px solid var(--ink);border-radius:var(--r);padding:var(--s2) var(--s3);cursor:pointer}
+.dock>button.dock-toggle{display:inline-flex;align-items:center;gap:var(--s2);font:600 var(--t2)/1 var(--font);background:transparent;color:var(--ink);border:1px solid var(--line-2);border-radius:var(--r);padding:var(--s2) var(--s3);min-height:32px;cursor:pointer}
+.dock>button.dock-toggle:hover,.dock>button.dock-toggle[aria-expanded=true]{border-color:var(--ink);background:var(--panel-2)}
 .dock-aa{font:700 var(--t2)/1 var(--display)}
 .dock-panel{position:absolute;right:0;top:calc(100% + var(--s2));z-index:60;width:min(320px,calc(100vw - 2 * var(--s4)));max-height:calc(100vh - var(--bar-h) - var(--s5));overflow:auto;background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r2);padding:var(--s4);box-shadow:var(--pop-shadow)}
 .dock-panel[hidden]{display:none}
@@ -47,6 +50,7 @@
 .col>main{flex:1}
 .side{position:sticky;top:var(--bar-h);align-self:start;height:calc(100vh - var(--bar-h));overflow:auto;border-right:1px solid var(--line);background:var(--bg);padding:0 0 var(--s5);display:flex;flex-direction:column}
 .side-fx{height:var(--s2);flex:none;position:relative;overflow:hidden}
+html[data-theme=day] .side-fx{display:none}
 .side-g{padding:var(--s4) var(--s4) 0}
 .side-h{font:600 var(--t1) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 var(--s2);padding-left:var(--s3)}
 .side ul{list-style:none;margin:0;padding:0;display:grid;gap:1px}
@@ -83,15 +87,16 @@ html[data-mode=story] .brand{width:auto}
  .side{position:fixed;z-index:50;top:var(--bar-h);left:0;bottom:0;height:auto;width:min(300px,86vw);border-right:1px solid var(--line-2);
   transform:translateX(-100%);visibility:hidden;transition:transform .2s ease,visibility 0s linear .2s}
  .side.open{transform:none;visibility:visible;transition:transform .2s ease}
+ .side-fx{display:none}
  html.drawer-open .col{filter:brightness(.55)}
 }
 @media (max-width:680px){
  .bar-title{display:none}
  .brand b{display:none}
+ .menu{padding:var(--s1) var(--s2)}
  .dock>button.dock-toggle{width:40px;height:36px;padding:0;justify-content:center}
  .dock-toggle .dock-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
  .foot{grid-template-columns:1fr}
- .menu span{display:none}
 }
-@media (max-width:380px){.pill .pill-n{font-size:11px}}
+@media (max-width:380px){.pill{padding:var(--s1) var(--s2)}}
 @media (forced-colors:active){.pill i{forced-color-adjust:none}.side a[aria-current=page]{border-left-color:Highlight}}

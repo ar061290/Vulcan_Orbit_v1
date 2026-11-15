@@ -45,7 +45,7 @@ button.chip,.chip{font:500 var(--t2) var(--font);background:transparent;color:va
 .chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .seg-row{display:grid;gap:var(--s1);margin:0 0 var(--s3)}
 .seg-label{font:600 var(--t1) var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
-.seg{display:flex;flex-wrap:wrap;border:1px solid var(--line-2);border-radius:var(--r);padding:2px;gap:2px}
+.seg{display:flex;flex-wrap:wrap;border:1px solid var(--line-2);border-radius:var(--r);padding:var(--s1);gap:var(--s1)}
 .seg button{flex:1 1 auto;border:0;background:none;color:var(--ink-2);font:600 var(--t2) var(--font);padding:var(--s1) var(--s3);min-height:32px;border-radius:2px;cursor:pointer}
 .seg button:hover{color:var(--ink);background:var(--panel-2)}
 .seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
@@ -75,7 +75,7 @@ label{color:var(--ink-2);font-size:var(--t2)}
 
 /* ---------- tables: dense, numbers right-aligned in tabular figures ---------- */
 .scroll{overflow-x:auto;max-width:100%}
-.scroll:focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+.scroll:focus-visible{outline:2px solid var(--oxy);outline-offset:-2px}
 table{width:100%;border-collapse:collapse;font-size:var(--t2);font-variant-numeric:tabular-nums}
 caption{caption-side:top;text-align:left;font-size:var(--t2);color:var(--mute);padding:0 0 var(--s2)}
 th{text-align:left;padding:var(--s2);border-bottom:1px solid var(--line-2);white-space:nowrap;color:var(--mute);font:600 var(--t1) var(--mono);letter-spacing:.06em;text-transform:uppercase}
@@ -94,7 +94,7 @@ details.more>summary{list-style:none;display:flex;flex-wrap:wrap;align-items:cen
 details.more>summary::-webkit-details-marker{display:none}
 details.more>summary span{display:inline-flex;align-items:center;gap:var(--s3);font:600 var(--t2) var(--font);color:var(--ink);border:1px solid var(--line-2);border-radius:var(--r);padding:var(--s2) var(--s4)}
 details.more>summary:hover span{border-color:var(--ink)}
-details.more>summary span::before{content:"+";font:600 var(--t3)/1 var(--mono);color:var(--accent-ink)}
+details.more>summary span::before{content:"+";font:600 var(--t3)/1 var(--mono);color:var(--mute)}
 details.more[open]>summary span::before{content:"−"}
 details.more>summary small{font-size:var(--t2)}
 details.more>*:not(summary){margin-bottom:var(--s5)}
@@ -108,7 +108,7 @@ details.madeby{margin:0 0 var(--s4)}
 details.madeby>summary{list-style:none;display:inline-flex;flex-wrap:wrap;align-items:center;gap:var(--s1) var(--s3);cursor:pointer;font:500 var(--t1) var(--mono);color:var(--mute)}
 details.madeby>summary::-webkit-details-marker{display:none}
 details.madeby>summary .mb-btn{display:inline-flex;align-items:center;gap:6px;font:600 var(--t1)/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border:1px solid var(--line-2);border-radius:var(--r);padding:6px var(--s2)}
-details.madeby>summary .mb-btn::before{content:"+";color:var(--accent-ink)}
+details.madeby>summary .mb-btn::before{content:"+";color:var(--mute)}
 details.madeby[open]>summary .mb-btn::before{content:"−"}
 details.madeby>summary:hover .mb-btn{color:var(--ink);border-color:var(--ink)}
 details.madeby>summary small{font:inherit;color:var(--mute)}
@@ -142,14 +142,14 @@ dl.made dd{margin:0;color:var(--ink-2);overflow-wrap:anywhere}
 .short ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));counter-reset:sa}
 .short li{counter-increment:sa;padding:var(--s4) var(--s5) var(--s5) 0;font-size:var(--t3);line-height:1.5;color:var(--ink)}
 .short li+li{padding-left:var(--s5);border-left:1px solid var(--line)}
-.short li::before{content:counter(sa,decimal-leading-zero);display:block;font:600 var(--t1) var(--mono);color:var(--accent-ink);margin-bottom:var(--s2)}
+.short li::before{content:counter(sa,decimal-leading-zero);display:block;font:600 var(--t1) var(--mono);color:var(--mute);margin-bottom:var(--s2)}
 
 /* ---------- "On this page": a sticky right rail on wide screens, a dropdown-style list on narrow ones ---------- */
 .toc{margin:0 0 var(--s5);border:1px solid var(--line);border-radius:var(--r2);padding:var(--s3) var(--s4)}
-.toc summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:var(--s3);min-height:32px}
+.toc summary{list-style:none;display:flex;align-items:center;gap:var(--s3);min-height:40px}
 .toc summary::-webkit-details-marker{display:none}
 .toc summary span{font:600 var(--t1) var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
-.toc summary small{font:500 var(--t1) var(--mono);color:var(--mute)}
+.toc summary small{font:500 var(--t1) var(--mono);color:var(--mute);margin-left:auto}
 .toc summary::after{content:"▾";color:var(--mute);font-size:var(--t1)}
 .toc details[open] summary::after{content:"▴"}
 .toc details[open] summary{margin-bottom:var(--s2)}
@@ -172,7 +172,8 @@ dl.made dd{margin:0;color:var(--ink-2);overflow-wrap:anywhere}
 .empty h3{margin-bottom:var(--s2)}
 .empty pre{margin:var(--s3) 0 0;font:var(--t1)/1.5 var(--mono);color:var(--ink-2);white-space:pre-wrap;overflow-wrap:anywhere}
 [aria-busy=true]{position:relative}
-[aria-busy=true]::after{content:"Working…";position:absolute;right:var(--s2);top:var(--s2);font:600 var(--t1) var(--mono);color:var(--mute)}
+[aria-busy=true]>*{opacity:.45;transition:opacity .2s}
+[aria-busy=true]::after{content:"Working…";position:absolute;z-index:2;right:0;top:0;font:600 var(--t1)/1 var(--mono);letter-spacing:.06em;color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r);padding:var(--s1) var(--s2)}
 
 /* ---------- tooltip and glossary (popovers: the only shadows) ---------- */
 .tip{position:fixed;z-index:70;pointer-events:none;background:var(--ink);color:var(--bg);border:0;border-radius:var(--r);padding:6px var(--s2);font-size:var(--t2);max-width:260px;box-shadow:var(--pop-shadow)}
@@ -227,6 +228,8 @@ html[data-terms=off] .term{border:0;cursor:inherit;background:none}
 @keyframes vt-out{to{opacity:0}}
 @keyframes vt-in{from{opacity:0;transform:translateY(6px)}}
 
+.seg button:focus-visible{outline-offset:1px}
+.chip:focus-visible,.btn:focus-visible,.seg button:focus-visible{outline:2px solid var(--oxy)}
 @media (max-width:680px){
  .card{padding:var(--s4)}
  dl.made{grid-template-columns:1fr}
