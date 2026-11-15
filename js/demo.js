@@ -3,6 +3,7 @@
 // visitor's inputs (js/assess_core.js computeAssessment, the same code the full site uses). Status badges say which.
 import { load, isMissing } from './lib.js';
 import { loadAssessData, computeAssessment } from './assess_core.js';
+import { flowingCursor } from './demo_fluid.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -25,6 +26,7 @@ const gapLow = RAD?.alarm_s != null && SCA ? (SCA.alarm_s_range?.[0] ?? SCA.alar
 
 // ---------- hero orb (a CSS illustration; the full site has the WebGL flame) ----------
 $('porthole').insertAdjacentHTML('afterbegin', '<div class="orb" aria-hidden="true"></div>');
+try { flowingCursor(document.querySelector('.hero')); } catch (e) { console.warn('Flowing cursor off:', e.message); }
 
 // ---------- headline stats ----------
 $('stats').innerHTML = burn ? `
