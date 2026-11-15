@@ -274,4 +274,5 @@ export function hero({ g = 0, fit, ctx } = {}) {
       const y = isCalm() ? 0 : f * 2.4, p = isCalm() ? 0 : -f * .4;
       if (y === yOff && p === pOff) return; yOff = y; pOff = p; if (!setStatic) kick();
     },
+  };
 }
