@@ -6,7 +6,7 @@ export const PAGES = [
   { id: 'memory', label: 'History', head: false, doc: 'Sixty years of fire · Vulcan Orbit' },
   { id: 'detect', label: 'Find it', title: 'Where is the fire?', visual: 'smoke', keep: 2 },
   { id: 'assess', label: 'Assess', title: 'How bad will it get?', visual: 'flame', keep: 6 /* nothing folds: C2 says the lists stay visible beside the curve */ },
-  { id: 'predict', label: 'Predict it', title: 'What will it do?', visual: 'flame', keep: 1 },
+  { id: 'predict', label: 'Predict it', title: 'What will it do?', visual: 'flame', keep: 2 },
   { id: 'respond', label: 'Put it out', title: 'What puts it out?', visual: 'flame', keep: 2 },
   { id: 'flame', label: 'Flame lab', title: 'A flame without gravity', visual: 'flame', keep: 1 },
   { id: 'explorer', label: 'NASA experiments', title: 'The NASA experiments', visual: 'earth', keep: 1 },

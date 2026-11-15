@@ -56,18 +56,64 @@ export function trustCard(t) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 // "NASA says / we get" [NIS] (data/crosscheck.json). Ported from main's verify_ui.js crosscheckCard.
+// UI lock: drawn as a ledger (NASA's value and ours in two aligned columns, hairlines between rows). Each row is one
+// control: the topic button (Enter/Space), or a tap anywhere on the row, reveals its sources; the links stay real links.
+// Numbers with their units are picked out of the file's own text (nothing is added): see UNITS.
+const UNITS = /\d[\d,.]*(?:\s?(?:-|–|to)\s?\d[\d,.]*)?(?:\s?(?:cm\/s|m\/s|mg\/m³|kPa|µm|nm|mm|cm|atm|bar|SD|s)(?![A-Za-z])|%|-fold)/g;
+const withUnits = text => {
+  const s = String(text ?? ''), out = []; let at = 0;
+  for (const m of s.matchAll(UNITS)) { out.push(s.slice(at, m.index), h('span', { class: 'lg-num' }, m[0])); at = m.index + m[0].length; }
+  out.push(s.slice(at));
+  return out.filter(x => x !== '');
+};
+const srcLink = (t, u) => {
+  const ext = !String(u).startsWith('#');
+  return h('a', { href: u, target: ext ? '_blank' : null, rel: ext ? 'noopener' : null }, t, ext ? h('span', { class: 'sr' }, ' (opens in a new tab)') : null);
+};
+
 export function crosscheckCard(c) {
   const title = 'NASA says / we get';
   if (isMissing(c) || !Array.isArray(c.rows)) return missingCard(title, 'crosscheck', 'Built by scripts/build_crosscheck.py from published NASA values and the site\'s own data files.',
     '{"status": "reported", "checked": "YYYY-MM-DD", "what": "…", "rows": [{"topic", "nasa", "ours", "verdict", "sources": [["title", "url"]]}]}');
+  const row = (r, i) => {
+    const srcs = Array.isArray(r.sources) ? r.sources : [];
+    const sid = `lg-src-${i}`;
+    const src = srcs.length ? h('div', { class: 'lg-src', id: sid, hidden: true },
+      h('span', { class: 'lg-k' }, srcs.length === 1 ? 'Source' : `Sources · ${srcs.length}`),
+      h('ul', {}, srcs.map(([t, u]) => h('li', {}, srcLink(t, u))))) : null;
+    const topic = src
+      ? h('button', { type: 'button', class: 'lg-topic', 'aria-expanded': false, 'aria-controls': sid },
+        h('span', { class: 'lg-caret', 'aria-hidden': 'true' }), h('b', {}, r.topic), h('span', { class: 'sr' }, ': show the source'))
+      : h('span', { class: 'lg-topic' }, h('b', {}, r.topic));
+    const li = h('li', { class: src ? 'lg-row lg-tap' : 'lg-row' },
+      h('div', { class: 'lg-head' }, h('h3', { class: 'lg-h' }, topic),
+        h('span', { class: `lvl lg-stamp vstamp ${/conflict|not compared/i.test(r.verdict) ? 'demo' : 'real'}` }, r.verdict)),
+      h('div', { class: 'lg-cols' },
+        h('div', { class: 'lg-col' }, h('span', { class: 'lg-k' }, 'NASA says (summarised)'), h('p', {}, withUnits(scrubIonWind(r.nasa)))),
+        h('div', { class: 'lg-col' }, h('span', { class: 'lg-k' }, 'We get / use'), h('p', {}, withUnits(scrubIonWind(r.ours))))),
+      src);
+    if (src) {
+      topic.addEventListener('click', () => { const o = topic.getAttribute('aria-expanded') !== 'true'; topic.setAttribute('aria-expanded', String(o)); src.hidden = !o; });
+      // the whole row is the tap target; links, buttons, the sources and a text selection keep their own behaviour
+      li.addEventListener('click', e => { if (e.target.closest('a, button, .lg-src, .gloss, [data-term]') || String(getSelection?.() || '').trim()) return; topic.click(); });
+    }
+    return li;
+  };
   return card(title, c.status, `${c.what} Checked ${c.checked}. Where NASA's own sources disagree, both are shown.`,
-    tbl('xcheck', ['Topic', 'NASA says (summarised)', 'We get / use', 'Verdict'],
-      c.rows.map(r => h('tr', {},
-        h('td', {}, h('b', {}, r.topic)),
-        h('td', {}, scrubIonWind(r.nasa), h('br'), h('small', {}, (r.sources || []).flatMap(([t, u], i) => [i ? ' · ' : '',
-          h('a', { href: u, target: String(u).startsWith('#') ? null : '_blank', rel: String(u).startsWith('#') ? null : 'noopener' }, t)]))),
-        h('td', {}, scrubIonWind(r.ours)),
-        h('td', {}, h('span', { class: `lvl ${/conflict|not compared/i.test(r.verdict) ? 'demo' : 'real'}` }, r.verdict))))));
+    h('ol', { class: 'ledger' }, c.rows.map(row)));
+}
+
+// Verdict stamps: a short state word beside each check's result. The word is aria-hidden; the result text says the same.
+const STAMP = { pass: 'Pass', fail: 'Fail', pending: 'Pending', scrapped: 'Scrapped' };
+const stamp = state => h('span', { class: `ck-stamp vstamp ${state}`, 'aria-hidden': 'true' }, STAMP[state] || state);
+
+/** Pop each verdict stamp (scale 1.15 to 1 over 180 ms) the first time it scrolls into view. Nothing under Calm motion. Returns a stop function. */
+export function armStamps(root) {
+  const calmNow = document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (calmNow || typeof IntersectionObserver !== 'function' || !root) return () => {};
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('pop'); io.unobserve(e.target); } }), { threshold: 0.6 });
+  root.querySelectorAll('.vstamp').forEach(el => { el.classList.add('armed'); io.observe(el); });
+  return () => { io.disconnect(); root.querySelectorAll('.vstamp.armed').forEach(el => el.classList.remove('armed')); };
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -128,7 +174,7 @@ export function checksCard(rows, ev = {}) {
     const text = state === 'scrapped' ? STATE_LABEL.scrapped : (r.result || STATE_LABEL[state] || state);
     return h('tr', { 'data-id': r.id, class: state === 'scrapped' ? 'ck-scrapped' : (added.includes(r) ? 'ck-added' : null) },
       h('td', {}, h('code', {}, r.id)), h('td', {}, h('b', {}, r.what)), h('td', {}, r.ref), h('td', {}, r.limit),
-      h('td', { class: 'ck-result' }, pill(state, text),
+      h('td', { class: 'ck-result' }, stamp(state), pill(state, text),
         state === 'scrapped' && r.result ? [h('br'), h('small', {}, `Before scrapping: ${r.result}`)] : null,
         r.proposedScrap ? [h('br'), h('small', { class: 'ck-proposed' }, PROPOSED)] : null,
         r.overlay ? [h('br'), h('small', { class: 'ck-source' }, 'Filled at display time from ', h('code', {}, r.overlay))]
@@ -191,7 +237,7 @@ export function simChecksCard(fs, sp, dw) {
     tbl('simchecks', ['Model', 'Check', 'Result', 'Status'],
       rows.map(c => h('tr', { 'data-id': c.id, class: c.shown === 'scrapped' ? 'ck-scrapped' : null },
         h('td', {}, c.n), h('td', {}, h('code', {}, c.id)), h('td', {}, c.result),
-        h('td', {}, pill(c.shown, SIM_LABEL[c.shown] || c.shown),
+        h('td', { class: 'ck-result' }, h('span', { class: `status ${c.shown} ck-stamp vstamp` }, SIM_LABEL[c.shown] || c.shown),
           proposed && SCRAPPED.simChecks.includes(c.id) ? [h('br'), h('small', { class: 'ck-proposed' }, PROPOSED)] : null)))));
 }
 

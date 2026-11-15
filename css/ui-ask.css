@@ -1,0 +1,54 @@
+/* UI lock styles for #/ask (feat/ui-lock). Scope every rule under #view[data-page="ask"]. */
+/* console prompt: "> " before the input, mono everywhere a machine speaks */
+#view[data-page="ask"] .ask-box>label{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="ask"] .ask-box .row{display:flex;align-items:stretch;gap:0;border:1px solid var(--axis);border-radius:var(--r-data);background:var(--page);transition:border-color var(--t-micro)}
+#view[data-page="ask"] .ask-box .row:focus-within{border-color:var(--oxy)}
+#view[data-page="ask"] .ask-box .ps{display:flex;align-items:center;padding:0 0 0 12px;font:500 16px/1 var(--mono);color:var(--oxy)}
+#view[data-page="ask"] .ask-box input[type=search]{font:500 15px/1.4 var(--mono);background:transparent;border:0;color:var(--ink);padding:14px 10px}
+#view[data-page="ask"] .ask-box input[type=search]:focus-visible{outline:2px solid var(--oxy);outline-offset:-2px}
+#view[data-page="ask"] .ask-box input[type=search]::placeholder{color:var(--mute);opacity:1}
+#view[data-page="ask"] .ask-box .chip{border:0;border-left:1px solid var(--axis);border-radius:0 var(--r-data) var(--r-data) 0!important;padding:0 18px;background:transparent;color:var(--ink)}
+#view[data-page="ask"] .ask-box .chip:hover{background:var(--ink);color:var(--page)}
+
+/* big suggestion buttons */
+#view[data-page="ask"] .qlist{gap:var(--sp1);margin-top:var(--sp2)}
+#view[data-page="ask"] .q{position:relative;background:transparent;border:1px solid var(--line);border-radius:var(--r-data);padding:14px 16px 14px 36px;font:inherit;font-size:1rem;line-height:1.45;
+  transition:border-color var(--t-micro),background var(--t-micro),color var(--t-micro)}
+#view[data-page="ask"] .q::before{content:">";position:absolute;left:14px;top:14px;font:500 15px/1.45 var(--mono);color:var(--mute)}
+#view[data-page="ask"] .q:hover{border-color:var(--mute);background:var(--raise)}
+#view[data-page="ask"] .q:focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+#view[data-page="ask"] .q[aria-pressed=true]{border-color:var(--ink);box-shadow:none;background:var(--raise)}
+#view[data-page="ask"] .q[aria-pressed=true]::before{color:var(--oxy)}
+
+/* the terminal panel */
+#view[data-page="ask"] .answer{background:var(--page);border:1px solid var(--line);border-left:2px solid var(--oxy);border-radius:var(--r-data);padding:var(--sp2) var(--sp2) var(--sp3);min-height:12rem}
+#view[data-page="ask"] .answer>.muted{font:500 13px/1.6 var(--mono);margin:0}
+#view[data-page="ask"] .answer>.muted::before{content:"> ";color:var(--oxy)}
+#view[data-page="ask"] .ask-echo{font:500 13px/1.5 var(--mono);color:var(--ink2);margin:0 0 var(--sp2)!important;overflow-wrap:anywhere}
+#view[data-page="ask"] .ask-echo .ps{color:var(--oxy)}
+#view[data-page="ask"] .ans{font:400 14.5px/1.7 var(--mono);color:var(--ink);max-width:72ch}
+#view[data-page="ask"] .ans .ty-rest{color:transparent}
+#view[data-page="ask"] .ans .ty::after{content:"";display:inline-block;width:.6em;height:1.15em;margin-left:1px;vertical-align:text-bottom;background:var(--oxy)}
+#view[data-page="ask"] .answer .matched small,#view[data-page="ask"] .answer small{font:500 12px/1.5 var(--mono);color:var(--mute)}
+/* refusals: amber (Night #fab219, Day #8a5a00: both above 4.5:1 on --page) */
+#view[data-page="ask"] .answer.refusal{border-left-color:var(--warn)}
+#view[data-page="ask"] .answer.refusal .ans{color:var(--warn)}
+#view[data-page="ask"] .answer.refusal .ans .ty::after{background:var(--warn)}
+#view[data-page="ask"] .badge.warn{color:var(--warn);border-color:var(--warn);background:transparent}
+
+/* source chips */
+#view[data-page="ask"] .src{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--sp1);margin-top:var(--sp2);font-size:inherit}
+#view[data-page="ask"] .src-k{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="ask"] .src-chips{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0;min-width:0}
+#view[data-page="ask"] .src-chips li{min-width:0;max-width:100%}
+#view[data-page="ask"] .src-chips a{display:inline-block;max-width:100%;font:500 11.5px/1.4 var(--mono);letter-spacing:.06em;color:var(--ink);text-decoration:none;
+  border:1px solid var(--axis);border-radius:var(--r-data);padding:5px 8px;overflow-wrap:anywhere;transition:border-color var(--t-micro),background var(--t-micro)}
+#view[data-page="ask"] .src-chips a:hover{border-color:var(--oxy);background:var(--raise)}
+#view[data-page="ask"] .src-chips a:focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+#view[data-page="ask"] .ai-out:not(:empty){border-top:1px solid var(--line)}
+#view[data-page="ask"] .ai-out .ans{font-family:var(--mono)}
+@media (max-width:420px){
+  #view[data-page="ask"] .ask-box .row{flex-wrap:nowrap}
+  #view[data-page="ask"] .ask-box .chip{padding:0 12px}
+  #view[data-page="ask"] .q{font-size:.95rem}
+}

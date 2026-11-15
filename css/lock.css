@@ -1,0 +1,176 @@
+/* UI lock (feat/ui-lock): the mission-console layer, loaded last so it wins over the v2 component styles.
+   One panel style, one accent per screen (fire), orbit blue for 0 g and live traces, HUD brackets on live visuals,
+   no drop shadows, no gradients, motion on the four curves in tokens.css. */
+
+/* ---------- the field ---------- */
+#field{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block}
+#field[hidden]{display:none}
+/* Day: the field shows only through the current host (the page header or the Home story), clipped to it by field.js,
+   above the host's dark background and below its text */
+html[data-theme=day] #field{z-index:0}
+html[data-theme=day] .phead,html[data-theme=day] .story-pin{background:var(--screen)}
+html[data-theme=day] .phead-in,html[data-theme=day] .story-pin .story-in{position:relative;z-index:1}
+#bg{display:none}
+
+/* ---------- base ---------- */
+body{font:1rem/1.625 var(--font)}
+html[data-theme=night] body{background:var(--page)}
+html[data-theme=day] body{background:var(--page)}
+h1,h2,h3{font-weight:800;letter-spacing:-.03em}
+.kicker,th,.stat-label,.seg-label,.dock-row>span,.toc>span,.card[data-fignum]::before,.cred-cap,dl.made dt,.tc-head,.short h2{font:var(--label);letter-spacing:.14em;text-transform:uppercase}
+.kicker{color:var(--mute)}
+.kicker::before{width:16px;height:1px;background:var(--mute)}
+:focus-visible{border-radius:var(--r-data)}
+::selection{background:var(--oxy);color:#05060E}
+
+/* ---------- header and nav: numbered mono links, mission clock ---------- */
+.top{background:color-mix(in srgb,var(--page) 90%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);gap:8px 16px;padding:10px var(--gutter)}
+.brand b{font:800 17px/1 var(--display);letter-spacing:-.03em;text-transform:uppercase}
+.brand small{letter-spacing:.14em}
+#nav{gap:0}
+#nav a,.more-btn{font:500 11.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:9px 8px;border-radius:var(--r-data);color:var(--mute);transition:color var(--t-micro),background var(--t-micro)}
+#nav a .nn{color:var(--mute);opacity:.7;margin-right:2px}
+#nav a:hover,.more-btn:hover{background:transparent;color:var(--ink)}
+#nav a[aria-current=page]{background:transparent;color:var(--ink);box-shadow:inset 0 -1px 0 var(--ink)}
+#nav a[aria-current=page] .nn{color:var(--accent);opacity:1}
+.more-btn.has-current{box-shadow:inset 0 -1px 0 var(--ink)}
+.more-list{border-radius:var(--r-data);box-shadow:none;background:var(--surface)}
+.judge{font:500 11.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;border-radius:var(--r-data);border:1px solid var(--line);background:transparent;color:var(--ink);padding:9px 10px}
+.hud-right{display:flex;align-items:center;gap:6px;margin-left:8px}
+.mclock{font:500 11.5px/1 var(--mono);letter-spacing:.14em;color:var(--orbit,var(--oxy));white-space:nowrap;min-width:8.5ch}
+html[data-theme=day] .mclock{color:var(--oxy)}
+.hud-btn{font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);background:transparent;border:1px solid var(--line);border-radius:var(--r-data);padding:8px 9px;cursor:pointer;white-space:nowrap;transition:color var(--t-micro),border-color var(--t-micro)}
+.hud-btn:hover{color:var(--ink);border-color:var(--mute)}
+.hud-btn b{font-weight:500;color:var(--ink)}
+.hud-btn kbd{font:inherit;color:var(--ink)}
+.menu{border-radius:var(--r-data);font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.banner{font:500 12px/1.5 var(--mono);letter-spacing:.04em}
+html[data-theme=night] .banner{background:#0B0D18;color:#E9D7A8;border-color:var(--line)}
+
+/* ---------- page header: a window onto the field ---------- */
+.phead{min-height:clamp(360px,62vh,640px);background:transparent;color:#EDE8DF;align-items:flex-end;overflow:visible}
+.phead::after{display:none}
+.phead-field,.phead-field.hud{position:absolute;inset:12px var(--gutter);pointer-events:none}
+.phead-in{max-width:var(--maxw);padding:0 var(--gutter) 48px}
+.phead h1{font:var(--display-xl);letter-spacing:-.03em;text-transform:uppercase;color:#EDE8DF;margin:12px 0 16px;max-width:14ch}
+.phead .kicker{color:#8C8A93}.phead .kicker::before{background:#8C8A93}
+.phead .lead{color:#C4C0B8;max-width:56ch;font-size:1rem;line-height:1.625}
+.illus-tag{position:absolute;right:16px;top:14px;font:500 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#8C8A93}
+html.nogl .phead,html.nogl .story-pin{background:var(--screen)}
+
+/* the h1 line reveal: each word rises under a mask, 40 ms apart */
+h1 .w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.06em;margin-bottom:-.06em}
+h1 .w>span{display:inline-block;animation:vo-word var(--t-in) var(--ease-in) both;animation-delay:calc(var(--i,0) * var(--stagger) + 120ms)}
+@keyframes vo-word{from{transform:translateY(105%)}}
+
+/* ---------- HUD corner brackets (12 px, 1 px muted line), framing every live visual ---------- */
+.hud,.card:has(> canvas,> svg.chart,> .osc,> .cab3d,> .chart-wrap){position:relative}
+.hud::after,.card:has(> canvas,> svg.chart,> .osc)::after{content:"";position:absolute;inset:-1px;pointer-events:none;z-index:2;
+ --b:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M.5 12V.5H12' fill='none' stroke='%238C8A93'/%3E%3C/svg%3E");
+ background:var(--b) top left no-repeat,
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M0 .5h11.5V12' fill='none' stroke='%238C8A93'/%3E%3C/svg%3E") top right no-repeat,
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M.5 0v11.5H12' fill='none' stroke='%238C8A93'/%3E%3C/svg%3E") bottom left no-repeat,
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M11.5 0v11.5H0' fill='none' stroke='%238C8A93'/%3E%3C/svg%3E") bottom right no-repeat}
+
+/* ---------- ONE panel style ---------- */
+.card,.short,.tick,.statbox,.lamp,details.madeby,.empty,.dock-panel,.tour,.gloss,.more-list,.pipe-step{border-radius:var(--r-panel);box-shadow:none}
+.card{background:var(--surface);border:1px solid var(--line);padding:var(--sp3);animation:none}
+html[data-theme=day] .card{box-shadow:none}
+.card>h2{font:800 1.35rem/1.15 var(--display);letter-spacing:-.03em}
+.card[data-fignum]::before{color:var(--mute)}
+.short{border-left:1px solid var(--accent);background:var(--surface);border-radius:0 var(--r-panel) var(--r-panel) 0}
+.short li{font-size:1.06rem}
+.statbox{background:transparent;border:1px solid var(--line)}
+.stat{font:500 2rem/1.05 var(--mono);letter-spacing:-.02em}
+.empty{background:transparent;border:1px dashed var(--axis)}
+.gloss{box-shadow:none;border:1px solid var(--line)}
+.tip{border-radius:var(--r-data);box-shadow:none}
+.toc{border-bottom:1px solid var(--line)}
+.toc li::before{color:var(--accent)}
+details.madeby{background:transparent}
+details.madeby>summary span{color:var(--mute)}
+
+/* data elements: 2 px corners */
+.badge,.lvl,.tag,code,canvas,svg.chart,.chip,button.chip,.seg,.seg button,input,select,textarea,.tc-track,.tc-track i{border-radius:var(--r-data)!important}
+.badge{font:500 10px/1 var(--mono);letter-spacing:.14em}
+
+/* buttons: outline by default; fire only on .primary (one call-to-action per screen) */
+.btn{border-radius:var(--r-data);font:500 12.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:14px 18px;border:1px solid var(--ink);transition:translate var(--t-micro) var(--ease-in),background var(--t-micro),color var(--t-micro)}
+.btn:hover{filter:none;background:var(--ink);color:var(--page)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#05060E}
+html[data-theme=day] .btn.primary:not(:hover){color:#fff}
+.btn.primary:hover{background:var(--ink);border-color:var(--ink);color:var(--page)}
+.chip,button.chip{font:500 11.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;border-width:1px}
+.seg{background:transparent;border:1px solid var(--line);padding:2px}
+.seg button{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.seg button[aria-pressed=true]{box-shadow:none;background:var(--ink);color:var(--page)}
+details.more>summary span{border-radius:var(--r-data);font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;border-width:1px}
+.dock>button.dock-toggle{border-radius:var(--r-data);box-shadow:none;font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.foot{border-top:1px solid var(--line)}
+
+/* ---------- entering a page: only the first 3 blocks stagger in (no fade on every block) ---------- */
+#view.entering .page>:not(.phead):nth-child(-n+4){animation:vo-in var(--t-in) var(--ease-in) both}
+#view.entering .page>:nth-child(2){animation-delay:calc(var(--stagger) * 1 + 200ms)}
+#view.entering .page>:nth-child(3){animation-delay:calc(var(--stagger) * 2 + 200ms)}
+#view.entering .page>:nth-child(4){animation-delay:calc(var(--stagger) * 3 + 200ms)}
+@keyframes vo-in{from{opacity:0;transform:translateY(16px)}}
+
+/* ---------- cinematic transitions (View Transitions API) ---------- */
+::view-transition-old(root){animation:vo-drop 260ms var(--ease-move) both}
+::view-transition-new(root){animation:vo-fade var(--t-in) var(--ease-in) both}
+@keyframes vo-drop{to{opacity:0;transform:translateY(24px)}}
+@keyframes vo-fade{from{opacity:0}}
+html[data-vtdir=out]::view-transition-new(root){animation:vo-fade var(--t-in) var(--ease-in) both}
+/* Find it: a scan-line wipe; Put it out: zoom into the droplet; Flame lab: the divider sweeps in */
+html[data-vtpage=detect]::view-transition-new(root){animation:vo-scan 620ms var(--ease-move) both}
+@keyframes vo-scan{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0)}}
+html[data-vtpage=respond]::view-transition-new(root){animation:vo-zoom 700ms var(--ease-move) both}
+@keyframes vo-zoom{from{clip-path:circle(0 at 68% 40%)}to{clip-path:circle(150% at 68% 40%)}}
+html[data-vtpage=flame]::view-transition-new(root){animation:vo-sweep 700ms var(--ease-move) both}
+@keyframes vo-sweep{from{clip-path:inset(0 50% 0 50%)}to{clip-path:inset(0)}}
+html[data-vtpage=memory]::view-transition-new(root){animation:vo-fade var(--t-move) var(--ease-move) both}
+
+/* ---------- command palette ---------- */
+.pal{position:fixed;inset:0;z-index:80;background:rgba(5,6,14,.72);display:grid;place-items:start center;padding:12vh 16px 16px}
+.pal[hidden]{display:none}
+.pal-box{width:min(640px,100%);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-panel);padding:16px}
+.pal-k{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 8px}
+.pal-in{width:100%;font:500 16px var(--mono)!important;padding:12px!important}
+.pal-list{list-style:none;margin:10px 0 0;padding:0;max-height:50vh;overflow:auto}
+.pal-list li{display:flex;justify-content:space-between;gap:12px;padding:9px 10px;border-radius:var(--r-data);cursor:pointer;color:var(--ink2)}
+.pal-list li small{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.pal-list li[aria-selected=true]{background:var(--raise);color:var(--ink);box-shadow:inset 2px 0 0 var(--accent)}
+
+/* ---------- first-visit loader ---------- */
+.loader{position:fixed;inset:0;z-index:90;background:#05060E;display:grid;place-items:center;transition:opacity var(--t-in) var(--ease-in)}
+.loader.done{opacity:0;pointer-events:none}
+.loader-in{width:min(360px,80vw)}
+.loader p{font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#8C8A93;margin:0 0 10px;max-width:none}
+.loader b{color:#EDE8DF;font-weight:500}
+.loader-bar{height:1px;background:rgba(255,255,255,.08)}
+.loader-bar i{display:block;height:1px;width:0;background:#7AA2FF;transition:width var(--t-micro)}
+
+/* ---------- ILLUSTRATION tag ---------- */
+.illus-note{font:500 10px/1 var(--mono);letter-spacing:.14em;border-radius:var(--r-data);background:transparent;color:#8C8A93}
+
+@media (max-width:1100px){.hud-right .mclock{display:none}}
+@media (max-width:680px){
+ .hud-right{margin-left:0;order:2}
+ .phead{min-height:420px}
+ .phead h1{font-size:clamp(40px,12vw,64px)}
+ .phead-field{inset:8px 8px}
+ #nav a{font-size:13px;padding:12px 8px}
+}
+@media (prefers-reduced-motion:reduce){h1 .w>span{animation:none}}
+html[data-motion=calm] ::view-transition-old(root),html[data-motion=calm] ::view-transition-new(root){animation:none!important}
+
+/* header: two rows on wide screens: brand + HUD, then the numbered nav across the full width */
+@media (min-width:681px){
+ .top{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"brand . hud" "nav nav nav";align-items:center;row-gap:4px}
+ .top .brand{grid-area:brand}
+ .top .hud-right{grid-area:hud;margin:0}
+ .top #nav{grid-area:nav;justify-content:flex-start;margin:0 0 0 -8px;flex-wrap:wrap}
+ .top #nav .judge{margin-left:auto}
+}
+#nav a,.more-btn{padding:8px 7px;font-size:11px}
+@media (max-width:400px){.brand small{white-space:normal;letter-spacing:.08em}.brand{min-width:0;max-width:calc(100vw - 2 * var(--gutter))}}

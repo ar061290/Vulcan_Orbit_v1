@@ -1,0 +1,56 @@
+/* UI lock styles for #/evidence (feat/ui-lock). Scope every rule under #view[data-page="evidence"]. */
+
+/* ---------- verdict stamps (Checks, Simulation checks, the ledger) ---------- */
+#view[data-page="evidence"] .ck-stamp,#view[data-page="evidence"] td .ck-stamp.status{display:inline-block;margin:0 8px 6px 0;padding:4px 7px;font:500 10.5px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--mute);border:1px solid currentColor;border-radius:var(--r-data);white-space:normal;vertical-align:baseline}
+#view[data-page="evidence"] .ck-stamp.pass{color:var(--good)}
+#view[data-page="evidence"] .ck-stamp.fail{color:var(--crit)}
+#view[data-page="evidence"] .ck-stamp.pending{color:var(--mute);border-style:solid}
+#view[data-page="evidence"] .ck-stamp.scrapped{color:var(--mute);border-style:dashed}
+#view[data-page="evidence"] .ck-stamp.status{gap:0}
+#view[data-page="evidence"] .ck-stamp.status::before,#view[data-page="evidence"] td.ck-result .ck-stamp+.status::before{display:none}
+#view[data-page="evidence"] td.ck-result .ck-stamp+.status{display:block;color:var(--ink)}
+#view[data-page="evidence"] .lg-stamp{display:inline-block;white-space:normal;max-width:100%;border-width:1px;border-radius:var(--r-data);font:500 10.5px/1.3 var(--mono);letter-spacing:.1em}
+/* pop in once, when scrolled into view (js/fig_checks.js armStamps adds .armed, then .pop) */
+#view[data-page="evidence"] .vstamp.armed:not(.pop){opacity:0}
+#view[data-page="evidence"] .vstamp.pop{animation:ck-pop var(--t-micro) var(--ease-in) both;transform-origin:left center}
+@keyframes ck-pop{from{opacity:0;transform:scale(1.15)}}
+
+/* ---------- NASA says / we get: a ledger ---------- */
+#view[data-page="evidence"] ol.ledger{list-style:none;margin:var(--sp1) 0 0;padding:0;border-top:1px solid var(--line)}
+#view[data-page="evidence"] .lg-row{padding:var(--sp2) var(--sp1);border-bottom:1px solid var(--line);transition:background var(--t-micro)}
+#view[data-page="evidence"] .lg-tap{cursor:pointer}
+#view[data-page="evidence"] .lg-tap:hover{background:var(--raise)}
+#view[data-page="evidence"] .lg-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px var(--sp2);margin:0 0 var(--sp1)}
+#view[data-page="evidence"] h3.lg-h{margin:0;font:600 15px/1.35 var(--font);min-width:0;flex:1 1 16em}
+#view[data-page="evidence"] .lg-topic{display:inline-flex;align-items:baseline;gap:8px;margin:0;padding:2px 0;font:inherit;color:var(--ink);text-align:left;background:none;border:0;border-radius:var(--r-data);cursor:pointer}
+#view[data-page="evidence"] .lg-topic b{font-weight:600}
+#view[data-page="evidence"] button.lg-topic:hover b{text-decoration:underline;text-underline-offset:3px}
+#view[data-page="evidence"] button.lg-topic:focus-visible{outline:2px solid var(--oxy);outline-offset:3px}
+#view[data-page="evidence"] .lg-caret::before{content:"+";display:inline-block;width:1ch;font:500 13px/1 var(--mono);color:var(--oxy)}
+#view[data-page="evidence"] button.lg-topic[aria-expanded=true] .lg-caret::before{content:"−"}
+#view[data-page="evidence"] .lg-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#view[data-page="evidence"] .lg-col{min-width:0;padding:0 var(--sp2) 0 0}
+#view[data-page="evidence"] .lg-col+.lg-col{padding:0 0 0 var(--sp2);border-left:1px solid var(--line)}
+#view[data-page="evidence"] .lg-k{display:block;margin:0 0 4px;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="evidence"] .lg-col p{margin:0;max-width:none;font:400 13px/1.6 var(--mono);color:var(--ink2);overflow-wrap:anywhere}
+#view[data-page="evidence"] .lg-num{color:var(--ink);font-weight:600;white-space:nowrap}
+#view[data-page="evidence"] .lg-src{margin:var(--sp2) 0 0;padding:var(--sp1) 0 0;border-top:1px dashed var(--line)}
+#view[data-page="evidence"] .lg-src[hidden]{display:none}
+#view[data-page="evidence"] .lg-src ul{margin:0;padding:0;list-style:none;font-size:14px;line-height:1.5}
+#view[data-page="evidence"] .lg-src li+li{margin-top:4px}
+#view[data-page="evidence"] .lg-src a{overflow-wrap:anywhere}
+
+html[data-motion=calm] #view[data-page="evidence"] .vstamp{animation:none;opacity:1}
+html[data-motion=calm] #view[data-page="evidence"] .lg-row{transition:none}
+@media (prefers-reduced-motion:reduce){
+  #view[data-page="evidence"] .vstamp{animation:none;opacity:1}
+  #view[data-page="evidence"] .lg-row{transition:none}
+}
+@media print{#view[data-page="evidence"] .vstamp{opacity:1;animation:none}#view[data-page="evidence"] .lg-src[hidden]{display:block}}
+@media (max-width:640px){
+  #view[data-page="evidence"] .lg-row{padding-inline:0}
+  #view[data-page="evidence"] .lg-cols{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="evidence"] .lg-col{padding:0}
+  #view[data-page="evidence"] .lg-col+.lg-col{margin-top:var(--sp1);padding:var(--sp1) 0 0;border-left:0;border-top:1px solid var(--line)}
+}

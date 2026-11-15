@@ -28,6 +28,91 @@ function measure(theme, names) {
   probe.remove();
   return out;
 }
+// ---------- UI lock tokens (css/tokens.css): read live, never retyped ----------
+const LOCK_COLOURS = [['Page', '--page', 'Background'], ['Surface', '--surface', 'Panels'], ['Line', '--line', 'Rules, panel edges'],
+  ['Ink', '--ink', 'Text'], ['Muted', '--mute', 'Labels, captions'], ['Fire', '--fire', 'Earth flames, alarms, one call to action'], ['Orbit', '--orbit', '0 g flames, live data traces']];
+const CURVES = [['In', '--ease-in', '--t-in', 'Things arriving: page blocks, words, panels'], ['Move', '--ease-move', '--t-move', 'Things travelling: the camera between tabs, drawings'],
+  ['Micro', null, '--t-micro', 'Hover and press feedback (the browser\'s default ease)']];
+/** Raw token strings of one theme (custom properties inherit, so :root tokens read through the probe too). */
+function raw(theme, names) {
+  const probe = h('div', { 'data-theme': theme, 'aria-hidden': 'true', style: 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden' });
+  document.body.append(probe);
+  const cs = getComputedStyle(probe), out = {};
+  for (const n of names) out[n] = cs.getPropertyValue(n).trim();
+  probe.remove();
+  return out;
+}
+/** Computed font size and line height of a specimen styled with `font`, measured on a hidden probe. */
+function fontSize(font) {
+  const probe = h('div', { 'aria-hidden': 'true', style: `position:absolute;visibility:hidden;white-space:nowrap;font:${font}` }, 'Ag');
+  document.body.append(probe);
+  const cs = getComputedStyle(probe), out = { size: cs.fontSize, line: cs.lineHeight, family: cs.fontFamily.split(',')[0].replace(/["']/g, '') };
+  probe.remove();
+  return out;
+}
+const bez = v => { const m = String(v || '').match(/cubic-bezier\(([^)]+)\)/); const n = m ? m[1].split(',').map(Number) : null; return n && n.length === 4 && n.every(Number.isFinite) ? n : null; };
+const SVGNS = 'http://www.w3.org/2000/svg';
+function curveSvg(b) {
+  const s = document.createElementNS(SVGNS, 'svg'); s.setAttribute('viewBox', '0 0 64 64'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('class', 'dk-curve');
+  const p = (d, cls) => { const e = document.createElementNS(SVGNS, 'path'); e.setAttribute('d', d); e.setAttribute('class', cls); s.append(e); };
+  p('M2 62H62M2 62V2', 'ax');
+  p(`M2 62C${2 + b[0] * 60} ${62 - b[1] * 60} ${2 + b[2] * 60} ${62 - b[3] * 60} 62 2`, 'cv');
+  return s;
+}
+
+function lockCards(ctx) {
+  const night = raw('night', LOCK_COLOURS.map(c => c[1])), day = raw('day', LOCK_COLOURS.map(c => c[1]));
+  const okc = LOCK_COLOURS.every(([, v]) => night[v]);
+  const colours = card('Mission console colours', 'team', 'The UI-lock palette, read live from css/tokens.css. Night is the default; the Day theme keeps light values under the same names. Fire and orbit are the same in both.',
+    okc ? h('div', { class: 'dk-lock-sw' }, LOCK_COLOURS.map(([name, v, use]) => h('div', { class: 'dk-lsw' },
+      h('i', { style: `background:${night[v]}`, 'aria-hidden': 'true' }),
+      h('b', {}, name), h('code', {}, v),
+      h('span', {}, `Night ${night[v]}`), day[v] && day[v] !== night[v] ? h('span', {}, `Day ${day[v]}`) : null,
+      h('small', {}, use))))
+      : h('p', {}, 'The colour tokens could not be read from the stylesheet (css/tokens.css did not load).'));
+  colours.dataset.made = 'none';
+
+  const t = raw('night', ['--display-xl', '--label', '--font', '--display', '--mono']);
+  const dx = fontSize('var(--display-xl)'), lb = fontSize('var(--label)'), bd = fontSize(`1rem/1.625 var(--font)`);
+  const spec = (cls, sample, name, token, m) => h('div', { class: `dk-spec ${cls}` },
+    h('div', { class: 'dk-spec-k' }, h('span', {}, name), h('code', {}, token)),
+    h('div', { class: 'dk-spec-s' }, sample),
+    h('div', { class: 'dk-spec-m' }, `${m.family} · size ${m.size} · line ${m.line}`));
+  const scale = card('Type scale', 'team', 'Three jobs, three faces. Sizes are measured from the live CSS at this screen width (the display size scales with the window).',
+    spec('dk-s-display', 'Flame in freefall', 'Display', `--display-xl: ${t['--display-xl'] || 'not set'}`, dx),
+    spec('dk-s-label', 'Alarm latency · s', 'Label', `--label: ${t['--label'] || 'not set'}`, lb),
+    spec('dk-s-body', 'Without gravity, hot gas does not rise, so a flame becomes a slow blue sphere.', 'Body', '--font, 1rem / 1.625', bd),
+    h('p', {}, h('small', {}, 'Labels are always upper case with .14em letter spacing, and always carry their unit.')));
+  scale.dataset.made = 'none';
+
+  const m = raw('night', CURVES.flatMap(c => [c[1], c[2]]).filter(Boolean));
+  const still = () => document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rows = CURVES.map(([name, ease, dur, use]) => {
+    const e = ease ? m[ease] : 'ease', b = bez(e) || (ease ? null : [.25, .1, .25, 1]);
+    return h('div', { class: 'dk-mrow' },
+      b ? curveSvg(b) : h('span', { class: 'dk-curve' }),
+      h('div', { class: 'dk-mtxt' },
+        h('div', { class: 'dk-mk' }, h('b', {}, name), h('code', {}, `${ease ? `${ease}: ${e}` : 'ease'} · ${dur}: ${m[dur] || 'not set'}`)),
+        h('div', { class: 'dk-track', 'aria-hidden': 'true', style: `--dk-ease:${ease ? `var(${ease})` : 'ease'};--dk-dur:var(${dur})` }, h('i')),
+        h('small', {}, use)));
+  });
+  const play = h('button', { type: 'button', class: 'btn dk-play' }, 'Play');
+  const box = h('div', { class: 'dk-motion' }, rows);
+  const run = () => { if (still()) return; box.classList.remove('run'); void box.offsetWidth; box.classList.add('run'); };
+  play.addEventListener('click', run);
+  const calmNote = h('p', { class: 'dk-calm' }, h('small', {}, 'Calm motion or the system "reduce motion" setting is on, so the dots stay still.'));
+  const motion = card('Motion curves', 'team', 'The three curves every animation on the site uses, read from css/tokens.css. Each dot crosses its track on its own curve and duration.',
+    box, h('div', { class: 'row' }, play), calmNote);
+  motion.dataset.made = 'none';
+  if (!ctx.detached) ctx.onMount(() => {
+    const st = still();
+    calmNote.hidden = !st; play.disabled = st;
+    if (!st) requestAnimationFrame(run);
+  });
+  else calmNote.hidden = true;
+  return h('div', { class: 'dk-lock' }, colours, h('div', { class: 'grid g2' }, scale, motion));
+}
+
 const verdict = (r, px) => {
   if (r >= 4.5) return '✓ AA';
   if (r >= 3) return px >= 18.66 ? '✓ bold only' : '✗ large text only';
@@ -129,6 +214,7 @@ export default async function render(root, ctx) {
 
   root.append(page('Freefall',
     'The design system behind Vulcan Orbit: a field manual for fire in orbit. Paper for reading, dark screens for live instruments, a porthole for the flame, and a stamp on every number saying where it came from. This page is drawn from the same CSS the site uses, so it cannot drift from it.',
+    lockCards(ctx),
     h('div', { class: 'grid g4' },
       card('Paper and screens', 'team', null, h('p', {}, 'Reading happens on calm paper (Day) or the dark side of orbit (Night). Anything live, like a replay or a simulation, sits in a dark screen in both themes.')),
       card('Every figure is numbered', 'team', null, h('p', {}, 'Each figure carries a "Figure N" label. "On this page" and figure links use the same number, so a judge or teammate can point at "figure 7".')),

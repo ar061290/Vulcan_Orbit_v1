@@ -6,8 +6,7 @@ import { h, slug, calm, setParams } from './lib.js';
 import { kicker } from './site.js';
 import * as prov from './provenance.js';
 import * as gloss from './glossary.js';
-import { hero } from './gl_hero.js';
-import { banner } from './gl_banner.js';
+import { pageNum } from './engine.js';
 
 const titleOf = c => c.dataset.title || c.querySelector(':scope > h2')?.childNodes[0]?.textContent?.trim() || '';
 /** Top-level figure cards: a .card with its own h2 that is not inside another card. */
@@ -74,10 +73,10 @@ function pageHead(pg, page, ctx) {
   if (!h1) { h1 = h('h1', {}, page.title || page.label); pg.prepend(h1); }
   const lead = h1.nextElementSibling?.classList.contains('lead') ? h1.nextElementSibling : null;
   if (page.title) h1.textContent = page.title;
-  let vis = null;
-  try { vis = page.visual === 'flame' ? hero({ g: 0, ctx }).el : banner(page.visual || 'earth', ctx); }
-  catch (e) { console.error(e); }
-  const head = h('header', { class: 'phead' }, vis, h('div', { class: 'phead-in' }, h('p', { class: 'kicker' }, kicker(page)), h1, lead));
+  // UI lock: the header is a window onto the one shared WebGL field (js/field.js), framed by HUD brackets.
+  // No GL context per page; the field moves to this page's station on route change.
+  const vis = h('div', { class: 'phead-field hud', 'aria-hidden': 'true' }, h('span', { class: 'illus-tag' }, 'Illustration'));
+  const head = h('header', { class: 'phead' }, vis, h('div', { class: 'phead-in' }, h('p', { class: 'kicker' }, `${pageNum(page.id)} · ${kicker(page).split(' / ').pop()}`), h1, lead));
   pg.prepend(head);
   return head;
 }

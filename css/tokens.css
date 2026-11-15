@@ -19,25 +19,29 @@
     Night --crit was main's #d03b3b (3.85:1 as text on --surface); it is lightened to #ef6464 (5.89:1 on #0e1320,
     6.29:1 on #070a12, 5.51:1 on #141a2b, WCAG 1.4.3) because pages use it as a text colour (P7-D, site/A11Y.md 2.1). */
  --good:#0ca30c;--warn:#fab219;--crit:#ef6464;
- --gutter:24px;--maxw:1240px;
+ --gutter:24px;--maxw:1440px;
+ /* UI lock (feat/ui-lock): one panel style, 2px on data, 14px on panels, 8px spacing steps, four motion curves */
+ --fire:#FF7A3D;--orbit:#7AA2FF;--r-data:2px;--r-panel:14px;
+ --sp1:8px;--sp2:16px;--sp3:24px;--sp4:32px;--sp6:48px;--sp8:64px;
+ --ease-in:cubic-bezier(.16,1,.3,1);--ease-move:cubic-bezier(.65,0,.35,1);--ease-micro:ease;--t-in:420ms;--t-move:900ms;--t-micro:180ms;--stagger:40ms;
+ --label:500 11px/1.3 var(--mono);--display-xl:800 clamp(44px,7vw,120px)/.9 var(--display);
 }
 [data-theme=day]{color-scheme:light;
  --page:#f3f0e8;--surface:#fffdf8;--raise:#ece7dc;--ink:#121722;--ink2:#353c4a;--mute:#596171;--grid:#e3ddd0;--axis:#c9c1b0;
  --accent:#c2410c;--accent-ink:#9a3412;--accent-soft:#fde9dc;--oxy:#1d4ed8;--oxy-soft:#e3eafd;--line:#d8d1c2;
- --shadow:0 1px 0 #fff inset,0 18px 40px -28px rgba(40,30,10,.35);
+ --shadow:none;
  --screen:#0b1020;--screen-ink:#eef1f7;--warn:#8a5a00;--good:#166534;--crit:#b91c1c;
 }
 [data-theme=night]{color-scheme:dark;
- --page:#070a12;--surface:#0e1320;--raise:#161c2c;--ink:#eef1f7;--ink2:#bcc3d1;--mute:#8d96a8;--grid:#1e2638;--axis:#2c3550;
- --accent:#ff7a3d;--accent-ink:#ffb089;--accent-soft:#2a160c;--oxy:#7aa2ff;--oxy-soft:#121c35;--line:#232c41;
- --shadow:0 20px 50px -30px rgba(0,0,0,.9);
- --screen:#05070e;--screen-ink:#eef1f7;--good:#0ca30c;--warn:#fab219;--crit:#ef6464;
+ --page:#05060E;--surface:#0B0D18;--raise:#111423;--ink:#EDE8DF;--ink2:#C4C0B8;--mute:#8C8A93;--grid:rgba(255,255,255,.06);--axis:rgba(255,255,255,.16);
+ --accent:#FF7A3D;--accent-ink:#FFB089;--accent-soft:#1F1009;--oxy:#7AA2FF;--oxy-soft:#0F1630;--line:rgba(255,255,255,.08);
+ --shadow:none;--screen:#05060E;--screen-ink:#EDE8DF;--good:#0ca30c;--warn:#fab219;--crit:#ef6464;
 }
-/* before prefs.js runs (no data-theme yet) the page follows the system theme */
+/* before prefs.js runs (no data-theme yet) the page follows the system theme; prefs.js then sets Night, the default */
 :root:not([data-theme]){color-scheme:light;
  --page:#f3f0e8;--surface:#fffdf8;--raise:#ece7dc;--ink:#121722;--ink2:#353c4a;--mute:#596171;--grid:#e3ddd0;--axis:#c9c1b0;
  --accent:#c2410c;--accent-ink:#9a3412;--accent-soft:#fde9dc;--oxy:#1d4ed8;--oxy-soft:#e3eafd;--line:#d8d1c2;
- --shadow:0 1px 0 #fff inset,0 18px 40px -28px rgba(40,30,10,.35);--screen:#0b1020;--screen-ink:#eef1f7;--warn:#8a5a00;--good:#166534;--crit:#b91c1c;
+ --shadow:none;--screen:#0b1020;--screen-ink:#eef1f7;--warn:#8a5a00;--good:#166534;--crit:#b91c1c;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme]){color-scheme:dark;
  --page:#070a12;--surface:#0e1320;--raise:#161c2c;--ink:#eef1f7;--ink2:#bcc3d1;--mute:#8d96a8;--grid:#1e2638;--axis:#2c3550;

@@ -1,0 +1,97 @@
+/* UI lock styles for #/models (feat/ui-lock). Scope every rule under #view[data-page="models"].
+   The deck: one swipe row of short cards above the ten full sections. Each card turns over (CSS 3D, var(--ease-move))
+   to its limits; the hidden face is inert and visibility:hidden once the turn passes halfway. Tokens only, so Day and
+   Night both work: text is --ink / --ink2 / --mute on --surface (4.5:1 or more in both themes). No shadows, no gradients. */
+
+#view[data-page="models"] .mcd{grid-column:content;margin:var(--sp4,32px) 0 var(--sp5,40px)}
+#view[data-page="models"] .mcd-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:0 0 12px}
+#view[data-page="models"] .mcd-head h2{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin:0}
+#view[data-page="models"] .mcd-hint{margin:0;font-size:.875rem;color:var(--mute);max-width:none}
+
+/* controls: ← 01 / 10 → · list toggle */
+#view[data-page="models"] .mcd-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+#view[data-page="models"] .mcd-ctl .btn{background:transparent;color:var(--ink);min-height:44px}
+#view[data-page="models"] .mcd-ctl .btn:hover{background:var(--ink);color:var(--page)}
+#view[data-page="models"] .mcd-nav{padding:12px 16px}
+#view[data-page="models"] .mcd-nav[aria-disabled="true"]{color:var(--mute);border-color:var(--line);cursor:default}
+#view[data-page="models"] .mcd-nav[aria-disabled="true"]:hover{background:transparent;color:var(--mute)}
+#view[data-page="models"] .mcd-list{margin-left:auto}
+#view[data-page="models"] .mcd-list[aria-pressed="true"]{border-color:var(--oxy);color:var(--ink)}
+#view[data-page="models"] .mcd-count{font:var(--label);letter-spacing:.14em;color:var(--mute);min-width:7ch;text-align:center;font-variant-numeric:tabular-nums}
+
+/* the row: its own overflow:hidden viewport, so the page never scrolls sideways */
+#view[data-page="models"] .mcd-vp{overflow:hidden;padding:6px 4px 10px;margin:0 -4px}
+#view[data-page="models"] .mcd-track{display:flex;gap:16px;align-items:stretch;position:relative}
+#view[data-page="models"] .mcd-track.live{cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform}
+#view[data-page="models"] .mcd-track.live:active{cursor:grabbing}
+#view[data-page="models"] .mcd-track a,#view[data-page="models"] .mcd-track button{cursor:pointer}
+
+/* one card: a flipper (both faces share one grid cell) and a bar that never turns */
+#view[data-page="models"] .mcd-card{flex:0 0 min(88%,24rem);box-sizing:border-box;display:flex;flex-direction:column;perspective:1600px;
+ background:var(--surface);border:1px solid var(--line);border-radius:var(--r-panel,14px);transition:border-color 180ms}
+#view[data-page="models"] .mcd-card.on{border-color:var(--mute)}
+#view[data-page="models"] .mcd-flipper{flex:1;display:grid;transform-style:preserve-3d;transition:transform var(--t-move,900ms) var(--ease-move,cubic-bezier(.65,0,.35,1))}
+#view[data-page="models"] .mcd-card[data-flipped="true"] .mcd-flipper{transform:rotateY(180deg)}
+#view[data-page="models"] .mcd-face{grid-area:1/1;min-width:0;padding:var(--sp3,24px) var(--sp3,24px) 12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+ background:var(--surface);border-radius:var(--r-panel,14px);transition:visibility 0s linear calc(var(--t-move,900ms) / 2)}
+#view[data-page="models"] .mcd-back{transform:rotateY(180deg)}
+#view[data-page="models"] .mcd-card:not([data-flipped="true"]) .mcd-back,
+#view[data-page="models"] .mcd-card[data-flipped="true"] .mcd-front{visibility:hidden}
+
+/* mono labels, always uppercase */
+#view[data-page="models"] .mcd-k{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
+#view[data-page="models"] .mcd-k .badge{letter-spacing:.06em}
+#view[data-page="models"] .mcd-front h3,#view[data-page="models"] .mcd-bt{font:800 1.35rem/1.15 var(--display);letter-spacing:-.03em;color:var(--ink);margin:0 0 8px;text-transform:none}
+#view[data-page="models"] .mcd-q{font-size:.9375rem;line-height:1.5;color:var(--ink2);margin:0 0 14px;max-width:none}
+#view[data-page="models"] .mcd-stats{display:grid;gap:8px;margin:0 0 12px}
+#view[data-page="models"] .mcd-stats .statbox{border-radius:var(--r-data,2px);padding:10px 12px}
+#view[data-page="models"] .mcd-stats .stat{font-size:1.5rem;overflow-wrap:anywhere}
+#view[data-page="models"] .mcd-stats .stat small{display:block;margin-top:4px;font:400 12.5px/1.4 var(--font);letter-spacing:0;color:var(--ink2)}
+#view[data-page="models"] .mcd-stats .stat-label{font-size:11px;color:var(--mute)}
+#view[data-page="models"] .mcd-none{color:var(--ink2);font-size:.9375rem}
+#view[data-page="models"] .mcd-rule{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:8px 12px;border:1px solid var(--line);border-left:3px solid var(--mute);border-radius:var(--r-data,2px)}
+#view[data-page="models"] .mcd-rule .mcd-k{margin:0}
+#view[data-page="models"] .mcd-rule b{font:600 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+#view[data-page="models"] .mcd-rule[data-state="pass"]{border-left-color:var(--good)}
+#view[data-page="models"] .mcd-rule[data-state="fail"]{border-left-color:var(--crit)}
+#view[data-page="models"] .mcd-use{font-size:.875rem;line-height:1.5;color:var(--ink2);margin:0;max-width:none}
+#view[data-page="models"] .mcd-use .mcd-k,#view[data-page="models"] .mcd-not .mcd-k{margin:0 0 2px}
+
+/* the back: limits and caveats, scrolling inside the card when long */
+#view[data-page="models"] .mcd-scroll{max-height:24rem;overflow:auto;overscroll-behavior:contain;padding-right:6px;font-size:.875rem;line-height:1.5;color:var(--ink2)}
+#view[data-page="models"] .mcd-scroll p{max-width:none;margin:0 0 10px}
+#view[data-page="models"] .mcd-not{color:var(--ink)}
+#view[data-page="models"] .mcd-lim{margin:0 0 10px}
+#view[data-page="models"] .mcd-lim dt{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:10px 0 2px}
+#view[data-page="models"] .mcd-lim dd{margin:0;color:var(--ink2);overflow-wrap:anywhere}
+#view[data-page="models"] .mcd-scroll .mc-verdict{margin:0 0 10px;border-radius:var(--r-data,2px);border-left-width:3px;font-size:.875rem}
+#view[data-page="models"] .mcd-scroll .mc-quote{font-size:.875rem}
+
+/* the bar: Limits (the turn) and Full card */
+#view[data-page="models"] .mcd-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px var(--sp3,24px) var(--sp3,24px);border-top:1px solid var(--line)}
+#view[data-page="models"] .mcd-flip{background:transparent;color:var(--ink);padding:12px 14px;min-height:44px}
+#view[data-page="models"] .mcd-flip:hover{background:var(--ink);color:var(--page)}
+#view[data-page="models"] .mcd-flip[aria-pressed="true"]{border-color:var(--oxy)}
+#view[data-page="models"] .mcd-full{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);padding:14px 4px;text-underline-offset:4px}
+#view[data-page="models"] .mcd :focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+
+/* "Show all as a list": the same cards in a wrapping grid, no drag, no transform */
+#view[data-page="models"] .mcd.as-list .mcd-vp{overflow:visible;padding:0;margin:0}
+#view[data-page="models"] .mcd.as-list .mcd-track{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,20rem),1fr));transform:none!important;cursor:auto;user-select:auto;-webkit-user-select:auto}
+#view[data-page="models"] .mcd.as-list .mcd-card{flex:none}
+
+/* calm motion: the card turns instantly */
+html[data-motion=calm] #view[data-page="models"] .mcd-flipper,
+html[data-motion=calm] #view[data-page="models"] .mcd-face,
+html[data-motion=calm] #view[data-page="models"] .mcd-card{transition:none}
+@media (prefers-reduced-motion:reduce){
+ #view[data-page="models"] .mcd-flipper,#view[data-page="models"] .mcd-face,#view[data-page="models"] .mcd-card{transition:none}
+}
+
+@media (max-width:600px){
+ #view[data-page="models"] .mcd-card{flex-basis:90%}
+ #view[data-page="models"] .mcd-face{padding:18px 16px 10px}
+ #view[data-page="models"] .mcd-bar{padding:10px 16px 16px}
+ #view[data-page="models"] .mcd-list{margin-left:0}
+ #view[data-page="models"] .mcd-scroll{max-height:20rem}
+}

@@ -1,0 +1,66 @@
+/* UI lock styles for #/memory (feat/ui-lock). Scope every rule under #view[data-page="memory"].
+   The plaques sit in one row inside an overflow:hidden viewport (no sideways page scroll), dragged with momentum by
+   js/spring.js. History keeps its own fonts (Special Elite, Libre Caslon) and its dark band in both themes.
+   Contrast (WCAG): rail years #c9b48a on #15120e 9.2:1, current year #f6ead2 14:1, nav text #efe6d2 13:1, hint and
+   counter #a89a80 6.8:1; plaque title #1e1812 on the paper 13:1, and higher under the pointer light (it only lightens). */
+
+/* the carousel fades in once, slowly (opacity only) */
+#view[data-page="memory"] .mem-car{margin:0 0 8px;animation:mem-in var(--t-move,900ms) var(--ease-move,cubic-bezier(.65,0,.35,1)) both}
+@keyframes mem-in{from{opacity:0}}
+
+/* controls: Earlier · 01 / 08 · Later, then a quiet hint */
+#view[data-page="memory"] .mem-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 14px}
+#view[data-page="memory"] .mem-nav{font:400 .8125rem/1 var(--elite);letter-spacing:.14em;text-transform:uppercase;color:#efe6d2;background:transparent;
+ border:1px solid #5b4a32;border-radius:2px;padding:12px 14px;min-height:44px;cursor:pointer;transition:border-color 180ms,color 180ms}
+#view[data-page="memory"] .mem-nav:hover{border-color:#c9a36a}
+#view[data-page="memory"] .mem-nav[aria-disabled="true"]{color:#a89a80;border-color:#3a3125;cursor:default}
+#view[data-page="memory"] .mem-count{font:400 .875rem/1 var(--elite);letter-spacing:.14em;color:#a89a80;min-width:7ch;text-align:center;font-variant-numeric:tabular-nums}
+#view[data-page="memory"] .mem-hint{font:400 .75rem/1.3 var(--elite);letter-spacing:.14em;text-transform:uppercase;color:#a89a80;margin-left:auto}
+
+/* the viewport bleeds to the band's inner edges; vertical padding leaves room for the focus ring */
+#view[data-page="memory"] .mem-vp{overflow:hidden;margin:0 -24px;padding:8px 24px 10px}
+#view[data-page="memory"] .mem-track{display:flex;gap:24px;align-items:stretch;position:relative}
+#view[data-page="memory"] .mem-track.live{cursor:grab;user-select:none;-webkit-user-select:none;will-change:transform}
+#view[data-page="memory"] .mem-track.live:active{cursor:grabbing}
+#view[data-page="memory"] .mem-track a{cursor:pointer}
+
+/* each plaque is one slide; the year moves onto the plaque (there is no side column in a row) */
+#view[data-page="memory"] .mem-track .plaque{flex:0 0 min(86%,640px);margin:0;box-sizing:border-box}
+#view[data-page="memory"] .mem-track .plaque::before{display:none}
+#view[data-page="memory"] .mem-track .plaque-year{position:static;width:auto;text-align:left;white-space:normal;margin:0 0 8px;
+ font:400 1.5rem/1 var(--elite);letter-spacing:.04em;color:#7a5a2c}
+
+/* engraved title, and the one allowed gradient: a soft light that follows the mouse over it */
+#view[data-page="memory"] .mem-track .plaque h2{position:relative;isolation:isolate;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+#view[data-page="memory"] .mem-track .plaque h2::before{content:"";position:absolute;inset:-8px -12px;z-index:-1;pointer-events:none;border-radius:2px;opacity:0;
+ background:radial-gradient(180px circle at calc(var(--mx,-200px) + 12px) calc(var(--my,-200px) + 8px),rgba(255,252,243,.95),rgba(255,252,243,0) 70%);
+ transition:opacity 180ms}
+#view[data-page="memory"] .mem-track .plaque.lit h2::before{opacity:1}
+
+/* the year rail: a horizontal timeline that doubles as the index */
+#view[data-page="memory"] .mem-rail{display:flex;flex-wrap:wrap;margin:14px 0 0;border-top:1px solid #5b4a32}
+#view[data-page="memory"] .mem-yr{font:400 .875rem/1 var(--elite);letter-spacing:.06em;color:#c9b48a;background:transparent;border:0;border-top:2px solid transparent;
+ margin-top:-1px;padding:12px 10px;min-height:44px;cursor:pointer;transition:color 180ms,border-color 180ms}
+#view[data-page="memory"] .mem-yr:hover{color:#f6ead2}
+#view[data-page="memory"] .mem-yr[aria-current="true"]{color:#f6ead2;border-top-color:#e4c88f}
+
+#view[data-page="memory"] .mem-car + .reel-clock{margin-top:56px}
+
+/* calm motion: no fade, no light transition (the drag itself already jumps, js/spring.js) */
+html[data-motion=calm] #view[data-page="memory"] .mem-car{animation:none}
+html[data-motion=calm] #view[data-page="memory"] .mem-track .plaque h2::before,
+html[data-motion=calm] #view[data-page="memory"] .mem-nav,
+html[data-motion=calm] #view[data-page="memory"] .mem-yr{transition:none}
+@media (prefers-reduced-motion:reduce){
+ #view[data-page="memory"] .mem-car{animation:none}
+ #view[data-page="memory"] .mem-track .plaque h2::before,#view[data-page="memory"] .mem-nav,#view[data-page="memory"] .mem-yr{transition:none}
+}
+
+@media (max-width:680px){
+ #view[data-page="memory"] .mem-vp{margin:0 -16px;padding:8px 16px 10px}
+ #view[data-page="memory"] .mem-track{gap:12px}
+ #view[data-page="memory"] .mem-track .plaque{flex-basis:90%}
+ #view[data-page="memory"] .mem-track .plaque-year{font-size:1.25rem}
+ #view[data-page="memory"] .mem-hint{margin-left:0;flex-basis:100%}
+ #view[data-page="memory"] .mem-yr{padding:12px 8px;font-size:.8125rem}
+}

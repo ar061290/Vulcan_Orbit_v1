@@ -4,7 +4,7 @@
 // this?", table.trust) is reached through revealFigure, which opens the fold.
 import { load, loadPath, page, isMissing } from '../lib.js';
 import { evidenceRows, E4_SOURCE } from '../overlays.js';
-import { trustCard, crosscheckCard, permutationCard, checksCard, checkCounts, simChecksCard, manifestCard, knownLimitsCard } from '../fig_checks.js';
+import { trustCard, crosscheckCard, permutationCard, checksCard, checkCounts, simChecksCard, manifestCard, knownLimitsCard, armStamps } from '../fig_checks.js';
 
 const LEAD = 'Every claim on this site has a check, a reference and a pass limit written before the check was run. Failures stay on the page.';
 
@@ -25,6 +25,8 @@ export default async function render(root, ctx) {
     simChecksCard(fs, sp, dw),
     manifestCard(man),
     knownLimitsCard()));
+  // UI lock: verdict stamps pop in once as they scroll into view (none under Calm motion; nothing when detached).
+  if (ctx && !ctx.detached) ctx.onMount?.(() => { const stop = armStamps(root); ctx.onLeave?.(stop); });
 }
 
 // "The short answer" (main's summaries.js evidence lines). Scrapped rows are counted apart from "still to run" (§3.1).

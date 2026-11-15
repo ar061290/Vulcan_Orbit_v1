@@ -10,6 +10,7 @@
 import { h, page, announce, isMissing } from '../lib.js';
 import { loadAssessData, computeAssessment } from '../assess_core.js';
 import { stopGrowth } from '../growth_run.js';
+import { setField } from '../field.js';
 import { inputsCard, cameraCard, verdictCard, outputsCard, listsCard, riskCard, setBusy, idle } from '../fig_assess.js';
 
 const LEAD = 'Set a flame on a piece of fuel and the cabin air around it. The spread predictor, calibrated on NASA\'s orbital burns, runs in your browser and shows whether the flame spreads, how big it gets, when it stops, and how that compares with when NASA\'s sensors alarmed. Values outside NASA\'s tested range are flagged, never hidden.';
@@ -95,6 +96,9 @@ export default async function render(root, ctx = {}) {
 
   ctx.onMount?.(() => {
     if (left) return;
+    // The field's Assess station already looks down (pitch 1.45); settle it fully top-down over the cabin plate.
+    // Illustration only; the router clears this override on the next route change.
+    setField({ pitch: 1.53, dist: 5.2 });
     // A fresh visit (no inputs in the link) takes the latest camera reading when the camera owner has published one.
     if (!isMissing(data.cv) && !hasInputQuery(ctx.params, store.QUERY_KEYS || [])) cCamera.apply?.(data.cv, 'camera', 'The latest camera reading');
     cInputs.sync(store.get());

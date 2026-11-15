@@ -1,0 +1,74 @@
+/* UI lock styles for #/explorer (feat/ui-lock). Scope every rule under #view[data-page="explorer"]. */
+
+/* ---------- the constellation: x = PSI record number, lanes = hardware family ---------- */
+#view[data-page="explorer"] .xc{position:relative;margin:0 0 var(--sp3);padding:var(--sp2) 0 var(--sp1);background:var(--page);border:1px solid var(--line);border-radius:var(--r-panel)}
+#view[data-page="explorer"] .xc-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px var(--sp3);padding:0 var(--sp2);margin:0 0 var(--sp1)}
+#view[data-page="explorer"] .xc-k{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="explorer"] .xc-read{margin:0 0 var(--sp1);padding:0 var(--sp2);min-height:1.6em;max-width:none;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--oxy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#view[data-page="explorer"] .xc-view{position:relative;overflow:hidden;cursor:grab;user-select:none;-webkit-user-select:none;border-radius:var(--r-data)}
+#view[data-page="explorer"] .xc-view:active{cursor:grabbing}
+#view[data-page="explorer"] .xc-view:focus-visible{outline:2px solid var(--oxy);outline-offset:-2px}
+#view[data-page="explorer"] .xc-track{position:relative;will-change:transform}
+#view[data-page="explorer"] .xc-svg{display:block;max-width:none}
+#view[data-page="explorer"] .xc-lane{stroke:var(--line);stroke-width:1}
+#view[data-page="explorer"] .xc-guide{stroke:var(--axis);stroke-width:1;stroke-dasharray:1 4}
+#view[data-page="explorer"] .xc-axis,#view[data-page="explorer"] .xc-tick,#view[data-page="explorer"] .xc-break{stroke:var(--mute);stroke-width:1;fill:none}
+#view[data-page="explorer"] .xc-num{font:500 10px var(--mono);fill:var(--mute)}
+#view[data-page="explorer"] .xc-name{font:500 10.5px var(--mono);fill:var(--ink2)}
+#view[data-page="explorer"] .xc-star circle{fill:var(--oxy)}
+#view[data-page="explorer"] .xc-star .h1{opacity:.08}
+#view[data-page="explorer"] .xc-star .h2{opacity:.16}
+#view[data-page="explorer"] .xc-star .h3{opacity:.5}
+#view[data-page="explorer"] .xc-star .h4{opacity:1;fill:var(--ink)}
+#view[data-page="explorer"] .xc-star{transition:opacity var(--t-micro)}
+#view[data-page="explorer"] .xc-star.dim{opacity:.25}
+#view[data-page="explorer"] .xc-star.on circle{fill:var(--accent)}
+#view[data-page="explorer"] .xc-star.on .xc-name{fill:var(--ink)}
+#view[data-page="explorer"] .xc-star>circle{transform-box:fill-box;transform-origin:center;animation:xc-in var(--t-in) var(--ease-in) both;animation-delay:calc(var(--k,0) * var(--stagger) + 200ms)}
+@keyframes xc-in{from{opacity:0;transform:scale(.2)}}
+#view[data-page="explorer"] .xc-lanes{position:absolute;left:0;top:0;z-index:1;pointer-events:none;display:block;overflow:hidden}
+/* the stroke in the page colour clears the lane line and guides behind the name (no shadow, no box) */
+#view[data-page="explorer"] .xc-lanes text{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;fill:var(--mute);stroke:var(--page);stroke-width:6px;stroke-linejoin:round;paint-order:stroke}
+@media (max-width:420px){#view[data-page="explorer"] .xc-lanes text{font-size:9.5px;letter-spacing:.08em}}
+#view[data-page="explorer"] button.xc-dot{position:absolute;z-index:2;width:28px;height:28px;margin:0;padding:0;border:1px solid transparent;border-radius:50%;background:transparent;cursor:pointer;
+  transition:border-color var(--t-micro)}
+#view[data-page="explorer"] button.xc-dot:hover{border-color:var(--mute)}
+#view[data-page="explorer"] button.xc-dot:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#view[data-page="explorer"] button.xc-dot[aria-expanded=true]{border:1.5px solid var(--accent)}
+#view[data-page="explorer"] .xc-hint{margin:var(--sp1) 0 0;padding:0 var(--sp2);max-width:var(--measure);font-size:13px;line-height:1.5;color:var(--mute)}
+
+/* ---------- side panel: the same record as the expand row, in a fixed right-hand panel ---------- */
+#view[data-page="explorer"] .xp-panel{position:fixed;top:0;right:0;bottom:0;z-index:40;width:min(440px,100%);overflow:auto;overscroll-behavior:contain;
+  padding:var(--sp3);background:var(--surface);border-left:1px solid var(--line);color:var(--ink);animation:xp-panel-in var(--t-in) var(--ease-in) both}
+@keyframes xp-panel-in{from{opacity:0;transform:translateX(32px)}}
+#view[data-page="explorer"] .xp-panel-top{display:flex;justify-content:space-between;align-items:center;gap:var(--sp2);margin:0 0 var(--sp2);padding:0 0 var(--sp1);border-bottom:1px solid var(--line)}
+#view[data-page="explorer"] .xp-panel-k{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--oxy);min-width:0;overflow-wrap:anywhere}
+#view[data-page="explorer"] .xp-panel-x{flex:none;font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:transparent;border:1px solid var(--line);
+  border-radius:var(--r-data);padding:9px 10px;cursor:pointer;transition:border-color var(--t-micro)}
+#view[data-page="explorer"] .xp-panel-x:hover{border-color:var(--mute)}
+#view[data-page="explorer"] .xp-panel-x:focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+#view[data-page="explorer"] .xp-panel h2{margin:0 0 var(--sp2);font:800 1.6rem/1.1 var(--display);letter-spacing:-.03em;color:var(--ink)}
+#view[data-page="explorer"] .xp-panel h2:focus{outline:none}
+#view[data-page="explorer"] .xp-panel h2:focus-visible{outline:2px solid var(--oxy);outline-offset:4px}
+#view[data-page="explorer"] .xp-panel .xp-kv{display:grid;grid-template-columns:minmax(7em,auto) 1fr;gap:6px 14px;margin:0;font-size:14px}
+#view[data-page="explorer"] .xp-panel .xp-kv dt{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);padding-top:3px}
+#view[data-page="explorer"] .xp-panel .xp-kv dd{margin:0;padding:0 0 6px;border-bottom:1px solid var(--line)}
+#view[data-page="explorer"] .xp-panel-act{margin:var(--sp3) 0 0}
+
+/* the list below: hairline console table */
+#view[data-page="explorer"] .xp-bar{border-radius:var(--r-data);background:var(--oxy)}
+#view[data-page="explorer"] tr.xp-detail>td{background:var(--raise)}
+#view[data-page="explorer"] details.xp-rule[open]{border-radius:var(--r-panel)}
+
+html[data-motion=calm] #view[data-page="explorer"] .xc-star>circle,html[data-motion=calm] #view[data-page="explorer"] .xp-panel{animation:none}
+html[data-motion=calm] #view[data-page="explorer"] .xc-star,html[data-motion=calm] #view[data-page="explorer"] button.xc-dot{transition:none}
+@media (prefers-reduced-motion:reduce){
+  #view[data-page="explorer"] .xc-star>circle,#view[data-page="explorer"] .xp-panel{animation:none}
+  #view[data-page="explorer"] .xc-star,#view[data-page="explorer"] button.xc-dot{transition:none}
+}
+@media (max-width:520px){
+  #view[data-page="explorer"] .xp-panel{padding:var(--sp2)}
+  #view[data-page="explorer"] .xp-panel .xp-kv{grid-template-columns:1fr;gap:2px}
+  #view[data-page="explorer"] .xp-panel .xp-kv dd{margin-bottom:6px}
+}
+@media print{#view[data-page="explorer"] .xp-panel{display:none}}

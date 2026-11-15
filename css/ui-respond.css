@@ -1,0 +1,72 @@
+/* UI lock styles for #/respond (feat/ui-lock). Scope every rule under #view[data-page="respond"].
+   fr-hero = the droplet instrument at the top of the page (js/fig_respond.js dropletHero). */
+
+#view[data-page="respond"] .fr-top{display:grid;gap:var(--sp3);min-width:0}
+
+/* ---- hero panel ---- */
+#view[data-page="respond"] .fr-hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-panel);padding:var(--sp3);min-width:0}
+#view[data-page="respond"] .fr-hero-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp1);margin:0 0 var(--sp2)}
+#view[data-page="respond"] .fr-tag,#view[data-page="respond"] .fr-hint,#view[data-page="respond"] .fr-lab{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0}
+#view[data-page="respond"] .fr-hero-grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:var(--sp4);align-items:start}
+#view[data-page="respond"] .fr-stage-wrap{min-width:0}
+#view[data-page="respond"] .fr-stage{position:relative;width:100%;max-width:420px;aspect-ratio:1/1;cursor:ns-resize;border-radius:var(--r-data);user-select:none;-webkit-user-select:none}
+#view[data-page="respond"] .fr-stage:focus-visible{outline:3px solid var(--oxy);outline-offset:3px}
+#view[data-page="respond"] .fr-stage svg{display:block;width:100%;height:100%;overflow:visible}
+#view[data-page="respond"] .fr-hint{margin-top:var(--sp1)}
+
+/* SVG parts (illustration; sizes and the ring come from data) */
+#view[data-page="respond"] .fr-ring-track{fill:none;stroke:var(--line);stroke-width:6}
+#view[data-page="respond"] .fr-ring{fill:none;stroke:var(--oxy);stroke-width:6;transition:stroke-dasharray var(--t-move) var(--ease-move)}
+#view[data-page="respond"] .fr-band{fill:none;stroke:var(--mute);stroke-width:2;transition:stroke-dasharray var(--t-move) var(--ease-move)}
+#view[data-page="respond"] .fr-drop{fill:var(--ink)}
+#view[data-page="respond"] .fr-shell-a{fill:none;stroke:var(--oxy);stroke-width:2}
+#view[data-page="respond"] .fr-shell-b{fill:none;stroke:var(--oxy);stroke-width:9;opacity:.16}
+#view[data-page="respond"] .fr-cool{fill:var(--oxy);fill-opacity:.08;stroke:var(--oxy);stroke-opacity:.45;stroke-width:1.5;stroke-dasharray:2 4}
+#view[data-page="respond"] .fr-ghost{fill:none;stroke:var(--mute);stroke-width:1;stroke-dasharray:3 3}
+#view[data-page="respond"] .fr-track{stroke:var(--axis);stroke-width:1.5}
+#view[data-page="respond"] .fr-tick{stroke:var(--mute);stroke-width:1.5}
+#view[data-page="respond"] .fr-half{stroke:var(--accent);stroke-width:2}
+#view[data-page="respond"] .fr-svg-lab{font:500 10px var(--mono);letter-spacing:.14em;fill:var(--mute)}
+#view[data-page="respond"] .fr-svg-on{font:500 12px var(--mono);letter-spacing:.06em;fill:var(--ink)}
+#view[data-page="respond"] .fr-knob path{fill:var(--ink)}
+#view[data-page="respond"] .fr-knob line{stroke:var(--ink);stroke-width:2}
+#view[data-page="respond"] .fr-mmbar line{stroke:var(--mute);stroke-width:2}
+#view[data-page="respond"] .fr-mmbar text{font:500 9px var(--mono);letter-spacing:.14em;fill:var(--mute)}
+
+/* ---- side: controls and readouts ---- */
+#view[data-page="respond"] .fr-side{min-width:0;display:grid;gap:var(--sp1);align-content:start}
+#view[data-page="respond"] .fr-side .seg-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp1);margin:0}
+#view[data-page="respond"] .fr-side .seg{display:flex;flex-wrap:wrap;max-width:100%}
+#view[data-page="respond"] .fr-burns{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp1);margin:var(--sp1) 0 0}
+#view[data-page="respond"] .fr-step{min-width:44px;min-height:44px;padding:0 12px;font-size:16px;background:transparent;color:var(--ink)}
+#view[data-page="respond"] .fr-step:disabled{opacity:.4;cursor:default}
+#view[data-page="respond"] .fr-count{font:500 13px var(--mono);color:var(--ink);min-width:4.5em;text-align:center}
+#view[data-page="respond"] .fr-pause{min-height:44px;padding:0 14px;background:transparent;color:var(--ink);margin-left:auto}
+#view[data-page="respond"] .fr-read{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr);margin:var(--sp2) 0 0;border-top:1px solid var(--line)}
+#view[data-page="respond"] .fr-read dt,#view[data-page="respond"] .fr-read dd{padding:7px 0;border-bottom:1px solid var(--line);margin:0}
+#view[data-page="respond"] .fr-read dt{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);padding-right:var(--sp1)}
+#view[data-page="respond"] .fr-read dd{font:500 13px/1.45 var(--mono);color:var(--ink);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#view[data-page="respond"] .fr-note{margin:var(--sp2) 0 0;font-size:14px;line-height:1.6;color:var(--mute);max-width:72ch}
+
+@media (max-width:760px){
+  #view[data-page="respond"] .fr-hero-grid{grid-template-columns:minmax(0,1fr);gap:var(--sp2)}
+  #view[data-page="respond"] .fr-stage{max-width:360px;margin:0 auto}
+}
+@media (max-width:400px){
+  #view[data-page="respond"] .fr-hero{padding:var(--sp2)}
+  #view[data-page="respond"] .fr-read{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="respond"] .fr-read dt{border-bottom:0;padding-bottom:0}
+  #view[data-page="respond"] .fr-read dd{padding-top:2px}
+}
+
+/* ---- console look for the existing cards (no content changes) ---- */
+#view[data-page="respond"] .fr-beside td,#view[data-page="respond"] .fr-cov .stat{font-variant-numeric:tabular-nums}
+#view[data-page="respond"] .fr-beside td:not(:first-child){font-family:var(--mono);font-size:12.5px}
+#view[data-page="respond"] .fr-quote{border-left-color:var(--oxy);border-radius:0 var(--r-data) var(--r-data) 0}
+#view[data-page="respond"] .fr-cap small,#view[data-page="respond"] .fr-inv small{font-family:var(--mono);font-size:12px}
+
+/* ---- motion: calm / reduced motion = instant changes ---- */
+html[data-motion="calm"] #view[data-page="respond"] .fr-ring,html[data-motion="calm"] #view[data-page="respond"] .fr-band{transition:none}
+@media (prefers-reduced-motion:reduce){
+  #view[data-page="respond"] .fr-ring,#view[data-page="respond"] .fr-band{transition:none}
+}

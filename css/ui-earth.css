@@ -1,0 +1,46 @@
+/* UI lock styles for #/earth (feat/ui-lock). Scope every rule under #view[data-page="earth"]. */
+/* stage: the three cards | a sticky, transparent window onto the field's planet (drag to spin) */
+#view[data-page="earth"] .ea-stage{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:var(--sp3);align-items:start}
+#view[data-page="earth"] .ea-cards{display:grid;gap:var(--sp3);min-width:0}
+#view[data-page="earth"] .ea-cards>.card{margin:0}
+#view[data-page="earth"] .ea-globe{position:sticky;top:calc(var(--top-h,64px) + var(--sp2));height:calc(100vh - var(--top-h,64px) - var(--sp4));min-height:320px;
+  border-radius:var(--r-panel);cursor:grab;outline-offset:4px;user-select:none;-webkit-user-select:none}
+#view[data-page="earth"] .ea-globe:active{cursor:grabbing}
+#view[data-page="earth"] .ea-globe:focus-visible{outline:2px solid var(--oxy)}
+#view[data-page="earth"] .ea-gtag,
+#view[data-page="earth"] .ea-ghint{position:absolute;z-index:1;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:#8C8A93;pointer-events:none}
+#view[data-page="earth"] .ea-gtag{top:var(--sp2);right:var(--sp2)}
+#view[data-page="earth"] .ea-ghint{left:var(--sp2);bottom:var(--sp2);display:flex;gap:6px;align-items:center;color:#EDE8DF;background:#05060E;padding:6px 8px;border-radius:var(--r-data)}
+#view[data-page="earth"] .ea-ghint kbd{font:inherit;border:1px solid rgba(255,255,255,.16);border-radius:var(--r-data);padding:1px 5px;color:#EDE8DF}
+#view[data-page="earth"] .ea-gtag{background:#05060E;padding:6px 8px;border-radius:var(--r-data)}
+/* Day: the field is clipped to one host (the header, then this window once the header scrolls away, js/pages/earth.js).
+   While the header is the host the window is a dark screen; as the host it stays transparent so the field shows through. */
+html[data-theme=day] #view[data-page="earth"] .ea-globe:not(.is-host){background:var(--screen)}
+html.nogl #view[data-page="earth"] .ea-globe{display:none}
+html.nogl #view[data-page="earth"] .ea-stage{grid-template-columns:minmax(0,1fr)}
+/* the field stays undimmed on this page, so the contents line sits on a panel */
+#view[data-page="earth"] .toc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-panel);padding:var(--sp2) var(--sp3);position:relative;z-index:1}
+
+/* console cards: mono uppercase section labels, data in mono, one rule between blocks */
+#view[data-page="earth"] .ea-block h3,
+#view[data-page="earth"] .ea-links h3,
+#view[data-page="earth"] .ea-src h3,
+#view[data-page="earth"] .ea-files h3{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:var(--sp3) 0 var(--sp1)}
+#view[data-page="earth"] .ea-block h3::before{content:"";display:inline-block;width:12px;height:1px;background:currentColor;vertical-align:middle;margin-right:8px}
+#view[data-page="earth"] .ea-ref{border-bottom-color:var(--oxy);border-bottom-style:solid}
+#view[data-page="earth"] .ea-gap{border:0}
+#view[data-page="earth"] .ea-trial{font-weight:500}
+#view[data-page="earth"] .ea-foot{border-top-color:var(--line)}
+#view[data-page="earth"] .ea-src a,#view[data-page="earth"] .ea-links a{text-underline-offset:3px}
+#view[data-page="earth"] .ea-src li{font-family:var(--mono);font-size:.82rem}
+
+@media (max-width:1180px){
+  #view[data-page="earth"] .ea-grid,
+  #view[data-page="earth"] .ea-foot{grid-template-columns:minmax(0,1fr)}
+}
+/* phones and small tablets: the spin window first, short and not sticky, then the cards */
+@media (max-width:760px){
+  #view[data-page="earth"] .ea-stage{grid-template-columns:minmax(0,1fr)}
+  #view[data-page="earth"] .ea-globe{order:-1;position:relative;top:auto;height:260px;min-height:0}
+  #view[data-page="earth"] .toc{padding:var(--sp2)}
+}

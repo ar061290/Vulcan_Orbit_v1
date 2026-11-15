@@ -1,0 +1,82 @@
+/* UI lock styles for #/detect (feat/ui-lock). Scope every rule under #view[data-page="detect"]. */
+
+/* ---------- 03 Find it: the Saffire-III oscilloscope (Replay an orbital fire) ---------- */
+/* the replay card spans the content column; its scope bleeds to the card's inner edges (negative margins equal to the
+   card padding, so nothing pokes past the card and nothing scrolls sideways at 320 px) */
+#view[data-page="detect"] .card.det-osc{--det-pad:var(--sp3);padding:var(--det-pad)}
+#view[data-page="detect"] .det-osc .replay-ctl{gap:var(--sp1) 12px;align-items:center;flex-wrap:wrap}
+#view[data-page="detect"] .det-osc .replay-ctl .btn{padding:11px 14px}
+#view[data-page="detect"] .det-osc .det-reset[aria-disabled=true]{cursor:default}
+/* Day: lock.css puts #05060E text on the Day fire (#c2410c), about 3.9:1; white text there is about 5.2:1 */
+html[data-theme=day] #view[data-page="detect"] .det-osc .det-play:not(:hover){color:#fff}
+#view[data-page="detect"] .det-osc .det-reset[aria-disabled=true]:hover{background:transparent;color:var(--ink)}
+
+/* the scope is an instrument screen in both themes: fixed dark-canvas colours, not theme tokens */
+#view[data-page="detect"] .det-scope{margin:var(--sp2) calc(-1 * var(--det-pad));background:#05060E;color:#EDE8DF;border-block:1px solid rgba(255,255,255,.08)}
+#view[data-page="detect"] .det-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:12px 24px;padding:14px var(--det-pad) 10px}
+#view[data-page="detect"] .det-top-l{display:grid;gap:4px;min-width:0}
+#view[data-page="detect"] .det-k,
+#view[data-page="detect"] .det-foot{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:#8C8A93}
+#view[data-page="detect"] .det-ev{font:500 14px/1.35 var(--font);color:#EDE8DF;overflow-wrap:anywhere}
+#view[data-page="detect"] .det-top-r{display:grid;justify-items:end;gap:6px;min-width:0}
+#view[data-page="detect"] .det-t{font:500 26px/1 var(--mono);letter-spacing:.04em;color:#EDE8DF;font-variant-numeric:tabular-nums}
+#view[data-page="detect"] .det-chs{display:grid;grid-template-columns:repeat(5,auto);gap:3px 10px;align-items:center;font:500 11px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#8C8A93}
+#view[data-page="detect"] .det-rd{display:contents}
+#view[data-page="detect"] .det-rd i{width:8px;height:8px;border-radius:var(--r-data);background:var(--c)}
+#view[data-page="detect"] .det-n{color:#EDE8DF}
+#view[data-page="detect"] .det-v{font-weight:500;color:#EDE8DF;text-align:right;min-width:7ch;font-variant-numeric:tabular-nums}
+#view[data-page="detect"] .det-st{min-width:8ch}
+#view[data-page="detect"] .det-st[data-st=alarm]{color:#FF7A3D}
+
+/* the plot: full-bleed canvas, crisp at DPR (js sizes the backing store), one-finger vertical scroll passes through */
+#view[data-page="detect"] .det-plot{position:relative}
+#view[data-page="detect"] .det-scope canvas.replay{display:block;width:100%;height:clamp(260px,30vw,440px);aspect-ratio:auto;margin:0;border:0;border-radius:0!important;background:#05060E;touch-action:pan-y;cursor:ew-resize;user-select:none;-webkit-user-select:none}
+#view[data-page="detect"] .det-scope canvas.replay:focus-visible{outline:2px solid #7AA2FF;outline-offset:-2px}
+#view[data-page="detect"] .det-ph{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#view[data-page="detect"] .det-grip{position:absolute;left:-6px;top:0;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:9px solid #EDE8DF;will-change:transform}
+#view[data-page="detect"] .det-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px;padding:8px var(--det-pad) 12px;font-size:10.5px}
+
+/* lamps and the time row read as console hardware: hairlines, square data marks, no glow */
+#view[data-page="detect"] .det-osc .lamps{gap:var(--sp1)}
+#view[data-page="detect"] .det-osc .lamp{background:transparent;border:1px solid var(--line);transition:border-color var(--t-micro)}
+#view[data-page="detect"] .det-osc .lamp i{width:10px;height:10px;border-radius:var(--r-data);opacity:.35}
+#view[data-page="detect"] .det-osc .lamp.on{border-color:var(--c)}
+#view[data-page="detect"] .det-osc .lamp.on i{opacity:1;box-shadow:none}
+#view[data-page="detect"] .det-osc .lamp b{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+#view[data-page="detect"] .det-osc .clock{font:500 13px var(--mono);letter-spacing:.08em;color:var(--ink)}
+
+@media (max-width:720px){
+  #view[data-page="detect"] .det-top-r{justify-items:start;width:100%}
+  #view[data-page="detect"] .det-chs{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:6px 16px;width:100%}
+  #view[data-page="detect"] .det-rd{display:grid;grid-template-columns:10px auto minmax(0,1fr) auto;grid-template-areas:"i n n st" "i v u u";gap:2px 8px;align-items:center}
+  #view[data-page="detect"] .det-rd i{grid-area:i;align-self:start;margin-top:3px}
+  #view[data-page="detect"] .det-n{grid-area:n;overflow-wrap:anywhere}
+  #view[data-page="detect"] .det-v{grid-area:v;text-align:left;min-width:0}
+  #view[data-page="detect"] .det-u{grid-area:u}
+  #view[data-page="detect"] .det-st{grid-area:st;min-width:0;text-align:right}
+}
+@media (max-width:560px){
+  #view[data-page="detect"] .card.det-osc{--det-pad:var(--sp2)}
+  #view[data-page="detect"] .det-t{font-size:22px}
+  #view[data-page="detect"] .det-tip{display:none}
+}
+
+/* ---------- the other Find it cards: console look (mono labels, hairlines), CSS only ---------- */
+#view[data-page="detect"] .card .row > label,
+#view[data-page="detect"] .card .seg-label{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="detect"] .card select{font:500 13px var(--mono);letter-spacing:.04em}
+#view[data-page="detect"] .card table{border-collapse:collapse}
+#view[data-page="detect"] .card th,
+#view[data-page="detect"] .card td{border-bottom:1px solid var(--line)}
+#view[data-page="detect"] .card td{font-variant-numeric:tabular-nums}
+#view[data-page="detect"] .card td.num,
+#view[data-page="detect"] .card td.sel{font-family:var(--mono);font-size:13px}
+#view[data-page="detect"] .chart-wrap{border-top:1px solid var(--line);padding-top:var(--sp2)}
+#view[data-page="detect"] .det-stats .statbox{background:transparent;border:1px solid var(--line)}
+#view[data-page="detect"] .det-stats .stat small{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-left:4px}
+#view[data-page="detect"] .det-ch.stat-label{font:var(--label);letter-spacing:.1em;text-transform:uppercase}
+#view[data-page="detect"] .det-result{border-left:1px solid var(--line);padding-left:var(--sp2)}
+#view[data-page="detect"] .det-link a{color:var(--oxy)}
+#view[data-page="detect"] .timeline{border-left:1px solid var(--line);gap:var(--sp2)}
+#view[data-page="detect"] .tl-item::before{left:-23px;width:7px;height:7px;border-radius:var(--r-data);background:var(--surface);border:1px solid var(--mute)}
+#view[data-page="detect"] .tl-item b{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}

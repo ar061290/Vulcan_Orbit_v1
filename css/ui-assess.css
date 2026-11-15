@@ -1,0 +1,96 @@
+/* UI lock styles for #/assess (feat/ui-lock). Scope every rule under #view[data-page="assess"].
+   The cabin plate (rings from the growth run) and the dials sit at the top of "Flame now, fuel and cabin";
+   the number fields fold under "Exact values". Colours: tokens only, so Day and Night both work. No shadows, no gradients. */
+
+/* ---------- the cabin plate ---------- */
+#view[data-page="assess"] .as-plate{margin:var(--sp2,16px) 0 var(--sp3,24px)}
+#view[data-page="assess"] .as-plate-frame{border-radius:var(--r-panel,14px)}
+#view[data-page="assess"] .as-plate-svg{display:block;width:100%;height:auto;max-width:100%;user-select:none;-webkit-user-select:none}
+#view[data-page="assess"] .as-cabin{fill:var(--raise);stroke:var(--axis);stroke-width:1}
+#view[data-page="assess"] .as-cabin-in{fill:none;stroke:var(--axis);stroke-width:1;stroke-dasharray:2 5}
+#view[data-page="assess"] .as-bolts circle{fill:none;stroke:var(--mute);stroke-width:1}
+#view[data-page="assess"] .as-ptag{font:500 11px var(--mono);letter-spacing:.14em;fill:var(--mute)}
+#view[data-page="assess"] .as-fuel-t{fill:var(--ink2)}
+#view[data-page="assess"] .as-stat{fill:var(--ink2)}
+#view[data-page="assess"] .as-pgrid line{stroke:var(--grid);stroke-width:1;shape-rendering:crispEdges}
+#view[data-page="assess"] .as-fuel{fill:var(--surface);stroke:var(--ink2);stroke-width:1;cursor:crosshair}
+#view[data-page="assess"] .as-now{fill:var(--oxy);fill-opacity:.28;stroke:var(--oxy);stroke-width:1}
+
+/* the three rings: glow = layered strokes at falling opacity (no blur, no gradient) */
+#view[data-page="assess"] .as-ring{transition:opacity var(--t-micro,180ms) linear;pointer-events:none}
+#view[data-page="assess"] .as-ring circle{fill:none;stroke:var(--oxy)}
+#view[data-page="assess"] .as-ring .halo2{stroke-width:11;stroke-opacity:.06}
+#view[data-page="assess"] .as-ring .halo1{stroke-width:5;stroke-opacity:.16}
+#view[data-page="assess"] .as-ring .line{stroke-width:1.6}
+#view[data-page="assess"] .as-ring.lo .line{stroke-dasharray:6 4}
+#view[data-page="assess"] .as-ring.hi .line{stroke-dasharray:2 3}
+#view[data-page="assess"] .as-ring.lo{opacity:.8}
+#view[data-page="assess"] .as-rtag{font:500 11px var(--mono);letter-spacing:.1em;fill:var(--oxy);paint-order:stroke;stroke:var(--raise);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+#view[data-page="assess"] .as-bar,#view[data-page="assess"] .as-air{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* the draggable start point */
+#view[data-page="assess"] .as-start{cursor:grab;outline:none}
+#view[data-page="assess"] .as-start:active{cursor:grabbing}
+#view[data-page="assess"] .as-hhit{fill:transparent}
+#view[data-page="assess"] .as-hcross{stroke:var(--ink);stroke-width:1.5;stroke-linecap:round}
+#view[data-page="assess"] .as-hdot{fill:var(--ink)}
+#view[data-page="assess"] .as-hfocus{fill:none;stroke:var(--ink);stroke-width:2;opacity:0;transition:opacity var(--t-micro,180ms) linear}
+#view[data-page="assess"] .as-start:focus-visible .as-hfocus,#view[data-page="assess"] .as-start:hover .as-hfocus{opacity:1}
+
+/* ring key (the text equivalent of the rings) */
+#view[data-page="assess"] .as-ring-key{list-style:none;margin:var(--sp1,8px) 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 22px;
+  font:500 11px/1.5 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="assess"] .as-ring-key li{display:flex;align-items:baseline;gap:8px;min-width:0}
+#view[data-page="assess"] .as-ring-key i{display:inline-block;width:22px;border-top:2px solid var(--oxy);transform:translateY(-3px)}
+#view[data-page="assess"] .as-ring-key li.lo i{border-top-style:dashed}
+#view[data-page="assess"] .as-ring-key li.hi i{border-top-style:dotted}
+#view[data-page="assess"] .as-ring-key b{font:500 14px var(--mono);letter-spacing:.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+#view[data-page="assess"] .as-ring-key small{font:inherit;color:var(--mute)}
+#view[data-page="assess"] .as-plate-help{margin:var(--sp1,8px) 0 0;font-size:13px;line-height:1.5;color:var(--mute);max-width:78ch}
+
+/* ---------- inputs: groups, dials, exact values ---------- */
+#view[data-page="assess"] .as-group{border:1px solid var(--line);border-radius:var(--r-panel,14px);padding:var(--sp2,16px) var(--sp2,16px) var(--sp1,8px)}
+#view[data-page="assess"] .as-group>legend{font:var(--label,500 11px var(--mono));letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="assess"] select,#view[data-page="assess"] .as-other input,#view[data-page="assess"] textarea{border-radius:var(--r-data,2px);border-width:1px}
+#view[data-page="assess"] .as-preset{margin:0 0 var(--sp2,16px)}
+
+#view[data-page="assess"] .as-dials{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:var(--sp2,16px) var(--sp1,8px);margin:var(--sp1,8px) 0 var(--sp1,8px)}
+#view[data-page="assess"] .as-dial{display:grid;justify-items:center;align-content:start;gap:4px;text-align:center;min-width:0}
+#view[data-page="assess"] .as-dial-label{font:var(--label,500 11px var(--mono));letter-spacing:.14em;text-transform:uppercase;color:var(--mute);overflow-wrap:anywhere}
+#view[data-page="assess"] .as-dial-face{width:88px;height:88px;border-radius:50%;cursor:ns-resize;outline:none}
+#view[data-page="assess"] .as-dial-face:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+#view[data-page="assess"] .as-dial-face svg{display:block;width:100%;height:100%;overflow:visible}
+#view[data-page="assess"] .as-dial-track{fill:none;stroke:var(--axis);stroke-width:3;stroke-linecap:round}
+#view[data-page="assess"] .as-dial-band path{fill:none;stroke:var(--oxy);stroke-width:3.5}
+#view[data-page="assess"] .as-dial-ticks line{stroke:var(--mute);stroke-width:1}
+#view[data-page="assess"] .as-dial-ticks line.maj{stroke:var(--ink2);stroke-width:1.5}
+#view[data-page="assess"] .as-dial-ptr{transform-box:view-box;transform-origin:50px 50px;transform:rotate(calc(var(--turn,0) * 270deg - 135deg))}
+#view[data-page="assess"] .as-dial-ptr line{stroke:var(--ink);stroke-width:2.2;stroke-linecap:round}
+#view[data-page="assess"] .as-dial-ptr circle{fill:var(--ink)}
+#view[data-page="assess"] .as-dial-hub{fill:var(--surface);stroke:var(--axis);stroke-width:1}
+#view[data-page="assess"] .as-dial-val{font:500 14px var(--mono);color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+#view[data-page="assess"] .as-dial-tag{font:var(--label,500 11px var(--mono));letter-spacing:.14em;text-transform:uppercase;color:var(--warn)}
+#view[data-page="assess"] .as-dial-tag[hidden]{display:none}
+#view[data-page="assess"] .as-dial.out .as-dial-ptr line{stroke:var(--warn)}
+#view[data-page="assess"] .as-dial.out .as-dial-ptr circle{fill:var(--warn)}
+#view[data-page="assess"] .as-dial.out .as-dial-val{color:var(--warn)}
+#view[data-page="assess"] .as-flags .as-flag{margin:4px 0 8px}
+
+#view[data-page="assess"] .as-exact{margin:var(--sp1,8px) 0;border-top:1px solid var(--line)}
+#view[data-page="assess"] .as-exact>summary{font:var(--label,500 11px var(--mono));letter-spacing:.14em;text-transform:uppercase;color:var(--mute);cursor:pointer;padding:10px 0;min-height:24px}
+#view[data-page="assess"] .as-exact>summary:hover{color:var(--ink)}
+#view[data-page="assess"] .as-exact>summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#view[data-page="assess"] .as-exact-body{padding:4px 0 2px}
+#view[data-page="assess"] .as-dial-help{margin:var(--sp2,16px) 0 0;font-size:12.5px;line-height:1.5;color:var(--mute);max-width:90ch}
+
+@media (max-width:640px){
+  #view[data-page="assess"] .as-dials{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #view[data-page="assess"] .as-ring-key{gap:4px 16px}
+}
+@media (max-width:360px){
+  #view[data-page="assess"] .as-dial-face{width:76px;height:76px}
+}
+html[data-motion="calm"] #view[data-page="assess"] .as-ring,html[data-motion="calm"] #view[data-page="assess"] .as-hfocus{transition:none}
+@media (prefers-reduced-motion:reduce){
+  #view[data-page="assess"] .as-ring,#view[data-page="assess"] .as-hfocus{transition:none}
+}

@@ -110,3 +110,44 @@ export function plannedCard() {
     h('ul', {}, h('li', {}, h('b', {}, 'Closed loop. '),
       'The camera\'s reading of where the flame is would steer the mist nozzle to it on its own. It depends on the bench mist trial, which is optional and not completed.')));
 }
+
+// ---------- UI lock: the rig as a line drawing (ILLUSTRATION, no numbers) ----------
+const SVGNS = 'http://www.w3.org/2000/svg';
+const sv = (tag, a = {}, ...kids) => { const e = document.createElementNS(SVGNS, tag); for (const k in a) e.setAttribute(k, a[k]); kids.forEach(k => e.append(k)); return e; };
+// Each stroke draws itself in (pathLength 1, stroke-dashoffset 1 → 0, css/ui-locate.css), in this order. The shapes are a
+// sketch of the layout described in "Bench rig: camera"; positions and sizes are drawing choices, not dimensions.
+const RIG = [
+  ['bench', 'M20 292H620M20 300H620M60 300V334M580 300V334'],
+  ['dome', 'M200 292A130 130 0 0 1 460 292'],
+  ['dome', 'M214 292A116 116 0 0 1 446 292'],
+  ['stand', 'M318 292V252H342V292M312 252H348'],
+  ['cam', 'M56 172H132V218H56ZM132 182H152V208H132ZM94 218V292M94 258L68 292M94 258L120 292'],
+  ['flow', 'M572 292V96H426M380 80H426V108H380Z'],
+  ['flame', 'M330 248C314 236 312 216 330 186C348 216 346 236 330 248Z'],
+  ['flame', 'M330 244C323 238 322 228 330 214C338 228 337 238 330 244Z'],
+];
+const RIG_LABELS = [
+  ['Camera', 56, 160], ['Dome', 468, 196], ['Flame', 356, 206], ['Flow sensor', 300, 68], ['Bench', 24, 326],
+];
+/** The bench rig as a line drawing that draws itself in. Static (fully drawn) under Calm / reduced motion. */
+export function benchDrawing({ animate = true } = {}) {
+  const svg = sv('svg', { viewBox: '0 0 640 340', class: 'rig-svg', role: 'img', focusable: 'false',
+    'aria-label': 'Illustration, not data: a line drawing of the bench rig. A camera on a stand and a smoke-flow sensor on an arm look at a small upright flame on a stand inside a clear dome on a bench. No measurement is shown.' });
+  RIG.forEach(([part, d], i) => svg.append(sv('path', { d, class: `rig-${part}`, pathLength: '1', style: `--k:${i}` })));
+  // sight lines: dashed, so they fade in rather than draw
+  svg.append(sv('path', { d: 'M152 195L316 222', class: 'rig-sight' }), sv('path', { d: 'M403 108L340 186', class: 'rig-sight' }));
+  RIG_LABELS.forEach(([t, x, y], i) => svg.append(sv('text', { x, y, class: 'rig-label', style: `--k:${i}` }, t.toUpperCase())));
+  return h('figure', { class: 'rig hud', 'data-anim': animate ? '' : null },
+    h('span', { class: 'rig-tag', 'aria-hidden': 'true' }, 'Illustration'),
+    h('span', { class: 'rig-stamp' }, 'Awaiting data'),
+    svg,
+    h('figcaption', { class: 'sr' }, 'Illustration. No camera, depth or smoke-flow result has been measured yet; the pending checks are listed below.'));
+}
+/** Start the draw-in when the drawing is on screen (call from onMount). Returns a stop function. */
+export function startBenchDrawing(fig) {
+  if (!fig?.hasAttribute('data-anim')) return () => {};
+  if (!('IntersectionObserver' in window)) { fig.classList.add('go'); return () => {}; }
+  const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { fig.classList.add('go'); io.disconnect(); } }, { threshold: .2 });
+  io.observe(fig);
+  return () => io.disconnect();
+}

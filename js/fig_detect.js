@@ -4,8 +4,10 @@
 // js/verify_ui.js (sensitivityCard) and js/pages/detect.js. Every number on screen is read from the data file
 // the card is stamped with; the only constants below are display choices carried over from main (marked).
 import { h, card, empty, fmt, isMissing, seg, legend, table, announce, setParams, tip, untip } from './lib.js';
-import { lineChart, dotRows, keyNav, numbers, SERIES, SCREEN, DASH, C } from './charts.js';
+import { lineChart, dotRows, keyNav, numbers, SERIES, DASH, C } from './charts.js';
 import { figLink, revealFigure } from './passes.js';
+import { blip } from './engine.js';
+import { spring } from './spring.js';
 
 let uidN = 0;
 const uid = p => `det-${p}-${++uidN}`;
@@ -31,90 +33,295 @@ const LAT_SCHEMA = '{ "status":"real", "y_meaning":"...", "burns":[{ "name":"Bur
 const latEmpty = () => empty('Waiting for Saffire-III telemetry', 'saffire_latency', 'One burn per entry, each channel scaled so 1.0 is its alarm threshold.', LAT_SCHEMA);
 
 // ---------------------------------------------------------------------------------------------------------------
-// #24 Replay an orbital fire (canvas on the dark SCREEN palette)
+// #24 Replay an orbital fire: a full-width oscilloscope (feat/ui-lock). The scope is always a dark instrument screen,
+// whatever the page theme. Lanes, graticule, readouts and alarm marks are all drawn from saffire_latency.json.
 // ---------------------------------------------------------------------------------------------------------------
+// trace colours: orbit blue for the first live trace, then the existing SERIES colours; fire is kept for alarms
+const TRACE = ['#7AA2FF', C.s3, C.s4, C.s1];
+const ALARM = '#FF7A3D', INK = '#EDE8DF', MUTE = '#8C8A93', BG = '#05060E';
+const LABEL_FONT = '500 11px "IBM Plex Mono", ui-monospace, monospace';
+const isCalm = () => document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const tLab = t => (t < 0 ? `T−${fmt(-t, 0)} S` : `T+${fmt(t, 0)} S`);
+/** a "nice" major graticule step (s) for a visible span: about one labelled major per 110 px */
+const niceStep = (span, count) => {
+  const raw = span / Math.max(2, count), p = 10 ** Math.floor(Math.log10(raw)), m = raw / p;
+  return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p;
+};
+
 /** params: the route query ({event:'wire'|'s2'|'s1'}); ctx: the page ctx (playback stops in ctx.onLeave). */
 export function replayCard(lat, params = {}, ctx = {}) {
   if (isMissing(lat) || !Array.isArray(lat.burns) || !lat.burns.length) return card(T_REPLAY, 'missing', null, latEmpty());
   const REPLAY_S = 14;   // display choice from main (detect_ui.js): every event replays in about 14 s, stated in the sub
-  const selId = uid('event'), sliderId = uid('time'), sumId = uid('sum');
+  const selId = uid('event'), sliderId = uid('time'), sumId = uid('sum'), hintId = uid('hint');
   const sel = h('select', { id: selId }, lat.burns.map((b, i) => h('option', { value: i }, b.name)));
-  const cv = h('canvas', { class: 'replay', width: 1280, height: 420, role: 'img', 'aria-describedby': sumId });
+  const cv = h('canvas', { class: 'replay', role: 'img', 'aria-describedby': `${sumId} ${hintId}` });
   const clock = h('span', { class: 'clock' }, '0 s after ignition');
-  const btn = h('button', { type: 'button', class: 'chip', 'aria-pressed': 'false' }, '▶ Play');
+  const btn = h('button', { type: 'button', class: 'btn primary det-play', 'aria-pressed': 'false' }, '▶ Play');
+  const resetBtn = h('button', { type: 'button', class: 'btn det-reset' }, 'Reset zoom');
   const slider = h('input', { type: 'range', id: sliderId, min: 0, max: 1, step: 1, value: 0 });
   const lamps = h('div', { class: 'lamps' });
   const summary = h('p', { id: sumId, class: 'replay-sum' });
   const tableBox = h('div', { class: 'replay-table' });
+  // scope chrome: readouts (top right), the playhead grip and the window strip. All aria-hidden: the slider's
+  // value text, the lamps and the arrow-key readings carry the same values as text.
+  const tRead = h('b', { class: 'det-t' }, 'T+ 0 S');
+  const chRead = h('div', { class: 'det-chs' });
+  const evRead = h('span', { class: 'det-ev' });
+  const winRead = h('span', { class: 'det-win' });
+  const grip = h('div', { class: 'det-grip' });
+  const scope = h('div', { class: 'det-scope hud' },
+    h('div', { class: 'det-top', 'aria-hidden': 'true' }, h('div', { class: 'det-top-l' }, h('span', { class: 'det-k' }, 'Saffire-III · telemetry'), evRead), h('div', { class: 'det-top-r' }, tRead, chRead)),
+    h('div', { class: 'det-plot' }, cv, h('div', { class: 'det-ph', 'aria-hidden': 'true' }, grip)),
+    h('div', { class: 'det-foot', 'aria-hidden': 'true' }, winRead, h('span', { class: 'det-tip' }, 'Drag to scrub · pinch or ctrl+wheel to zoom · double-click resets')));
   const g = cv.getContext('2d');
-  let b, T0, T1, raf = 0, playing = false, last = 0, f = 1;
+  let b, T0, T1, v0, v1, now = 0, prevNow = null, raf = 0, timer = 0, playing = false, last = 0;
+  let W = 0, H = 0, dpr = 1, onScreen = true, cancelSpring = () => {};
   const items = [];   // keyboard stops (one per reading); mutated in place so keyNav always reads the current event
-  const W = cv.width, H = cv.height, pad = 50;
-  const X = t => pad + (t - T0) / (T1 - T0) * (W - pad - 20);
+  const PL = () => (W < 560 ? 34 : 46), PR = 12, PT = 6, PB = 26;
+  const plotW = () => Math.max(1, W - PL() - PR);
+  const X = t => PL() + (t - v0) / (v1 - v0) * plotW();
+  const invX = x => v0 + (x - PL()) / plotW() * (v1 - v0);
   const clampV = v => Math.max(-0.5, Math.min(2, v ?? 0));   // display clamp from main: lanes show -0.5 to 2 alarm margins
-  const nowT = () => T0 + f * (T1 - T0);
+  const clampT = t => Math.max(T0, Math.min(T1, t));
+  const minSpan = () => { const dt = b.t.length > 1 ? (T1 - T0) / (b.t.length - 1) : 1; return Math.max(dt * 6, (T1 - T0) / 60); };
+  const idxAt = t => { let k = -1; for (let j = 0; j < b.t.length && b.t[j] <= t + 1e-9; j++) k = j; return k; };
 
+  // ---------- drawing ----------
+  const size = () => {
+    if (ctx.detached) { W = 960; H = 340; dpr = 1; }
+    else { const r = cv.getBoundingClientRect(); if (!r.width || !r.height) return false; W = r.width; H = r.height; dpr = Math.min(1.5, window.devicePixelRatio || 1); }
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    return true;
+  };
+  const trace = (c, from, to, laneY) => {
+    g.beginPath(); let n = 0;
+    for (let j = Math.max(0, from); j <= to && j < b.t.length; j++) {
+      const v = c.values[j]; if (v == null) { n = 0; continue; }
+      const x = X(b.t[j]), y = laneY(v); n++ ? g.lineTo(x, y) : g.moveTo(x, y);
+    }
+  };
   const draw = () => {
-    if (!g || !b) return;
-    const now = nowT(), rowH = (H - pad - 20) / b.channels.length;
-    g.clearRect(0, 0, W, H);
-    g.font = '22px "Atkinson Hyperlegible", system-ui, sans-serif';
+    if (!g || !b || (!W && !size())) return;
+    const calmNow = isCalm(), span = v1 - v0, pl = PL(), pw = plotW(), n = b.channels.length;
+    const plotH = H - PT - PB, rowH = plotH / n;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+    g.fillStyle = BG; g.fillRect(0, 0, W, H);
+    g.font = LABEL_FONT; if ('letterSpacing' in g) g.letterSpacing = '1.5px';
+    // graticule: minor lines every step/5, majors labelled in seconds after ignition
+    const major = niceStep(span, Math.floor(pw / 110)), minor = major / 5;
+    g.lineWidth = 1;
+    for (let k = Math.ceil(v0 / minor - 1e-9); k * minor <= v1 + 1e-9; k++) {
+      const t = k * minor, isMaj = ((k % 5) + 5) % 5 === 0, x = Math.round(X(t)) + 0.5;
+      g.strokeStyle = isMaj ? 'rgba(237,232,223,0.13)' : 'rgba(237,232,223,0.045)';
+      g.beginPath(); g.moveTo(x, PT); g.lineTo(x, PT + plotH); g.stroke();
+      if (isMaj) { g.fillStyle = MUTE; g.textAlign = 'center'; g.fillText(tLab(Math.round(t * 1000) / 1000), Math.min(W - 30, Math.max(pl + 24, x)), H - 9); }
+    }
+    g.textAlign = 'left';
+    // ignition line (t = 0 is when the igniter or smoke wire switched on, per units.time)
+    if (v0 <= 0 && v1 >= 0) {
+      const x = Math.round(X(0)) + 0.5;
+      g.strokeStyle = 'rgba(237,232,223,0.55)'; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(x, PT); g.lineTo(x, PT + plotH); g.stroke(); g.setLineDash([]);
+    }
+    const kNow = idxAt(now);
     b.channels.forEach((c, i) => {
-      const col = SERIES[i % SERIES.length], y0 = 10 + i * rowH, mid = y0 + rowH * 0.62, sc = rowH * 0.5;
-      g.fillStyle = 'rgba(255,255,255,0.03)'; g.fillRect(pad, y0, W - pad - 20, rowH - 8);
-      g.strokeStyle = 'rgba(255,255,255,0.18)'; g.lineWidth = 1; g.setLineDash([6, 6]);
-      g.beginPath(); g.moveTo(pad, mid - sc); g.lineTo(W - 20, mid - sc); g.stroke(); g.setLineDash([]);
-      const grad = g.createLinearGradient(0, mid - sc * 2, 0, mid); grad.addColorStop(0, col); grad.addColorStop(1, 'transparent');
-      let k = 0;
-      // keep each trace inside its own lane: at the top of main's clamp (2 alarm margins) the line rose into the lane above,
-      // and lane 1 ran off the canvas (P7-B shots); the alarm line and dot sit well inside the band
-      g.save(); g.beginPath(); g.rect(pad, y0, W - pad - 20, rowH - 8); g.clip();
-      g.beginPath(); g.moveTo(X(T0), mid);
-      for (; k < b.t.length && b.t[k] <= now; k++) g.lineTo(X(b.t[k]), mid - clampV(c.values[k]) * sc);
-      g.lineTo(X(b.t[Math.max(0, k - 1)]), mid); g.closePath();
-      g.fillStyle = grad; g.globalAlpha = 0.35; g.fill(); g.globalAlpha = 1;
-      g.beginPath();
-      for (let j = 0; j < k; j++) { const x = X(b.t[j]), y = mid - clampV(c.values[j]) * sc; j ? g.lineTo(x, y) : g.moveTo(x, y); }
-      // each lane is named on the canvas and in its lamp, so colour is never the only cue
-      g.strokeStyle = col; g.lineWidth = 3; g.shadowColor = col; g.shadowBlur = 12; g.stroke(); g.shadowBlur = 0;
+      const col = TRACE[i % TRACE.length], y0 = PT + i * rowH, top = y0 + 22, bot = y0 + rowH - 6;
+      const laneY = v => bot - (clampV(v) + 0.5) / 2.5 * (bot - top);
+      // lane frame, zero line and the dashed alarm line (1.0 = alarm margin)
+      g.strokeStyle = 'rgba(237,232,223,0.08)'; g.beginPath(); g.moveTo(pl, Math.round(y0 + rowH) - 0.5); g.lineTo(W - PR, Math.round(y0 + rowH) - 0.5); g.stroke();
+      g.strokeStyle = 'rgba(237,232,223,0.16)'; g.beginPath(); g.moveTo(pl, Math.round(laneY(0)) + 0.5); g.lineTo(W - PR, Math.round(laneY(0)) + 0.5); g.stroke();
+      g.strokeStyle = 'rgba(237,232,223,0.32)'; g.setLineDash([6, 5]); g.beginPath(); g.moveTo(pl, Math.round(laneY(1)) + 0.5); g.lineTo(W - PR, Math.round(laneY(1)) + 0.5); g.stroke(); g.setLineDash([]);
+      g.fillStyle = MUTE; g.textAlign = 'right';
+      g.fillText('1×', pl - 6, laneY(1) + 4); g.fillText('0', pl - 6, laneY(0) + 4);
+      g.textAlign = 'left'; g.fillStyle = INK;
+      g.fillText(String(c.name).toUpperCase(), pl + 8, y0 + 15);   // each lane named in text: colour is never the only cue
+      // the trace: additive glow; the most recent stretch drawn brighter (a phosphor trail, steady, never flashing)
+      g.save(); g.beginPath(); g.rect(pl, y0, pw, rowH); g.clip();
+      g.globalCompositeOperation = 'lighter'; g.strokeStyle = col; g.lineJoin = 'round'; g.lineCap = 'round';
+      const kFrom = Math.max(0, idxAt(v0) - 1);
+      trace(c, kFrom, kNow, laneY);
+      g.globalAlpha = 0.16; g.lineWidth = 6; g.stroke();
+      g.globalAlpha = calmNow ? 0.95 : 0.6; g.lineWidth = 1.75; g.stroke();
+      if (!calmNow && kNow >= 0) {
+        const trail = idxAt(now - span * 0.08);
+        trace(c, Math.max(kFrom, trail), kNow, laneY);
+        g.globalAlpha = 0.22; g.lineWidth = 9; g.stroke();
+        g.globalAlpha = 0.95; g.lineWidth = 2.25; g.stroke();
+      }
+      const vHead = kNow >= 0 ? c.values[kNow] : null;
+      if (vHead != null && b.t[kNow] >= v0) { g.globalAlpha = 1; g.fillStyle = col; g.beginPath(); g.arc(X(b.t[kNow]), laneY(vHead), 3, 0, 7); g.fill(); }
       g.restore();
-      g.fillStyle = SCREEN.mute; g.fillText(c.name, pad + 8, y0 + 26);
+      // alarm mark: fire dot on the alarm line once the playhead has passed alarm_s
       const on = c.alarm_s != null && now >= c.alarm_s;
-      if (on) { g.fillStyle = col; g.beginPath(); g.arc(X(c.alarm_s), mid - sc, 9, 0, 7); g.fill(); }
+      if (on && c.alarm_s >= v0 && c.alarm_s <= v1) {
+        const x = X(c.alarm_s), y = laneY(1);
+        g.fillStyle = ALARM; g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill();
+        g.strokeStyle = BG; g.lineWidth = 1.5; g.stroke();
+        const lab = `ALARM ${tLab(c.alarm_s)}`, tw = g.measureText(lab).width;
+        g.fillStyle = ALARM; g.fillText(lab, Math.min(W - PR - tw - 4, x + 9), Math.max(y0 + 30, y - 8));
+      }
       lamps.children[i]?.classList.toggle('on', on);
     });
-    if (T0 <= 0 && T1 >= 0) {
-      g.strokeStyle = C.warn; g.lineWidth = 2; g.beginPath(); g.moveTo(X(0), 4); g.lineTo(X(0), H - pad + 6); g.stroke();
-      g.fillStyle = C.warn; g.fillText('ignition', X(0) + 6, H - pad + 30);
+    // the playhead
+    const px = X(now);
+    if (now >= v0 && now <= v1) {
+      g.strokeStyle = INK; g.lineWidth = 1.5; g.globalAlpha = 1;
+      g.beginPath(); g.moveTo(Math.round(px) + 0.5, PT); g.lineTo(Math.round(px) + 0.5, PT + plotH); g.stroke();
     }
-    g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath(); g.moveTo(X(now), 4); g.lineTo(X(now), H - pad + 6); g.stroke();
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    grip.style.transform = `translateX(${px}px)`;
+    grip.hidden = !(now >= v0 && now <= v1);
+    readouts(kNow);
+  };
+  const readouts = kNow => {
     const txt = `${Math.round(now)} s after ignition`;
     clock.textContent = txt;
     slider.value = String(Math.round(now));
     slider.setAttribute('aria-valuetext', txt);
+    tRead.textContent = now < 0 ? `T− ${fmt(-now, 0)} S` : `T+ ${fmt(now, 0)} S`;
+    b.channels.forEach((c, i) => {
+      const row = chRead.children[i]; if (!row) return;
+      const v = kNow >= 0 ? c.values[kNow] : null;
+      row.querySelector('.det-v').textContent = v == null ? 'n/a' : `×${fmt(v, 2)}`;
+      const st = c.alarm_s == null ? 'no alarm' : now >= c.alarm_s ? 'alarm' : 'below';
+      const s = row.querySelector('.det-st'); s.textContent = st; s.dataset.st = st;
+    });
+    const zoomed = v0 > T0 + 1e-6 || v1 < T1 - 1e-6;
+    winRead.textContent = `Window ${tLab(v0)} to ${tLab(v1)}${zoomed ? ` · zoom ×${fmt((T1 - T0) / (v1 - v0), 1)}` : ''}`;
+    resetBtn.setAttribute('aria-disabled', String(!zoomed));
   };
 
-  const stop = () => { playing = false; btn.textContent = '▶ Play'; btn.setAttribute('aria-pressed', 'false'); cancelAnimationFrame(raf); raf = 0; };
-  const tick = ts => {
-    if (!playing) return;
-    const dt = last ? (ts - last) / 1000 : 0; last = ts;
-    f = Math.min(1, f + dt / REPLAY_S); draw();
-    if (f >= 1) stop(); else raf = requestAnimationFrame(tick);
+  // ---------- time, alarms and the view window ----------
+  const crossCheck = () => {
+    if (prevNow != null && b.channels.some(c => c.alarm_s != null && (prevNow < c.alarm_s) !== (now < c.alarm_s))) {
+      try { if (navigator.userActivation?.hasBeenActive !== false) navigator.vibrate?.(8); } catch { /* no vibration */ }
+      blip(880);
+    }
+    prevNow = now;
   };
+  const follow = () => {   // keep the playhead inside the visible window when zoomed
+    const span = v1 - v0;
+    if (now < v0) { v0 = clampT(now - span * 0.1); v1 = v0 + span; }
+    else if (now > v1) { v1 = Math.min(T1, now + span * 0.1); v0 = v1 - span; }
+    if (v0 < T0) { v0 = T0; v1 = T0 + span; }
+  };
+  const setNow = (t, check = true) => { now = clampT(t); if (check) crossCheck(); else prevNow = now; follow(); draw(); };
+  const zoomAt = (factor, x) => {   // factor < 1 zooms in; x (canvas px) stays fixed
+    const tc = invX(x), frac = (x - PL()) / plotW();
+    const span = Math.max(minSpan(), Math.min(T1 - T0, (v1 - v0) * factor));
+    v0 = tc - frac * span; v1 = v0 + span;
+    if (v0 < T0) { v0 = T0; v1 = T0 + span; } if (v1 > T1) { v1 = T1; v0 = T1 - span; }
+    draw();
+  };
+  const panBy = dt => { const span = v1 - v0; v0 = Math.max(T0, Math.min(T1 - span, v0 + dt)); v1 = v0 + span; draw(); };
+  const resetZoom = () => { v0 = T0; v1 = T1; draw(); };
+
+  // ---------- playback (rAF only while playing, paused off-screen and in hidden tabs; Calm: still frames) ----------
+  const stop = () => {
+    playing = false; btn.textContent = '▶ Play'; btn.setAttribute('aria-pressed', 'false');
+    cancelAnimationFrame(raf); raf = 0; clearTimeout(timer); timer = 0;
+  };
+  const tick = ts => {
+    raf = 0;
+    if (!playing) return;
+    if (!onScreen || document.hidden) { last = 0; return; }   // resumed by the observer / visibilitychange
+    const dt = last ? Math.min(0.1, (ts - last) / 1000) : 0; last = ts;
+    setNow(now + dt / REPLAY_S * (T1 - T0));
+    if (now >= T1) stop(); else raf = requestAnimationFrame(tick);
+  };
+  const calmStep = () => {   // reduced motion: one still frame per second, no animation loop
+    timer = 0;
+    if (!playing) return;
+    if (!onScreen || document.hidden) { timer = setTimeout(calmStep, 1000); return; }
+    setNow(now + (T1 - T0) / REPLAY_S);
+    if (now >= T1) stop(); else timer = setTimeout(calmStep, 1000);
+  };
+  const resume = () => { if (playing && !raf && !timer) { last = 0; if (isCalm()) timer = setTimeout(calmStep, 1000); else raf = requestAnimationFrame(tick); } };
   btn.addEventListener('click', () => {
     if (playing) return stop();
-    if (f >= 1) f = 0;
-    playing = true; last = 0; btn.textContent = '❚❚ Pause'; btn.setAttribute('aria-pressed', 'true');
-    raf = requestAnimationFrame(tick);
+    cancelSpring();
+    if (now >= T1) setNow(T0, false);
+    playing = true; btn.textContent = '❚❚ Pause'; btn.setAttribute('aria-pressed', 'true');
+    resume();
   });
-  slider.addEventListener('input', () => { stop(); f = (Number(slider.value) - T0) / (T1 - T0); f = Math.max(0, Math.min(1, f)); draw(); });
+  resetBtn.addEventListener('click', resetZoom);
+  slider.addEventListener('input', () => { stop(); cancelSpring(); setNow(Number(slider.value)); });
 
+  // ---------- touch: drag the playhead with inertia, pinch to zoom the time axis ----------
+  const pts = new Map();
+  let drag = null, pinch = null;
+  const localX = e => e.clientX - cv.getBoundingClientRect().left;
+  const pinchStart = () => {
+    const [a, c] = [...pts.values()];
+    pinch = { d: Math.max(20, Math.abs(a.x - c.x)), cx: (a.x + c.x) / 2, v0, v1 };
+    drag = null;
+  };
+  cv.addEventListener('pointerdown', e => {
+    if (e.button > 0 || !b) return;
+    pts.set(e.pointerId, { x: localX(e) });
+    try { cv.setPointerCapture(e.pointerId); } catch { /* pointer gone */ }
+    if (pts.size === 2) { stop(); cancelSpring(); pinchStart(); return; }
+    if (pts.size > 2) return;
+    const x = localX(e);
+    // touch waits for a sideways move (a vertical swipe stays a page scroll); mouse and pen grab at once
+    drag = { x, sx: x, t: performance.now(), v: 0, live: e.pointerType !== 'touch' };
+    if (drag.live) { stop(); cancelSpring(); setNow(invX(x)); }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.get(e.pointerId).x = localX(e);
+    if (pinch && pts.size === 2) {
+      const [a, c] = [...pts.values()], d = Math.max(20, Math.abs(a.x - c.x)), cx = (a.x + c.x) / 2;
+      const span0 = pinch.v1 - pinch.v0, frac0 = (pinch.cx - PL()) / plotW(), tc = pinch.v0 + frac0 * span0;
+      const span = Math.max(minSpan(), Math.min(T1 - T0, span0 * pinch.d / d)), frac = (cx - PL()) / plotW();
+      v0 = tc - frac * span; v1 = v0 + span;
+      if (v0 < T0) { v0 = T0; v1 = T0 + span; } if (v1 > T1) { v1 = T1; v0 = T1 - span; }
+      draw(); return;
+    }
+    if (!drag) return;
+    const x = localX(e);
+    if (!drag.live) { if (Math.abs(x - drag.sx) < 6) return; drag.live = true; stop(); cancelSpring(); }
+    const tnow = performance.now(), dt = Math.max(1, tnow - drag.t);
+    drag.v = 0.8 * ((x - drag.x) / dt * 1000) + 0.2 * drag.v; drag.x = x; drag.t = tnow;
+    setNow(invX(x));
+  });
+  const up = e => {
+    if (!pts.delete(e.pointerId)) return;
+    if (pinch) { if (pts.size < 2) pinch = null; drag = null; return; }
+    if (!drag) return;
+    if (!drag.live) { const tap = e.type === 'pointerup' ? drag.sx : null; drag = null; if (tap != null) { stop(); cancelSpring(); setNow(invX(tap)); } return; }
+    const v = isCalm() || e.type === 'pointercancel' ? 0 : drag.v; drag = null;
+    if (Math.abs(v) < 40) return;
+    // fling: the playhead glides on with its release speed and settles on a spring (spring.js), inside the window
+    const x0 = X(now), target = Math.max(PL(), Math.min(PL() + plotW(), x0 + v * 0.18));
+    cancelSpring(); cancelSpring = spring(x0, v, target, x => setNow(invX(x)));
+  };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('dblclick', e => { e.preventDefault(); resetZoom(); });
+  cv.addEventListener('wheel', e => {
+    if (!b) return;
+    if (e.ctrlKey) { e.preventDefault(); zoomAt(Math.exp(e.deltaY * 0.0025), localX(e)); return; }
+    // a sideways trackpad swipe pans a zoomed window; vertical wheel always scrolls the page
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY) * 1.5 && (v1 - v0) < (T1 - T0) - 1e-6) { e.preventDefault(); panBy(e.deltaX / plotW() * (v1 - v0)); }
+  }, { passive: false });
+  cv.addEventListener('keydown', e => {   // + / - zoom around the playhead, 0 resets (arrows stay with keyNav)
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key, at = now >= v0 && now <= v1 ? X(now) : PL() + plotW() / 2;
+    if (k === '+' || k === '=') { e.preventDefault(); zoomAt(0.6, at); }
+    else if (k === '-' || k === '_') { e.preventDefault(); zoomAt(1 / 0.6, at); }
+    else if (k === '0') { e.preventDefault(); resetZoom(); }
+  });
+
+  // ---------- events ----------
   const alarmText = c => (c.alarm_s == null ? 'no alarm' : `alarm at ${c.alarm_s} s${c.resolution_s > 2 ? ` ± ${c.resolution_s}` : ''}`);
   const setup = () => {
     b = lat.burns[Number(sel.value)] || lat.burns[0];
-    T0 = b.t[0]; T1 = b.t[b.t.length - 1]; f = 1;
+    T0 = b.t[0]; T1 = b.t[b.t.length - 1]; v0 = T0; v1 = T1; now = T1; prevNow = T1;
     slider.min = String(T0); slider.max = String(T1);
-    lamps.replaceChildren(...b.channels.map((c, i) => h('div', { class: 'lamp', 'data-i': i, style: `--c:${SERIES[i % SERIES.length]}` }, h('i'), h('span', {}, c.name), h('b', {}, alarmText(c)))));
+    evRead.textContent = b.name;
+    lamps.replaceChildren(...b.channels.map((c, i) => h('div', { class: 'lamp', 'data-i': i, style: `--c:${TRACE[i % TRACE.length]}` }, h('i'), h('span', {}, c.name), h('b', {}, alarmText(c)))));
+    chRead.replaceChildren(...b.channels.map((c, i) => h('div', { class: 'det-rd', style: `--c:${TRACE[i % TRACE.length]}` },
+      h('i'), h('span', { class: 'det-n' }, c.key || c.name), h('b', { class: 'det-v' }), h('span', { class: 'det-u' }, 'alarm margin'), h('span', { class: 'det-st' }))));
     // text summary of the canvas (D5.6), built from the same values
     const al = b.channels.filter(c => c.alarm_s != null).sort((p, q) => p.alarm_s - q.alarm_s);
     summary.textContent = `${b.name}. The lanes run from ${fmt(T0, 0)} s to ${fmt(T1, 0)} s after ignition. ` +
@@ -126,9 +333,9 @@ export function replayCard(lat, params = {}, ctx = {}) {
       html: `<b>${esc(fmt(t, 1))} s after ignition</b>` + b.channels.map((c, i) => {
         const v = c.values[k];
         const st = c.alarm_s == null ? 'never alarms in this event' : t >= c.alarm_s ? `alarmed at ${c.alarm_s} s` : 'below its alarm line';
-        return `<br><span style="color:${SERIES[i % SERIES.length]}">&#9632;</span> ${esc(c.name)}: <b>${v == null ? 'n/a' : esc(fmt(v, 2)) + '×'}</b> (${st})`;
+        return `<br><span style="color:${TRACE[i % TRACE.length]}">&#9632;</span> ${esc(c.name)}: <b>${v == null ? 'n/a' : esc(fmt(v, 2)) + '×'}</b> (${st})`;
       }).join(''),
-      anchor: () => { const r = cv.getBoundingClientRect(); return { x: r.left + X(t) / W * r.width, y: r.top + 12 / H * r.height }; },
+      anchor: () => { const r = cv.getBoundingClientRect(); return { x: r.left + X(t), y: r.top + 12 }; },
     }));
     kn.index = -1;
     // lane-value table: the raw readings the lanes draw (unclamped)
@@ -139,11 +346,11 @@ export function replayCard(lat, params = {}, ctx = {}) {
     draw();
   };
   const kn = keyNav(cv, items, {
-    label: 'Replay of sensor signals after ignition',
-    onMove: k => { stop(); const t = b.t[k]; f = Math.max(0, Math.min(1, (t - T0) / (T1 - T0))); draw(); },
+    label: 'Replay of sensor signals after ignition. Plus and minus zoom the time axis, 0 resets',
+    onMove: k => { stop(); cancelSpring(); setNow(b.t[k]); },
   });
   sel.addEventListener('change', () => {
-    stop(); setup();
+    stop(); cancelSpring(); setup();
     if (!ctx.detached && b.key) setParams({ event: b.key });   // ?event= round-trips (main read it but never wrote it)
   });
 
@@ -153,21 +360,35 @@ export function replayCard(lat, params = {}, ctx = {}) {
   let idx = lat.burns.findIndex(x => ev && x.key === ev);
   if (idx < 0) idx = lat.burns.findIndex(x => want.test(x.name));
   sel.value = String(Math.max(0, idx));
+  if (ctx.detached) size();
   setup();
-  ctx.onLeave?.(stop);
+
+  // ---------- lifecycle: crisp redraw on resize, pause off-screen, stop everything on leave ----------
+  if (!ctx.detached) {
+    const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(() => { if (size()) draw(); }) : null;
+    ro?.observe(cv);
+    const io = typeof IntersectionObserver === 'function' ? new IntersectionObserver(([en]) => { onScreen = en.isIntersecting; if (onScreen) resume(); }) : null;
+    io?.observe(scope);
+    const vis = () => { if (!document.hidden) resume(); };
+    document.addEventListener('visibilitychange', vis);
+    ctx.onLeave?.(() => { stop(); cancelSpring(); ro?.disconnect(); io?.disconnect(); document.removeEventListener('visibilitychange', vis); });
+  }
 
   const blindLink = h('a', { href: figLink('detect', T_BLIND), onclick: e => {
     if (ctx.detached || e.metaKey || e.ctrlKey || e.shiftKey || e.button > 0) return;
     if (revealFigure(T_BLIND)) e.preventDefault();
   } }, 'stated on the Blind Spot panel');
 
-  return card(T_REPLAY, lat.status,
+  const c0 = card(T_REPLAY, lat.status,
     'Saffire-III telemetry, replayed at about 14 seconds per event. Each lane is one sensor, scaled so the dashed line is its alarm threshold. A dot marks the moment it would alarm.',
-    h('div', { class: 'row replay-ctl' }, h('label', { for: selId }, 'Event'), sel, btn),
-    cv,
+    h('div', { class: 'row replay-ctl' }, h('label', { for: selId }, 'Event'), sel, btn, resetBtn),
+    scope,
+    h('p', { id: hintId, class: 'sr' }, 'Drag across the scope to move the playhead; pinch, ctrl and the mouse wheel, or the plus and minus keys zoom the time axis; double-click or the Reset zoom button shows the whole event.'),
     h('div', { class: 'replay-time' }, h('label', { for: sliderId }, 'Time after ignition, s'), slider, clock),
     lamps, summary, tableBox,
     h('p', {}, h('small', {}, 'NASA has not published Cygnus smoke detector alarm times for Saffire-III that we could find, so these thresholds are ours (', blindLink, '), not NASA\'s.')));
+  c0.classList.add('det-osc');
+  return c0;
 }
 
 // ---------------------------------------------------------------------------------------------------------------

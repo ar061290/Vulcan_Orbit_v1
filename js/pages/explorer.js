@@ -6,7 +6,11 @@
 //   B3 an expand button per row with every attribute we hold, and "Not in our table yet" for the rest
 //   B4 side by side: a Compare button per row (aria-pressed), at most 2, the oldest pick drops out
 //   B5 "Group by hardware": a prefix rule on the facility string, shown on the page
+//   UI lock: a "constellation" of the investigations at the top of the card. x = the PSI record number, because
+//   data/investigations.json holds no year or date (the axis says so); lanes = the hardware family (B5 rule).
+//   Drag or arrow keys pan it (js/spring.js); each dot opens that investigation's existing record in a side panel.
 import { h, load, card, badge, empty, seg, announce, isMissing } from '../lib.js';
+import { draggable } from '../spring.js';
 
 // B5: hardware family = the first prefix the facility string starts with. Order matters only for display.
 // The rule is a team choice (the facility strings come from data/investigations.json); it is printed on the page.
@@ -46,6 +50,129 @@ function testedText(t, gaps) {
       ? `${t.n} tests in NASA's summary table with a usable O₂ value (${t.kind})`
       : `${t.n} tests in NASA's summary table with usable O₂ and pressure values (${t.kind})`,
   };
+}
+
+// ---------- the constellation (UI lock) ----------
+const calmNow = () => document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SVGNS = 'http://www.w3.org/2000/svg';
+const sv = (tag, attrs = {}) => { const el = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs)) if (v != null) el.setAttribute(k, String(v)); return el; };
+// Layout only (pixels, not data): one PSI number = U px; a jump of more than BREAK_AT numbers is drawn as an axis break.
+const U = 44, BREAK = 72, BREAK_AT = 4, PAD = 48, LANE = 80, AXIS = 40, DOT_Y = 50, HIT = 28;
+/** Short dot label from the investigation's own name: drops a bracketed note and the "ACME " prefix, cut at 14 characters. */
+const shortName = n => { const s = String(n || '').replace(/\s*\(.*?\)\s*/g, ' ').replace(/^ACME\s+/, '').trim(); return s.length > 14 ? `${s.slice(0, 12).trim()}…` : s; };
+
+/**
+ * Build the constellation. Returns {el, mark(id), dim(fn), destroy()}.
+ * live=false (Sources site map): a still SVG with a text label, no buttons and no listeners.
+ */
+function constellation(items, { live, onOpen }) {
+  const pts = items.map(it => ({ it, n: Number((psiOf(it.psi) || '').slice(4)), fam: familyOf(it.facility) })).filter(p => Number.isFinite(p.n) && p.n > 0);
+  const nums = [...new Set(pts.map(p => p.n))].sort((a, b) => a - b);
+  const X = new Map(), breaks = [];
+  let x = PAD;
+  nums.forEach((n, i) => {
+    if (i) { const g = n - nums[i - 1]; if (g > BREAK_AT) { breaks.push(x + BREAK / 2); x += BREAK; } else x += g * U; }
+    X.set(n, x);
+  });
+  const W = x + PAD;
+  const fams = [...FAMILIES.map(f => f.label), UNMAPPED].filter(f => pts.some(p => p.fam === f));
+  const ay = fams.length * LANE + 6, H = ay + AXIS;
+  const yOf = p => fams.indexOf(p.fam) * LANE + DOT_Y;
+
+  const svg = sv('svg', { class: 'xc-svg', width: W, height: H, viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true', focusable: 'false' });
+  fams.forEach((f, l) => svg.append(sv('line', { class: 'xc-lane', x1: 0, x2: W, y1: l * LANE + DOT_Y, y2: l * LANE + DOT_Y })));
+  let a0 = 0;
+  for (const b of breaks) { svg.append(sv('line', { class: 'xc-axis', x1: a0, x2: b - 5, y1: ay, y2: ay })); a0 = b + 5;
+    svg.append(sv('path', { class: 'xc-break', d: `M${b - 8} ${ay + 5}L${b - 2} ${ay - 5}M${b + 2} ${ay + 5}L${b + 8} ${ay - 5}` })); }
+  svg.append(sv('line', { class: 'xc-axis', x1: a0, x2: W, y1: ay, y2: ay }));
+  for (const n of nums) {
+    svg.append(sv('line', { class: 'xc-tick', x1: X.get(n), x2: X.get(n), y1: ay, y2: ay + 5 }));
+    const t = sv('text', { class: 'xc-num', x: X.get(n), y: ay + 19, 'text-anchor': 'middle' }); t.textContent = String(n); svg.append(t);
+  }
+  // alternate each lane's labels above and below the dots so neighbours do not collide
+  const side = new Map();
+  for (const f of fams) pts.filter(p => p.fam === f).sort((a, b) => a.n - b.n).forEach((p, i) => side.set(p, i % 2 ? 1 : -1));
+  const stars = new Map();
+  [...pts].sort((a, b) => a.n - b.n).forEach((p, k) => {
+    const cx = X.get(p.n), cy = yOf(p);
+    svg.append(sv('line', { class: 'xc-guide', x1: cx, x2: cx, y1: cy + 6, y2: ay }));
+    const g = sv('g', { class: 'xc-star', 'data-id': p.it.id, style: `--k:${k}` });
+    // glow: layered circles at falling opacity (no gradients, no filters)
+    [[14, 'h1'], [9, 'h2'], [5, 'h3'], [2.4, 'h4']].forEach(([r, c]) => g.append(sv('circle', { class: c, cx, cy, r })));
+    const lab = sv('text', { class: 'xc-name', x: cx, y: side.get(p) < 0 ? cy - 19 : cy + 27, 'text-anchor': 'middle' });
+    lab.textContent = shortName(p.it.name); g.append(lab);
+    svg.append(g); stars.set(p.it.id, g);
+  });
+
+  // lane names stay pinned while the track pans. SVG text, so the glossary pass leaves it alone (it is aria-hidden;
+  // the view's label and each dot's name carry the same information).
+  const lanes = sv('svg', { class: 'xc-lanes', width: '100%', height: H, 'aria-hidden': 'true', focusable: 'false' });
+  fams.forEach((f, l) => { const t = sv('text', { x: 16, y: l * LANE + 14 }); t.textContent = `${f} · ${pts.filter(p => p.fam === f).length}`; lanes.append(t); });
+  const track = h('div', { class: 'xc-track', style: `width:${W}px;height:${H}px` }, svg);
+  const n0 = items.length - pts.length;
+  const summary = `${pts.length} NASA investigations placed by PSI record number, in ${fams.length} hardware-family lanes.${n0 ? ` ${n0} without a PSI number are in the list only.` : ''}`;
+  const readDefault = `${pts.length} investigations · ${fams.length} hardware families`;
+  const read = h('p', { class: 'xc-read', 'aria-hidden': 'true' }, readDefault);
+  const view = h('div', live
+    ? { class: 'xc-view', tabindex: '0', role: 'group', 'aria-label': `${summary} Use the arrow keys to pan.`, 'aria-describedby': 'xc-hint' }
+    : { class: 'xc-view', role: 'img', 'aria-label': summary }, lanes, track);
+  const el = h('div', { class: 'xc hud' },
+    h('div', { class: 'xc-head' },
+      h('span', { class: 'xc-k' }, 'X · NASA PSI record number (catalogue order, not a date)'),
+      h('span', { class: 'xc-k' }, 'Lanes · hardware family')),
+    read, view,
+    h('p', { class: 'xc-hint', id: live ? 'xc-hint' : null },
+      'Our NASA table has no launch year, so the dots run in PSI catalogue order. ',
+      live ? 'Drag sideways or use the arrow keys to pan; press a dot to open its full record.' : 'Open the page to pan and open each record.',
+      n0 ? ` ${n0} without a PSI number are in the list only.` : null));
+
+  const btns = new Map();
+  const say = p => { read.textContent = p ? `${p.it.psi} · ${p.it.name} · ${p.it.facility}` : readDefault; };
+  const api = {
+    el,
+    mark(id) { btns.forEach((b, k) => b.setAttribute('aria-expanded', String(k === id))); stars.forEach((g, k) => g.classList.toggle('on', k === id)); },
+    dim(keep) { stars.forEach((g, k) => g.classList.toggle('dim', !keep(k))); },
+    destroy() {},
+  };
+  if (!live) return api;
+
+  const put = p => { track.style.transform = `translate3d(${p}px,0,0)`; };
+  const bounds = () => [Math.min(0, view.clientWidth - W), 0];
+  const clampP = p => { const [a, b] = bounds(); return Math.max(a, Math.min(b, p)); };
+  const dr = draggable(view, { axis: 'x', bounds, onMove: put, step: 3 * U, value: 0 });
+  put(0);
+  let down = null, lastTap = 0;
+  for (const p of pts) {
+    const b = h('button', { type: 'button', class: 'xc-dot', 'data-id': p.it.id, 'aria-haspopup': 'dialog', 'aria-expanded': 'false', 'aria-controls': 'xp-panel',
+      style: `left:${X.get(p.n) - HIT / 2}px;top:${yOf(p) - HIT / 2}px` },
+      h('span', { class: 'sr' }, `${p.it.name}, ${p.it.psi}, ${p.fam}: open its record`));
+    b.addEventListener('click', () => { if (performance.now() - lastTap > 600) onOpen(p.it, b); });
+    b.addEventListener('pointerenter', () => say(p)); b.addEventListener('pointerleave', () => say(null));
+    b.addEventListener('focus', () => {
+      say(p);
+      // keyboard focus: pan the dot into view (pointer focus is left alone so it does not fight a drag)
+      if (!b.matches(':focus-visible')) return;
+      const vx = X.get(p.n) + dr.get();
+      if (vx < 24 || vx > view.clientWidth - 24) dr.set(clampP(view.clientWidth / 2 - X.get(p.n)));
+    });
+    b.addEventListener('blur', () => say(null));
+    track.append(b); btns.set(p.it.id, b);
+  }
+  // a tap (pointer moved under 6 px) opens the dot; draggable captures the pointer, so the button may not get the click
+  view.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, dot: e.target.closest?.('.xc-dot') }; });
+  view.addEventListener('pointerup', e => {
+    if (down?.dot && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6) {
+      lastTap = performance.now(); const p = pts.find(q => q.it.id === down.dot.dataset.id); if (p) onOpen(p.it, down.dot);
+    }
+    down = null;
+  });
+  view.addEventListener('pointercancel', () => { down = null; });
+  // a sideways trackpad swipe pans; vertical wheel is left to the page
+  view.addEventListener('wheel', e => { if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; e.preventDefault(); dr.set(clampP(dr.get() - e.deltaX), false); }, { passive: false });
+  const onResize = () => { const p = dr.get(), q = clampP(p); if (q !== p) dr.set(q, false); };
+  addEventListener('resize', onResize);
+  api.destroy = () => { dr.destroy(); removeEventListener('resize', onResize); };
+  return api;
 }
 
 /** One-line answer for "The short answer" (main's summaries.js text). */
@@ -131,9 +258,10 @@ export default async function render(root, ctx = {}) {
   const cmpBox = h('div', { class: 'xp-cmp' });
   const ruleLine = h('p', { class: 'xp-score-rule' });
 
-  const detailRow = (r, id) => {
+  // The record ("dossier") for one investigation: used by the expand row (B3) and by the constellation's side panel.
+  const dossier = r => {
     const t = testedText(testedBy.get(r.psi), gaps);
-    const dl = h('dl', { class: 'kv xp-kv' },
+    return [h('dl', { class: 'kv xp-kv' },
       [['Focus', cap(r.focus)], ['Fuel', r.fuel], ['Facility', r.facility], ['Hardware family', familyOf(r.facility)],
         ['What it measured', r.measured], ['Rows', r.rows || 'unverified'],
         ['Topic tags', (r.tags || []).length ? h('span', {}, r.tags.map(x => h('span', { class: 'tag' }, x))) : 'unverified'],
@@ -141,11 +269,44 @@ export default async function render(root, ctx = {}) {
         ['DOI', r.doi ? ext(`https://doi.org/${r.doi}`, r.doi) : 'unverified'],
         ['O₂ tested', t.o2], ['Pressure tested', t.kpa], t.n ? ['Range from', `${t.n}, data/gaps.json`] : null,
         ['Goals', NOT_YET], ['Sample shape', NOT_YET], ['Variables', NOT_YET],
-      ].filter(Boolean).map(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]));
-    return h('tr', { class: 'xp-detail', id, hidden: !state.open.has(r.id) },
-      h('td', { colspan: COLS.length }, dl,
-        h('p', { class: 'xp-note' }, h('small', {}, 'Airflow, sample size and sensors are named inside "What it measured" where our table has them. Goals, sample shape and variables are not separate fields in data/investigations.json yet.'))));
+      ].filter(Boolean).map(([k, v]) => [h('dt', {}, k), h('dd', {}, v)])),
+    h('p', { class: 'xp-note' }, h('small', {}, 'Airflow, sample size and sensors are named inside "What it measured" where our table has them. Goals, sample shape and variables are not separate fields in data/investigations.json yet.'))];
   };
+  const detailRow = (r, id) => h('tr', { class: 'xp-detail', id, hidden: !state.open.has(r.id) }, h('td', { colspan: COLS.length }, dossier(r)));
+
+  // ---------- the constellation's side panel: the same dossier, in a non-modal dialog on the right ----------
+  let panel = null, opener = null;
+  const onEsc = e => { if (e.key === 'Escape' && panel) { e.preventDefault(); closePanel(); } };
+  function closePanel(restore = true) {
+    if (!panel) return;
+    panel.remove(); panel = null; cons.mark(null);
+    document.removeEventListener('keydown', onEsc);
+    if (restore && opener?.isConnected) opener.focus();
+    opener = null;
+  }
+  function openPanel(it, btn) {
+    opener = btn;
+    const head = h('h2', { id: 'xp-panel-h', tabindex: '-1' }, it.name);
+    const el = h('div', { class: 'xp-panel', id: 'xp-panel', role: 'dialog', 'aria-modal': 'false', 'aria-labelledby': 'xp-panel-h' },
+      h('div', { class: 'xp-panel-top' },
+        h('span', { class: 'xp-panel-k' }, [it.psi, familyOf(it.facility)].filter(Boolean).join(' · ')),
+        h('button', { type: 'button', class: 'xp-panel-x', 'aria-label': 'Close the record', onclick: () => closePanel() }, 'Close')),
+      head, dossier(it),
+      h('p', { class: 'xp-panel-act' }, h('button', { type: 'button', class: 'btn', onclick: () => showInList(it) }, 'Show in the list')));
+    if (panel) panel.replaceWith(el); else { pg.append(el); document.addEventListener('keydown', onEsc); }
+    panel = el; cons.mark(it.id);
+    head.focus({ preventScroll: true });
+  }
+  function showInList(it) {
+    state.open.add(it.id); drawTable();
+    const tr = tableBox.querySelector(`tr[data-id="${CSS.escape(it.id)}"]`);
+    if (!tr) { announce(`${it.name} is hidden by the current search or focus. Clear them to see it in the list.`); return; }
+    closePanel(false);
+    tr.scrollIntoView({ block: 'center', behavior: calmNow() ? 'auto' : 'smooth' });
+    tr.querySelector('button.xp-x')?.focus({ preventScroll: true });
+  }
+  const cons = constellation(items, { live, onOpen: openPanel });
+  ctx.onLeave?.(() => { closePanel(false); cons.destroy(); });
 
   const row = r => {
     const did = `xp-d-${r.id}`, picked = state.pick.includes(r.id);
@@ -174,6 +335,8 @@ export default async function render(root, ctx = {}) {
 
   function drawTable() {
     const rows = items.filter(matches).map(i => ({ ...i, score: score(i) })).sort((a, b) => b.score - a.score);
+    const shown = new Set(rows.map(r => r.id));
+    cons.dim(id => shown.has(id));
     const max = Math.max(1, ...rows.map(r => r.score));
     rows.forEach(r => { r.max = max; });
     const head = h('thead', {}, h('tr', {}, COLS.map(c => h('th', { scope: 'col' }, c))));
@@ -239,7 +402,7 @@ export default async function render(root, ctx = {}) {
 
   drawTable(); drawCmp(); drawRule();
   pg.append(card('Find and rank', inv.status, inv.source,
-    controls, ruleBox, tableBox, cmpBox, ruleLine,
+    cons.el, controls, ruleBox, tableBox, cmpBox, ruleLine,
     haveW ? null : empty('Mission ranking', 'ranking_weights', 'Without the team\'s topic weights the experiments are listed in file order and not ranked.',
       '{ "status": "team", "missions": { "station": "Space station" }, "weights": { "station": { "detection": 3 } } }'),
     haveW && rw.note ? h('p', {}, h('small', {}, rw.note)) : null));

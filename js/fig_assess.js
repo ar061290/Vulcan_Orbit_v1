@@ -11,6 +11,7 @@
 // limit came from (plan §3.5, Q10).
 import { h, add, card, badge, empty, sig, pct, stat, seg, numField, table, announce, load, isMissing } from './lib.js';
 import { lineChart, numbers, SERIES, DASH, C } from './charts.js';
+import { dial } from './spring.js';
 
 export const TITLES = {
   inputs: 'Flame now, fuel and cabin',
@@ -130,6 +131,330 @@ export function presetState(store, example) {
   return s;
 }
 
+// ---------------------------------------------------------------- dial detents and the cabin plate (feat/ui-lock)
+const SVGNS = 'http://www.w3.org/2000/svg';
+const sv = (tag, a = {}, ...kids) => {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(a)) if (v != null && v !== false) e.setAttribute(k, String(v));
+  for (const k of kids) if (k) e.append(k);
+  return e;
+};
+const reduced = () => (typeof document !== 'undefined' && document.documentElement.dataset.motion === 'calm')
+  || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const decimalsOf = s => (String(s).split('.')[1] || '').length;
+const uniqSorted = a => [...new Set(a.filter(isNum).map(v => Number(v.toPrecision(6))))].sort((x, y) => x - y);
+const supUnit = u => String(u || '').replace(/2$/, '²');
+
+/** Marked values for each dial, all read from the data files: every calibration-box edge in spread_predictor.json
+ *  (constants.*.domain; a τ edge gives the one-side and two-side sheet thickness, as deriveBounds does), every worked
+ *  example's input in growth_examples.json and every gaps.json probe pressure. */
+export function dataMarks(data) {
+  const sp = data?.sp, ex = examplesOf(data?.examples), probes = Array.isArray(data?.gaps?.probes) ? data.gaps.probes : [];
+  const M = { flow_cm_s: [], o2_vol_pct: [], pressure_atm: [], thickness_mm: [], width_cm: [], length_cm: [], area_cm2: [], flow_direction_deg: [] };
+  const walk = (o, inDomain) => {
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return;
+    for (const [k, v] of Object.entries(o)) {
+      if (inDomain && Array.isArray(v) && v.length === 2 && v.every(isNum)) {
+        if (k in M) M[k].push(...v);
+        if (k === 'tau_mm') M.thickness_mm.push(...v, ...v.map(x => 2 * x));
+      } else if (v && typeof v === 'object' && !Array.isArray(v)) walk(v, inDomain || k === 'domain');
+    }
+  };
+  walk(sp?.constants, false);
+  for (const e of ex) {
+    const f = e.inputs?.fuel || {}, c = e.inputs?.conditions || {}, fl = e.inputs?.flame_state || {};
+    M.width_cm.push(f.width_cm); M.length_cm.push(f.length_cm); M.thickness_mm.push(f.thickness_mm); M.area_cm2.push(fl.area_cm2);
+    M.flow_cm_s.push(c.flow_cm_s); M.o2_vol_pct.push(c.o2_vol_pct); M.pressure_atm.push(c.pressure_atm); M.flow_direction_deg.push(c.flow_direction_deg);
+  }
+  for (const p of probes) if (isNum(p.kpa)) M.pressure_atm.push(p.kpa / KPA_PER_ATM);
+  return Object.fromEntries(Object.entries(M).map(([k, v]) => [k, uniqSorted(v)]));
+}
+
+// A dial sweeps 270 degrees, from -135 (min) to +135 (max), clockwise from 12 o'clock.
+const A0 = -135, SWEEP = 270;
+const polar = (r, deg) => [50 + r * Math.sin(deg * Math.PI / 180), 50 - r * Math.cos(deg * Math.PI / 180)];
+const arcD = (r, d0, d1) => {
+  const [x0, y0] = polar(r, d0), [x1, y1] = polar(r, d1);
+  return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${r} ${r} 0 ${d1 - d0 > 180 ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+};
+
+/** One rotary control (js/spring.js dial) drawn as an SVG ring: tick detents at the marked data values, a pointer turned
+ *  by --turn and the calibration box of the active regime as an arc. `detents` (when given) are where it snaps; otherwise
+ *  it steps by the input's own step and PageUp / PageDown jump to the next marked value. */
+function dialCtl({ id, name, unit, min, max, step, value, marks = [], detents = null, onInput }) {
+  const dec = decimalsOf(step);
+  const round = v => Number(Number(v).toFixed(dec));
+  // a value set from outside (a preset, a link, the exact field) is shown as it is; a value the dial produced is rounded to the step
+  let lo = min, hi = max, ctl = null, face = null, cur = value, bands = [], given = value;
+  const fmtv = v => `${plain(v === given ? v : round(v))} ${unit}`;
+  const ticks = sv('g', { class: 'as-dial-ticks' }), bandG = sv('g', { class: 'as-dial-band' });
+  const svg = sv('svg', { viewBox: '0 0 100 100', 'aria-hidden': 'true', focusable: 'false' },
+    sv('path', { class: 'as-dial-track', d: arcD(40, A0, A0 + SWEEP) }), bandG, ticks,
+    sv('g', { class: 'as-dial-ptr' }, sv('line', { x1: 50, y1: 40, x2: 50, y2: 17 }), sv('circle', { cx: 50, cy: 14, r: 3.2 })),
+    sv('circle', { class: 'as-dial-hub', cx: 50, cy: 50, r: 5 }));
+  const val = h('span', { class: 'as-dial-val', 'aria-hidden': 'true' });
+  const tag = h('span', { class: 'as-dial-tag', hidden: true, 'aria-hidden': 'true' }, 'Outside cal box');
+  const el = h('div', { class: 'as-dial' }, h('span', { class: 'as-dial-label', 'aria-hidden': 'true' }, `${name} · ${unit}`));
+  const frac = v => (v - lo) / ((hi - lo) || 1);
+  const ang = v => A0 + SWEEP * Math.max(0, Math.min(1, frac(v)));
+  const drawTicks = () => {
+    ticks.replaceChildren();
+    for (const m of marks) {
+      if (!isNum(m.v) || m.v < lo - 1e-9 || m.v > hi + 1e-9) continue;
+      const [x0, y0] = polar(m.major ? 43 : 44.5, ang(m.v)), [x1, y1] = polar(m.major ? 49.5 : 47.5, ang(m.v));
+      ticks.append(sv('line', { x1: x0.toFixed(2), y1: y0.toFixed(2), x2: x1.toFixed(2), y2: y1.toFixed(2), class: m.major ? 'maj' : null }));
+    }
+  };
+  const drawBands = () => {
+    bandG.replaceChildren();
+    for (const [a, b] of bands) {
+      if (!isNum(a) || !isNum(b) || b < lo || a > hi) continue;
+      let d0 = ang(Math.max(a, lo)), d1 = ang(Math.min(b, hi));
+      if (d1 - d0 < 2) { const m = (d0 + d1) / 2; d0 = m - 1; d1 = m + 1; }
+      bandG.append(sv('path', { d: arcD(40, d0, d1) }));
+    }
+  };
+  const showVal = v => { val.textContent = fmtv(v); };
+  const majors = () => uniqSorted(marks.filter(m => m.major).map(m => m.v)).filter(v => v >= lo - 1e-9 && v <= hi + 1e-9);
+  const bind = v => {
+    const f = h('div', { class: 'as-dial-face', id: `${id}-dial` });
+    f.append(svg);
+    if (face) face.replaceWith(f); else el.append(f, val, tag);
+    face = f;
+    ctl = dial(face, { min: lo, max: hi, value: Math.max(lo, Math.min(hi, v)), detents: detents ? detents.filter(d => d >= lo && d <= hi) : null,
+      step: detents ? null : step, label: `${name}, ${unit}`, format: fmtv,
+      onChange: x => { const r = round(x); cur = r; showVal(r); onInput(r); } });
+    face.setAttribute('aria-valuetext', fmtv(v));
+    face.addEventListener('keydown', e => {
+      if (e.key !== 'PageUp' && e.key !== 'PageDown') return;
+      const pts = majors(); if (!pts.length) return;
+      const t = e.key === 'PageUp' ? pts.find(p => p > cur + 1e-9) ?? hi : [...pts].reverse().find(p => p < cur - 1e-9) ?? lo;
+      e.preventDefault(); cur = t; given = t; ctl.set(t); showVal(t); onInput(t);
+    });
+    drawTicks(); drawBands(); showVal(v);
+  };
+  bind(value);
+  return {
+    el,
+    /** Set from outside (a preset, a link, the exact field); never while the visitor is turning this dial. */
+    set(v) { if (!isNum(v) || (typeof document !== 'undefined' && document.activeElement === face)) return; cur = v; given = v; ctl.set(v); showVal(v); },
+    active: () => typeof document !== 'undefined' && document.activeElement === face,
+    limits(a, b) { if (!isNum(a) || !isNum(b) || b <= a || (a === lo && b === hi)) return; lo = a; hi = b; bind(cur); },
+    bands(list) { bands = Array.isArray(list) ? list : []; drawBands(); },
+    out(on) { el.classList.toggle('out', !!on); tag.hidden = !on; },
+  };
+}
+
+// Lengths for the plate's grid and scale bar, in the fuel's own unit (cm). Drawing choices, not data.
+const NICE = [0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200];
+const easeMove = t => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);   // = cubic-bezier(.65,0,.35,1)
+const RING_RUNS = [['lo', 'Slow run', 145, 'end'], ['mid', 'Middle run', 90, 'middle'], ['hi', 'Fast run', 35, 'start']];
+
+/** The cabin plate: a top-down illustration of a cabin wall panel (not to scale) holding the fuel sheet drawn to scale
+ *  (width × length from the inputs). The three rings are the growth model's largest burning area for the slow, middle and
+ *  fast runs, each drawn as a circle of the same area (radius √(area/π)) around the flame's start point. The start point
+ *  is the flame position x, y: a real growth-model input, so dragging it sets the same field as the x and y inputs. */
+function platePanel({ onStart, detached }) {
+  let PW = 560, PH = 340;
+  let fuel = { W: null, L: null, material: '' }, start = [0, 0], flameA = null, flow = { u: null, deg: 0 }, kind = 'surface';
+  let areas = null, aUnit = '', status = 'Waiting for the growth run';
+  let cur = null, from = null, to = null, t0 = 0, raf = 0, visible = true, dragging = false;
+  const g = cls => sv('g', { class: cls });
+  const clip = sv('clipPath', { id: 'as-plate-clip' }, sv('rect', {}));
+  const cabin = sv('rect', { class: 'as-cabin', rx: 14 }), cabinIn = sv('rect', { class: 'as-cabin-in', rx: 3 }), bolts = sv('g', { class: 'as-bolts' });
+  const tagL2 = sv('tspan', {}, document.createTextNode('CABIN PLATE NOT TO SCALE'));
+  const tagL = sv('text', { class: 'as-ptag' }, sv('tspan', {}, document.createTextNode('ILLUSTRATION · ')), tagL2);
+  const tagR = sv('text', { class: 'as-ptag', 'text-anchor': 'end' }, document.createTextNode('TOP-DOWN · FUEL AND RINGS TO SCALE'));
+  const gridG = g('as-pgrid'), fuelR = sv('rect', { class: 'as-fuel', rx: 2 }), fuelT = sv('text', { class: 'as-ptag as-fuel-t' });
+  const axX = sv('text', { class: 'as-ptag', 'text-anchor': 'end' }), axY = sv('text', { class: 'as-ptag' });
+  const disc = sv('circle', { class: 'as-now' });
+  const rings = Object.fromEntries(RING_RUNS.map(([k]) => [k, {
+    g: sv('g', { class: `as-ring ${k}` }, sv('circle', { class: 'halo2' }), sv('circle', { class: 'halo1' }), sv('circle', { class: 'line' })),
+    t: sv('text', { class: 'as-rtag' }) }]));
+  const ringG = g('as-rings-g'); RING_RUNS.forEach(([k]) => ringG.append(rings[k].g));
+  const tagG = g('as-rtags'); RING_RUNS.forEach(([k]) => tagG.append(rings[k].t));
+  const bar = sv('path', { class: 'as-bar' }), barT = sv('text', { class: 'as-ptag' });
+  const arrow = sv('path', { class: 'as-air' }), airT = sv('text', { class: 'as-ptag', 'text-anchor': 'end' });
+  const stT = sv('text', { class: 'as-ptag as-stat', 'text-anchor': 'middle' });
+  const art = sv('g', { role: 'img', 'aria-label': '' },
+    cabin, cabinIn, bolts, tagL, tagR, sv('g', { 'clip-path': 'url(#as-plate-clip)' }, gridG, fuelR, disc, ringG), fuelT, axX, axY, tagG, bar, barT, arrow, airT, stT);
+  const focusC = sv('circle', { class: 'as-hfocus', r: 15 });
+  const handle = sv('g', { class: 'as-start', tabindex: 0, role: 'application', 'aria-roledescription': 'draggable point', 'aria-describedby': 'as-plate-help' },
+    sv('circle', { class: 'as-hhit', r: 22 }), focusC, sv('path', { class: 'as-hcross', d: 'M-11 0H-4M4 0H11M0 -11V-4M0 4V11' }), sv('circle', { class: 'as-hdot', r: 3.5 }));
+  const svg = sv('svg', { class: 'as-plate-svg', role: 'group', 'aria-label': 'Cabin plate: the fire start point and the burning-area rings' },
+    sv('defs', {}, clip), art, handle);
+  const key = h('ul', { class: 'as-ring-key' });
+  const help = h('p', { class: 'as-plate-help', id: 'as-plate-help' });
+  const el = h('div', { class: 'as-plate' }, h('div', { class: 'as-plate-frame hud' }, svg), key, help);
+
+  // ---- geometry
+  const narrow = () => PW < 460;
+  const box = () => (narrow() ? { IX: 24, IY: 64, IW: PW - 48, IH: PH - 64 - 62 } : { IX: 28, IY: 50, IW: PW - 56, IH: PH - 50 - 46 });
+  const target = () => {
+    const { W, L } = fuel; if (!(W > 0 && L > 0)) return null;
+    const { IX, IY, IW, IH } = box();
+    // room around the sheet for the largest area the model can return (the whole face, W × L)
+    const R = Math.sqrt(W * L / Math.PI), bw = L + 2 * R, bh = W + 2 * R, s = Math.min(IW / bw, IH / bh);
+    const rc = k => (areas && isNum(areas[k]) && areas[k] > 0 ? Math.sqrt(areas[k] / Math.PI) : 0);
+    return { s, ox: IX + (IW - bw * s) / 2 + R * s, oy: IY + IH - (IH - bh * s) / 2 - R * s, lo: rc('lo'), mid: rc('mid'), hi: rc('hi') };
+  };
+  const set = (e, a) => { for (const [k, v] of Object.entries(a)) e.setAttribute(k, typeof v === 'number' ? v.toFixed(2) : v); };
+  const txt = (e, s) => { e.textContent = s; };
+  function draw() {
+    const { IX, IY, IW, IH } = box();
+    svg.setAttribute('viewBox', `0 0 ${PW} ${PH}`);
+    set(cabin, { x: 6, y: 6, width: PW - 12, height: PH - 12 }); set(cabinIn, { x: IX - 8, y: IY - 8, width: IW + 16, height: IH + 16 });
+    set(clip.firstChild, { x: IX - 8, y: IY - 8, width: IW + 16, height: IH + 16 });
+    bolts.replaceChildren(...[[IX - 8, IY - 8], [IX + IW + 8, IY - 8], [IX - 8, IY + IH + 8], [IX + IW + 8, IY + IH + 8]].map(([x, y]) => sv('circle', { cx: x, cy: y, r: 2.5 })));
+    const nar = narrow();
+    set(tagL, { x: 18, y: nar ? 26 : 30 }); set(tagR, { x: PW - 18, y: 30 });
+    if (nar) set(tagL2, { x: 18, dy: 15 }); else { tagL2.removeAttribute('x'); tagL2.removeAttribute('dy'); }
+    tagR.style.display = nar ? 'none' : '';
+    const q = cur;
+    for (const e of [fuelR, disc, bar, arrow]) e.style.display = q ? '' : 'none';
+    if (!q) { gridG.replaceChildren(); txt(stT, 'NO FUEL SIZE: SET THE WIDTH AND LENGTH'); set(stT, { x: PW / 2, y: PH / 2 }); handle.style.display = 'none'; return; }
+    handle.style.display = '';
+    const { s, ox, oy } = q, { W, L } = fuel, px = x => ox + x * s, py = y => oy - y * s;
+    // grid in cm, aligned to the fuel origin
+    const gs = NICE.find(n => n * s >= 16) ?? NICE.at(-1);
+    gridG.replaceChildren();
+    const x0 = Math.ceil((IX - 8 - ox) / (gs * s)), x1 = Math.floor((IX + IW + 8 - ox) / (gs * s));
+    for (let i = x0; i <= x1 && i - x0 < 120; i++) gridG.append(sv('line', { x1: (ox + i * gs * s).toFixed(1), x2: (ox + i * gs * s).toFixed(1), y1: IY - 8, y2: IY + IH + 8 }));
+    const y0 = Math.ceil((oy - (IY + IH + 8)) / (gs * s)), y1 = Math.floor((oy - (IY - 8)) / (gs * s));
+    for (let i = y0; i <= y1 && i - y0 < 120; i++) gridG.append(sv('line', { y1: (oy - i * gs * s).toFixed(1), y2: (oy - i * gs * s).toFixed(1), x1: IX - 8, x2: IX + IW + 8 }));
+    set(fuelR, { x: px(0), y: py(W), width: L * s, height: W * s });
+    set(fuelT, { x: px(0), y: Math.max(IY - 12, py(W) - 7) });
+    const mat = String(fuel.material || '').toUpperCase();
+    txt(fuelT, `FUEL · ${mat.length > 14 ? mat.slice(0, 13) + '…' : mat} · ${plain(L)} × ${plain(W)} CM`);
+    set(axX, { x: px(L), y: Math.min(PH - 40, py(0) + 15) }); txt(axX, `X → ${plain(L)} CM`);
+    set(axY, { x: px(0), y: Math.min(PH - 40, py(0) + 15) }); txt(axY, 'Y ↑ · 0');
+    const cx = px(start[0]), cy = py(start[1]);
+    const ra = isNum(flameA) && flameA > 0 && kind !== 'droplet' ? Math.sqrt(flameA / Math.PI) * s : 0;
+    set(disc, { cx, cy, r: Math.max(0, ra) });
+    const same = areas && RING_RUNS.every(([k]) => sig(areas[k], 4) === sig(areas.mid, 4));
+    for (const [k, , deg, anchor] of RING_RUNS) {
+      const r = q[k] * s, R = rings[k];
+      R.g.style.opacity = r > .5 ? '' : '0';
+      for (const c of R.g.children) set(c, { cx, cy, r: Math.max(0, r) });
+      const show = !!areas && isNum(areas[k]) && r > .5 && (!same || k === 'mid');
+      R.t.style.display = show ? '' : 'none';
+      if (!show) continue;
+      const d = (same ? 90 : deg) * Math.PI / 180, lx = cx + (r + 7) * Math.cos(d), ly = cy - (r + 7) * Math.sin(d);
+      const words = same ? `LO = MID = HI ${sig(areas.mid, 4)} ${supUnit(aUnit).toUpperCase()}` : `${k.toUpperCase()} ${sig(areas[k], 4)} ${supUnit(aUnit).toUpperCase()}`;
+      const an = same ? 'middle' : anchor, tw = words.length * 7.4, lft = an === 'start' ? 0 : an === 'end' ? tw : tw / 2;
+      set(R.t, { x: Math.max(10 + lft, Math.min(PW - 10 - (tw - lft), lx)), y: Math.max(IY - 4, Math.min(PH - (nar ? 58 : 42), ly)), 'text-anchor': an });
+      txt(R.t, words);
+    }
+    handle.setAttribute('transform', `translate(${cx.toFixed(2)} ${cy.toFixed(2)})`);
+    // scale bar in cm
+    const bl = [...NICE].reverse().find(n => n * s <= Math.min(140, IW / 3)) ?? NICE[0];
+    const by = nar ? PH - 36 : PH - 20, bx = 20;
+    set(bar, { d: `M${bx} ${by - 5}V${by}H${(bx + bl * s).toFixed(2)}V${by - 5}` });
+    set(barT, { x: bx + bl * s + 8, y: by }); txt(barT, `${plain(bl)} CM · GRID ${plain(gs)} CM`);
+    // airflow direction (fuel coordinates: 0 degrees = +x, 90 degrees = +y)
+    const hasAir = isNum(flow.u);
+    arrow.style.display = hasAir && flow.u > 0 ? '' : 'none';
+    const ax = nar ? 29 : PW - 30, ay = nar ? PH - 17 : PH - 24, th = (Number(flow.deg) || 0) * Math.PI / 180, ux = Math.cos(th), uy = -Math.sin(th), nx = -uy, ny = ux;
+    const tip = [ax + 9 * ux, ay + 9 * uy], tail = [ax - 9 * ux, ay - 9 * uy];
+    set(arrow, { d: `M${tail[0].toFixed(1)} ${tail[1].toFixed(1)}L${tip[0].toFixed(1)} ${tip[1].toFixed(1)}M${(tip[0] - 5 * ux + 4 * nx).toFixed(1)} ${(tip[1] - 5 * uy + 4 * ny).toFixed(1)}L${tip[0].toFixed(1)} ${tip[1].toFixed(1)}L${(tip[0] - 5 * ux - 4 * nx).toFixed(1)} ${(tip[1] - 5 * uy - 4 * ny).toFixed(1)}` });
+    set(airT, { x: nar ? ax + 16 : ax - 16, y: ay + 4, 'text-anchor': nar ? 'start' : 'end' }); txt(airT, hasAir ? `AIR ${plain(flow.u)} CM/S · ${plain(flow.deg || 0)}°` : 'AIR N/A');
+    set(stT, { x: PW / 2, y: IY + IH - 6 }); txt(stT, status ? status.toUpperCase() : '');
+  }
+  const label = () => {
+    const a = areas && RING_RUNS.map(([k, n]) => `${n.toLowerCase()} ${sig(areas[k], 4)} ${supUnit(aUnit)}`).join(', ');
+    art.setAttribute('aria-label', `Illustration of a cabin plate, not to scale, with the fuel sheet drawn to scale: ${fuel.material || 'fuel'} ${plain(fuel.L)} by ${plain(fuel.W)} cm. `
+      + `Fire start at x ${plain(start[0])} cm, y ${plain(start[1])} cm. ${a ? `Largest burning area as equal-area rings: ${a}.` : status || ''}`);
+    handle.setAttribute('aria-label', `Fire start point on the fuel: x ${plain(start[0])} cm along the length, y ${plain(start[1])} cm across the width`);
+  };
+  const key0 = () => {
+    key.replaceChildren(...RING_RUNS.map(([k, n]) => h('li', { class: k }, h('i', { 'aria-hidden': 'true' }), h('span', {}, `${k} · ${n}`),
+      h('b', {}, areas && isNum(areas[k]) ? `${sig(areas[k], 4)} ${supUnit(aUnit)}` : 'n/a'),
+      h('small', {}, areas && isNum(areas[k]) && areas[k] > 0 ? `r ${sig(Math.sqrt(areas[k] / Math.PI), 3)} cm` : ''))));
+  };
+  // ---- motion: rings and scale move over --t-move with --ease-move; Calm, detached or off-screen: instant
+  const dur = () => { const v = typeof getComputedStyle === 'function' ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--t-move')) : NaN; return v > 0 ? v : 900; };
+  const frame = now => {
+    const k = Math.min(1, (now - t0) / dur()), e = easeMove(k);
+    cur = Object.fromEntries(Object.keys(to).map(x => [x, from[x] + (to[x] - from[x]) * e]));
+    draw();
+    raf = k < 1 && !document.hidden ? requestAnimationFrame(frame) : 0;
+    if (!raf) { cur = to; draw(); }
+  };
+  function update(animate = true) {
+    const t = target();
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    if (!t || !cur || !animate || detached || reduced() || !visible || document.hidden) { cur = t; draw(); }
+    else { from = { ...cur }; to = t; t0 = performance.now(); raf = requestAnimationFrame(frame); }
+    label();
+  }
+  // ---- drag, tap and keys move the start point (snapped to the x, y fields' 0.05 cm step)
+  const snap = v => Number((Math.round(v / 0.05) * 0.05).toFixed(2));
+  const clampXY = ([x, y]) => [snap(Math.max(0, Math.min(fuel.L, x))), snap(Math.max(0, Math.min(fuel.W, y)))];
+  const toCm = e => {
+    const m = svg.getScreenCTM?.(); if (!m || !cur) return null;
+    const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+    return [(p.x - cur.ox) / cur.s, (cur.oy - p.y) / cur.s];
+  };
+  const moveTo = xy => {
+    if (!xy || !(fuel.W > 0 && fuel.L > 0)) return;
+    const [x, y] = clampXY(xy); if (x === start[0] && y === start[1]) return;
+    start = [x, y]; draw(); label(); onStart(x, y);
+  };
+  if (!detached) {
+    handle.style.touchAction = 'none';
+    handle.addEventListener('pointerdown', e => { if (e.button > 0) return; dragging = true; handle.focus({ preventScroll: true }); try { handle.setPointerCapture(e.pointerId); } catch { /* gone */ } });
+    handle.addEventListener('pointermove', e => { if (dragging) moveTo(toCm(e)); });
+    const up = () => { dragging = false; };
+    handle.addEventListener('pointerup', up); handle.addEventListener('pointercancel', up);
+    fuelR.addEventListener('click', e => moveTo(toCm(e)));
+    handle.addEventListener('keydown', e => {
+      const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
+      if (!d || !(fuel.W > 0 && fuel.L > 0)) return;
+      e.preventDefault();
+      const sx = e.shiftKey ? 0.05 : Math.max(0.05, snap(fuel.L / 20)), sy = e.shiftKey ? 0.05 : Math.max(0.05, snap(fuel.W / 10));
+      moveTo([start[0] + d[0] * sx, start[1] + d[1] * sy]);
+    });
+  }
+  let ro = null, io = null;
+  if (!detached && typeof ResizeObserver === 'function') {
+    ro = new ResizeObserver(([en]) => {
+      const w = Math.round(en.contentRect.width); if (!(w > 0) || w === PW) return;
+      PW = Math.max(220, w); PH = Math.round(Math.max(PW < 460 ? 290 : 250, Math.min(380, PW * .58)));
+      if (raf) { cancelAnimationFrame(raf); raf = 0; } cur = target(); draw();
+    });
+    ro.observe(el.querySelector('.as-plate-frame'));
+  }
+  if (!detached && typeof IntersectionObserver === 'function') {
+    io = new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (!visible && raf) { cancelAnimationFrame(raf); raf = 0; cur = to; draw(); } });
+    io.observe(svg);
+  }
+  help.textContent = 'Drag the start point, tap the fuel, or focus the point and use the arrow keys (Shift for 0.05 cm steps). It sets the flame position x, y on the fuel, a growth-model input, the same as the x and y fields under Exact values. '
+    + 'Rings: the largest burning area of each growth run, from the model below, drawn as a circle of the same area (radius √(area/π)) around the start point. The real burn follows the fuel sheet, so a ring can reach past its edge. The cabin outline is an illustration; the fuel, rings, grid and scale bar share one scale.';
+  key0();
+  return {
+    el,
+    sync({ W, L, material, x, y, area, u, deg, type }) {
+      const fuelChanged = W !== fuel.W || L !== fuel.L;
+      fuel = { W, L, material }; flameA = area; flow = { u, deg }; kind = type || 'surface';
+      if (!dragging && isNum(x) && isNum(y)) start = [x, y];
+      if (fuelChanged) update(true); else { draw(); label(); }
+    },
+    result(r) {
+      if (r?.kind === 'growth' && r.growth?.summary) {
+        const sm = r.growth.summary;
+        areas = { lo: sm.lo?.max_area_cm2, mid: sm.mid?.max_area_cm2, hi: sm.hi?.max_area_cm2 };
+        aUnit = r.growth.units?.area || '';
+        status = '';
+      } else {
+        areas = null;
+        status = !r ? 'Waiting for the growth run' : r.kind === 'droplet' ? 'Droplet flame: no growth rings (M7)' : r.kind === 'unsupported' ? 'Material not supported: no rings' : 'These inputs cannot be run: no rings';
+      }
+      key0(); update(true);
+    },
+    destroy() { if (raf) cancelAnimationFrame(raf); raf = 0; ro?.disconnect(); io?.disconnect(); },
+  };
+}
+
 // ---------------------------------------------------------------- 1. inputs
 /** "Flame now, fuel and cabin": preset, flame, fuel and cabin controls. Every slider has a number field, units and its
  *  min and max. Edits are sent to the store at most every 200 ms (each store.set also rewrites the URL).
@@ -179,13 +504,21 @@ export function inputsCard(store, data, ctx = {}) {
   const W = () => Number(S.fuel?.width_cm), L = () => Number(S.fuel?.length_cm);
   const areaMax = () => Number((W() * L()).toPrecision(6));
   const typeSeg = seg({ label: 'Flame type', id: 'as-ft', options: [['surface', 'Surface (on a solid)'], ['droplet', 'Droplet']], value: fl().flame_type || 'surface',
-    onChange: v => { S.flame = { ...fl(), flame_type: v, source: 'sliders' }; dirty = true; flush(); } });
-  const reshape = patch => { S.flame = store.reshapeFlame(fl(), patch); schedule(); };
-  const nfArea = numField({ id: 'as-a', label: 'Flame area', unit: 'cm²', min: 0.1, max: areaMax(), step: 0.1, value: fl().area_cm2 ?? 0.1, onInput: v => reshape({ area_cm2: v }) });
+    onChange: v => { S.flame = { ...fl(), flame_type: v, source: 'sliders' }; dirty = true; plateSync(); flush(); } });
+  const dials = {};
+  const reshape = patch => { S.flame = store.reshapeFlame(fl(), patch); plateSync(); schedule(); };
+  const nfArea = numField({ id: 'as-a', label: 'Flame area', unit: 'cm²', min: 0.1, max: areaMax(), step: 0.1, value: fl().area_cm2 ?? 0.1, onInput: v => { reshape({ area_cm2: v }); dials.a?.set(v); } });
   const nfX = numField({ id: 'as-x', label: 'Position along the length, x', unit: 'cm', min: 0, max: L(), step: 0.05, value: fl().centroid_cm?.[0] ?? 0,
     onInput: v => reshape({ centroid_cm: [v, fl().centroid_cm?.[1] ?? W() / 2] }) });
   const nfY = numField({ id: 'as-y', label: 'Position across the width, y', unit: 'cm', min: 0, max: W(), step: 0.05, value: fl().centroid_cm?.[1] ?? 0,
     onInput: v => reshape({ centroid_cm: [fl().centroid_cm?.[0] ?? L() / 2, v] }) });
+  // ---- the cabin plate: dragging the start point sets the same flame position x, y as the fields above
+  const plate = platePanel({ detached: !!ctx.detached, onStart: (x, y) => { setNF(nfX, x); setNF(nfY, y); reshape({ centroid_cm: [x, y] }); } });
+  ctx.onLeave?.(() => plate.destroy());
+  function plateSync() {
+    plate.sync({ W: W(), L: L(), material: S.fuel?.material, x: fl().centroid_cm?.[0], y: fl().centroid_cm?.[1], area: fl().area_cm2,
+      u: S.conditions?.flow_cm_s, deg: S.conditions?.flow_direction_deg ?? 0, type: fl().flame_type });
+  }
   const flameFrom = h('small', { class: 'as-from' });
   const dropNote = h('p', { class: 'as-note', hidden: true });
   const flameNote = h('p', { class: 'as-note' });
@@ -203,29 +536,58 @@ export function inputsCard(store, data, ctx = {}) {
   };
   matSel.addEventListener('change', setMaterial);
   otherIn.addEventListener('change', setMaterial);
-  const fuelNF = (id, label, unit, key, step) => numField({ id, label, unit, min: B[key]?.min ?? 0, max: B[key]?.max ?? 1, step, value: S.fuel?.[key] ?? B[key]?.min ?? 0,
-    onInput: v => { S.fuel = { ...S.fuel, [key]: v }; if (key === 'width_cm' || key === 'length_cm') flameLimits(); schedule(); } });
-  const nfW = fuelNF('as-w', 'Fuel width', 'cm', 'width_cm', 0.1);
-  const nfL = fuelNF('as-l', 'Fuel length', 'cm', 'length_cm', 0.1);
-  const nfTh = fuelNF('as-th', 'Fuel thickness', 'mm', 'thickness_mm', 0.01);
+  const setFuel = (key, v) => { S.fuel = { ...S.fuel, [key]: v }; if (key === 'width_cm' || key === 'length_cm') flameLimits(); plateSync(); schedule(); };
+  const fuelNF = (id, label, unit, key, step, dk) => numField({ id, label, unit, min: B[key]?.min ?? 0, max: B[key]?.max ?? 1, step, value: S.fuel?.[key] ?? B[key]?.min ?? 0,
+    onInput: v => { setFuel(key, v); dials[dk]?.set(v); } });
+  const nfW = fuelNF('as-w', 'Fuel width', 'cm', 'width_cm', 0.1, 'w');
+  const nfL = fuelNF('as-l', 'Fuel length', 'cm', 'length_cm', 0.1, 'l');
+  const nfTh = fuelNF('as-th', 'Fuel thickness', 'mm', 'thickness_mm', 0.01, 'th');
   const sidesSeg = seg({ label: 'Sides burning', id: 'as-sd', options: [[1, 'One side'], [2, 'Both sides']], value: S.fuel?.sides_burning ?? 2,
     onChange: v => { S.fuel = { ...S.fuel, sides_burning: Number(v) }; dirty = true; flush(); } });
 
   // ---- cabin
-  const condNF = (id, label, unit, key, step) => numField({ id, label, unit, min: B[key].min, max: B[key].max, step, value: S.conditions?.[key] ?? B[key].min,
-    onInput: v => { S.conditions = { ...S.conditions, [key]: v }; schedule(); } });
-  const nfU = condNF('as-u', 'Airflow speed', 'cm/s', 'flow_cm_s', 0.1);
+  const setCond = (key, v) => { S.conditions = { ...S.conditions, [key]: v }; plateSync(); schedule(); };
+  const condNF = (id, label, unit, key, step, dk) => numField({ id, label, unit, min: B[key].min, max: B[key].max, step, value: S.conditions?.[key] ?? B[key].min,
+    onInput: v => { setCond(key, v); dials[dk]?.set(v); } });
+  const nfU = condNF('as-u', 'Airflow speed', 'cm/s', 'flow_cm_s', 0.1, 'flow');
   const nfDir = numField({ id: 'as-dir', label: 'Airflow direction', unit: 'degrees', min: 0, max: 359, step: 1, value: S.conditions?.flow_direction_deg ?? 0,
-    onInput: v => { S.conditions = { ...S.conditions, flow_direction_deg: v }; schedule(); } });
-  const nfO2 = condNF('as-o2', 'Oxygen', '%', 'o2_vol_pct', 0.1);
-  const nfP = B.pressure_atm ? condNF('as-p', 'Pressure', 'atm', 'pressure_atm', 0.001) : null;
+    onInput: v => { setCond('flow_direction_deg', v); dials.dir?.set(v); } });
+  const nfO2 = condNF('as-o2', 'Oxygen', '%', 'o2_vol_pct', 0.1, 'o2');
+  const nfP = B.pressure_atm ? condNF('as-p', 'Pressure', 'atm', 'pressure_atm', 0.001, 'p') : null;
 
-  // ---- one field = slider + where its limits came from + an out-of-box flag
+  // ---- dials over the same inputs. Ticks: every calibration-box edge, worked-example value and data limit (dataMarks);
+  // airflow and oxygen also snap to the spread predictor's own grid. The number fields stay under "Exact values".
+  const MK = dataMarks(data);
+  const marksOf = (k, extra = []) => [...extra.map(v => ({ v, major: false })), ...(MK[k] || []).map(v => ({ v, major: true })),
+    ...(B[k] ? [{ v: B[k].min, major: true }, { v: B[k].max, major: true }] : [])];
+  const gridOf = k => (Array.isArray(data.sp?.[k]) ? data.sp[k].filter(isNum) : []);
+  const mkDial = (dk, id, name, unit, min, max, step, value, nf, apply, mk, grid = []) => {
+    if (!isNum(min) || !isNum(max) || max <= min) return null;
+    dials[dk] = dialCtl({ id, name, unit, min, max, step, value: isNum(value) ? value : min, marks: mk, detents: grid.length ? uniqSorted([...grid, ...mk.map(m => m.v)]).filter(v => v >= min && v <= max) : null,
+      onInput: v => { if (nf) nf.set(v); apply(v); } });
+    return dials[dk];
+  };
+  const dA = mkDial('a', 'as-a', 'Flame area', 'cm²', 0.1, areaMax(), 0.1, fl().area_cm2, nfArea, v => reshape({ area_cm2: v }), [{ v: 0.1, major: true }, ...marksOf('area_cm2')]);
+  const dW = mkDial('w', 'as-w', 'Width', 'cm', B.width_cm?.min, B.width_cm?.max, 0.1, S.fuel?.width_cm, nfW, v => setFuel('width_cm', v), marksOf('width_cm'));
+  const dL = mkDial('l', 'as-l', 'Length', 'cm', B.length_cm?.min, B.length_cm?.max, 0.1, S.fuel?.length_cm, nfL, v => setFuel('length_cm', v), marksOf('length_cm'));
+  const dTh = mkDial('th', 'as-th', 'Thickness', 'mm', B.thickness_mm?.min, B.thickness_mm?.max, 0.01, S.fuel?.thickness_mm, nfTh, v => setFuel('thickness_mm', v), marksOf('thickness_mm'));
+  const dU = mkDial('flow', 'as-u', 'Airflow', 'cm/s', B.flow_cm_s.min, B.flow_cm_s.max, 0.1, S.conditions?.flow_cm_s, nfU, v => setCond('flow_cm_s', v), marksOf('flow_cm_s', gridOf('flow_cm_s')), gridOf('flow_cm_s'));
+  // direction: 0 and 359 are the field's own limits; 90, 180 and 270 are the axis directions the airflow note defines
+  const dDir = mkDial('dir', 'as-dir', 'Air direction', 'degrees', 0, 359, 1, S.conditions?.flow_direction_deg ?? 0, nfDir, v => setCond('flow_direction_deg', v),
+    [...[90, 180, 270].map(v => ({ v, major: false })), ...(MK.flow_direction_deg || []).map(v => ({ v, major: true })), { v: 0, major: true }, { v: 359, major: true }]);
+  const dO2 = mkDial('o2', 'as-o2', 'Oxygen', '%', B.o2_vol_pct.min, B.o2_vol_pct.max, 0.1, S.conditions?.o2_vol_pct, nfO2, v => setCond('o2_vol_pct', v), marksOf('o2_vol_pct', gridOf('o2_vol_pct')), gridOf('o2_vol_pct'));
+  const dP = nfP ? mkDial('p', 'as-p', 'Pressure', 'atm', B.pressure_atm.min, B.pressure_atm.max, 0.001, S.conditions?.pressure_atm, nfP, v => setCond('pressure_atm', v), marksOf('pressure_atm')) : null;
+
+  // ---- one field = slider + where its limits came from; the out-of-box flags sit under the dials, always visible
   const flags = {};
-  const field = (key, nf, from) => { const flag = h('p', { class: 'as-flag', hidden: true, id: `as-flag-${key}` }); flags[key] = flag; return h('div', { class: 'as-field' }, nf, from, flag); };
+  const flag = key => { const f = h('p', { class: 'as-flag', hidden: true, id: `as-flag-${key}` }); flags[key] = f; return f; };
+  const field = (key, nf, from) => h('div', { class: 'as-field' }, nf, from);
+  const dialRow = (...ds) => h('div', { class: 'as-dials' }, ds.filter(Boolean).map(d => d.el));
+  const flagRow = (...keys) => h('div', { class: 'as-flags' }, keys.map(flag));
+  const exact = (...kids) => h('details', { class: 'as-exact' }, h('summary', {}, 'Exact values'), h('div', { class: 'as-exact-body' }, ...kids));
   function flameLimits() {
     const am = areaMax();
-    if (isNum(am) && am > 0) setLimits(nfArea, 0.1, am, 'cm²');
+    if (isNum(am) && am > 0) { setLimits(nfArea, 0.1, am, 'cm²'); dials.a?.limits(0.1, am); }
     if (isNum(L())) setLimits(nfX, 0, L(), 'cm');
     if (isNum(W())) setLimits(nfY, 0, W(), 'cm');
     flameFrom.textContent = `Limits from the fuel you set: area up to its width × length (${plain(W())} × ${plain(L())} = ${plain(am)} cm²), x from 0 to its length, y from 0 to its width. The lowest area is one slider step (0.1 cm²), since an area must be above 0.`;
@@ -233,17 +595,26 @@ export function inputsCard(store, data, ctx = {}) {
   flameLimits();
 
   const fs = (legendText, ...kids) => h('fieldset', { class: 'as-group' }, h('legend', {}, legendText), ...kids);
+  const dirFrom = '0 degrees: the air moves along +x, the fuel length; 90 degrees: along +y, across it (fuel coordinates, models/m6b-predictor/CONTRACT_PROPOSAL.md).';
   const c = card(TITLES.inputs, data.examples.status || 'model', 'Set the flame, the fuel and the cabin air, or start from a worked example. Values outside the calibration box are allowed and flagged.',
+    plate.el,
     h('div', { class: 'as-preset' }, h('label', { for: 'as-preset' }, 'Start from a worked example'), presetSel, presetWhy),
     h('div', { class: 'as-groups' },
-      fs('Flame now', typeSeg, field('a', nfArea), field('x', nfX), field('y', nfY, flameFrom), flameNote, dropNote),
-      fs('Fuel', h('div', { class: 'as-field' }, h('label', { for: 'as-m' }, 'Material'), matSel, otherWrap),
-        field('w', nfW, h('small', { class: 'as-from' }, fromText(B.width_cm))), field('l', nfL, h('small', { class: 'as-from' }, fromText(B.length_cm))),
-        field('th', nfTh, h('small', { class: 'as-from' }, fromText(B.thickness_mm))), sidesSeg),
-      fs('Cabin air', field('flow', nfU, h('small', { class: 'as-from' }, fromText(B.flow_cm_s))),
-        field('dir', nfDir, h('small', { class: 'as-from' }, '0 degrees: the air moves along +x, the fuel length; 90 degrees: along +y, across it (fuel coordinates, models/m6b-predictor/CONTRACT_PROPOSAL.md).')),
-        field('o2', nfO2, h('small', { class: 'as-from' }, fromText(B.o2_vol_pct))),
-        nfP ? field('p', nfP, h('small', { class: 'as-from' }, fromText(B.pressure_atm))) : h('p', { class: 'as-note' }, 'Pressure: no data file to derive the slider limits from.'))));
+      fs('Flame now', typeSeg, dialRow(dA), flagRow('a', 'x', 'y'), flameNote, dropNote,
+        exact(field('a', nfArea), field('x', nfX), field('y', nfY, flameFrom))),
+      fs('Fuel', h('div', { class: 'as-field' }, h('label', { for: 'as-m' }, 'Material'), matSel, otherWrap), sidesSeg,
+        dialRow(dW, dL, dTh), flagRow('w', 'l', 'th'),
+        exact(field('w', nfW, h('small', { class: 'as-from' }, fromText(B.width_cm))), field('l', nfL, h('small', { class: 'as-from' }, fromText(B.length_cm))),
+          field('th', nfTh, h('small', { class: 'as-from' }, fromText(B.thickness_mm))))),
+      fs('Cabin air', dialRow(dU, dDir, dO2, dP), flagRow('flow', 'dir', 'o2', 'p'),
+        nfP ? null : h('p', { class: 'as-note' }, 'Pressure: no data file to derive the slider limits from.'),
+        exact(field('flow', nfU, h('small', { class: 'as-from' }, fromText(B.flow_cm_s))),
+          field('dir', nfDir, h('small', { class: 'as-from' }, dirFrom)),
+          field('o2', nfO2, h('small', { class: 'as-from' }, fromText(B.o2_vol_pct))),
+          nfP ? field('p', nfP, h('small', { class: 'as-from' }, fromText(B.pressure_atm))) : null))),
+    h('p', { class: 'as-dial-help' }, 'Dials: drag up or down, or around the ring; arrow keys step (airflow and oxygen step through the spread predictor\'s own grid), PageUp and PageDown jump to the next long tick, Home and End go to the limits. '
+      + 'Long ticks are the calibration-box edges, the worked examples\' values and the limits from the data; short ticks are the predictor grid (airflow, oxygen) or the axis directions (air direction). '
+      + 'The blue arc is the calibration box of the active regime after each run; a dial outside it turns amber and is flagged. ' + dirFrom));
 
   /** Refresh every control from the store (a preset, a camera reading or a link changed the inputs). */
   c.sync = st => {
@@ -261,6 +632,9 @@ export function inputsCard(store, data, ctx = {}) {
     for (const [nf, k] of [[nfW, 'width_cm'], [nfL, 'length_cm'], [nfTh, 'thickness_mm']]) if (isNum(S.fuel[k])) setNF(nf, S.fuel[k]);
     sidesSeg.set(S.fuel.sides_burning ?? 2);
     for (const [nf, k] of [[nfU, 'flow_cm_s'], [nfDir, 'flow_direction_deg'], [nfO2, 'o2_vol_pct'], [nfP, 'pressure_atm']]) if (nf && isNum(S.conditions[k])) setNF(nf, S.conditions[k]);
+    for (const [dk, v] of [['a', fl().area_cm2], ['w', S.fuel.width_cm], ['l', S.fuel.length_cm], ['th', S.fuel.thickness_mm], ['flow', S.conditions.flow_cm_s],
+      ['dir', S.conditions.flow_direction_deg ?? 0], ['o2', S.conditions.o2_vol_pct], ['p', S.conditions.pressure_atm]]) dials[dk]?.set(v);
+    plateSync();
     const drop = fl().flame_type === 'droplet';
     dropNote.hidden = !drop;
     dropNote.textContent = drop ? `Droplet flame: area and position are not used. ${isNum(fl().droplet?.diameter_mm) ? `Droplet diameter from the reading: ${plain(fl().droplet.diameter_mm)} mm. ` : ''}M6b does not simulate droplets; see "Will it spread here?" for where the droplet answer lives.` : '';
@@ -270,11 +644,20 @@ export function inputsCard(store, data, ctx = {}) {
   /** Show an out-of-box flag beside each input the result checked. */
   c.update = result => {
     Object.values(flags).forEach(f => { f.hidden = true; f.textContent = ''; });
+    const bands = {}, outs = {};
     for (const b of boxesOf(result)) {
-      const key = BOX_TO_CONTROL[b.field]; if (!key || !flags[key] || b.inside) continue;
+      const key = BOX_TO_CONTROL[b.field]; if (!key) continue;
+      // the τ box is burning thickness; the dial is sheet thickness, τ = thickness ÷ 2 when both sides burn (js/growth.js)
+      const f = b.field === 'tau_mm' ? ((S.fuel?.sides_burning ?? 2) === 2 ? 2 : 1) : 1;
+      if (isNum(b.lo) && isNum(b.hi)) (bands[key] ||= []).push([b.lo * f, b.hi * f]);
+      if (b.inside) continue;
+      outs[key] = true;
+      if (!flags[key]) continue;
       flags[key].hidden = false;
       add(flags[key], h('b', {}, 'Outside the calibration box'), ` (${fieldName(b.field)} ${boxText(b)}): this value is extrapolated, not validated.`);
     }
+    for (const [dk, d] of Object.entries(dials)) { d.bands(bands[dk] || []); d.out(!!outs[dk]); }
+    plate.result(result);
   };
   c.sync(S);
   return c;

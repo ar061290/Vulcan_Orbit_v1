@@ -1,0 +1,29 @@
+/* UI lock styles for #/predict (feat/ui-lock). Scope every rule under #view[data-page="predict"]. */
+
+/* the 3D cabin: a framed live visual (HUD brackets sit inside its clip), drag cursor, no tap highlight */
+#view[data-page="predict"] .cab3d{border-radius:var(--r-panel);border:1px solid var(--line);background:#05060E}
+#view[data-page="predict"] .cab3d.hud::after{inset:6px}
+#view[data-page="predict"] .cab3d-cv{touch-action:pan-y;-webkit-tap-highlight-color:transparent;user-select:none}
+#view[data-page="predict"] .cab3d-cv:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+
+/* detector lamps: one mono strip under the drawing, lit by the file's alarm times */
+#view[data-page="predict"] .cab3d-lamps{list-style:none;margin:var(--sp1) 0 var(--sp2);padding:0;display:flex;flex-wrap:wrap;gap:var(--sp1)}
+#view[data-page="predict"] .cab3d-lamp{display:flex;align-items:center;gap:var(--sp1);min-width:0;max-width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:var(--r-data);
+  font:500 11px/1.35 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);transition:border-color var(--t-micro),color var(--t-micro)}
+#view[data-page="predict"] .cab3d-lamp i{flex:none;width:8px;height:8px;border-radius:50%;border:1px solid var(--mute);background:transparent;transition:background var(--t-micro),border-color var(--t-micro)}
+#view[data-page="predict"] .cab3d-lname{min-width:0;overflow-wrap:anywhere}
+#view[data-page="predict"] .cab3d-lamp b{font-weight:500;color:var(--ink);white-space:nowrap}
+#view[data-page="predict"] .cab3d-lamp.on{border-color:var(--accent);color:var(--ink)}
+#view[data-page="predict"] .cab3d-lamp.on i{background:var(--accent);border-color:var(--accent)}
+#view[data-page="predict"] .cab3d-lamp.on b{color:var(--accent-ink,var(--ink))}
+
+/* where the lamp rule comes from */
+#view[data-page="predict"] .cab3d-alarm{font-size:14px;line-height:1.55;color:var(--ink2,var(--mute));max-width:var(--measure);margin:var(--sp1) 0}
+#view[data-page="predict"] .cab3d-tag{font:500 11px var(--mono);letter-spacing:.14em;color:var(--mute);margin-right:4px}
+#view[data-page="predict"] .cab3d-view{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="predict"] .cab3d-keys{gap:var(--sp1)}
+
+@media (max-width:480px){
+  #view[data-page="predict"] .cab3d-lamp{flex:1 1 100%}
+  #view[data-page="predict"] .cab3d-keys .chip{flex:1 1 auto}
+}

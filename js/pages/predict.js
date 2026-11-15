@@ -36,7 +36,7 @@ export default async function render(root, ctx = {}) {
   const lbmTitle = 'Second opinion: a cabin with racks';
   root.append(page('What will it do?', LEAD,
     h('div', { class: 'grid g2' }, driftCard(drift, {}, ctx), whatifCard(wi)),
-    cabin3dCard(drift, ctx),
+    cabin3dCard(drift, ctx, { sources: isMissing(wi) ? null : wi.sources }),
     h('div', { class: 'grid g2' }, calibrationCard(cal), showRobust ? robustCard(wi) : null),
     h('div', { class: 'grid g2' },
       driftCard(lbm, { title: lbmTitle, sub: isMissing(lbm) ? null : lbmSub(lbm, lwi), file: 'drift_lbm' }, ctx),

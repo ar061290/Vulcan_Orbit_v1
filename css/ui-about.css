@@ -1,0 +1,34 @@
+/* UI lock styles for #/about (feat/ui-lock). Scope every rule under #view[data-page="about"]. */
+/* references: mono index | citation (DOI revealed on hover or focus; always read by screen readers) | Copy */
+#view[data-page="about"] .src-list:has(>.ref){list-style:none;padding:0;margin:0 0 var(--sp2);border-top:1px solid var(--line)}
+#view[data-page="about"] .ref{display:grid;grid-template-columns:3ch minmax(0,1fr) auto;gap:var(--sp2);align-items:baseline;margin:0;padding:10px 6px;
+  border-bottom:1px solid var(--line);border-radius:var(--r-data);cursor:copy;transition:background var(--t-micro)}
+#view[data-page="about"] .ref:hover,#view[data-page="about"] .ref:focus-within,#view[data-page="about"] .ref.on{background:var(--raise)}
+#view[data-page="about"] .ref-n{font:var(--label);letter-spacing:.14em;color:var(--mute);font-variant-numeric:tabular-nums}
+#view[data-page="about"] .ref:hover .ref-n,#view[data-page="about"] .ref:focus-within .ref-n{color:var(--oxy)}
+#view[data-page="about"] .ref-body{min-width:0;overflow-wrap:anywhere}
+#view[data-page="about"] .ref-body a{text-underline-offset:3px}
+#view[data-page="about"] .ref a:focus-visible,#view[data-page="about"] .ref-copy:focus-visible{outline:2px solid var(--oxy);outline-offset:2px}
+/* the DOI: clipped (still in the accessibility tree) until the row is hovered, focused or just copied */
+#view[data-page="about"] .ref-doi{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#view[data-page="about"] .ref:hover .ref-doi,#view[data-page="about"] .ref:focus-within .ref-doi,#view[data-page="about"] .ref.on .ref-doi{
+  position:static;width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal;display:block;margin-top:4px;
+  font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="about"] .ref-doi code{font:500 12px var(--mono);letter-spacing:0;text-transform:none;color:var(--ink);background:transparent;padding:0}
+#view[data-page="about"] .ref-copy{font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:transparent;
+  border:1px solid var(--axis);border-radius:var(--r-data);padding:8px 10px;min-height:32px;cursor:pointer;white-space:nowrap;transition:border-color var(--t-micro),background var(--t-micro),color var(--t-micro)}
+#view[data-page="about"] .ref-copy:hover{background:var(--ink);color:var(--page);border-color:var(--ink)}
+#view[data-page="about"] .ref.on .ref-copy{border-color:var(--oxy);color:var(--oxy)}
+#view[data-page="about"] .ref.on .ref-copy:hover{color:var(--page)}
+
+/* site map: mono page index */
+#view[data-page="about"] .sitemap{counter-reset:smp}
+#view[data-page="about"] .sitemap>li{counter-increment:smp}
+#view[data-page="about"] .sitemap>li::before{content:counter(smp,decimal-leading-zero);display:block;font:var(--label);letter-spacing:.14em;color:var(--mute);margin-bottom:2px}
+#view[data-page="about"] .sm-status{font:var(--label);letter-spacing:.14em;text-transform:uppercase}
+#view[data-page="about"] .card>h3{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+
+@media (max-width:420px){
+  #view[data-page="about"] .ref{grid-template-columns:minmax(0,1fr) auto;gap:6px var(--sp1)}
+  #view[data-page="about"] .ref-n{grid-column:1/-1}
+}

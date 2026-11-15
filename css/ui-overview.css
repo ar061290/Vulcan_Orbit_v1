@@ -1,0 +1,150 @@
+/* UI lock styles for #/overview (feat/ui-lock). Scope every rule under #view[data-page="overview"].
+   1. The pinned scroll story (section.story-pin > .story-stick > .story-in): always on the dark field, so it uses
+      fixed light colours, not theme variables (#EDE8DF ink, #8C8A93 mute, #7AA2FF orbit, #FF7A3D fire).
+   2. The ledger: every other Home section as a one-line <details class="hrow"> row. */
+
+/* ---------- 1. the story ---------- */
+#view[data-page="overview"] .story-pin{position:relative;height:300vh;margin-top:-32px;margin-bottom:0;color:#EDE8DF}
+#view[data-page="overview"] .story-stick{position:sticky;top:var(--top-h,0px);height:calc(100vh - var(--top-h,0px));height:calc(100svh - var(--top-h,0px));overflow:hidden}
+#view[data-page="overview"] .story-in{position:relative;z-index:1;box-sizing:border-box;height:100%;max-width:var(--maxw);margin:0 auto;padding:clamp(20px,5vh,56px) var(--gutter) clamp(18px,4vh,40px);display:flex;flex-direction:column;gap:clamp(12px,2.4vh,24px)}
+
+#view[data-page="overview"] .story-top{position:relative;z-index:1;max-width:min(640px,54%)}
+#view[data-page="overview"] .story-top .kicker{color:#8C8A93;margin:0}
+#view[data-page="overview"] .story-top .kicker::before{background:#8C8A93}
+#view[data-page="overview"] .story-top h1{font:800 clamp(34px,min(5vw,8.4vh),76px)/.96 var(--display);letter-spacing:-.03em;color:#EDE8DF;margin:14px 0 clamp(14px,3vh,26px);max-width:13ch;text-wrap:balance;overflow-wrap:break-word}
+
+/* the buttons sit on the dark field in both themes: one fire call-to-action, the rest outline */
+#view[data-page="overview"] .story-in .btn{background:transparent;border-color:rgba(237,232,223,.6);color:#EDE8DF}
+#view[data-page="overview"] .story-in .btn:hover{background:#EDE8DF;border-color:#EDE8DF;color:#05060E}
+#view[data-page="overview"] .story-in .btn.primary{background:#FF7A3D;border-color:#FF7A3D;color:#05060E}
+#view[data-page="overview"] .story-in .btn.primary:hover{background:#EDE8DF;border-color:#EDE8DF}
+#view[data-page="overview"] .story-in :focus-visible{outline:2px solid #7AA2FF;outline-offset:3px}
+
+/* the drag surface over the flame (right half on wide screens) */
+#view[data-page="overview"] .story-drag{position:absolute;top:0;right:0;bottom:0;width:46%;z-index:0;touch-action:pan-y;cursor:grab;-webkit-tap-highlight-color:transparent}
+#view[data-page="overview"] .story-drag:active{cursor:grabbing}
+#view[data-page="overview"] .story-drag:focus-visible{outline:2px solid #7AA2FF;outline-offset:-10px;border-radius:var(--r-panel)}
+#view[data-page="overview"] .story-drag .illus-tag{color:#8C8A93}
+#view[data-page="overview"] .story-hint{position:absolute;left:50%;top:76%;transform:translateX(-50%);font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:#8C8A93;white-space:nowrap;pointer-events:none}
+#view[data-page="overview"] .story-pin.no-field .story-hint,#view[data-page="overview"] .story-pin.no-field .illus-tag{display:none}
+#view[data-page="overview"] .story-pin.no-field .story-drag{cursor:default}
+
+/* the stage: the three captions and the flight-data panel share one cell and crossfade */
+#view[data-page="overview"] .story-stage{position:relative;z-index:1;margin-top:auto;display:grid;max-width:min(680px,56%)}
+#view[data-page="overview"] .story-stage>*{grid-area:1/1;align-self:end;min-width:0}
+#view[data-page="overview"] .cap{margin:0;display:grid;gap:10px;will-change:opacity,transform}
+#view[data-page="overview"] .cap-n{font:var(--label);letter-spacing:.14em;color:#8C8A93}
+#view[data-page="overview"] .cap-t{font:800 clamp(38px,min(6vw,9.5vh),96px)/.9 var(--display);letter-spacing:-.03em;text-transform:uppercase;color:#EDE8DF;max-width:11ch;text-wrap:balance;overflow-wrap:break-word}
+#view[data-page="overview"] .story-pin:not(.is-static) .cap1,
+#view[data-page="overview"] .story-pin:not(.is-static) .cap2,
+#view[data-page="overview"] .story-pin:not(.is-static) .story-data{opacity:0}
+
+/* the flight-data panel */
+#view[data-page="overview"] .story-data{padding:14px 14px 12px;background:rgba(5,6,14,.74);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-panel)}
+#view[data-page="overview"] .sd-head{margin:0 0 12px;display:flex;flex-wrap:wrap;gap:4px 14px;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:#8C8A93}
+#view[data-page="overview"] .sd-src{color:#EDE8DF}
+#view[data-page="overview"] .sd-why{margin:0;color:#EDE8DF;font-size:15px}
+#view[data-page="overview"] .sd-plot{position:relative}
+#view[data-page="overview"] .sd-svg{display:block;width:100%;height:auto;overflow:visible;border-radius:var(--r-data)}
+#view[data-page="overview"] .sd-trace{fill:none;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:1 1}
+#view[data-page="overview"] .sd-tr-r{stroke:#7AA2FF}
+#view[data-page="overview"] .sd-tr-s{stroke:#FF7A3D}
+#view[data-page="overview"] .sd-zero,#view[data-page="overview"] .sd-alarm,#view[data-page="overview"] .sd-ign,#view[data-page="overview"] .sd-mark-r,#view[data-page="overview"] .sd-brk,#view[data-page="overview"] .sd-cur{vector-effect:non-scaling-stroke;fill:none;stroke-width:1}
+#view[data-page="overview"] .sd-zero{stroke:rgba(255,255,255,.14)}
+#view[data-page="overview"] .sd-alarm{stroke:#8C8A93;stroke-dasharray:4 4}
+#view[data-page="overview"] .sd-ign{stroke:rgba(255,255,255,.22)}
+#view[data-page="overview"] .sd-mark-r{stroke:#7AA2FF;stroke-dasharray:2 3}
+#view[data-page="overview"] .sd-brk{stroke:#EDE8DF}
+#view[data-page="overview"] .sd-cur{stroke:#EDE8DF}
+#view[data-page="overview"] .sd-band{fill:#FF7A3D;stroke:none}
+#view[data-page="overview"] .sd-rev{opacity:0;transition:opacity var(--t-micro) var(--ease-in)}
+#view[data-page="overview"] .sd-rev.on{opacity:1}
+#view[data-page="overview"] .sd-band.on{opacity:.18}
+#view[data-page="overview"] .sd-gap,#view[data-page="overview"] .sd-alarm-l,#view[data-page="overview"] .sd-ign-l,#view[data-page="overview"] .sd-t{position:absolute;font:var(--label);font-size:10px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;pointer-events:none}
+#view[data-page="overview"] .sd-gap{top:0;transform:translate(-50%,-9px);color:#EDE8DF}
+#view[data-page="overview"] .sd-alarm-l{right:2px;transform:translateY(-130%);color:#8C8A93}
+#view[data-page="overview"] .sd-ign-l{bottom:0;transform:translateX(5px);color:#8C8A93}
+#view[data-page="overview"] .sd-t{top:22%;transform:translateX(6px);color:#EDE8DF}
+#view[data-page="overview"] .sd-key{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px}
+#view[data-page="overview"] .sd-key li{display:flex;gap:8px;align-items:baseline;font:var(--label);letter-spacing:.1em;text-transform:uppercase;color:#EDE8DF;margin:0}
+#view[data-page="overview"] .sd-key i{flex:none;width:14px;height:2px;align-self:center;border-radius:var(--r-data)}
+#view[data-page="overview"] .sd-key .k-rad i{background:#7AA2FF}
+#view[data-page="overview"] .sd-key .k-sc i{background:#FF7A3D}
+
+/* the progress rail (decoration; the captions carry the meaning) */
+#view[data-page="overview"] .story-rail{position:absolute;right:var(--gutter);bottom:clamp(18px,4vh,40px);z-index:1;display:flex;gap:18px;pointer-events:none}
+#view[data-page="overview"] .story-rail span{display:grid;gap:6px;min-width:10ch;font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:#8C8A93}
+#view[data-page="overview"] .story-rail b{font-weight:500;color:#EDE8DF}
+#view[data-page="overview"] .story-rail i{display:block;position:relative;height:1px;background:rgba(255,255,255,.14)}
+#view[data-page="overview"] .story-rail i::after{content:"";position:absolute;inset:0;background:#7AA2FF;transform:scaleX(var(--f,0));transform-origin:left}
+
+/* stacked story: Calm, reduced motion, short screens and the detached site map */
+#view[data-page="overview"] .story-pin.is-static{height:auto}
+#view[data-page="overview"] .story-pin.is-static .story-stick{position:static;height:auto;overflow:visible}
+#view[data-page="overview"] .story-pin.is-static .story-in{height:auto;min-height:calc(100svh - var(--top-h,0px))}
+#view[data-page="overview"] .story-pin.is-static .story-stage{display:flex;flex-direction:column;align-items:stretch;gap:clamp(14px,2.6vh,26px)}
+#view[data-page="overview"] .story-pin.is-static .cap-t{font-size:clamp(30px,4.4vw,64px)}
+#view[data-page="overview"] .story-pin.is-static .story-rail{display:none}
+#view[data-page="overview"] .story-pin.is-static .sd-rev{opacity:1;transition:none}
+#view[data-page="overview"] .story-pin.is-static .sd-band{opacity:.18}
+#view[data-page="overview"] .story-pin.is-static .sd-trace{stroke-dashoffset:0!important}
+
+/* the paragraph that used to sit in the hero, now the first words under the visual */
+#view[data-page="overview"] .home-lead{font-size:1.15rem;line-height:1.6;color:var(--ink2);max-width:60ch;margin:clamp(28px,6vh,56px) 0 clamp(20px,4vh,36px)}
+
+/* phones and tablets: one column, the flame in the middle, the stage under it */
+@media (max-width:900px){
+  #view[data-page="overview"] .story-top,#view[data-page="overview"] .story-stage{max-width:none}
+  #view[data-page="overview"] .story-top h1{font-size:clamp(28px,min(8.4vw,6vh),48px);max-width:none;margin:10px 0 14px}
+  #view[data-page="overview"] .story-drag{position:relative;inset:auto;width:auto;flex:1 1 auto;min-height:88px;margin:0 calc(-1 * var(--gutter))}
+  #view[data-page="overview"] .story-hint{top:auto;bottom:6px}
+  #view[data-page="overview"] .story-stage{margin-top:0}
+  #view[data-page="overview"] .cap-t{font-size:clamp(32px,min(10.4vw,7vh),60px);max-width:none}
+  #view[data-page="overview"] .story-rail{display:none}
+  #view[data-page="overview"] .hero-cta{gap:8px}
+  #view[data-page="overview"] .story-in .btn{padding:11px 12px;font-size:11px;letter-spacing:.1em}
+  #view[data-page="overview"] .story-pin.is-static .story-drag{min-height:38vh}
+}
+@media (max-width:680px){#view[data-page="overview"] .story-pin{margin-top:-20px}}
+@media (max-width:420px){
+  #view[data-page="overview"] .sd-head{font-size:10px;letter-spacing:.1em;margin-bottom:14px}
+  #view[data-page="overview"] .sd-key li{font-size:10px;letter-spacing:.06em}
+  #view[data-page="overview"] .story-data{padding:12px 10px 10px}
+}
+
+/* ---------- 2. the ledger: one-line rows ---------- */
+#view[data-page="overview"] .ledger{margin:0 0 28px}
+#view[data-page="overview"] .ledger-h{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0 0 10px}
+#view[data-page="overview"] .hrow{border-top:1px solid var(--line)}
+#view[data-page="overview"] .hrow:last-child{border-bottom:1px solid var(--line)}
+#view[data-page="overview"] .hrow>summary{list-style:none;display:grid;grid-template-columns:4ch minmax(0,max-content) minmax(0,1fr) 20px;align-items:baseline;gap:4px 20px;padding:16px 8px;cursor:pointer;border-radius:var(--r-data);transition:background var(--t-micro)}
+#view[data-page="overview"] .hrow>summary::-webkit-details-marker{display:none}
+#view[data-page="overview"] .hrow>summary:hover{background:var(--surface)}
+#view[data-page="overview"] .hrow>summary:focus-visible{outline:2px solid var(--oxy);outline-offset:-2px}
+#view[data-page="overview"] .hrow-n{font:var(--label);letter-spacing:.14em;color:var(--mute);transition:color var(--t-micro)}
+#view[data-page="overview"] .hrow[open]>summary .hrow-n{color:var(--accent)}
+#view[data-page="overview"] .hrow-t{font:600 1.05rem/1.3 var(--font);color:var(--ink)}
+#view[data-page="overview"] .hrow-hint{font-size:.95rem;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#view[data-page="overview"] .hrow-plus{position:relative;width:12px;height:12px;align-self:center;justify-self:end;transition:transform var(--t-micro) var(--ease-in)}
+#view[data-page="overview"] .hrow-plus::before,#view[data-page="overview"] .hrow-plus::after{content:"";position:absolute;background:var(--ink2)}
+#view[data-page="overview"] .hrow-plus::before{left:0;right:0;top:5.5px;height:1px}
+#view[data-page="overview"] .hrow-plus::after{top:0;bottom:0;left:5.5px;width:1px}
+#view[data-page="overview"] .hrow[open]>summary .hrow-plus{transform:rotate(45deg)}
+#view[data-page="overview"] .hrow-body{padding:6px 8px 32px calc(4ch + 28px);min-width:0}
+#view[data-page="overview"] .hrow-body>*:first-child{margin-top:0}
+#view[data-page="overview"] .hrow-body>*:last-child{margin-bottom:0}
+#view[data-page="overview"] .hrow-body>.story{margin:0}
+#view[data-page="overview"] .hrow-body .qs-also{margin:0}
+#view[data-page="overview"] .hrow-body .india{margin-top:0}
+#view[data-page="overview"] .hrow[open]>.hrow-body{animation:vo-row var(--t-in) var(--ease-in) both}
+@keyframes vo-row{from{opacity:0;transform:translateY(-6px)}}
+@media (max-width:680px){
+  #view[data-page="overview"] .hrow>summary{grid-template-columns:3.4ch minmax(0,1fr) 20px;padding:14px 4px}
+  #view[data-page="overview"] .hrow-t{grid-column:2}
+  #view[data-page="overview"] .hrow-hint{grid-column:2;grid-row:2;font-size:.88rem}
+  #view[data-page="overview"] .hrow-plus{grid-column:3;grid-row:1}
+  #view[data-page="overview"] .hrow-body{padding:4px 0 26px}
+}
+@media (prefers-reduced-motion:reduce){#view[data-page="overview"] .hrow[open]>.hrow-body{animation:none}}
+html[data-motion=calm] #view[data-page="overview"] .hrow[open]>.hrow-body{animation:none}
+html[data-motion=calm] #view[data-page="overview"] .hrow-plus,html[data-motion=calm] #view[data-page="overview"] .sd-rev{transition:none}

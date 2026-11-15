@@ -11,6 +11,7 @@
 import { h, add, card, badge, fmt, seg, stat, announce, calm, tip, untip } from './lib.js';
 import { keyNav, numbers } from './charts.js';
 import { moonMarsSwitch, modelOnly, gravities, mmStamp } from './fig_flame.js';
+import { draggable } from './spring.js';
 
 /** Replace an element's children, dropping null/false/undefined (replaceChildren(null) would print "null"). */
 const put = (el, ...kids) => { el.replaceChildren(); add(el, ...kids); };
@@ -36,6 +37,12 @@ function heat(T) {
 const BB = [[800, [120, 20, 0]], [1200, [255, 70, 0]], [1600, [255, 115, 10]], [2000, [255, 145, 40]], [2400, [255, 175, 85]], [2800, [255, 205, 140]]];
 function bb(T) { if (T <= BB[0][0]) return BB[0][1]; for (let i = 1; i < BB.length; i++) if (T <= BB[i][0]) { const [a, ca] = BB[i - 1], [b, cb] = BB[i], f = (T - a) / (b - a); return ca.map((x, k) => x + (cb[k] - x) * f); } return BB[BB.length - 1][1]; }
 const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+// feat/ui-lock split screen: orbit (0 g) always on the left, Earth (1 g) on the right, same fuel and conditions, one scale.
+// View feel only (team choices, not data): divider range and keyboard steps, pixels of drag per airflow step.
+const LEFT_G = '0 g', RIGHT_G = 'Earth 1 g', SPLIT_MIN = 0.15, SPLIT_MAX = 0.85, SPLIT_STEP = 0.05, FLOW_PX = 44;
+const reduced = () => calm() || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const LBL = '500 11px "IBM Plex Mono", ui-monospace, monospace';
+const INK_C = '#EDE8DF', MUTE_C = '#8C8A93';   // text on the always-dark canvas
 
 // How many NASA tests ran near these conditions (same window as the gap map: 3 oxygen points, 10 kPa), by fire type.
 export function nearTests(gaps, kind, o2pct, kpa) {
@@ -54,9 +61,10 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
   const G = gravities(fs.flames);
   const st = saved || (saved = { fuel: 'n-heptane', g: '0 g', o2: 0.21, p: 101.3, flow: 0, look: 'real' });
   if (!showMM && G.find(x => x.g === st.g)?.mm) st.g = '0 g';
-  const W = 760, H = 470, dpr = Math.min(2, (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1);
+  const W = 960, H = 520, dpr = Math.min(2, (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1);
   const sumId = `flsim-sum-${Math.random().toString(36).slice(2, 8)}`;
-  const cv = h('canvas', { width: W * dpr, height: H * dpr, class: 'fl-simcv', 'aria-describedby': sumId });
+  const cvId = `${sumId}-cv`;
+  const cv = h('canvas', { width: W * dpr, height: H * dpr, class: 'fl-simcv', id: cvId, 'aria-describedby': sumId });
   const g2 = cv.getContext('2d'); if (g2) g2.scale(dpr, dpr);
   const readout = h('div', { class: 'grid g3 fl-stats' }), labelBox = h('div', { class: 'fl-labels' });
   const summary = h('p', { class: 'fl-sum', id: sumId }), tableSlot = h('div');
@@ -99,44 +107,74 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
     const half = Math.max((z1 - z0) / 2, (x1 - x0) / 2 * H / W) * 1.08;
     return { cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, half };
   }
+  /** One scale for both halves: the larger of the two grids fits a half-width pane (so sizes compare honestly). */
+  function sharedHalf() {
+    let half = 0;
+    for (const s of sides) if (s.cur) { const x = s.cur.grid.x_mm, z = s.cur.grid.z_mm; half = Math.max(half, (z[z.length - 1] - z[0]) / 2, (x[x.length - 1] - x[0]) / 2 * H / (W / 2)); }
+    return (half || 1) * 1.04;
+  }
   const lerp = (a, b, t) => a + (b - a) * t;
-  let cur = null, prev = null, view = null, from = null, t0 = 0, parts = [], last = 0, focusCell = -1;
+  let cur = null, t0 = 0, last = 0, focusCell = -1, split = 0.5, halfFrom = null, halfNow = null, rightG = RIGHT_G;
+  // the two halves: each keeps its own case, the case it morphs from, its view centre and its tracers
+  const sides = [{ g: LEFT_G, cur: null, prev: null, from: null, view: null, parts: [] }, { g: RIGHT_G, cur: null, prev: null, from: null, view: null, parts: [] }];
+  const paneOf = i => (i === 0 ? [0, W * split] : [W * split, W]);
+  const sideOfCur = () => sides.findIndex(s => s.cur === cur);
   const resample = (c, n) => (c.length === n ? c : Array.from({ length: n }, (_, k) => c[Math.floor(k * c.length / n)]));
 
   // ---------- lifecycle: nothing runs until mounted; Calm or Pause draws still frames only ----------
   let raf = 0, mounted = false, playing = false, visible = true, io = null;
-  const animating = () => mounted && playing && visible && !calm();
+  const animating = () => mounted && playing && visible && !reduced() && !document.hidden;   // paused off screen and in a hidden tab
+  const onVis = () => { if (animating()) start(); else stop(); };
   function loop(now) { raf = 0; if (!mounted) return; frame(now, false); if (animating()) raf = requestAnimationFrame(loop); }
   function start() { if (!raf && animating()) { last = performance.now(); raf = requestAnimationFrame(loop); } }
   function stop() { if (raf) cancelAnimationFrame(raf); raf = 0; }
-  function still() { if (!mounted) return; prev = null; frame(performance.now(), true); }
+  function still() { if (!mounted) return; for (const s of sides) s.prev = null; halfFrom = null; frame(performance.now(), true); }
+  let stillRaf = 0;   // coalesce redraws while the divider is dragged in a still frame (one draw per display frame, no loop)
+  const stillSoon = () => { if (!stillRaf) stillRaf = requestAnimationFrame(() => { stillRaf = 0; if (!animating()) still(); }); };
 
   function frame(now, isStill) {
     if (!cur || !g2) return;
     const ctx2 = g2;
     const dt = isStill ? 0 : Math.min(0.05, (now - last) / 1000); last = now;
-    const tt = prev && !isStill ? Math.min(1, (now - t0) / 650) : 1, e = ease(tt);
-    if (tt >= 1) prev = null;
-    const tv = viewOf(cur), v = prev && from ? { cx: lerp(from.cx, tv.cx, e), cz: lerp(from.cz, tv.cz, e), half: lerp(from.half, tv.half, e) } : tv; view = v;
-    const S = H / 2 / v.half, X = x => W / 2 + (x - v.cx) * S, Y = z => H / 2 - (z - v.cz) * S;
-    const look = st.look, mm = modelOnly(cur.gravity_label);
+    const morphing = sides.some(s => s.prev) && !isStill;
+    const tt = morphing ? Math.min(1, (now - t0) / 650) : 1, e = ease(tt);
+    if (tt >= 1) { for (const s of sides) s.prev = null; halfFrom = null; }
+    const hT = sharedHalf(), half = halfFrom != null && tt < 1 ? lerp(halfFrom, hT, e) : hT; halfNow = half;
+    const S = H / 2 / half, look = st.look;
     ctx2.clearRect(0, 0, W, H); ctx2.fillStyle = '#05070d'; ctx2.fillRect(0, 0, W, H);
     if (look === 'real') { const vg = ctx2.createRadialGradient(W / 2, H / 2, 40, W / 2, H / 2, W * 0.7); vg.addColorStop(0, 'rgba(40,50,80,.25)'); vg.addColorStop(1, 'rgba(0,0,0,0)'); ctx2.fillStyle = vg; ctx2.fillRect(0, 0, W, H); }
     ctx2.imageSmoothingEnabled = true; ctx2.imageSmoothingQuality = 'high';
-    const put = (f, a) => { if (a <= 0) return; const x = f.grid.x_mm, z = f.grid.z_mm, dx = (x[x.length - 1] - x[0]) / (x.length - 1), dz = (z[z.length - 1] - z[0]) / (z.length - 1);
-      ctx2.globalAlpha = a; ctx2.drawImage(look === 'real' ? imageReal(f) : image(f), X(x[0] - dx / 2), Y(z[z.length - 1] + dz / 2), (x[x.length - 1] - x[0] + dx) * S, (z[z.length - 1] - z[0] + dz) * S); ctx2.globalAlpha = 1; };
+    sides.forEach((sd, i) => drawSide(ctx2, sd, i, S, e, tt, dt, isStill));
+    // scale bar: one for both halves (same scale)
+    const nice = [1, 2, 5, 10, 20, 50, 100, 200, 500].find(n => n * S > 70) || 500;
+    ctx2.fillStyle = '#c3c2b7'; ctx2.fillRect(18, H - 22, nice * S, 2); ctx2.font = LBL; ctx2.textAlign = 'left'; ctx2.fillText(`${nice} MM · BOTH HALVES`, 18, H - 30);
+  }
+
+  /** One half of the split: the same drawing as the single view had, clipped to its pane and centred in it. */
+  function drawSide(ctx2, sd, i, S, e, tt, dt, isStill) {
+    const [a, b] = paneOf(i), f = sd.cur, pw = b - a;
+    ctx2.save(); ctx2.beginPath(); ctx2.rect(a, 0, pw, H); ctx2.clip();
+    if (!f) {
+      ctx2.font = LBL; ctx2.fillStyle = MUTE_C; ctx2.textAlign = 'left'; ctx2.fillText('NO CASE IN THE FILE', a + 16, H / 2); ctx2.restore(); return;
+    }
+    const prev = sd.prev && tt < 1 ? sd.prev : null;
+    const tv = viewOf(f), v = prev && sd.from ? { cx: lerp(sd.from.cx, tv.cx, e), cz: lerp(sd.from.cz, tv.cz, e) } : tv; sd.view = { cx: v.cx, cz: v.cz, S, a, b };
+    const pcx = (a + b) / 2, X = x => pcx + (x - v.cx) * S, Y = z => H / 2 - (z - v.cz) * S;
+    const look = st.look, mm = modelOnly(f.gravity_label);
+    const blit = (c, al) => { if (al <= 0) return; const x = c.grid.x_mm, z = c.grid.z_mm, dx = (x[x.length - 1] - x[0]) / (x.length - 1), dz = (z[z.length - 1] - z[0]) / (z.length - 1);
+      ctx2.globalAlpha = al; ctx2.drawImage(look === 'real' ? imageReal(c) : image(c), X(x[0] - dx / 2), Y(z[z.length - 1] + dz / 2), (x[x.length - 1] - x[0] + dx) * S, (z[z.length - 1] - z[0] + dz) * S); ctx2.globalAlpha = 1; };
     ctx2.save(); if (look === 'real') ctx2.globalCompositeOperation = 'lighter';
-    if (prev && tt < 1) put(prev, 1 - e); put(cur, prev && tt < 1 ? e : 1); ctx2.restore();
+    if (prev) blit(prev, 1 - e); blit(f, prev ? e : 1); ctx2.restore();
     // glow: a blurred copy gives the bright core a soft halo
-    ctx2.save(); ctx2.globalCompositeOperation = 'lighter'; ctx2.filter = look === 'real' ? 'blur(18px)' : 'blur(10px)'; put(cur, look === 'real' ? 0.7 : 0.35); ctx2.restore(); ctx2.filter = 'none';
+    ctx2.save(); ctx2.globalCompositeOperation = 'lighter'; ctx2.filter = look === 'real' ? 'blur(18px)' : 'blur(10px)'; blit(f, look === 'real' ? 0.7 : 0.35); ctx2.restore(); ctx2.filter = 'none';
     // hot-gas tracers carried by the model's effective flow (frozen in a still frame)
-    const g = cur.U_buoy_m_s || 0, u = cur.flow_m_s || 0, sp = Math.hypot(u, g);
+    const g = f.U_buoy_m_s || 0, u = f.flow_m_s || 0, sp = Math.hypot(u, g);
     const slow = sp > 0 ? Math.max(1, sp * 1000 * S / 90) : 1;               // so the fastest tracer moves ~90 px/s
-    const cont = resample(cur.contour_mm, 72);
-    if (!isStill && parts.length < 140 && Math.random() < 0.9) { const p = cont[Math.floor(Math.random() * cont.length)]; parts.push({ x: p[0] * (0.6 + 0.4 * Math.random()), z: p[1] * (0.6 + 0.4 * Math.random()), life: 1 }); }
+    const cont = resample(f.contour_mm, 72);
+    if (!isStill && sd.parts.length < 140 && Math.random() < 0.9) { const p = cont[Math.floor(Math.random() * cont.length)]; sd.parts.push({ x: p[0] * (0.6 + 0.4 * Math.random()), z: p[1] * (0.6 + 0.4 * Math.random()), life: 1 }); }
     ctx2.save(); ctx2.globalCompositeOperation = 'lighter';
-    parts = parts.filter(p => p.life > 0);
-    for (const p of parts) {
+    sd.parts = sd.parts.filter(p => p.life > 0);
+    for (const p of sd.parts) {
       let vx = u * 1000 / slow, vz = g * 1000 / slow;
       if (sp === 0) { const r = Math.hypot(p.x, p.z) || 1; vx = p.x / r * 6; vz = p.z / r * 6; }   // no flow, no rise: gas only spreads outward
       if (dt > 0) { p.x += (vx + (Math.random() - 0.5) * 8) * dt; p.z += (vz + (Math.random() - 0.5) * 8) * dt; p.life -= dt * 0.45; }
@@ -144,47 +182,52 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
     }
     ctx2.restore();
     // flame sheet (stoichiometric surface): morphs between cases; dashed for Moon and Mars (model only)
-    const pc = prev && tt < 1 ? resample(prev.contour_mm, 72) : null;
+    const pc = prev ? resample(prev.contour_mm, 72) : null;
     ctx2.beginPath(); cont.forEach((p, k) => { const x = pc ? lerp(pc[k][0], p[0], e) : p[0], z = pc ? lerp(pc[k][1], p[1], e) : p[1]; if (k) ctx2.lineTo(X(x), Y(z)); else ctx2.moveTo(X(x), Y(z)); }); ctx2.closePath();
     ctx2.setLineDash(mm ? [9, 7] : []);
     if (look === 'real') {
       // blue light from the reaction zone, strongest where fresh oxygen meets fuel: all round in orbit, near the base when buoyancy lifts the flame
-      const zs = cont.map(p => p[1]), zmin = Math.min(...zs), zmax = Math.max(...zs), lift = Math.min(1, (cur.U_buoy_m_s || 0) / 0.3);
+      const zs = cont.map(p => p[1]), zmin = Math.min(...zs), zmax = Math.max(...zs), lift = Math.min(1, (f.U_buoy_m_s || 0) / 0.3);
       const gr = ctx2.createLinearGradient(0, Y(zmin), 0, Y(zmax));
       gr.addColorStop(0, 'rgba(90,140,255,1)'); gr.addColorStop(0.35, `rgba(90,140,255,${1 - 0.8 * lift})`); gr.addColorStop(1, `rgba(90,140,255,${1 - 0.95 * lift})`);
       ctx2.save(); ctx2.globalCompositeOperation = 'lighter'; ctx2.strokeStyle = gr; ctx2.lineJoin = 'round';
-      for (const [w, a, bl] of [[14, 0.18, 12], [6, 0.35, 4], [2.2, 0.9, 0]]) { ctx2.globalAlpha = a; ctx2.lineWidth = w; ctx2.filter = bl ? `blur(${bl}px)` : 'none'; ctx2.stroke(); }
+      for (const [w, al, bl] of [[14, 0.18, 12], [6, 0.35, 4], [2.2, 0.9, 0]]) { ctx2.globalAlpha = al; ctx2.lineWidth = w; ctx2.filter = bl ? `blur(${bl}px)` : 'none'; ctx2.stroke(); }
       ctx2.restore(); ctx2.filter = 'none';
     } else { ctx2.strokeStyle = 'rgba(160,200,255,.9)'; ctx2.lineWidth = 1.5; ctx2.stroke(); }
     ctx2.setLineDash([]);
     // fuel source to scale
-    const src = cur.source; ctx2.fillStyle = '#d9d7cf';
+    const src = f.source; ctx2.fillStyle = '#d9d7cf';
     if (src.type === 'droplet') { const r = Math.max(2.5, src.d0_mm / 2 * S);
       if (look === 'real') { const dg = ctx2.createRadialGradient(X(0) - r * 0.35, Y(0) - r * 0.35, r * 0.1, X(0), Y(0), r); dg.addColorStop(0, 'rgba(255,240,220,.95)'); dg.addColorStop(0.35, 'rgba(120,90,70,.9)'); dg.addColorStop(1, 'rgba(20,16,14,.95)'); ctx2.fillStyle = dg; }
       ctx2.beginPath(); ctx2.arc(X(0), Y(0), r, 0, 6.283); ctx2.fill(); }
     else { ctx2.fillRect(X(0) - 3, Y(0), 6, 14); }
-    // scale bar, gravity and airflow markers
-    const nice = [1, 2, 5, 10, 20, 50, 100, 200, 500].find(n => n * S > 70) || 500;
-    ctx2.fillStyle = '#c3c2b7'; ctx2.fillRect(18, H - 22, nice * S, 2); ctx2.font = '12px system-ui'; ctx2.textAlign = 'left'; ctx2.fillText(`${nice} mm`, 18, H - 30);
-    ctx2.textAlign = 'right'; ctx2.fillText(cur.gravity === '0 g' ? 'no gravity' : `gravity ${fmt(cur.g_m_s2, 2)} m/s² ↓`, W - 16, 22);
-    if (u > 0) ctx2.fillText(`air ${u} m/s →`, W - 16, 40);
-    ctx2.fillText(!animating() ? (calm() ? 'Calm motion: still frame' : 'tracers paused') : slow > 1.5 ? `tracers shown ${Math.round(slow)}× slower` : 'tracers at real speed', W - 16, H - 16);
-    if (mm) { ctx2.textAlign = 'left'; ctx2.fillStyle = '#fab219'; ctx2.font = '700 12px system-ui'; ctx2.fillText('MODEL ONLY · NOT VALIDATED', 16, 22); }
+    // the half names, gravity and airflow are DOM labels over the canvas (they stay readable on a phone); the canvas keeps
+    // only the tracer speed, drawn when the canvas is shown wide enough to read it
+    ctx2.font = LBL; try { ctx2.letterSpacing = '1.5px'; } catch { /* older canvas */ }
+    if (mm) { ctx2.textAlign = 'left'; ctx2.fillStyle = '#fab219'; ctx2.fillText('MODEL ONLY · NOT VALIDATED', a + 16, 84); }
+    ctx2.textAlign = 'right'; ctx2.fillStyle = MUTE_C;
+    const l2 = !animating() ? (reduced() ? 'CALM MOTION: STILL FRAME' : 'TRACERS PAUSED') : slow > 1.5 ? `TRACERS ${Math.round(slow)}× SLOWER` : 'TRACERS AT REAL SPEED';
+    if (cv.clientWidth >= 600 && ctx2.measureText(l2).width < pw - 32 - (i === 0 ? 150 : 0)) ctx2.fillText(l2, b - 16, H - 40);
+    try { ctx2.letterSpacing = '0px'; } catch { /* older canvas */ }
     ctx2.textAlign = 'left';
-    // keyboard focus ring on the grid cell being read
-    if (focusCell >= 0) {
-      const x = cur.grid.x_mm, z = cur.grid.z_mm, nx = x.length, dx = (x[nx - 1] - x[0]) / (nx - 1), dz = (z[z.length - 1] - z[0]) / (z.length - 1);
+    // keyboard focus ring on the grid cell being read (only on the half being read)
+    if (focusCell >= 0 && f === cur) {
+      const x = f.grid.x_mm, z = f.grid.z_mm, nx = x.length, dx = (x[nx - 1] - x[0]) / (nx - 1), dz = (z[z.length - 1] - z[0]) / (z.length - 1);
       const ii = focusCell % nx, jj = z.length - 1 - Math.floor(focusCell / nx);
-      ctx2.strokeStyle = '#eef1f7'; ctx2.lineWidth = 2; ctx2.strokeRect(X(x[ii] - dx / 2), Y(z[jj] + dz / 2), dx * S, dz * S);
+      ctx2.strokeStyle = INK_C; ctx2.lineWidth = 2; ctx2.strokeRect(X(x[ii] - dx / 2), Y(z[jj] + dz / 2), dx * S, dz * S);
     }
+    ctx2.restore();
   }
 
   // ---------- keyboard and pointer reading of the grid ----------
   const items = [];
-  const cellHtml = (i, j) => { const x = cur.grid.x_mm[i], z = cur.grid.z_mm[j], T = cur.grid.T_K[j][i];
-    return `<b>${fmt(T, 0)} K</b><br>${fmt(x, 1)} mm across, ${fmt(z, 1)} mm up from the fuel${modelOnly(cur.gravity_label) ? '<br><span>model only, not validated</span>' : ''}`; };
-  const toClient = (x, z) => { const r = cv.getBoundingClientRect(), v = view || viewOf(cur), S = H / 2 / v.half;
-    return { x: r.left + (W / 2 + (x - v.cx) * S) / W * r.width, y: r.top + (H / 2 - (z - v.cz) * S) / H * r.height }; };
+  const cellOf = (f, i, j) => { const x = f.grid.x_mm[i], z = f.grid.z_mm[j], T = f.grid.T_K[j][i];
+    return `<b>${fmt(T, 0)} K</b> · ${gLabel(f.gravity, modelOnly(f.gravity_label))}<br>${fmt(x, 1)} mm across, ${fmt(z, 1)} mm up from the fuel${modelOnly(f.gravity_label) ? '<br><span>model only, not validated</span>' : ''}`; };
+  const cellHtml = (i, j) => cellOf(cur, i, j);
+  /** A side's drawing geometry (from the last frame, or the resting one before any frame): centre, scale and pane. */
+  const geoOf = k => { const sd = sides[k]; if (sd.view) return sd.view; const tv = viewOf(sd.cur || cur), [a, b] = paneOf(k); return { cx: tv.cx, cz: tv.cz, S: H / 2 / (halfNow || sharedHalf()), a, b }; };
+  const toClient = (x, z) => { const r = cv.getBoundingClientRect(), k = Math.max(0, sideOfCur()), v = geoOf(k), pcx = (v.a + v.b) / 2;
+    return { x: r.left + (pcx + (x - v.cx) * v.S) / W * r.width, y: r.top + (H / 2 - (z - v.cz) * v.S) / H * r.height }; };
   const nav = keyNav(cv, items, { label: 'Flame simulator: the model temperature grid', cols: fs.flames[0]?.grid?.x_mm?.length || 31,
     onMove: i => { focusCell = i; if (!animating()) still(); }, onClear: () => { focusCell = -1; if (!animating()) still(); } });
   function setItems() {
@@ -192,16 +235,35 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
     const x = cur.grid.x_mm, z = cur.grid.z_mm;
     for (let j = z.length - 1; j >= 0; j--) for (let i = 0; i < x.length; i++) { const ii = i, jj = j; items.push({ html: cellHtml(ii, jj), anchor: () => toClient(x[ii], z[jj]) }); }
   }
+  const paneAt = e => { const r = cv.getBoundingClientRect(); return (e.clientX - r.left) / Math.max(1, r.width) * W < W * split ? 0 : 1; };
+  // drag across a flame to change the airflow (snaps to the file's own airflow values); a tap picks the half to read
+  let fd = null;
+  cv.addEventListener('pointerdown', e => { if (e.button > 0 || !cur) return; fd = { id: e.pointerId, x: e.clientX, y: e.clientY, i0: Math.max(0, flows.indexOf(st.flow)), moved: false }; });
   cv.addEventListener('pointermove', e => {
     if (!cur) return;
-    const r = cv.getBoundingClientRect(), v = view || viewOf(cur), S = H / 2 / v.half;
-    const mx = v.cx + ((e.clientX - r.left) / r.width * W - W / 2) / S, mz = v.cz - ((e.clientY - r.top) / r.height * H - H / 2) / S;
-    const x = cur.grid.x_mm, z = cur.grid.z_mm;
+    if (fd && e.pointerId === fd.id) {
+      const dx = e.clientX - fd.x;
+      if (!fd.moved && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(e.clientY - fd.y)) { fd.moved = true; untip(); cv.classList.add('fl-dragging'); try { cv.setPointerCapture(e.pointerId); } catch { /* gone */ } }
+      if (fd.moved) { const i = Math.max(0, Math.min(flows.length - 1, fd.i0 + Math.round(dx / FLOW_PX))); if (flows[i] !== st.flow) { st.flow = flows[i]; flowSeg.set(st.flow); show(); } return; }
+    }
+    const k = paneAt(e), f = sides[k].cur; if (!f) return untip();
+    const r = cv.getBoundingClientRect(), v = geoOf(k), pcx = (v.a + v.b) / 2;
+    const mx = v.cx + ((e.clientX - r.left) / r.width * W - pcx) / v.S, mz = v.cz - ((e.clientY - r.top) / r.height * H - H / 2) / v.S;
+    const x = f.grid.x_mm, z = f.grid.z_mm;
     if (mx < x[0] || mx > x[x.length - 1] || mz < z[0] || mz > z[z.length - 1]) return untip();
-    const near = (arr, val) => arr.reduce((b, q, k) => (Math.abs(q - val) < Math.abs(arr[b] - val) ? k : b), 0);
-    tip(e, cellHtml(near(x, mx), near(z, mz)));
+    const near = (arr, val) => arr.reduce((b, q, kk) => (Math.abs(q - val) < Math.abs(arr[b] - val) ? kk : b), 0);
+    tip(e, cellOf(f, near(x, mx), near(z, mz)));
   });
+  const endFd = e => {
+    if (!fd || e.pointerId !== fd.id) return;
+    const tap = !fd.moved && e.type === 'pointerup'; fd = null; cv.classList.remove('fl-dragging');
+    if (tap) readSide(paneAt(e));
+  };
+  cv.addEventListener('pointerup', endFd); cv.addEventListener('pointercancel', endFd);
   cv.addEventListener('pointerleave', untip);
+  // Enter or Space mirror the tap: switch which half the numbers below describe
+  cv.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; e.preventDefault(); readSide(sideOfCur() === 0 ? 1 : 0); });
+  function readSide(k) { const g = sides[k]?.cur?.gravity; if (!g || g === st.g) return; st.g = g; gravSeg?.set(g); show(); }
 
   // ---------- controls ----------
   const legendEl = h('div', { class: 'legend fl-legend' });
@@ -214,7 +276,7 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
   const setNote = () => put(lookNote, h('small', {}, st.look === 'real' ? 'Real look: the model\'s temperature grid drawn as light. Colour follows temperature; how bright and yellow the hot gas glows is scaled by the model\'s rise speed, which is our artistic choice, not a model output. Switch to Temperature for the exact numbers.' : 'Temperature map: every pixel is the model\'s gas temperature on a fixed scale.'));
   const playBtn = h('button', { type: 'button', class: 'btn fl-play' });
   const setBtn = () => {
-    const c = calm();
+    const c = reduced();
     playBtn.textContent = playing && !c ? 'Pause' : 'Play';
     playBtn.setAttribute('aria-label', playing && !c ? 'Pause the tracer animation' : 'Play the tracer animation');
     playBtn.disabled = c;
@@ -223,10 +285,11 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
   playBtn.addEventListener('click', () => { playing = !playing; setBtn(); if (animating()) start(); else { stop(); still(); } });
   const calmNote = h('small', { class: 'fl-calm' });
 
-  const lookRow = seg({ label: 'View', options: [['real', 'Real look'], ['temp', 'Temperature map']], value: st.look, onChange: v => { st.look = v; setLegend(); setNote(); if (!animating()) still(); } });
+  const lookRow = seg({ label: 'View', options: [['real', 'Real look'], ['temp', 'Temperature map']], value: st.look, onChange: v => { st.look = v; setLegend(); setNote(); setLabels(); if (!animating()) still(); } });
   const gravSlot = h('div');
+  let gravSeg = null;
   const gravRow = () => {
-    const row = seg({ label: 'Gravity', options: G.filter(x => showMM || !x.mm).map(x => [x.g, gLabel(x.g, x.mm)]), value: st.g, onChange: v => { st.g = v; show(); } });
+    const row = gravSeg = seg({ label: 'Numbers for', options: G.filter(x => showMM || !x.mm).map(x => [x.g, gLabel(x.g, x.mm)]), value: st.g, onChange: v => { st.g = v; show(); } });
     row.querySelectorAll('button').forEach(b => { if (G.find(x => x.g === b.dataset.v)?.mm) b.classList.add('mm'); });
     put(gravSlot, row);
   };
@@ -236,18 +299,28 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
     if (!showMM && G.find(x => x.g === st.g)?.mm) st.g = G.find(x => !x.mm)?.g || '0 g';
     gravRow(); setLegend(); show();
   }
+  const flowSeg = seg({ label: 'Airflow', options: flows.map(o => [o, o === 0 ? 'still air' : `${o} m/s`]), value: st.flow, onChange: v => { st.flow = Number(v); show(); } });
   const controls = h('div', { class: 'fl-controls' },
     sw, lookRow, seg({ label: 'Fuel', options: fuels.map(f => [f, f]), value: st.fuel, onChange: v => { st.fuel = v; show(); } }),
     gravSlot,
     seg({ label: 'Oxygen', options: [[0.21, '21%'], [0.34, '34%']], value: st.o2, onChange: v => { st.o2 = Number(v); show(); } }),
     seg({ label: 'Pressure', options: [[101.3, '101.3 kPa (sea level)'], [70.3, '70.3 kPa (exploration cabin)']], value: st.p, onChange: v => { st.p = Number(v); show(); } }),
-    seg({ label: 'Airflow', options: flows.map(o => [o, o === 0 ? 'still air' : `${o} m/s`]), value: st.flow, onChange: v => { st.flow = Number(v); show(); } }));
+    flowSeg);
 
   const srcText = f => (f.source.type === 'droplet' ? `${f.source.d0_mm} mm droplet` : `${f.source.Q_F_cm3_s} cm³/s gas jet`);
   function show() {
-    const f = idx.get(`${st.fuel}|${st.g}|${st.o2}|${st.p}|${st.flow}`); if (!f) return;
-    if (cur && f !== cur) { if (animating()) { prev = cur; from = view || viewOf(cur); t0 = performance.now(); } else prev = null; parts = []; }
-    cur = f;
+    const key = g => `${st.fuel}|${g}|${st.o2}|${st.p}|${st.flow}`;
+    const f = idx.get(key(st.g)); if (!f) return;
+    if (st.g !== LEFT_G) rightG = st.g;   // the right half shows Earth, or another gravity only if one is ever offered again
+    sides[1].g = rightG;
+    const anim = animating(); let changed = false;
+    for (const sd of sides) {
+      const nf = idx.get(key(sd.g)) || null;
+      if (sd.cur && nf !== sd.cur) { changed = true; if (anim && nf) { sd.prev = sd.cur; sd.from = sd.view; } else sd.prev = null; sd.parts = []; }
+      sd.cur = nf;
+    }
+    if (changed && anim) { halfFrom = halfNow; t0 = performance.now(); }
+    cur = f; setLabels();
     const mm = modelOnly(f.gravity_label), gname = gLabel(f.gravity, mm);
     put(readout, 
       stat('Flame temperature', fmt(f.T_flame_K, 0), 'K'),
@@ -269,7 +342,10 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
       + `The model gives a flame temperature of ${fmt(f.T_flame_K, 0)} K. Its flame is ${fmt(f.length_mm, 0)} mm long and ${fmt(f.width_mm, 0)} mm wide (length ÷ width ${fmt(f.aspect, 1)}, ${f.aspect < 1.05 ? 'a sphere' : 'elongated'}), `
       + `tilted ${fmt(f.tilt_deg_from_vertical, 0)}° from vertical, with a buoyant rise speed of ${fmt(f.U_buoy_m_s, 2)} m/s.${mm ? ' Model only, not validated.' : ''}`;
     summary.textContent = sumText;
-    cv.setAttribute('aria-label', `Flame simulator, ${gname}: the model temperature grid. Use the arrow keys to read the gas temperature cell by cell, or open "Show the numbers".`);
+    const other = sides.find(sd => sd.cur && sd.cur !== f)?.cur;
+    cv.setAttribute('aria-label', `Flame simulator, split screen: orbit (0 g) flame on the left, Earth (1 g) flame on the right, same fuel and conditions, drawn to one scale. `
+      + `${other ? `The other half: ${gLabel(other.gravity, modelOnly(other.gravity_label))}, ${fmt(other.length_mm, 0)} mm long and ${fmt(other.width_mm, 0)} mm wide. ` : ''}`
+      + `The arrow keys read the gas temperature of the ${gname} half cell by cell; Enter switches halves; or open "Show the numbers".`);
     const was = tableSlot.querySelector('details')?.open;
     const nb = numbers('Flame simulator: the case on screen (model output)', ['Quantity', 'Value', 'Unit'], [
       ['Fuel', f.fuel, ''], ['Fuel source', f.source.type === 'droplet' ? f.source.d0_mm : f.source.Q_F_cm3_s, f.source.type === 'droplet' ? 'mm droplet' : 'cm³/s gas jet'],
@@ -285,23 +361,70 @@ export function flameSimCard(fs, gaps, ctx = {}, opts = {}) {
     if (!animating()) still();
   }
 
-  if (!ctx.detached && typeof ctx.onMount === 'function') {
+  // ---------- the divider between the halves (js/spring.js draggable: fling, spring settle, arrow keys) ----------
+  const handle = h('div', { class: 'fl-divider', role: 'separator', tabindex: '0', 'aria-orientation': 'vertical', 'aria-controls': cvId,
+    'aria-label': 'Divider between the orbit and Earth flames', 'aria-valuemin': String(SPLIT_MIN * 100), 'aria-valuemax': String(SPLIT_MAX * 100) },
+    h('span', { class: 'fl-div-line', 'aria-hidden': 'true' }), h('span', { class: 'fl-div-grip', 'aria-hidden': 'true' }));
+  const live = !ctx.detached && typeof ctx.onMount === 'function';
+  // half labels (mono, uppercase, units): name, then gravity and airflow read from each half's case
+  const paneLab = cls => { const n = h('b', {}), m = h('span', {}); return { el: h('div', { class: `fl-pl ${cls}`, 'aria-hidden': 'true' }, n, m), n, m }; };
+  const labs = [paneLab('l'), paneLab('r')];
+  const illus = h('div', { class: 'fl-ill', 'aria-hidden': 'true' });
+  const stage = h('div', { class: `fl-stage hud${live && !reduced() ? ' fl-pre' : ''}` }, cv, labs[0].el, labs[1].el, illus, handle);
+  function setLabels() {
+    sides.forEach((sd, i) => {
+      const f = sd.cur, L = labs[i];
+      L.n.textContent = f ? gLabel(f.gravity, modelOnly(f.gravity_label)) : gLabel(sd.g, false);
+      L.m.textContent = !f ? 'no case in the file' : `${f.gravity === LEFT_G || !f.g_m_s2 ? 'no gravity' : `gravity ${fmt(f.g_m_s2, 2)} m/s² ↓`} · ${f.flow_m_s > 0 ? `air ${f.flow_m_s} m/s →` : 'still air'}`;
+      L.el.classList.toggle('on', !!f && f === cur);
+      L.el.classList.toggle('orbit', (f?.gravity ?? sd.g) === LEFT_G);
+    });
+    illus.textContent = st.look === 'real' ? 'Illustration: glow brightness and tracers' : 'Illustration: tracers';
+  }
+  function setSplit(fr) {
+    split = Math.max(0.05, Math.min(0.95, fr));   // the rubber band may pull past the stops while dragging
+    handle.style.left = `${split * 100}%`; stage.style.setProperty('--split', `${split * 100}%`);
+    const n = Math.round(Math.max(SPLIT_MIN, Math.min(SPLIT_MAX, split)) * 100);
+    handle.setAttribute('aria-valuenow', String(n)); handle.setAttribute('aria-valuetext', `Orbit ${n}% of the width, Earth ${100 - n}%`);
+    if (mounted && !animating()) stillSoon();
+  }
+  setSplit(split);
+  let divApi = null, ro = null;
+  const width = () => stage.clientWidth || 1;
+  handle.addEventListener('keydown', e => {   // Home / End jump to the stops, Enter or Space re-centre (arrows come from draggable)
+    const t = { Home: SPLIT_MIN, End: SPLIT_MAX, Enter: 0.5, ' ': 0.5 }[e.key];
+    if (t == null || !divApi) return; e.preventDefault(); divApi.set(t * width(), true);
+  });
+  function startDivider() {
+    divApi = draggable(handle, { axis: 'x', value: split * width(),
+      bounds: () => [SPLIT_MIN * width(), SPLIT_MAX * width()],
+      snap: () => Array.from({ length: Math.round((SPLIT_MAX - SPLIT_MIN) / SPLIT_STEP) + 1 }, (_, i) => (SPLIT_MIN + i * SPLIT_STEP) * width()),
+      onMove: p => setSplit(p / width()) });
+    let w0 = width();
+    if (typeof ResizeObserver === 'function') { ro = new ResizeObserver(() => { const w = width(); if (Math.abs(w - w0) > 1) { w0 = w; divApi.set(split * w, false); } }); ro.observe(stage); }
+  }
+
+  if (live) {
     ctx.onMount(() => {
-      mounted = true; playing = !calm(); setBtn();
-      calmNote.textContent = calm() ? 'Motion is Calm, so the simulator draws still frames. Change it in "Read your way".' : '';
+      startDivider();
+      // the divider sweeps in from the centre outward (CSS, --ease-move); instant under Calm or reduced motion
+      if (stage.classList.contains('fl-pre')) { requestAnimationFrame(() => requestAnimationFrame(() => stage.classList.remove('fl-pre'))); setTimeout(() => stage.classList.remove('fl-pre'), 1500); }
+      mounted = true; playing = !reduced(); setBtn();
+      document.addEventListener('visibilitychange', onVis);
+      calmNote.textContent = reduced() ? 'Motion is Calm or reduced, so the simulator draws still frames. Change it in "Read your way".' : '';
       if ('IntersectionObserver' in window) { io = new IntersectionObserver(es => { visible = es.some(x => x.isIntersecting); if (animating()) start(); else stop(); }); io.observe(cv); }
       if (animating()) start(); else still();
     });
-    ctx.onLeave?.(() => { mounted = false; stop(); io?.disconnect(); io = null; });
+    ctx.onLeave?.(() => { mounted = false; stop(); document.removeEventListener('visibilitychange', onVis); io?.disconnect(); io = null; ro?.disconnect(); ro = null; divApi?.destroy(); divApi = null; if (stillRaf) cancelAnimationFrame(stillRaf); stillRaf = 0; fd = null; });
   }
   setBtn(); setLegend(); setNote(); gravRow(); show();
 
   // "2.2 to 2.8 times taller": read from roper_check (main typed the range in)
   const ratios = (fs.roper_check || []).map(r => r.ratio).filter(Number.isFinite);
   const roper = ratios.length ? `at 1 g the model runs ${fmt(Math.min(...ratios), 1)} to ${fmt(Math.max(...ratios), 1)} times taller than a published laminar-flame correlation` : 'at 1 g the model runs taller than a published laminar-flame correlation';
-  const el = card('Flame simulator', fs.status, 'Pick a fuel, gravity, oxygen level, cabin pressure and airflow. Real look draws the model as light; Temperature map shows the exact gas temperatures. The blue line is the flame sheet, where fuel and oxygen meet in the right ratio.',
+  const el = card('Flame simulator', fs.status, 'Orbit on the left, Earth on the right: the same fuel, oxygen, pressure and airflow, drawn to one scale. Pick the conditions below, or drag a flame sideways to change the airflow. Real look draws the model as light; Temperature map shows the exact gas temperatures. The blue line is the flame sheet, where fuel and oxygen meet in the right ratio.',
     h('div', { class: 'fl-sim' },
-      h('div', { class: 'fl-left' }, cv, h('div', { class: 'fl-bar' }, playBtn, calmNote), legendEl, lookNote),
+      h('div', { class: 'fl-left' }, stage, h('div', { class: 'fl-bar' }, playBtn, calmNote, h('small', { class: 'fl-hint' }, 'Drag a flame sideways to change the airflow; drag the divider to compare. Tab to the divider and use the arrow keys.')), legendEl, lookNote),
       h('div', { class: 'fl-right' }, controls, labelBox)),
     readout,
     h('div', { class: 'fl-sumwrap' }, summary, tableSlot),

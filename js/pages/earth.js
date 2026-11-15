@@ -7,6 +7,8 @@ import { h, load, page, card, empty, badge, isMissing, fmt, sig, pct, table, fol
 import { figLink } from '../passes.js';
 import { scrubIonWind, SCRAPPED } from '../overlays.js';
 import { mistRows } from '../fig_respond.js';
+import { setField, setHost } from '../field.js';
+import { draggable } from '../spring.js';
 
 // The three card titles are MADE keys (js/provenance.js). They are listed here so the page keeps its three titled
 // panels (and the Sources site map sees them) even when data/earth_apps.json is missing or drops a card.
@@ -198,9 +200,35 @@ export default async function render(root, ctx) {
     ...CARDS.map(spec => (byId[spec.id] ? earthCard({ title: spec.title, ...byId[spec.id] }, files) : missingCard(spec, ea))),
     ...cards.filter(c => !known.has(c.id) && c.title).map(c => earthCard(c, files)),
   ];
-  root.append(page('On Earth',
+  // UI lock: cards | globe. The globe column is a transparent window onto the shared WebGL field (js/field.js, station
+  // "earth"); dragging it turns the planet. Illustration only: no number is drawn on it.
+  const globe = h('div', {
+    class: 'ea-globe hud', role: 'group', 'aria-roledescription': '3D illustration', tabindex: ctx.detached ? null : '0',
+    'aria-label': 'Illustration: the Earth. Drag or use the arrow keys to spin it.',
+  }, h('span', { class: 'ea-gtag', 'aria-hidden': 'true' }, 'Illustration'),
+    h('span', { class: 'ea-ghint', 'aria-hidden': 'true' }, 'Drag to spin', h('kbd', {}, '\u2190'), h('kbd', {}, '\u2192')));
+  const pg = page('On Earth',
     'Three findings from this site, each linked to an Earth use. The NASA tests ran in orbit, so they point to questions worth asking on Earth; they do not answer them. Every number is read from a data file when the page loads.',
-    ...els));
+    h('div', { class: 'ea-stage' }, h('div', { class: 'ea-cards' }, els), globe));
+  root.append(pg);
+  if (!ctx.detached) mountGlobe(pg, globe, ctx);
+}
+
+/** Drag (or arrow keys) on the globe column spins the planet, with a fling and spring settle (js/spring.js; instant
+ *  under Calm). The field is shown, undimmed, through the page header while it is on screen, then through the column. */
+function mountGlobe(pg, globe, ctx) {
+  let drag = null, io = null;
+  ctx.onMount(() => {
+    drag = draggable(globe, { axis: 'x', step: 80, onMove: p => setField({ spin: -p / 260 }) });
+    const head = pg.querySelector('.phead');
+    const host = el => { globe.classList.toggle('is-host', el === globe); setHost(el, { noDim: true }); };
+    host(head || globe);
+    if (head && 'IntersectionObserver' in window) {
+      io = new IntersectionObserver(([e]) => host(e.isIntersecting && e.intersectionRatio > .25 ? head : globe), { threshold: [0, .25, .5, 1] });
+      io.observe(head);
+    }
+  });
+  ctx.onLeave(() => { drag?.destroy(); io?.disconnect(); drag = io = null; });
 }
 
 /** "The short answer": one sentence per card, from each card's `short` items (D1.4: a missing file is named). */
