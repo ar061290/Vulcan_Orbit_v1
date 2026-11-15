@@ -1,1 +1,13 @@
-/* Page CSS for #/about. Every rule is scoped under #view[data-page="about"] (site/REBUILD_PLAN.md §0 rule 9). Created empty in phase 1. */
+/* Page CSS for #/about. Every rule is scoped under #view[data-page="about"] (site/REBUILD_PLAN.md §0 rule 9). */
+#view[data-page="about"] .src-list{margin:0 0 12px;padding-left:18px}
+#view[data-page="about"] .src-list li{margin-bottom:5px;overflow-wrap:anywhere}
+#view[data-page="about"] .card>h3{margin-top:16px}
+#view[data-page="about"] .sm-status{color:var(--mute);font-size:.92rem}
+#view[data-page="about"] .sitemap{list-style:none;margin:0;padding:0;columns:2 22rem;column-gap:32px}
+#view[data-page="about"] .sitemap>li{break-inside:avoid;margin:0 0 18px}
+#view[data-page="about"] .sm-page{font:700 1.05rem var(--display)}
+#view[data-page="about"] .sm-q{color:var(--mute);font-size:.92rem}
+#view[data-page="about"] .sitemap ol{margin:6px 0 0;padding-left:1.6em}
+#view[data-page="about"] .sitemap ol li{margin-bottom:3px;overflow-wrap:anywhere}
+#view[data-page="about"] .sitemap ol li::marker{font:600 .8rem var(--mono);color:var(--mute)}
+#view[data-page="about"] .sitemap p{margin:4px 0 0}

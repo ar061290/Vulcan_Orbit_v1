@@ -222,6 +222,18 @@
    "status": "demo",
    "owner": "Dashboard",
    "what": "Example camera reading for the Assess button: a copy of growth example 1's flame state"
+  },
+  {
+   "name": "earth_apps",
+   "status": "team",
+   "owner": "Team",
+   "what": "On Earth cards linking site findings to Earth uses"
+  },
+  {
+   "name": "i18n",
+   "status": "team",
+   "owner": "Team",
+   "what": "Telugu and Hindi strings for the Home short answer and India card (draft until reviewed)"
   }
  ]
 }

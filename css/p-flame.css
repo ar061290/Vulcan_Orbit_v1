@@ -1,1 +1,63 @@
-/* Page CSS for #/flame. Every rule is scoped under #view[data-page="flame"] (site/REBUILD_PLAN.md §0 rule 9). Created empty in phase 1. */
+/* Page CSS for #/flame (package P5-A). Every rule is scoped under #view[data-page="flame"] (site/REBUILD_PLAN.md §0 rule 9). */
+
+/* ---------- Flame simulator ---------- */
+#view[data-page="flame"] .fl-sim{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+#view[data-page="flame"] .fl-left,#view[data-page="flame"] .fl-right{min-width:0}
+#view[data-page="flame"] .fl-simcv{display:block;width:100%;height:auto;aspect-ratio:760/470;border-radius:12px;background:#05070d}
+#view[data-page="flame"] .fl-simcv:focus-visible,#view[data-page="flame"] .fl-mapcv:focus-visible{outline:3px solid var(--oxy);outline-offset:3px}
+#view[data-page="flame"] .fl-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:10px 0 6px}
+#view[data-page="flame"] .fl-play{min-width:6.5em}
+#view[data-page="flame"] .fl-play:disabled{opacity:.6;cursor:not-allowed}
+#view[data-page="flame"] .fl-calm{color:var(--mute)}
+#view[data-page="flame"] .fl-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0;font-size:13px;color:var(--ink2)}
+#view[data-page="flame"] .fl-legend span{display:inline-flex;align-items:center;gap:6px}
+#view[data-page="flame"] .fl-sw{display:inline-block;width:14px;height:4px;border-radius:2px;flex:none}
+#view[data-page="flame"] .fl-sw.wide{width:28px;height:10px;border-radius:3px}
+#view[data-page="flame"] .fl-sw.round{width:10px;height:10px;border-radius:50%}
+#view[data-page="flame"] .fl-sw.dash{width:22px;height:0;border-top:2px dashed rgb(160,200,255);border-radius:0}
+#view[data-page="flame"] .fl-look{margin:4px 0 0;color:var(--mute)}
+#view[data-page="flame"] .fl-controls{display:grid;gap:2px}
+#view[data-page="flame"] .fl-labels{margin-top:6px}
+#view[data-page="flame"] .dom{font-size:14px;padding:9px 12px;border-radius:10px;margin:0 0 8px;background:var(--raise)}
+#view[data-page="flame"] .dom.ok{background:var(--oxy-soft)}
+#view[data-page="flame"] .dom.out{background:var(--accent-soft);color:var(--accent-ink)}
+#view[data-page="flame"] .fl-valid{font-size:14px;color:var(--ink2);margin:0 0 8px}
+#view[data-page="flame"] .fl-stats{margin-top:16px}
+#view[data-page="flame"] .fl-stats.mm .statbox{outline:1.5px dashed var(--warn);outline-offset:-1.5px}
+#view[data-page="flame"] .fl-sumwrap{margin-top:14px}
+#view[data-page="flame"] .fl-sum{max-width:var(--measure, 70ch);color:var(--ink2);margin:0 0 8px}
+#view[data-page="flame"] .fl-map .fl-sum{margin-top:10px}
+
+/* ---------- Show Moon and Mars (model only) ---------- */
+#view[data-page="flame"] .mm-switch{display:grid;gap:4px;margin:0 0 14px}
+#view[data-page="flame"] .mm-switch small{color:var(--mute)}
+#view[data-page="flame"] .mm-btn{display:inline-flex;align-items:center;gap:10px;justify-self:start;min-height:44px;padding:8px 14px;border-radius:10px;
+  border:1.5px dashed var(--axis);background:var(--raise);color:var(--ink);font:700 14px var(--font);cursor:pointer;text-align:left}
+#view[data-page="flame"] .mm-btn:hover{border-color:var(--warn)}
+#view[data-page="flame"] .mm-btn[aria-pressed=true]{border-color:var(--warn);border-style:solid}
+#view[data-page="flame"] .mm-box{width:18px;height:18px;flex:none;border-radius:4px;border:2px solid var(--ink2);position:relative}
+#view[data-page="flame"] .mm-btn[aria-pressed=true] .mm-box{border-color:var(--warn);background:var(--warn)}
+#view[data-page="flame"] .mm-btn[aria-pressed=true] .mm-box::after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid var(--page, #000);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+#view[data-page="flame"] .badge.mm{border:1px dashed var(--warn);color:var(--warn);background:transparent}
+#view[data-page="flame"] .seg button.mm{border:1.5px dashed var(--warn)}
+#view[data-page="flame"] .mm-note{font-size:13.5px;color:var(--ink2);margin:8px 0;padding:8px 10px;border-left:3px dashed var(--warn);background:var(--raise);border-radius:0 8px 8px 0}
+
+/* ---------- figures 2 to 7 ---------- */
+#view[data-page="flame"] .fl-key{font-size:13px;color:var(--mute);margin:6px 0 10px}
+#view[data-page="flame"] .card h3{margin:16px 0 8px}
+#view[data-page="flame"] .fl-chart{min-width:0}
+#view[data-page="flame"] .fl-mapcv{display:block;width:100%;height:auto;aspect-ratio:640/340}
+#view[data-page="flame"] .fl-min,#view[data-page="flame"] .fl-band{margin:8px 0 0;font-size:14.5px}
+#view[data-page="flame"] .fl-band b{color:var(--ink)}
+#view[data-page="flame"] .fl-fronts{margin-top:10px}
+#view[data-page="flame"] .fl-count{margin:0 0 10px;color:var(--ink2)}
+#view[data-page="flame"] .fl-limits{margin:0;padding-left:18px;color:var(--ink2)}
+#view[data-page="flame"] .fl-limits li{margin-bottom:4px}
+
+@media (max-width:900px){
+  #view[data-page="flame"] .fl-sim{grid-template-columns:1fr}
+}
+@media (max-width:420px){
+  #view[data-page="flame"] .mm-btn{width:100%}
+  #view[data-page="flame"] .fl-stats{grid-template-columns:1fr 1fr}
+}
