@@ -240,6 +240,12 @@
    "status": "model",
    "owner": "M6",
    "what": "No-physics baselines beside M6 and M6b (added after audit)"
+  },
+  {
+   "name": "cv_scores",
+   "status": "model",
+   "owner": "Mukund",
+   "what": "YOLO fire detector validation scores (precision, recall, mAP)"
   }
  ]
 }

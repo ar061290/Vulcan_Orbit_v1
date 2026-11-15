@@ -3,84 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vulcan Orbit: fire safety for worlds without "up"</title>
-<link rel="icon" href="data:,">
-<meta name="theme-color" content="#05060E">
-<meta name="description" content="Vulcan Orbit: what NASA's microgravity fire experiments say about finding, predicting and stopping fires in spacecraft. Every number traced to its source.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- fonts: only the faces the CSS uses. Bricolage is variable, so one 500..800 range serves every display weight from one file.
-     The History-page faces and the Telugu/Hindi faces (Home language switch) do not block the first paint: they load as
-     print stylesheets and switch to all media once fetched (noscript keeps them for readers without JS). -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@500;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Noto+Sans+Telugu:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Noto+Sans+Telugu:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&display=swap"></noscript>
-<!-- the shell's module graph, fetched in parallel instead of one import level at a time -->
-<link rel="modulepreload" href="js/app.js"><link rel="modulepreload" href="js/engine.js"><link rel="modulepreload" href="js/site.js"><link rel="modulepreload" href="js/lib.js"><link rel="modulepreload" href="js/field.js"><link rel="modulepreload" href="js/overlays.js"><link rel="modulepreload" href="js/status.js"><link rel="modulepreload" href="js/router.js"><link rel="modulepreload" href="js/store.js"><link rel="modulepreload" href="js/tour.js"><link rel="modulepreload" href="js/passes.js"><link rel="modulepreload" href="js/glossary.js"><link rel="modulepreload" href="js/provenance.js"><link rel="modulepreload" href="js/prefs.js"><link rel="modulepreload" href="js/charts.js"><link rel="modulepreload" href="js/fx/loop.js">
-<link rel="stylesheet" href="css/tokens.css">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/charts.css">
-<link rel="stylesheet" href="css/fx-gl.css">
-<link rel="stylesheet" href="css/fx-hero.css">
-<link rel="stylesheet" href="css/fx-clock.css">
-<link rel="stylesheet" href="css/fx-response.css">
-<link rel="stylesheet" href="css/fx-drift.css">
-<link rel="stylesheet" href="css/p-overview.css">
-<link rel="stylesheet" href="css/p-memory.css">
-<link rel="stylesheet" href="css/p-detect.css">
-<link rel="stylesheet" href="css/p-assess.css">
-<link rel="stylesheet" href="css/p-predict.css">
-<link rel="stylesheet" href="css/p-respond.css">
-<link rel="stylesheet" href="css/p-flame.css">
-<link rel="stylesheet" href="css/p-explorer.css">
-<link rel="stylesheet" href="css/p-evidence.css">
-<link rel="stylesheet" href="css/p-ask.css">
-<link rel="stylesheet" href="css/p-models.css">
-<link rel="stylesheet" href="css/p-earth.css">
-<link rel="stylesheet" href="css/p-locate.css">
-<link rel="stylesheet" href="css/p-about.css">
-<link rel="stylesheet" href="css/p-design.css">
-<link rel="stylesheet" href="css/fx-effects.css">
-<link rel="stylesheet" href="css/lock.css">
-<link rel="stylesheet" href="css/ui-overview.css">
-<link rel="stylesheet" href="css/ui-detect.css">
-<link rel="stylesheet" href="css/ui-assess.css">
-<link rel="stylesheet" href="css/ui-respond.css">
-<link rel="stylesheet" href="css/ui-predict.css">
-<link rel="stylesheet" href="css/ui-flame.css">
-<link rel="stylesheet" href="css/ui-memory.css">
-<link rel="stylesheet" href="css/ui-models.css">
-<link rel="stylesheet" href="css/ui-explorer.css">
-<link rel="stylesheet" href="css/ui-evidence.css">
-<link rel="stylesheet" href="css/ui-earth.css">
-<link rel="stylesheet" href="css/ui-ask.css">
-<link rel="stylesheet" href="css/ui-locate.css">
-<link rel="stylesheet" href="css/ui-about.css">
-<link rel="stylesheet" href="css/ui-design.css">
-<link rel="stylesheet" href="css/shell-merge.css">
+<title>Vulcan Orbit · Fire safety where nothing rises</title>
+<meta name="description" content="Vulcan Orbit: four working demos. Detect a flame with a camera, locate it in 3D, sense its smoke, simulate how it spreads in microgravity and rate the risk. NASA Space Apps 2026, Flame in Freefall.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='11' fill='none' stroke='%23EDE8DF' stroke-width='1.5'/%3E%3Ccircle cx='14' cy='14' r='3.5' fill='none' stroke='%237AA2FF' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/demo.css">
 </head>
 <body>
-<a class="skip" href="#view">Skip to content</a>
-<header class="top">
-  <a class="brand" href="#/overview"><span class="mark" style="color:var(--ink)"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" stroke-width="1.5"/><ellipse cx="16" cy="16" rx="14.5" ry="5" fill="none" stroke="var(--accent)" stroke-width="1.5" transform="rotate(-24 16 16)"/><circle cx="16" cy="16" r="6" fill="var(--oxy)" opacity=".25"/><circle cx="16" cy="16" r="6" fill="none" stroke="var(--oxy)" stroke-width="1.6"/><circle cx="16" cy="16" r="1.6" fill="currentColor"/></svg></span><span><b>Vulcan Orbit</b><small>Fire safety where nothing rises</small></span></a>
-  <button type="button" class="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="nav">Menu</button>
-  <nav id="nav" aria-label="Sections"></nav>
-  <!-- the HUD: js/engine.js adds the mission clock, Jump and Sound in front of the data status pill (v3; replaces the full-width banner) -->
-  <div class="hud-right">
-    <div class="pill-wrap">
-      <button type="button" class="pill" aria-expanded="false" aria-controls="demo-banner" aria-label="Data status"><i aria-hidden="true"></i><span class="pill-c" aria-hidden="true">&middot;</span><span class="pill-n">Data status</span></button>
-      <div id="demo-banner" class="pop pill-pop" role="region" aria-label="Data status" hidden></div>
-    </div>
-  </div>
+<a class="skip" href="#main">Skip to the demos</a>
+<header class="bar">
+  <a class="brand" href="index.html">
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="11" fill="none" stroke="#EDE8DF" stroke-width="1.5"/><circle cx="14" cy="14" r="3.5" fill="none" stroke="#7AA2FF" stroke-width="2"/><ellipse cx="14" cy="14" rx="12.5" ry="4" transform="rotate(-24 14 14)" fill="none" stroke="#FF7A3D" stroke-width="1.6"/></svg>
+    <span><b>Vulcan Orbit</b><small class="mono">NASA Space Apps 2026</small></span>
+  </a>
+  <nav class="mono" aria-label="Demos" id="demo-nav">
+    <a href="#detect"><i>01</i> Detect</a><a href="#locate"><i>02</i> Locate</a><a href="#smoke" data-needs="smoke"><i>03</i> Smoke</a><a href="#simulate"><i id="sim-num">04</i> Simulate</a>
+  </nav>
+  <a class="mono ghost" href="https://github.com/ar061290/Vulcan_Orbit_v1">Code ↗</a>
 </header>
-<main id="view" tabindex="-1"></main>
-<footer class="foot">
-  <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="32" cy="32" r="24" fill="none" stroke="currentColor" stroke-width=".8" stroke-dasharray="2 3"/><circle cx="32" cy="32" r="9" fill="none" stroke="var(--oxy)" stroke-width="2"/><circle cx="32" cy="32" r="2.5" fill="currentColor"/><ellipse cx="32" cy="32" rx="28" ry="9" fill="none" stroke="var(--accent)" stroke-width="1.6" transform="rotate(-24 32 32)"/></svg>
-  <div class="foot-text"><b style="color:var(--ink)">Vulcan Orbit</b> · NASA Space Apps Challenge 2026, Flame in Freefall. Built on NASA Physical Sciences Informatics data. Not endorsed by NASA.<br>Every panel says where its numbers come from. Designed to be read by anyone: plain words, large-text and calm-motion options, keyboard and screen-reader friendly.</div>
-  <nav class="foot-links" aria-label="More pages"><a href="#/explorer">NASA experiments</a><a href="#/models">Model cards</a><a href="#/earth">On Earth</a><a href="#/locate">Bench rig</a><a href="#/about">Sources</a><a href="#/design">Design kit</a></nav>
-</footer>
-<div id="tip" class="tip" aria-hidden="true" hidden></div>
-<div id="live" class="sr" aria-live="polite"></div>
-<script type="module" src="js/app.js"></script>
+
+<main id="main">
+  <section class="hero">
+    <div class="hero-text">
+      <p class="kicker mono"><span></span>Flame in Freefall · our prototype</p>
+      <h1 class="disp">In orbit,<br>nothing<br><em>rises.</em></h1>
+      <p class="lede">A fire in a spacecraft has no plume and smoke drifts anywhere. We built a camera that finds the flame and places it in 3D, then a model that predicts how it spreads and how risky it is.</p>
+      <a class="cta mono" href="#detect">See the demos ↓</a>
+    </div>
+    <div class="hud porthole" id="porthole"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+      <p class="tag mono">Illustration, not data</p>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="Why it matters: NASA's real orbital fire" id="stats"></section>
+
+  <section class="step" id="detect" aria-labelledby="detect-h">
+    <header><p class="num mono">01</p><h2 class="disp" id="detect-h">Detect the flame</h2><p class="one">A YOLO model we trained finds flames in a camera frame in real time.</p></header>
+    <div class="grid2">
+      <figure class="panel media" id="detect-media"></figure>
+      <div class="panel" id="detect-nums"></div>
+    </div>
+  </section>
+
+  <section class="step" id="locate" aria-labelledby="locate-h">
+    <header><p class="num mono">02</p><h2 class="disp" id="locate-h">Locate it in 3D</h2><p class="one">A depth model turns the same frame into distance, so the flame gets a position in 3D and an estimated size.</p></header>
+    <div class="grid2">
+      <figure class="panel media" id="locate-media"></figure>
+      <div class="panel" id="locate-text"></div>
+    </div>
+  </section>
+
+  <section class="step" id="smoke" aria-labelledby="smoke-h" hidden>
+    <header><p class="num mono">03</p><h2 class="disp" id="smoke-h">Sense the smoke</h2><p class="one">An optical sensor reads scattered light and airflow to characterise the smoke and tell it apart from dust.</p></header>
+    <figure class="panel media wide" id="smoke-media"></figure>
+  </section>
+
+  <section class="step" id="simulate" aria-labelledby="sim-h">
+    <header><p class="num mono" id="sim-num2">04</p><h2 class="disp" id="sim-h">Simulate &amp; rate the risk</h2><p class="one">The flame goes into our spread model, calibrated on NASA's own space-station burns. Change the air and watch it react.</p></header>
+    <div class="controls" id="controls"></div>
+    <div class="grid2">
+      <div class="panel hud" id="curve"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+      <div class="panel" id="simnums"></div>
+    </div>
+    <div class="panel risk" id="risk" aria-live="polite" style="margin-top:24px"></div>
+  </section>
+
+  <section class="end">
+    <h2 class="disp">Built in 48 hours.</h2>
+    <p>Every number on this page comes from our own models or NASA's data, and each one is labelled with which.</p>
+    <a class="ghost mono" href="project.html">Method, checks &amp; sources ↗</a>
+  </section>
+</main>
+<footer class="foot mono">Vulcan Orbit · NASA Space Apps 2026 · Flame in Freefall · NASA data: PSI-100, PSI-25, PSI-99 · <a href="https://github.com/ar061290/Vulcan_Orbit_v1">Code</a></footer>
+<script type="module" src="js/demo_bg.js"></script>
+<script type="module" src="js/demo.js"></script>
 </body>
 </html>

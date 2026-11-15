@@ -1,0 +1,21 @@
+{
+ "status": "model",
+ "what": "Mukund's YOLO11s fire detector: scores on its validation split after the last of 100 training epochs",
+ "source": "FIRE-LOCALIZATION-AND-VOLUME-ESTIMATION repo (Mukund MV), train/results.csv and train/args.yaml (model yolo11s.pt, imgsz 640, 100 epochs, seed 0)",
+ "units": {
+  "precision": "share",
+  "recall": "share",
+  "map50": "share",
+  "map50_95": "share"
+ },
+ "epoch": 100,
+ "precision": 0.8672,
+ "recall": 0.78617,
+ "map50": 0.81953,
+ "map50_95": 0.49824,
+ "split": "the validation split of the team's fire-image dataset (YOLO 'val'); the images and the split are in the CV repo, not here",
+ "limits": [
+  "Trained and scored on Earth flame photos; not tested on microgravity flames, for which no labelled footage exists yet.",
+  "Scores are from the validation split used during training, not a separate held-out test set."
+ ]
+}

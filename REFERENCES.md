@@ -243,3 +243,9 @@ Every effect in `js/fx/` was written from scratch for this repo (AGENTS.md rule 
 | SpectraNoise, Framer Marketplace component, https://www.framer.com/marketplace/components/spectranoise/ | Idea for the slow warped glow with grain and scanlines, recoloured as embers (js/fx/noise.js) |
 | Inigo Quilez, "Domain warping" (article), https://iquilezles.org/articles/warp/ | Method of the warped noise in js/fx/noise.js |
 | Akimitsu Hamamuro, "Gravity Points" (CodePen), https://codepen.io/akm2/pen/AGgarW | Idea for the "Turn gravity on" mote illustration, labelled "Illustration, not data" (js/fx/gravity.js) |
+
+## Camera model (Mukund MV, team)
+
+- Fire detection and 3D location code: Mukund MV, FIRE-LOCALIZATION-AND-VOLUME-ESTIMATION (team repository, forked at github.com/ar061290/FIRE-LOCALIZATION-AND-VOLUME-ESTIMATION). Scores in `data/cv_scores.json` come from its `train/results.csv` (epoch 100); `media/cv/` images and the depth clip come from its `train/` folder and `depth_webcam.mp4`.
+- Ultralytics YOLO11 (detector architecture, yolo11s weights as the starting point): https://github.com/ultralytics/ultralytics
+- Depth Anything V2 (relative depth, vits encoder): Yang et al. 2024, https://github.com/DepthAnything/Depth-Anything-V2
