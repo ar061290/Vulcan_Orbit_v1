@@ -1,0 +1,123 @@
+{
+ "status": "reported",
+ "checked": "2026-11-15",
+ "what": "NASA says / we get: published NASA values next to the numbers this site uses or produces.",
+ "rows": [
+  {
+   "topic": "Saffire-III airflow in the flow duct",
+   "nasa": "25 cm/s as flown (21% O2, 100 kPa)",
+   "ours": "NASA's PSI-100 record says 30 cm/s, which we used to quote. We now show both. Our smoke model (M3) models the cargo ship's cabin, not the duct, so this number does not enter it.",
+   "verdict": "Conflict between NASA sources: shown, not hidden",
+   "sources": [
+    [
+     "Urban et al., ICES-2021-266, Table 2",
+     "https://ntrs.nasa.gov/api/citations/20210011521/downloads/ICES%202021-266%200503-2021%20final.pdf"
+    ],
+    [
+     "PSI-100 record (30 cm/s, likely the planned value)",
+     "https://doi.org/10.60555/040q-4h36"
+    ]
+   ]
+  },
+  {
+   "topic": "How sure are the alarm times? (threshold choice)",
+   "nasa": "NASA published no alarm times for Saffire-III, so there is nothing to match.",
+   "ours": "Changing our rule from 4 to 6 standard deviations leaves the flame sensor at 7 s in both burns and moves the smoke detector between 81.5 and 126.5 s. Smoke readings come every ~10 s, so smoke times are +/- 10 s.",
+   "verdict": "Robust to the threshold (except the loosest, 3 SD)",
+   "sources": [
+    [
+     "data/latency_sensitivity.json, models/m4-latency/sensitivity.py",
+     "#/detect"
+    ]
+   ]
+  },
+  {
+   "topic": "Does the station's smoke detector miss fine smoke?",
+   "nasa": "The ISS detector would not have alarmed for over half of the Kapton smoke tests and two thirds of the Teflon tests.",
+   "ours": "Our size-based view agrees in direction: Kapton and Teflon make the finest smoke (42 and 81 nm average size).",
+   "verdict": "Consistent",
+   "sources": [
+    [
+     "Meyer et al., Fire Safety Journal 98:74-81 (2018)",
+     "https://doi.org/10.1016/j.firesaf.2018.04.004"
+    ]
+   ]
+  },
+  {
+   "topic": "Smoke particle sizes we use",
+   "nasa": "Kapton unaged average size 0.042 µm; Teflon 0.081 µm (Table 1)",
+   "ours": "Kapton 42 nm; Teflon 81 nm",
+   "verdict": "Match",
+   "sources": [
+    [
+     "Urban et al., AIAA 2012-3536, Table 1",
+     "https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf"
+    ]
+   ]
+  },
+  {
+   "topic": "Textbook flame-spread formula on BASS-II slabs",
+   "nasa": "Models predict higher spread rates than observed, so need improvement.",
+   "ours": "The plain de Ris formula over-predicts these slabs about 3.5-fold (M6), which is why M6b calibrates it.",
+   "verdict": "Consistent: same direction",
+   "sources": [
+    [
+     "NASA Glenn, BASS-II page",
+     "https://www1.grc.nasa.gov/space/iss-research/msg/bass-2/"
+    ]
+   ]
+  },
+  {
+   "topic": "Lowest oxygen for flame spread over acrylic",
+   "nasa": "Steady spread seen at 13.6% O2 on rods in BASS-II; opposed spread not seen below 16.4% O2 in other tests.",
+   "ours": "M6b's calibrated cells for acrylic slabs start at 18% O2 (1 mm: 18-19%; 5 mm: 18-22%); anything lower is labelled outside NASA's data.",
+   "verdict": "Consistent: low-oxygen cells are not claimed",
+   "sources": [
+    [
+     "NASA NTRS 20160000593",
+     "https://ntrs.nasa.gov/api/citations/20160000593/downloads/20160000593.pdf?attachment=true"
+    ]
+   ]
+  },
+  {
+   "topic": "Lowest oxygen for droplet burning (FLEX)",
+   "nasa": "About 12% O2 for methanol and 15% for heptane (in nitrogen).",
+   "ours": "At 12% O2 our model gives at least a 99.9% chance the flame goes out early for every case in its table. Its 50% point (about 20-27% O2) is higher because it predicts going out before the fuel is used up, a stricter question than whether it burns at all.",
+   "verdict": "Consistent",
+   "sources": [
+    [
+     "Dietrich et al. 2014, Microgravity Sci. Technol. 26:65-76",
+     "https://link.springer.com/article/10.1007/s12217-014-9372-2"
+    ],
+    [
+     "Nayagam et al., NTRS 20130014061",
+     "https://ntrs.nasa.gov/citations/20130014061"
+    ]
+   ]
+  },
+  {
+   "topic": "When cool flames appear",
+   "nasa": "Cool diffusion flames of gas fuels were not seen below 2 bar (CFI-G).",
+   "ours": "Our cool-flame model's 50% point is at 3.22 atm, and a pressure-only rule (AUC 0.78) almost matches it (0.82): pressure is the main gate.",
+   "verdict": "Consistent; our model does not yet beat pressure gating",
+   "sources": [
+    [
+     "Kim et al., Proc. Combust. Inst. 39 (2023)",
+     "https://www.sciencedirect.com/science/article/abs/pii/S1540748922000414"
+    ]
+   ]
+  },
+  {
+   "topic": "Smoke alarm after the gas (Saffire VI)",
+   "nasa": "Far-field smoke monitor reached 1 mg/m³ at 981 s, after much of the hazardous gas had been released. No time zero is given.",
+   "ours": "We quote it as reported and do not turn it into a delay. It is a different vehicle and threshold from our Saffire-III times.",
+   "verdict": "Reported, not compared",
+   "sources": [
+    [
+     "Urban et al., ICES-2024-365",
+     "https://ntrs.nasa.gov/citations/20240002981"
+    ]
+   ]
+  }
+ ]
+}

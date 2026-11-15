@@ -1,0 +1,26 @@
+# On every push and pull request: every data file has a known status and is in the manifest, every file matches its
+# published fingerprint, the scripts that build from data files reproduce them exactly, and every page script parses.
+name: verify
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Data rules
+        run: python scripts/check_data.py
+      - name: Fingerprints match
+        run: cd data && sha256sum -c --quiet SHA256SUMS.txt
+      - name: Rebuild from data files and compare
+        run: |
+          python scripts/build_crosscheck.py
+          python scripts/build_trust.py
+          python scripts/build_kb.py
+          python scripts/build_memory.py
+          git diff --exit-code -- data/
+      - name: Page scripts parse
+        run: for f in js/*.js js/pages/*.js; do node --check "$f"; done

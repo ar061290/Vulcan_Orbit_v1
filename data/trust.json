@@ -18,7 +18,9 @@
    "tested": "Whole test sessions held out: 5-fold grouped by ISS test date (80 dates), repeated 20 times. Score = median AUC; range = 95% session bootstrap.",
    "passed": true,
    "rule": "Median AUC at least 0.80 and range above the one-variable baseline (models/m7-extinction/RULES.md, R1)",
-   "page": "respond"
+   "page": "respond",
+   "perm_p": 0.001,
+   "perm_n": 1000
   },
   {
    "id": "m7-burning-rate",
@@ -52,7 +54,9 @@
    "tested": "Whole test sessions held out: 5-fold grouped by ISS test date (39 dates), repeated 20 times. Score = median AUC; range = 95% session bootstrap.",
    "passed": true,
    "rule": "Lower end of the AUC range above 0.5 (R3). Note: its range overlaps a pressure-only rule.",
-   "page": "respond"
+   "page": "respond",
+   "perm_p": 0.001,
+   "perm_n": 1000
   },
   {
    "id": "smoke-miss",
@@ -69,7 +73,9 @@
    "tested": "leave one flight test out (16 folds); ranges from 2,000 bootstrap resamples",
    "passed": false,
    "rule": "AUC at least 0.75 (models/m5-smoke-miss/RULES.md)",
-   "page": "predict"
+   "page": "predict",
+   "perm_p": 0.0385,
+   "perm_n": 2000
   },
   {
    "id": "m6",

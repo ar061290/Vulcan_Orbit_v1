@@ -192,6 +192,24 @@
    "status": "team",
    "owner": "Dashboard",
    "what": "AI assistant switch: Worker URL or null (saved answers only)"
+  },
+  {
+   "name": "crosscheck",
+   "status": "reported",
+   "owner": "Dashboard",
+   "what": "NASA says / we get comparison table"
+  },
+  {
+   "name": "latency_sensitivity",
+   "status": "real",
+   "owner": "M4",
+   "what": "M4 alarm times for thresholds of 3-6 SD"
+  },
+  {
+   "name": "permutation",
+   "status": "model",
+   "owner": "Dashboard",
+   "what": "Label-permutation p-values for the trained models"
   }
  ]
 }

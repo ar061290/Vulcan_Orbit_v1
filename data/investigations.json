@@ -10,7 +10,7 @@
    "facility": "Cygnus cargo vehicle",
    "focus": "flammability",
    "fuel": "solid",
-   "measured": "Two SIBAL fabric samples burned at 30 cm/s (concurrent and opposed flow); flight telemetry: radiometers, anemometers, pressure, and the Cygnus cabin smoke detector (obscuration and scatter)",
+   "measured": "Two SIBAL fabric samples burned at about 25 cm/s as flown (ICES-2021-266; the PSI-100 record lists 30 cm/s) (concurrent and opposed flow); flight telemetry: radiometers, anemometers, pressure, and the Cygnus cabin smoke detector (obscuration and scatter)",
    "rows": "2 samples in the summary table; 11,450-row flight telemetry file",
    "tags": [
     "flammability",

@@ -5,6 +5,7 @@ import { annotate } from './glossary.js';
 import { banner } from './banner.js';
 import { summary, KEEP } from './summaries.js';
 import { provenance } from './provenance.js';
+import { startTour } from './tour.js';
 import { hero } from './hero.js';
 const VISUAL = { flame: 'flame', predict: 'flame', respond: 'flame', detect: 'smoke', locate: 'smoke' };   // others: earth
 import './bg.js';
@@ -12,9 +13,10 @@ const PAGES = [
   ['overview', 'Home'], ['memory', 'History'], ['detect', 'Find it'], ['predict', 'Predict it'], ['respond', 'Put it out'], ['flame', 'Flame lab'],
   ['evidence', 'Checks'], ['ask', 'Ask'], ['explorer', 'NASA experiments'], ['locate', 'Bench rig'], ['about', 'Sources'],
 ];
-const HIDDEN = ['design', 'explorer', 'locate', 'about'];   // reachable by link, not in the top bar
+const HIDDEN = ['design', 'explorer', 'locate', 'about', 'models'];   // reachable by link, not in the top bar
 const nav = document.getElementById('nav'), view = document.getElementById('view'), menu = document.querySelector('.menu');
 PAGES.filter(([id]) => !HIDDEN.includes(id)).forEach(([id, label]) => nav.append(h('a', { href: `#/${id}`, 'data-id': id }, label)));
+nav.append(h('button', { type: 'button', class: 'judge', onclick: startTour, title: 'A 1-minute guided tour of the key results' }, 'Judge mode'));
 menu.addEventListener('click', () => { const o = nav.classList.toggle('open'); menu.setAttribute('aria-expanded', o); });
 
 async function route() {
@@ -77,7 +79,7 @@ function pageHead(root, id) {
   const h1 = root.querySelector('h1'); if (!h1) return;
   const lead = h1.nextElementSibling?.classList.contains('lead') ? h1.nextElementSibling : null;
   const shown = PAGES.filter(([k]) => !HIDDEN.includes(k)), n = shown.findIndex(p => p[0] === id), label = PAGES.find(p => p[0] === id)?.[1] || 'Design kit';
-  const TITLE = { detect: 'Where is the fire?', predict: 'What will it do?', respond: 'What puts it out?', flame: 'A flame without gravity', evidence: 'How we checked it', explorer: 'The NASA experiments', locate: 'Our bench rig', ask: 'Ask a question', about: 'Sources and credits' };
+  const TITLE = { models: 'Model cards', detect: 'Where is the fire?', predict: 'What will it do?', respond: 'What puts it out?', flame: 'A flame without gravity', evidence: 'How we checked it', explorer: 'The NASA experiments', locate: 'Our bench rig', ask: 'Ask a question', about: 'Sources and credits' };
   if (TITLE[id]) h1.textContent = TITLE[id];
   const kind = VISUAL[id] || 'earth';
   const vis = kind === 'flame' ? hero({ g: 0 }).el : banner(kind);

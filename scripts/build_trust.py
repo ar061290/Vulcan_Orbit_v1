@@ -27,6 +27,9 @@ rows.append(dict(id="drift", name="Where does the smoke go?", kind="Physics mode
 rows.append(dict(id="rate", name="Would a fast-rise alarm be quicker?", kind="NASA data, no model", metric="Events where it beat the fixed alarm",
     score=ror["result"]["scatter_events_earlier"], range=f"{ror['result']['false_alarms']} false alarms", baseline="fixed level alarm", baseline_score=None,
     tested="All three Saffire-III events, each on its own", passed=ror["result"]["passed"], rule="Earlier in 2 of 3 events and no false alarms (models/m4-latency/RULES.md)", page="detect"))
+perm = {r["id"]: r for r in J("data/permutation.json")["rows"]} if (R / "data/permutation.json").exists() else {}
+for r in rows:
+    if r["id"] in perm: r["perm_p"] = perm[r["id"]]["p"]; r["perm_n"] = perm[r["id"]]["n_perm"]
 out = dict(status="model", what="Every model and analysis on one page: score on data it did not learn from, the simple baseline, and whether it met the pass rule written before it ran.",
            note="Scores are copied from each model's own output file by scripts/build_trust.py.", rows=rows)
 (R / "data/trust.json").write_text(json.dumps(out, indent=1, ensure_ascii=False))
