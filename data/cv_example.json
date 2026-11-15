@@ -1,0 +1,27 @@
+{
+ "status": "demo",
+ "what": "Example camera reading for the Assess 'Try an example camera reading' button. Not a camera output: a copy of growth example 1's flame state (data/growth_examples.json, examples[0].inputs.flame_state, id sibal_concurrent_panel), in the flame-state shape of models/m6b-predictor/CONTRACT_PROPOSAL.md, with confidence and droplet set to null.",
+ "source": "data/growth_examples.json examples[0].inputs.flame_state",
+ "example_id": "sibal_concurrent_panel",
+ "units": {
+  "time": "s",
+  "area": "cm2",
+  "length": "cm"
+ },
+ "frame_time_s": 0.0,
+ "flame_type": "surface",
+ "area_cm2": 2.5,
+ "centroid_cm": [
+  0.25,
+  2.5
+ ],
+ "bbox_cm": [
+  0.0,
+  0.0,
+  0.5,
+  5.0
+ ],
+ "coordinates": "fuel",
+ "confidence": null,
+ "droplet": null
+}

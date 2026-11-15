@@ -32,8 +32,20 @@ function fetchJSON(url) {
   })());
   return cache.get(url);
 }
-/** data/<name>.json, cached once per name. A missing or broken file returns {status:'missing'}. */
+/** True when data/manifest.json loads and says data/<name>.json does not exist: the name is not listed, or its line has
+ *  status 'missing' (AGENTS.md rule 5: every data file gets its manifest line in the same commit). If the manifest itself
+ *  is missing or broken, nothing is skipped. This keeps expected 404s (response_trials, cv_latest…) out of the console. */
+async function notInManifest(name) {
+  if (name === 'manifest') return false;
+  const m = await fetchJSON('data/manifest.json');
+  if (!m || !Array.isArray(m.files)) return false;
+  const line = m.files.find(f => f && f.name === name);
+  return !line || line.status === 'missing';
+}
+/** data/<name>.json, cached once per name. A missing or broken file returns {status:'missing'}. A file the manifest
+ *  marks as missing (or does not list) is not fetched and also returns {status:'missing'}. */
 export async function load(name) {
+  if (await notInManifest(name)) return { status: 'missing' };
   const out = await fetchJSON(`data/${name}.json`);
   if (out && typeof out === 'object' && !Array.isArray(out)) out.status ||= 'missing';
   return out;

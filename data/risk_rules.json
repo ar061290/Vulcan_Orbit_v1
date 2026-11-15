@@ -1,0 +1,127 @@
+{
+ "status": "team",
+ "approved": false,
+ "what": "Starting rules that turn the Assess parts (growth model output, NASA alarm times, the fuel and the verdict) into a level: Low, Elevated or High. A team choice, to be approved. The rules are read in file order and the first rule whose test holds fires (js/assess_core.js riskLevel). Every rule compares two computed values, or checks a category; none uses a fixed threshold number. The detection shares from whatif.json and drift_whatif.json are shown as parts but no rule uses them, because they do not change with the visitor's inputs.",
+ "units": {
+  "time": "s",
+  "area": "cm2"
+ },
+ "test_grammar": "test is a list of conditions that must all hold. Each condition is {a, op, b} (compare value a with value b) or {a, op, value} (compare value a with a fixed category value). op is one of == != > >= < <=. a and b name entries in 'values'. If a value a rule needs is missing, that rule cannot be checked; the chain stops there and the default level fires, saying which value was missing.",
+ "values": {
+  "kind": "what the growth model did with the input: growth, droplet, unsupported or invalid",
+  "material": "fuel material",
+  "verdict_code": "M6b verdict from NASA's observed cases: 0 spreads, 1 near observed extinction, 2 observed no-spread (data/spread_predictor.json verdict_codes)",
+  "verdict_label": "the verdict as text",
+  "frame_time_s": "time of the flame reading, s after ignition",
+  "initial_area_cm2": "starting flame area on the model grid, cm2",
+  "max_area_lo_cm2": "largest burning area in the lo run, cm2",
+  "max_area_mid_cm2": "largest burning area in the mid run, cm2",
+  "max_area_hi_cm2": "largest burning area in the hi run, cm2",
+  "t_max_mid_abs_s": "time of the largest burning area in the mid run, s after ignition (frame time + time to max)",
+  "t_max_hi_abs_s": "time of the largest burning area in the hi run, s after ignition (frame time + time to max)",
+  "t_end_hi_abs_s": "time the hi-run fire ends, s after ignition",
+  "stop_reason_hi": "why the hi run stopped: fuel edge, burned out, or observed no-spread conditions",
+  "out_of_box": "how many inputs lie outside the calibration box of the active regime",
+  "radiometer_s": "slowest flame-radiometer alarm over the Saffire-III burns with a radiometer alarm, s after ignition (data/saffire_latency.json)",
+  "smoke_fastest_s": "fastest cabin smoke-detector (scatter) alarm over those burns, s after ignition (data/saffire_latency.json)",
+  "smoke_slowest_s": "slowest cabin smoke-detector (scatter) alarm over those burns, s after ignition (data/saffire_latency.json)",
+  "cabin_caught_120": "share of simulated cabin fires caught within 120 s by the named whatif.json layout (shown, not used by a rule)",
+  "lbm_caught_180": "share of simulated fires caught within 180 s by the best drift_whatif.json layout (shown, not used by a rule)"
+ },
+ "rules": [
+  {
+   "id": "R0",
+   "level": null,
+   "label": "No growth run",
+   "test": [
+    {
+     "a": "kind",
+     "op": "!=",
+     "value": "growth"
+    }
+   ],
+   "reason": "The growth model ran no simulation for this input (a droplet flame, a material it does not model, or an input it cannot use), so no level is given. A droplet flame is covered by the M7 extinction and burning-rate models on Put it out."
+  },
+  {
+   "id": "R1",
+   "level": "High",
+   "label": "Still growing at the slowest smoke alarm",
+   "test": [
+    {
+     "a": "t_max_hi_abs_s",
+     "op": ">",
+     "b": "smoke_slowest_s"
+    }
+   ],
+   "reason": "In the hi run the burning area is still growing at the time of the slowest cabin smoke-detector alarm, so the crew could first hear of this fire while it is still getting bigger. The alarm times are seconds after ignition on NASA's Saffire-III orbital burns, a different fire, shown for scale only and not as a prediction for this one."
+  },
+  {
+   "id": "R2",
+   "level": "Elevated",
+   "label": "Spreads, peaks before the slowest smoke alarm",
+   "test": [
+    {
+     "a": "verdict_code",
+     "op": "==",
+     "value": 0
+    },
+    {
+     "a": "max_area_hi_cm2",
+     "op": ">",
+     "b": "initial_area_cm2"
+    }
+   ],
+   "reason": "NASA's observed cases do not rule out spread here and the hi run grows beyond the starting flame, but it reaches its largest size before the slowest cabin smoke-detector alarm. The alarm times are seconds after ignition on NASA's Saffire-III orbital burns, a different fire, shown for scale only and not as a prediction for this one."
+  },
+  {
+   "id": "R3",
+   "level": "Elevated",
+   "label": "Near observed extinction, still grows",
+   "test": [
+    {
+     "a": "verdict_code",
+     "op": "==",
+     "value": 1
+    },
+    {
+     "a": "max_area_hi_cm2",
+     "op": ">",
+     "b": "initial_area_cm2"
+    }
+   ],
+   "reason": "The conditions are close to a NASA case where the flame went out, but the hi run still grows beyond the starting flame. A small change in airflow or oxygen could go either way."
+  },
+  {
+   "id": "R4",
+   "level": "Low",
+   "label": "NASA observed no spread here",
+   "test": [
+    {
+     "a": "verdict_code",
+     "op": "==",
+     "value": 2
+    }
+   ],
+   "reason": "A matched NASA case recorded no spread at these conditions, so the model holds the flame at its starting size until it burns out. Check the matched cases: some are 'reported', not checked by us. Low is not a statement that the fire is harmless."
+  },
+  {
+   "id": "R5",
+   "level": "Low",
+   "label": "Does not grow",
+   "test": [
+    {
+     "a": "max_area_hi_cm2",
+     "op": "<=",
+     "b": "initial_area_cm2"
+    }
+   ],
+   "reason": "Even the hi run never grows beyond the starting flame. Low is not a statement that the fire is harmless."
+  }
+ ],
+ "default": {
+  "id": "default",
+  "level": "Elevated",
+  "label": "No rule matched",
+  "reason": "No rule matched, so the team default applies. The default is Elevated, not Low, so an unmatched case is never shown as reassuring."
+ }
+}

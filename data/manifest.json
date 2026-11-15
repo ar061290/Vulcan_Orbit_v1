@@ -210,6 +210,18 @@
    "status": "model",
    "owner": "Dashboard",
    "what": "Label-permutation p-values for the trained models"
+  },
+  {
+   "name": "risk_rules",
+   "status": "team",
+   "owner": "Team",
+   "what": "Assess risk rules (team choice, to be approved)"
+  },
+  {
+   "name": "cv_example",
+   "status": "demo",
+   "owner": "Dashboard",
+   "what": "Example camera reading for the Assess button: a copy of growth example 1's flame state"
   }
  ]
 }
