@@ -138,6 +138,9 @@ File names, sizes and sha256: `datasets/psi/MANIFEST.csv`. Documents in `dataset
 
 None used by M7, M6 or M6b. The R² 0.6–0.7 expectation for spread models is the plan's note on a competitor (`docs/plan.md`), used only to set the M6 target.
 
+| Idea: warp-speed starfield background | "Space Journey" by Akimitsu Hamamuro, https://codepen.io/akm2/pen/RwQXLdP | Look only; js/demo_bg.js is our own code |
+| Idea: flowing cursor trail | Framer "Flowing Cursor" component, https://www.framer.com/marketplace/components/flowing-cursor/ | Look only; js/demo_fluid.js is our own stable-fluids solver |
+
 ## AI assistance
 See `AI_LOG.md`.
 
