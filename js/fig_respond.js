@@ -7,6 +7,7 @@ import { h, card, empty, fmt, pct, seg, stat, legend, table, isMissing, badge, s
 import { C, SERIES, bars, keyNav, numbers } from './charts.js';
 import { efieldText, sentences, SCRAPPED } from './overlays.js';
 import { figLink, revealFigure } from './passes.js';
+import { draggable } from './spring.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const sv = (tag, a = {}, text) => {
@@ -359,4 +360,307 @@ export function readingCard() {
     h('p', {}, 'Our mist trial runs at Earth gravity, where hot gas rises and feeds the flame fresh air. A result on the bench shows a method can disturb a flame; it does not show it would work in orbit.'),
     h('p', {}, 'The two are shown side by side and never merged into one number.'),
     h('p', {}, 'This page summarises evidence. It is not a firefighting procedure.'));
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// 0. Hero instrument (feat/ui-lock): one real droplet burn at a time, from data/models.json (M7 entries).
+//    Not a .card with an h2, so figure numbering and the "Made by" boxes are untouched.
+//    Vertical drag (or Arrow Up/Down, Home/End) picks an oxygen level and snaps to a level NASA actually tested for the
+//    chosen fuel and added gas. Every number is read from one burn's point: its label (test id, fuel, O2, CO2, He,
+//    pressure, d0, outcome), the measured K (m7-burning-rate obs), and the model's pred/lo/hi.
+//    The droplet, flame shell and glow are an illustration; only the sizes, rates and probabilities come from the file.
+// ---------------------------------------------------------------------------------------------------------------------
+const RX_EXT = /^(\S+): (\w+), O2 ([\d.]+), CO2 ([\d.]+), He ([\d.]+), ([\d.]+) atm, d0 ([\d.]+) mm, NASA: (\w+)$/;
+const RX_CFI = /^([^:]+): (.+?), ([\d.]+) atm, O2 ([\d.]+), He ([\d.]+), d0 ([\d.]+) mm, (\w+); visible flame out at ([\d.]+) mm, (?:cool flame out at ([\d.]+) mm|droplet used up)/;
+const CFI = 'cfi';
+const GAS_TXT = { none: 'No added gas', CO2: 'Added CO₂', He: 'Added helium' };
+const f2 = v => (isNum(v) ? v.toFixed(2) : 'n/a');
+const pctO2 = o => `${Math.round(o * 100)}`;
+const isCalm = () => document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** Parse the M7 per-burn points into burn records. Returns null when the entries are not in the file. */
+function m7Burns(models) {
+  const ms = Array.isArray(models?.models) ? models.models : [];
+  const ext = ms.find(m => m.id === 'm7-extinction'), br = ms.find(m => m.id === 'm7-burning-rate'), cf = ms.find(m => m.id === 'm7-cool-flame');
+  if (!ext || !Array.isArray(ext.points)) return null;
+  const idOf = l => String(l).split(':')[0];
+  const K = new Map((br?.points || []).map(p => [idOf(p.label), p]));
+  const out = [];
+  for (const p of ext.points) {
+    const m = RX_EXT.exec(p.label || ''); if (!m) continue;
+    const co2 = +m[4], he = +m[5], k = K.get(m[1]);
+    out.push({ set: 'flex', id: m[1], fuel: m[2], o2: +m[3], co2, he, p: +m[6], d0: +m[7], outcome: m[8],
+      gas: co2 > 0 ? 'CO2' : he > 0 ? 'He' : 'none', prob: { v: p.pred, lo: p.lo, hi: p.hi },
+      k: k && isNum(k.obs) ? { obs: k.obs, pred: k.pred, lo: k.lo, hi: k.hi } : null });
+  }
+  for (const p of cf?.points || []) {
+    const m = RX_CFI.exec(p.label || ''); if (!m) continue;
+    out.push({ set: CFI, id: m[1], fuel: CFI, blend: m[2], p: +m[3], o2: +m[4], he: +m[5], d0: +m[6], mount: m[7], dhot: +m[8],
+      dcool: m[9] != null ? +m[9] : 0, used: p.obs, gas: +m[5] > 0 ? 'He' : 'none', prob: { v: p.pred, lo: p.lo, hi: p.hi } });
+  }
+  return { burns: out, ext, br, cf };
+}
+
+export function dropletHero(models, m7, ctx = {}) {
+  const parsed = isMissing(models) ? null : m7Burns(models);
+  const tagFile = 'data/models.json';
+  if (!parsed || !parsed.burns.length) {
+    return h('section', { class: 'fr-hero hud', 'aria-label': 'Droplet flame instrument' },
+      h('p', { class: 'fr-tag' }, `Illustration · values from ${tagFile}`),
+      h('p', {}, 'The droplet instrument needs the M7 per-burn points in data/models.json (entries m7-extinction, m7-burning-rate, m7-cool-flame). They are not in the file yet, so nothing is drawn.'));
+  }
+  const { burns, ext, br, cf } = parsed;
+  const st0 = ext.status || 'model';
+  const detached = !!ctx.detached;
+  const flexFuels = [...new Set(burns.filter(b => b.set === 'flex').map(b => b.fuel))];
+  const fuelOpts = [...flexFuels.map(f => [f, `${f} (FLEX)`]), ...(burns.some(b => b.set === CFI) ? [[CFI, 'n-dodecane family (CFI)']] : [])];
+  const st = { fuel: flexFuels.includes('heptane') ? 'heptane' : fuelOpts[0][0], gas: 'none', o2: 0.21, i: 0, paused: false };
+  const gasesFor = f => ['none', 'CO2', 'He'].filter(g => burns.some(b => b.fuel === f && b.gas === g));
+  const subset = () => burns.filter(b => b.fuel === st.fuel && b.gas === st.gas);
+  const tested = () => [...new Set(subset().map(b => b.o2))].sort((a, b) => a - b);
+  const at = o => subset().filter(b => b.o2 === o).sort((a, b) => (a.id < b.id ? -1 : 1));
+  const nearest = (arr, v) => arr.reduce((m, s) => (Math.abs(s - v) < Math.abs(m - v) ? s : m), arr[0]);
+  const fixGas = () => { const g = gasesFor(st.fuel); if (!g.includes(st.gas)) st.gas = g[0]; };
+  fixGas(); st.o2 = nearest(tested(), st.o2);
+
+  // ---- geometry (SVG units; the stage is square, so 1 SVG unit = stage px / 360) ----
+  const V = 360, CX = 160, CY = 180, RING = 132, RBAND = 143, TX = 326, Y0 = 34, Y1 = 326;
+  const maxD0 = Math.max(...burns.map(b => b.d0).filter(isNum));
+  const S = 30 / (maxD0 / 2);                      // px per mm: the largest droplet in the file is drawn 30 units across its radius
+  const C1 = 2 * Math.PI * RING, C2 = 2 * Math.PI * RBAND;
+  const yOf = o => { const t = tested(); const a = t[0], b = t.at(-1); return b > a ? Y0 + (b - o) / (b - a) * (Y1 - Y0) : (Y0 + Y1) / 2; };
+  const oOf = y => { const t = tested(); const a = t[0], b = t.at(-1); return b > a ? b - (y - Y0) / (Y1 - Y0) * (b - a) : a; };
+
+  const svg = sv('svg', { viewBox: `0 0 ${V} ${V}`, 'aria-hidden': 'true', focusable: 'false' });
+  const gRot = `rotate(-90 ${CX} ${CY})`;
+  const ringTrack = sv('circle', { cx: CX, cy: CY, r: RING, class: 'fr-ring-track' });
+  const ringFill = sv('circle', { cx: CX, cy: CY, r: RING, class: 'fr-ring', transform: gRot, 'stroke-dasharray': `0 ${C1}` });
+  const band = sv('circle', { cx: CX, cy: CY, r: RBAND, class: 'fr-band', transform: gRot, 'stroke-dasharray': `0 ${C2}` });
+  const ghosts = sv('g', { class: 'fr-ghosts' });
+  const cool = sv('circle', { cx: CX, cy: CY, r: 0, class: 'fr-cool' });
+  const shell = sv('g', { class: 'fr-shell' });
+  const shellA = sv('circle', { cx: CX, cy: CY, r: 0, class: 'fr-shell-a' }), shellB = sv('circle', { cx: CX, cy: CY, r: 0, class: 'fr-shell-b' });
+  shell.append(shellB, shellA);
+  const drop = sv('circle', { cx: CX, cy: CY, r: 0, class: 'fr-drop' });
+  const pText = sv('text', { x: CX, y: CY + RING - 22, 'text-anchor': 'middle', class: 'fr-svg-lab' });
+  const scale = sv('g', { class: 'fr-scale' });
+  const knob = sv('g', { class: 'fr-knob' }, null);
+  knob.append(sv('path', { d: `M${TX - 14} 0L${TX - 4} -6L${TX - 4} 6Z` }), sv('line', { x1: TX - 4, x2: TX + 8, y1: 0, y2: 0 }));
+  const bar = sv('g', { class: 'fr-mmbar' },);
+  bar.append(sv('line', { x1: 18, x2: 18 + S, y1: V - 14, y2: V - 14 }), sv('text', { x: 18 + S + 6, y: V - 10 }, 'DROPLET SCALE 1 MM'));
+  svg.append(band, ringTrack, ringFill, cool, shell, ghosts, drop, pText, scale, knob, bar);
+
+  const stage = h('div', { class: 'fr-stage', role: detached ? 'img' : 'slider', tabindex: detached ? null : '0', 'aria-orientation': detached ? null : 'vertical',
+    'aria-label': detached ? 'Droplet flame illustration for one NASA burn; the readouts beside it give the values.'
+      : 'Oxygen level, % by volume. Drag up or down, or use the arrow keys; it snaps to levels NASA tested.' }, svg);
+
+  // ---- readouts ----
+  const R = {};
+  const row = (k, label) => { R[k] = h('dd', {}); return [h('dt', {}, label), R[k]]; };
+  const dl = h('dl', { class: 'fr-read' }, row('o2', 'O₂'), row('burn', 'Burn'), row('k', 'K'), row('kmod', 'K, M7 model'), row('tb', 'd² law burnout'),
+    row('clock', 'Clock'), row('p', 'P(extinction)'), row('half', 'M7 50 % point'), row('out', 'NASA outcome'), row('cool', 'Cool flame'));
+  const live = h('p', { class: 'sr', 'aria-live': 'polite' });
+  const prev = h('button', { type: 'button', class: 'btn fr-step', 'aria-label': 'Previous burn at this oxygen level' }, '‹');
+  const next = h('button', { type: 'button', class: 'btn fr-step', 'aria-label': 'Next burn at this oxygen level' }, '›');
+  const count = h('span', { class: 'fr-count' });
+  const pause = h('button', { type: 'button', class: 'btn fr-pause', 'aria-pressed': 'false' }, 'Pause');
+  const stepper = h('div', { class: 'fr-burns' }, h('span', { class: 'fr-lab' }, 'Burns at this level'), prev, count, next, isCalm() || detached ? null : pause);
+  const note = h('p', { class: 'fr-note' });
+  let gasSeg = null;
+  const gasHolder = h('div');
+  const buildGas = () => {
+    gasSeg = seg({ label: 'Added gas', options: gasesFor(st.fuel).map(g => [g, GAS_TXT[g]]), value: st.gas,
+      onChange: v => { st.gas = v; st.o2 = nearest(tested(), st.o2); st.i = 0; commit(true); } });
+    gasHolder.replaceChildren(gasSeg);
+  };
+  const fuelSeg = seg({ label: 'Fuel', options: fuelOpts, value: st.fuel,
+    onChange: v => { st.fuel = v; fixGas(); buildGas(); st.o2 = nearest(tested(), st.o2); st.i = 0; commit(true); } });
+  buildGas();
+
+  // ---- animation state ----
+  let anim = null, raf = 0, visible = true, t0 = 0;
+  const cur = () => { const list = at(st.o2); return list[Math.min(st.i, list.length - 1)]; };
+  const rOf = d => Math.max(0, d) / 2 * S;
+  function paintDrop(d, phase) {
+    const r = rOf(d);
+    drop.setAttribute('r', r.toFixed(2));
+    const lit = phase !== 'out' && d > 0;
+    const hot = lit && phase === 'hot';
+    const rs = r * 3 + 14;                                   // illustration only: the shell is not drawn to scale
+    shellA.setAttribute('r', hot ? rs.toFixed(2) : 0); shellB.setAttribute('r', hot ? (rs + 6).toFixed(2) : 0);
+    cool.setAttribute('r', lit && phase === 'cool' ? (r * 2.2 + 8).toFixed(2) : 0);
+  }
+  function frame(now) {
+    raf = 0;
+    if (!anim) return;
+    if (!t0) t0 = now;
+    const L = anim.loop, hold = 0.9, u = ((now - t0) / 1000) % (L + hold), s = Math.min(1, u / L);
+    anim.step(s, u > L);
+    if (!st.paused && visible && !document.hidden) raf = requestAnimationFrame(frame);
+  }
+  const kick = () => { if (!raf && anim && !st.paused && visible && !document.hidden && !isCalm() && !detached) raf = requestAnimationFrame(frame); };
+  const stop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
+
+  function drawScale() {
+    const t = tested();
+    scale.replaceChildren(sv('line', { x1: TX, x2: TX, y1: Y0, y2: Y1, class: 'fr-track' }),
+      sv('text', { x: TX + 10, y: Y0 - 16, class: 'fr-svg-lab' }, 'O₂ %'));
+    t.forEach((o, i) => {
+      const y = yOf(o), dense = t.length > 12 && i % 2 && o !== st.o2;
+      scale.append(sv('line', { x1: TX - 3, x2: TX + 3, y1: y, y2: y, class: 'fr-tick' }));
+      if (!dense) scale.append(sv('text', { x: TX + 10, y: y + 3.5, class: o === st.o2 ? 'fr-svg-on' : 'fr-svg-lab' }, pctO2(o)));
+    });
+  }
+  function halfRow(b) {
+    if (b.set !== 'flex') return null;
+    const tb = m7?.extinction?.table; if (!Array.isArray(tb)) return null;
+    const rows = tb.filter(r => r.fuel === b.fuel && gasKey(r.added_gas) === b.gas); if (!rows.length) return null;
+    return rows.reduce((m, r) => (Math.abs(r.p_atm - b.p) < Math.abs(m.p_atm - b.p) ? r : m), rows[0]);
+  }
+  function setRing(pr) {
+    const ok = isNum(pr?.v);
+    ringFill.setAttribute('stroke-dasharray', `${ok ? (pr.v * C1).toFixed(2) : 0} ${C1}`);
+    if (ok && isNum(pr.lo) && isNum(pr.hi)) band.setAttribute('stroke-dasharray', `0 ${(pr.lo * C2).toFixed(2)} ${((pr.hi - pr.lo) * C2).toFixed(2)} ${C2}`);
+    else band.setAttribute('stroke-dasharray', `0 ${C2}`);
+  }
+
+  function commit(announceIt) {
+    const list = at(st.o2), b = cur(), t = tested();
+    if (!b) return;
+    st.i = Math.min(st.i, list.length - 1);
+    if (!detached) {
+      stage.setAttribute('aria-valuemin', pctO2(t[0])); stage.setAttribute('aria-valuemax', pctO2(t.at(-1)));
+      stage.setAttribute('aria-valuenow', pctO2(st.o2));
+      stage.setAttribute('aria-valuetext', `${pctO2(st.o2)} % oxygen, tested, ${list.length} burn${list.length > 1 ? 's' : ''}`);
+    }
+    drawScale(); knob.setAttribute('transform', `translate(0 ${yOf(st.o2).toFixed(2)})`);
+    count.textContent = `${st.i + 1} / ${list.length}`;
+    prev.disabled = list.length < 2; next.disabled = list.length < 2;
+    R.o2.textContent = `${pctO2(st.o2)} % · TESTED · ${list.length} BURN${list.length > 1 ? 'S' : ''}`;
+    const cfi = b.set === CFI;
+    R.burn.textContent = cfi
+      ? `${b.id} · ${b.blend} · ${b.p} ATM · HE ${f2(b.he)} · d0 ${f2(b.d0)} MM · ${b.mount}`
+      : `${b.id} · ${b.p.toFixed(2)} ATM · CO₂ ${f2(b.co2)} · HE ${f2(b.he)} · d0 ${f2(b.d0)} MM`;
+    const unit = br?.unit ? String(br.unit).toUpperCase() : 'UNIT NOT STATED';
+    const lab = dl.querySelectorAll('dt');
+    lab[6].textContent = cfi ? 'P(droplet used up)' : 'P(extinction)';
+    if (cfi) {
+      R.k.textContent = 'NOT IN THE FILE FOR CFI BURNS'; R.kmod.textContent = '—'; R.tb.textContent = 'NO TIME SCALE: K NOT IN THE FILE';
+      R.out.textContent = `VISIBLE FLAME OUT AT ${f2(b.dhot)} MM · ${b.dcool > 0 ? `COOL FLAME OUT AT ${f2(b.dcool)} MM` : 'DROPLET USED UP'}`;
+      R.cool.textContent = `RECORDED IN THIS BURN: BURNED ON FROM ${f2(b.dhot)} MM TO ${b.dcool > 0 ? f2(b.dcool) + ' MM' : 'USED UP'}`;
+      R.half.textContent = isNum(m7?.cool_flame?.pressure_at_half_atm) ? `${fmt(m7.cool_flame.pressure_at_half_atm, 2)} ATM FOR ${m7.cool_flame.pressure_at_half_case || 'the reference case'}` : 'NOT IN THE FILE';
+      lab[7].textContent = 'M7 50 % pressure';
+    } else {
+      lab[7].textContent = 'M7 50 % point';
+      R.k.textContent = b.k ? `${f2(b.k.obs)} ${unit} · NASA MEASURED` : 'NOT MEASURED FOR THIS BURN';
+      R.kmod.textContent = b.k && isNum(b.k.pred) ? `${f2(b.k.pred)} (${f2(b.k.lo)}–${f2(b.k.hi)}) ${unit}` : '—';
+      R.tb.textContent = b.k ? `d0²/K = ${(b.d0 * b.d0 / b.k.obs).toFixed(1)} S` : '—';
+      R.out.textContent = String(b.outcome).toUpperCase() + (b.outcome === 'Extinction' ? ' · FLAME OUT BEFORE BURNOUT; DIAMETER AT EXTINCTION NOT IN THE FILE' : '');
+      R.cool.textContent = 'NOT FLAGGED IN THE FLEX TABLE · CFI BURNS ONLY: PICK N-DODECANE';
+      const hr = halfRow(b);
+      // the reference droplet size is stated only in the file's own question/note text ("a 3 mm droplet"): read it there
+      const refD = (String(m7?.extinction?.question || m7?.extinction?.note || '').match(/(\d+(?:\.\d+)?)\s*mm droplet/i) || [])[1];
+      R.half.textContent = hr ? `O₂ ${o2pct(hr.o2_half)} (${o2pct(hr.o2_half_range?.[0])}–${o2pct(hr.o2_half_range?.[1])}) · ${refD ? `${refD} MM DROPLET, ` : ''}${hr.p_atm} ATM, ${String(hr.added_gas).toUpperCase()}` : 'NOT IN THE FILE';
+      // the model's 50 % oxygen point on the scale, only when it lies inside the tested range shown
+      if (hr && isNum(hr.o2_half) && hr.o2_half >= t[0] && hr.o2_half <= t.at(-1) && t.length > 1) {
+        const y = yOf(hr.o2_half);
+        scale.append(sv('line', { x1: TX - 18, x2: TX - 6, y1: y, y2: y, class: 'fr-half' }), sv('text', { x: TX - 20, y: y + 3.5, 'text-anchor': 'end', class: 'fr-svg-lab' }, '50 %'));
+      }
+    }
+    const pr = b.prob;
+    R.p.textContent = isNum(pr?.v) ? `${f2(pr.v)}${isNum(pr.lo) && isNum(pr.hi) ? ` (${f2(pr.lo)}–${f2(pr.hi)})` : ''} · M7 MODEL` : 'NOT IN THE FILE';
+    pText.textContent = isNum(pr?.v) ? `${cfi ? 'P(USED UP)' : 'P(EXTINCTION)'} ${f2(pr.v)}` : '';
+    setRing(pr);
+    stage.classList.toggle('is-cfi', cfi);
+    buildAnim(b);
+    const say = `${pctO2(st.o2)} % oxygen, ${cfi ? b.blend : b.fuel}, ${GAS_TXT[st.gas].toLowerCase()}: burn ${b.id}. ${cfi ? 'Chance the droplet is used up' : 'Chance of extinction'} ${f2(pr?.v)}.`;
+    if (announceIt && say !== live.textContent) live.textContent = say;
+  }
+
+  // ---- the burn loop (or stills in Calm / detached) ----
+  function buildAnim(b) {
+    stop(); t0 = 0; ghosts.replaceChildren();
+    const still = isCalm() || detached;
+    if (b.set === CFI) {
+      const d2a = b.d0 * b.d0, d2b = b.dcool * b.dcool;
+      const dAt = s => Math.sqrt(Math.max(0, d2a - (d2a - d2b) * s));
+      const phase = d => (d > b.dhot ? 'hot' : 'cool');
+      if (still) {
+        const marks = [b.d0, b.dhot, b.dcool].filter(isNum);
+        marks.slice(1).forEach(d => d > 0 && ghosts.append(sv('circle', { cx: CX, cy: CY, r: rOf(d).toFixed(2), class: 'fr-ghost' })));
+        paintDrop(b.d0, 'hot'); cool.setAttribute('r', (rOf(b.dhot) * 2.2 + 8).toFixed(2));
+        R.clock.textContent = `STILLS AT d = ${marks.map(f2).join(', ')} MM · NO TIME SCALE`;
+        anim = null; return;
+      }
+      anim = { loop: 5, step: (s, held) => { const d = held ? b.dcool : dAt(s); paintDrop(d, held ? 'out' : phase(d)); R.clock.textContent = `d = ${f2(d)} MM · ${d > b.dhot ? 'HOT FLAME' : held && b.dcool === 0 ? 'USED UP' : held ? 'COOL FLAME OUT' : 'COOL FLAME'}`; } };
+    } else if (b.k) {
+      const K = b.k.obs, tb = b.d0 * b.d0 / K;
+      const dAt = t => Math.sqrt(Math.max(0, b.d0 * b.d0 - K * t));
+      if (still) {
+        const ts = [0, tb / 3, 2 * tb / 3];
+        ts.slice(1).forEach(t => ghosts.append(sv('circle', { cx: CX, cy: CY, r: rOf(dAt(t)).toFixed(2), class: 'fr-ghost' })));
+        paintDrop(b.d0, 'hot');
+        R.clock.textContent = `STILLS AT T = ${ts.map(t => t.toFixed(1)).join(', ')} S · d = ${ts.map(t => f2(dAt(t))).join(', ')} MM`;
+        anim = null; return;
+      }
+      const L = 5;
+      anim = { loop: L, step: (s, held) => { const t = held ? tb : s * tb, d = dAt(t); paintDrop(d, d > 0 ? 'hot' : 'out'); R.clock.textContent = `T = ${t.toFixed(1)} S · d = ${f2(d)} MM · PLAYBACK ×${(tb / L).toFixed(1)}`; } };
+    } else {
+      paintDrop(b.d0, 'hot'); R.clock.textContent = 'NO K FOR THIS BURN, SO NO BURN CURVE'; anim = null; return;
+    }
+    anim.step(0, false);
+    kick();
+  }
+
+  // ---- input ----
+  let ctl = null, ro = null, io = null, quiet = false;
+  const unit = () => (stage.clientHeight || V) / V;           // stage px per SVG unit
+  if (!detached) {
+    ctl = draggable(stage, { axis: 'y', value: yOf(st.o2) * unit(),
+      bounds: () => [Y0 * unit(), Y1 * unit()],
+      snap: () => tested().map(o => yOf(o) * unit()),
+      onMove: pos => {
+        const y = pos / unit(); knob.setAttribute('transform', `translate(0 ${y.toFixed(2)})`);
+        const o = nearest(tested(), oOf(Math.max(Y0, Math.min(Y1, y))));
+        if (o !== st.o2) { st.o2 = o; st.i = 0; const k = knob.getAttribute('transform'); commit(false); knob.setAttribute('transform', k); }
+      },
+      onEnd: pos => { const o = nearest(tested(), oOf(pos / unit())); if (o !== st.o2 || !quiet) { st.o2 = o; commit(!quiet); } } });
+    stage.addEventListener('keydown', e => {
+      if (e.key !== 'Home' && e.key !== 'End') return;
+      e.preventDefault(); const t = tested(); st.o2 = e.key === 'Home' ? t[0] : t.at(-1); st.i = 0; ctl.set(yOf(st.o2) * unit(), true);
+    });
+    // re-place the drag position after a resize or a fuel/gas change, without announcing or restarting the loop
+    const sync = () => { const y = yOf(st.o2) * unit(); if (!ctl || Math.abs(ctl.get() - y) < 0.5) return; quiet = true; ctl.set(y, false); quiet = false; };
+    fuelSeg.addEventListener('click', () => requestAnimationFrame(sync));
+    gasHolder.addEventListener('click', () => requestAnimationFrame(sync));
+    const stepBy = d => { const n = at(st.o2).length; if (n < 2) return; st.i = (st.i + d + n) % n; commit(true); };
+    prev.addEventListener('click', () => stepBy(-1)); next.addEventListener('click', () => stepBy(1));
+    pause.addEventListener('click', () => {
+      st.paused = !st.paused; pause.setAttribute('aria-pressed', String(st.paused)); pause.textContent = st.paused ? 'Play' : 'Pause';
+      if (st.paused) stop(); else { t0 = 0; kick(); }
+    });
+    const onVis = () => { if (document.hidden) stop(); else kick(); };
+    ctx.onMount?.(() => {
+      sync();
+      if ('ResizeObserver' in window) { ro = new ResizeObserver(sync); ro.observe(stage); }
+      if ('IntersectionObserver' in window) { io = new IntersectionObserver(es => { visible = es.some(e => e.isIntersecting); if (visible) kick(); else stop(); }); io.observe(stage); }
+      document.addEventListener('visibilitychange', onVis);
+      kick();
+    });
+    ctx.onLeave?.(() => { stop(); anim = null; ctl?.destroy(); ro?.disconnect(); io?.disconnect(); document.removeEventListener('visibilitychange', onVis); });
+  }
+
+  const drivers = (cf?.drivers || []).slice(0, 1).map(d => `${d.name} ${Math.round(d.share * 100)} %`).join('');
+  note.append(
+    'One real NASA burn at a time. The droplet shrinks by the d² law, d(t)² = d0² − K·t, using that burn\'s d0 and measured K; the ring fills to the M7 model\'s chance for that burn, and the thin outer arc is its range. ',
+    'The flame shell and the cool-flame glow are drawn for illustration and are not to scale. The cool-flame glow appears only for CFI burns, where NASA recorded a cool flame after the visible flame went out',
+    drivers ? ` (the M7 cool-flame model's main driver is ${drivers.toLowerCase()}, not oxygen).` : '.');
+  commit(false);
+  return h('section', { class: 'fr-hero hud', 'aria-label': 'Droplet flame instrument: one NASA burn at a time' },
+    h('div', { class: 'fr-hero-top' },
+      h('p', { class: 'fr-tag' }, `Illustration · values from ${tagFile} (M7)`), badge(st0)),
+    h('div', { class: 'fr-hero-grid' },
+      h('div', { class: 'fr-stage-wrap' }, stage, h('p', { class: 'fr-hint', 'aria-hidden': 'true' }, 'Drag the droplet up or down · O₂ snaps to tested levels')),
+      h('div', { class: 'fr-side' }, fuelSeg, gasHolder, stepper, dl, live)),
+    note);
 }

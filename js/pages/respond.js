@@ -3,7 +3,8 @@
 // droplet extinction, cool flames, FLEX suppressants beside the M7 points, NASA E-FIELD (context only), the bench mist
 // trial and "Reading the comparison". Ion wind is not mentioned anywhere (spec C6).
 import { h, load, page, card, isMissing, pct } from '../lib.js';
-import { coverageCard, extinctionCard, coolFlameCard, flexCard, efieldCard, mistTrialCard, readingCard, mistRows } from '../fig_respond.js';
+import { coverageCard, extinctionCard, coolFlameCard, flexCard, efieldCard, mistTrialCard, readingCard, mistRows, dropletHero } from '../fig_respond.js';
+import { setField } from '../field.js';
 
 const RESPONSE_TITLE = 'Response evidence for this fire';
 
@@ -30,13 +31,17 @@ async function responseBlock(ctx, examples) {
 }
 
 export default async function render(root, ctx) {
-  const [tr, ef, fx, m7, gaps, inv, examples] = await Promise.all([
-    load('response_trials'), load('efield'), load('flex_suppression'), load('m7_explorer'), load('gaps'), load('investigations'), load('growth_examples'),
+  const [tr, ef, fx, m7, gaps, inv, examples, models] = await Promise.all([
+    load('response_trials'), load('efield'), load('flex_suppression'), load('m7_explorer'), load('gaps'), load('investigations'), load('growth_examples'), load('models'),
   ]);
+  // UI lock: zoom the shared field into the droplet (camera only; field values never stand for data here).
+  if (!ctx.detached) ctx.onMount(() => setField({ dist: 2.2, g: 0 }));
   const mistDone = mistRows(tr).length > 0;
   const lead = `What NASA's experiments say about putting a fire out without gravity, next to ${mistDone ? 'what our bench mist trial measured' : 'our bench mist trial, which is not completed yet'}. The two are shown together and never merged.`;
   root.append(page('Put it out', lead,
-    coverageCard(gaps, inv),
+    // The hero instrument shares the first block with the coverage card, so page.keep (2) still keeps the same
+    // two figures open and the figure numbers do not change (js/passes.js foldBlocks).
+    h('div', { class: 'fr-top' }, dropletHero(models, m7, ctx), coverageCard(gaps, inv)),
     await responseBlock(ctx, examples),
     h('div', { class: 'grid g2' }, extinctionCard(m7), coolFlameCard(m7)),
     h('div', { class: 'grid g2' }, flexCard(fx, m7), efieldCard(ef)),

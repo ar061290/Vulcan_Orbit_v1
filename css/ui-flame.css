@@ -1,0 +1,52 @@
+/* UI lock styles for #/flame (feat/ui-lock). Scope every rule under #view[data-page="flame"]. */
+
+/* the simulator becomes the hero: split screen full width, controls and words under it */
+#view[data-page="flame"] .fl-sim{grid-template-columns:minmax(0,1fr);gap:var(--sp3)}
+#view[data-page="flame"] .fl-right{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--sp2) var(--sp4);align-items:start}
+#view[data-page="flame"] .fl-controls{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:var(--sp1) var(--sp3);align-items:start}
+
+/* stage: always-dark canvas, HUD brackets inside its clip */
+#view[data-page="flame"] .fl-stage{position:relative;overflow:hidden;border-radius:var(--r-panel);border:1px solid var(--line);background:#05070d;--split:50%}
+#view[data-page="flame"] .fl-stage.hud::after{inset:6px}
+#view[data-page="flame"] .fl-stage .fl-simcv{aspect-ratio:960/520;border-radius:0!important;cursor:grab;touch-action:pan-y;user-select:none;-webkit-tap-highlight-color:transparent;
+  clip-path:inset(0 0 0 0);transition:clip-path var(--t-move) var(--ease-move)}
+#view[data-page="flame"] .fl-stage .fl-simcv.fl-dragging{cursor:grabbing}
+#view[data-page="flame"] .fl-stage .fl-simcv:focus-visible{outline:2px solid #EDE8DF;outline-offset:-4px}
+
+/* half labels: mono uppercase, units in the text, on solid dark so they read over the flame */
+#view[data-page="flame"] .fl-pl{position:absolute;top:12px;z-index:2;display:grid;gap:2px;padding:4px 6px;border-radius:var(--r-data);background:#05070d;
+  font:500 11px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#8C8A93;pointer-events:none;overflow:hidden;
+  transition:opacity var(--t-in) var(--ease-in)}
+#view[data-page="flame"] .fl-pl.l{left:12px;max-width:calc(var(--split) - 24px)}
+#view[data-page="flame"] .fl-pl.r{left:calc(var(--split) + 12px);max-width:calc(100% - var(--split) - 24px)}
+#view[data-page="flame"] .fl-pl b{font-weight:500;color:#FF7A3D;justify-self:start;border-bottom:2px solid transparent;padding-bottom:1px}
+#view[data-page="flame"] .fl-pl.orbit b{color:#7AA2FF}
+#view[data-page="flame"] .fl-pl.on b{border-bottom-color:currentColor}
+#view[data-page="flame"] .fl-pl span{overflow-wrap:anywhere}
+#view[data-page="flame"] .fl-ill{position:absolute;right:12px;bottom:10px;z-index:2;padding:4px 6px;border-radius:var(--r-data);background:#05070d;
+  font:500 11px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#8C8A93;pointer-events:none;max-width:calc(100% - var(--split) - 24px)}
+
+/* divider: 44 px touch target, 1 px line, a small grip; arrow keys from js/spring.js, Home/End/Enter here */
+#view[data-page="flame"] .fl-divider{position:absolute;top:0;bottom:0;left:50%;width:44px;margin-left:-22px;z-index:3;cursor:col-resize;outline:none}
+#view[data-page="flame"] .fl-div-line{position:absolute;left:21.5px;top:0;bottom:0;width:1px;background:#EDE8DF;transform-origin:50% 50%;transition:transform var(--t-move) var(--ease-move)}
+#view[data-page="flame"] .fl-div-grip{position:absolute;left:50%;top:50%;width:10px;height:44px;transform:translate(-50%,-50%);border:1px solid #EDE8DF;border-radius:var(--r-data);background:#05070d;
+  transition:background var(--t-micro),opacity var(--t-in) var(--ease-in) var(--t-move)}
+#view[data-page="flame"] .fl-divider:hover .fl-div-grip,#view[data-page="flame"] .fl-divider:active .fl-div-grip{background:#EDE8DF}
+#view[data-page="flame"] .fl-divider:focus-visible .fl-div-grip{outline:2px solid #FF7A3D;outline-offset:3px}
+
+/* enter: the divider draws from the centre outward and the two halves open from it */
+#view[data-page="flame"] .fl-stage.fl-pre .fl-simcv{clip-path:inset(0 50% 0 50%)}
+#view[data-page="flame"] .fl-stage.fl-pre .fl-div-line{transform:scaleY(0)}
+#view[data-page="flame"] .fl-stage.fl-pre .fl-div-grip,#view[data-page="flame"] .fl-stage.fl-pre .fl-pl,#view[data-page="flame"] .fl-stage.fl-pre .fl-ill{opacity:0}
+
+#view[data-page="flame"] .fl-hint{color:var(--mute)}
+
+@media (max-width:820px){
+  #view[data-page="flame"] .fl-right{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:560px){
+  #view[data-page="flame"] .fl-pl{letter-spacing:.08em;top:8px}
+  #view[data-page="flame"] .fl-pl.l{left:8px;max-width:calc(var(--split) - 16px)}
+  #view[data-page="flame"] .fl-pl.r{left:calc(var(--split) + 8px);max-width:calc(100% - var(--split) - 16px)}
+  #view[data-page="flame"] .fl-ill{right:8px;bottom:6px;letter-spacing:.08em;max-width:calc(100% - var(--split) - 16px)}
+}

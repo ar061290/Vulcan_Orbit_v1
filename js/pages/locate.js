@@ -2,7 +2,7 @@
 // are dropped (plan v2 removed features 3, 4 and 5). keep = 1 (site.js), so only the first block shows before the fold;
 // the first block holds the explainer and its limits side by side, so the limits are never hidden.
 import { h, load, page, card, isMissing } from '../lib.js';
-import { benchExplainCard, cvLatestCard, pendingCard, doesNotShowCard, plannedCard } from '../fig_bench.js';
+import { benchExplainCard, cvLatestCard, pendingCard, doesNotShowCard, plannedCard, benchDrawing, startBenchDrawing } from '../fig_bench.js';
 import { figLink } from '../passes.js';
 
 /** "Bench mist trial" is drawn by fig_respond.mistTrialCard (shared with Put it out). If that module cannot be loaded,
@@ -22,7 +22,10 @@ async function mistCard(tr) {
 
 export default async function render(root, ctx) {
   // card titles first (site map): the explainer and limits need no data
-  const first = h('div', { class: 'grid g2' }, benchExplainCard(), doesNotShowCard());
+  // UI lock: the drawing leads the first block (visual first, words under it), so it is never folded away
+  const rig = benchDrawing({ animate: !ctx.detached });
+  const first = h('div', { class: 'bench-hero' }, rig, h('div', { class: 'grid g2' }, benchExplainCard(), doesNotShowCard()));
+  if (!ctx.detached) { let stop = () => {}; ctx.onMount(() => { stop = startBenchDrawing(rig); }); ctx.onLeave(() => stop()); }
   const pg = page('Bench rig',
     'A camera and a smoke-flow sensor on a bench-top dome, at Earth gravity. The camera\'s reading of the flame is meant to be the first step of the site\'s pipeline, feeding the growth simulation on the Assess page.',
     first);

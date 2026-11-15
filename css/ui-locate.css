@@ -1,0 +1,40 @@
+/* UI lock styles for #/locate (feat/ui-lock). Scope every rule under #view[data-page="locate"]. */
+/* the rig line drawing: ILLUSTRATION, no numbers; an honest AWAITING DATA stamp */
+#view[data-page="locate"] .bench-hero{display:grid;gap:var(--sp3)}
+#view[data-page="locate"] .rig{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-panel);padding:var(--sp6) var(--sp3) var(--sp3);min-width:0}
+#view[data-page="locate"] .rig-svg{display:block;width:100%;max-width:880px;height:auto;margin:0 auto;overflow:visible;color:var(--ink2)}
+#view[data-page="locate"] .rig-tag,
+#view[data-page="locate"] .rig-stamp{position:absolute;top:var(--sp2);font:var(--label);letter-spacing:.14em;text-transform:uppercase}
+#view[data-page="locate"] .rig-tag{left:var(--sp3);color:var(--mute)}
+#view[data-page="locate"] .rig-stamp{right:var(--sp3);color:var(--warn);border:1px solid var(--warn);border-radius:var(--r-data);padding:5px 8px}
+#view[data-page="locate"] .rig-svg path{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+#view[data-page="locate"] .rig-svg .rig-bench{stroke:var(--mute)}
+#view[data-page="locate"] .rig-svg .rig-dome{stroke:var(--oxy)}
+#view[data-page="locate"] .rig-svg .rig-flame{stroke:var(--accent)}
+#view[data-page="locate"] .rig-svg .rig-sight{stroke:var(--mute);stroke-dasharray:3 5;stroke-width:1}
+#view[data-page="locate"] .rig-svg .rig-label{font:500 15px var(--mono);letter-spacing:.14em;fill:var(--mute)}
+
+/* draw-in: every stroke is pathLength 1; the resting state is drawn, so Calm / reduced motion (animation:none) shows it whole.
+   The animation is held at its first frame until the drawing is on screen (.go, set by fig_bench.startBenchDrawing). */
+#view[data-page="locate"] .rig[data-anim] .rig-svg path:not(.rig-sight){stroke-dasharray:1;stroke-dashoffset:0;
+  animation:rig-draw var(--t-move) var(--ease-move) both paused;animation-delay:calc(var(--k,0) * 140ms)}
+#view[data-page="locate"] .rig[data-anim] .rig-sight,
+#view[data-page="locate"] .rig[data-anim] .rig-label,
+#view[data-page="locate"] .rig[data-anim] .rig-stamp{animation:rig-fade var(--t-in) var(--ease-in) both paused;animation-delay:calc(1200ms + var(--k,0) * var(--stagger))}
+#view[data-page="locate"] .rig[data-anim] .rig-stamp{animation-delay:1500ms}
+#view[data-page="locate"] .rig.go .rig-svg path,
+#view[data-page="locate"] .rig.go .rig-label,
+#view[data-page="locate"] .rig.go .rig-stamp{animation-play-state:running}
+@keyframes rig-draw{from{stroke-dashoffset:1}}
+@keyframes rig-fade{from{opacity:0}}
+
+/* console touches on the existing cards */
+#view[data-page="locate"] .card>h3{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="locate"] .bench-pending b{font-family:var(--mono);font-weight:500;color:var(--ink)}
+
+@media (max-width:680px){
+  #view[data-page="locate"] .rig{padding:var(--sp6) var(--sp2) var(--sp2)}
+  #view[data-page="locate"] .rig-tag{left:var(--sp2)}
+  #view[data-page="locate"] .rig-stamp{right:var(--sp2)}
+  #view[data-page="locate"] .rig-svg .rig-label{font-size:22px}
+}

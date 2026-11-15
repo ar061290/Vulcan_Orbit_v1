@@ -11,7 +11,7 @@ const root = document.documentElement;
 const KEYS = ['theme', 'size', 'terms', 'motion', 'lang'];
 const mq = q => { try { return matchMedia(q).matches; } catch { return false; } };
 const DEFAULTS = {
-  theme: () => (mq('(prefers-color-scheme: dark)') ? 'night' : 'day'),
+  theme: () => 'night',   // UI lock: Night is the default; the Day toggle stays in Read your way
   size: () => '0',
   terms: () => 'on',
   motion: () => (mq('(prefers-reduced-motion: reduce)') ? 'calm' : 'full'),
@@ -35,7 +35,7 @@ export const prefs = {
 export function applyPrefs() {
   root.dataset.theme = state.theme; root.dataset.size = state.size; root.dataset.terms = state.terms; root.dataset.motion = state.motion;
   try { setChartTheme(state.theme); } catch (e) { console.error(e); }
-  document.querySelector('meta[name=theme-color]')?.setAttribute('content', state.theme === 'day' ? '#f3f0e8' : '#070a12');
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', state.theme === 'day' ? '#f3f0e8' : '#05060E');
 }
 
 // ---------- read aloud ----------

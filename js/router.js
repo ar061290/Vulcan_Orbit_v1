@@ -7,6 +7,9 @@ import { runPasses, revealFigure } from './passes.js';
 import { stopReading } from './prefs.js';
 import { startTour } from './tour.js';
 import * as store from './store.js';
+import { station, setHost, clearField } from './field.js';
+import { enterPage, pageNum, blip } from './engine.js';
+import { PAGES } from './site.js';
 
 const $ = id => document.getElementById(id);
 let cur = { id: null, params: {} }, leaving = [], token = 0;
@@ -55,7 +58,7 @@ function markCurrent(id) {
 const FOCUSABLE = 'a[href], button, input, select, textarea, summary, [tabindex]';
 let firstRoute = true;
 async function route({ rerender = false } = {}) {
-  const my = ++token, { id, params } = parse(), view = $('view'), y = scrollY;
+  const my = ++token, { id, params } = parse(), view = $('view'), y = scrollY, initial0 = firstRoute;
   // on a re-render (theme or motion change) keep open folds and the focused control
   const keep = rerender && view.dataset.page === id ? {
     open: [...view.querySelectorAll('details')].map(d => d.open),
@@ -74,8 +77,16 @@ async function route({ rerender = false } = {}) {
   const root = failed ? errorCard(failed) : out.root;
   let swapped = false;
   const swap = () => { if (swapped) return; swapped = true; view.dataset.page = id; view.replaceChildren(...root.childNodes); };
-  if (document.startViewTransition && !calmNow() && !rerender) { try { await document.startViewTransition(swap).updateCallbackDone; } catch { /* transition skipped */ } }
+  // UI lock: deeper in the menu = the camera moves in, back = out (PAGES order); Calm = instant
+  const dir = rerender || !cur.id ? 0 : Math.sign(PAGES.findIndex(p => p.id === id) - PAGES.findIndex(p => p.id === cur.id));
+  document.documentElement.dataset.vtdir = dir < 0 ? 'out' : 'in';
+  document.documentElement.dataset.vtpage = id;
+  if (!rerender) { clearField(); station(id, dir); if (dir) blip(dir > 0 ? 740 : 560, .05); }
+  if (document.startViewTransition && !calmNow() && !rerender && !initial0) { try { await document.startViewTransition(swap).updateCallbackDone; } catch { /* transition skipped */ } }
+  else if (!calmNow() && !rerender && !initial0 && view.animate) { view.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' }); }
   swap();
+  setHost(view.querySelector('.phead, .story-pin'), { noDim: id === 'overview' });
+  if (!rerender) enterPage(view);
   cur = { id, params };
   if (out) { leaving = out.leaves; runAll(out.mounts, 'onMount'); }
   // 8 focus or reveal
@@ -108,7 +119,7 @@ function setMore(open) {
 }
 function buildNav() {
   const nav = $('nav'), menu = document.querySelector('.menu');
-  const link = p => h('a', { href: `#/${p.id}`, 'data-id': p.id }, p.label);
+  const link = p => h('a', { href: `#/${p.id}`, 'data-id': p.id }, h('span', { class: 'nn', 'aria-hidden': 'true' }, pageNum(p.id)), ' ', p.label);
   moreList = h('ul', { id: 'more-list', class: 'more-list', hidden: true }, MORE.map(p => h('li', {}, link(p))));
   moreBtn = h('button', { type: 'button', class: 'more-btn', 'aria-expanded': 'false', 'aria-controls': 'more-list' }, 'More');
   moreBtn.addEventListener('click', () => { const open = moreList.hidden; setMore(open); if (open) moreList.querySelector('a')?.focus(); });

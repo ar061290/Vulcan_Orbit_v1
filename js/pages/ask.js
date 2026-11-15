@@ -39,16 +39,54 @@ export default async function render(root, ctx = {}) {
   const endpoint = !isMissing(cfg) && typeof cfg.endpoint === 'string' && cfg.endpoint.trim() ? cfg.endpoint.trim() : null;
   const haveCache = !isMissing(c) && Array.isArray(c.items);
   const items = haveCache ? c.items : [];
-  let alive = true, seq = 0;
-  ctx.onLeave?.(() => { alive = false; });
+  let alive = true, seq = 0, stopType = () => {};
+  ctx.onLeave?.(() => { alive = false; stopType(); });
   const say = msg => { if (!ctx.detached && alive) announce(msg); };
+
+  // ---------- UI lock: the answer types in, character by character ----------
+  // Screen readers get the whole text at once (an sr-only copy; the typed and untyped halves are aria-hidden, and the
+  // untyped half is laid out but transparent, so the panel does not grow as it types). Calm / reduced motion, a hidden
+  // browser tab, or the panel leaving the screen: the text is shown whole, at once.
+  const still = () => document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const typeIn = text => {
+    stopType();
+    const p = h('p', { class: 'ans' });
+    if (ctx.detached || still() || !text) { p.textContent = text; return { el: p, start: () => {} }; }
+    const typed = h('span', { class: 'ty', 'aria-hidden': 'true' }), rest = h('span', { class: 'ty-rest', 'aria-hidden': 'true' }, text);
+    p.append(typed, rest, h('span', { class: 'sr' }, text));
+    let raf = 0, io = null, done = false;
+    const finish = () => {
+      if (done) return; done = true; cancelAnimationFrame(raf); io?.disconnect();
+      document.removeEventListener('visibilitychange', vis); p.replaceChildren(text);
+    };
+    const vis = () => { if (document.hidden) finish(); };
+    const start = () => {
+      const dur = Math.min(2400, Math.max(450, text.length * 9)), t0 = performance.now();
+      const step = now => {
+        const k = Math.min(1, (now - t0) / dur), n = Math.round(text.length * k);
+        typed.textContent = text.slice(0, n); rest.textContent = text.slice(n);
+        if (k >= 1) finish(); else raf = requestAnimationFrame(step);
+      };
+      document.addEventListener('visibilitychange', vis);
+      if ('IntersectionObserver' in window) { io = new IntersectionObserver(([e]) => { if (!e.isIntersecting) finish(); }); io.observe(p); }
+      p.addEventListener('click', finish, { once: true });
+      raf = requestAnimationFrame(step);
+    };
+    stopType = finish;
+    return { el: p, start };
+  };
+  /** "> question": the console prompt line echoed above each answer. */
+  const echo = q => (q ? h('p', { class: 'ask-echo' }, h('span', { class: 'ps', 'aria-hidden': 'true' }, '>'), ' ', h('span', {}, q)) : null);
 
   // ---------- the answer panel ----------
   const out = h('div', { class: 'answer' }, h('p', { class: 'muted' }, 'Pick a question, or type your own.'));
   const show = (it, asked) => {
     if (!it) {
       const txt = `Nothing in our library answers "${asked}". The assistant does not guess.`;
-      out.replaceChildren(stamp('missing', 'missing', 'No NASA evidence'), h('p', { class: 'ans' }, txt));
+      const t = typeIn(txt);
+      out.classList.add('refusal');
+      add(clear(out), echo(asked), stamp('missing warn', 'missing', 'No NASA evidence'), t.el);
+      t.start();
       say(`No NASA evidence. ${txt}`);
       return;
     }
@@ -58,12 +96,17 @@ export default async function render(root, ctx = {}) {
     const matched = asked && showMatched ? `Matched to: ${it.q}` : null;
     const sources = Array.isArray(it.sources) ? it.sources : [];
     // replaceChildren would print a null kid as "null"; add() drops it (REBUILD_PLAN §0 rule 5)
+    const t = typeIn(a);
+    out.classList.toggle('refusal', refusal);
     add(clear(out),
-      refusal ? stamp('missing', 'missing', label) : stamp('real', 'reported', label),
+      echo(asked || it.q),
+      refusal ? stamp('missing warn', 'missing', label) : stamp('real', 'reported', label),
       matched ? h('p', { class: 'matched' }, h('small', {}, matched)) : null,
-      h('p', { class: 'ans' }, a),
+      t.el,
       it.trace ? h('p', {}, h('small', {}, 'Numbers from: ', h('code', {}, it.trace))) : null,
-      sources.length ? h('div', { class: 'src' }, 'Sources: ', ...sources.flatMap((s, i) => [i ? '; ' : '', link(s.url, s.label)])) : null);
+      sources.length ? h('div', { class: 'src' }, h('span', { class: 'src-k' }, 'Sources: '),
+        h('ul', { class: 'src-chips' }, sources.map(s => h('li', {}, link(s.url, s.label))))) : null);
+    t.start();
     say(`${label}. ${matched ? matched + '. ' : ''}${a}`);
   };
 
@@ -104,7 +147,7 @@ export default async function render(root, ctx = {}) {
   const questions = haveCache
     ? card('Questions', c.status, `${list.length} answers, each written from a data file. Type a question or pick one.`,
         h('div', { class: 'ask-box' }, h('label', { for: 'ask-q' }, 'Type a question'),
-          h('div', { class: 'row' }, input, h('button', { type: 'button', class: 'chip', onclick: ask }, 'Ask'))),
+          h('div', { class: 'row' }, h('span', { class: 'ps', 'aria-hidden': 'true' }, '>'), input, h('button', { type: 'button', class: 'chip', onclick: ask }, 'Ask'))),
         h('div', { class: 'qlist', role: 'group', 'aria-label': 'Saved questions' }, list))
     : card('Questions', 'missing', null, empty('No saved answers yet', 'assistant_cache', 'The questions and their pre-written answers come from this file (scripts/build_assistant.py).', CACHE_SHAPE));
   const answer = haveCache

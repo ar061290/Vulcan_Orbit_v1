@@ -201,5 +201,5 @@ export function announce(msg) {
   lastSaid = msg; live.textContent = '';
   setTimeout(() => { live.textContent = msg; }, 60);
 }
-export const calm = () => document.documentElement.dataset.motion === 'calm';
+export const calm = () => document.documentElement.dataset.motion === 'calm' || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
 export const slug = title => String(title ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');

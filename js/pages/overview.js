@@ -8,10 +8,13 @@
 // (site.js head:false), and exports no short(): it renders its own short answer.
 //  - (P5-G) the English/తెలుగు/हिन्दी switch on the short answer and the India card (spec #25). Strings are in
 //    data/i18n.json; the numbers are the same facts.detectFacts() vars the English uses (js/i18n.js).
+//  - (UI lock) the porthole and its own WebGL context are gone: a pinned ~300vh scroll story drives the shared field
+//    (js/field.js) and draws the real Saffire-III Sample 1 traces; every other section is a one-line ledger row.
 import { h, add, load, badge, card, empty, isMissing } from '../lib.js';
 import { loadI18n, langSwitch, draftNote, shortLines, tr, currentLang } from '../i18n.js';
 import { annotate } from '../glossary.js';
-import { hero } from '../gl_hero.js';
+import { setField, bindOrbit, fieldOk } from '../field.js';
+import { blip } from '../engine.js';
 import { ticking } from '../clock.js';
 import { tourButton } from '../tour.js';
 import { missionCheck, coverageLine } from '../mission.js';
@@ -25,52 +28,248 @@ const NS = 'http://www.w3.org/2000/svg';
 export default async function render(root, ctx = {}) {
   const [man, india, lat, gas, gaps, i18n] = await Promise.all([load('manifest'), load('india'), load('saffire_latency'), load('saffire_gas'), load('gaps'), loadI18n()]);
   const st = n => (Array.isArray(man.files) ? man.files : []).find(f => f.name === n)?.status || 'missing';
-  const facts = detectFacts(lat, gas);
+  const facts = detectFacts(lat, gas), v = facts.vars;
+  // UI lock: one pinned scroll story on top (the shared field does the drawing), then every other section as a
+  // one-line row of a console ledger. The rows hold the existing content unchanged.
+  let n = 0;
+  const row = (title, hint, kids, { open = false } = {}) => h('details', { class: 'hrow', open },
+    h('summary', {},
+      h('span', { class: 'hrow-n', 'aria-hidden': 'true' }, String(++n).padStart(2, '0')),
+      h('span', { class: 'hrow-t' }, title),
+      h('span', { class: 'hrow-hint' }, hint),
+      h('span', { class: 'hrow-plus', 'aria-hidden': 'true' })),
+    h('div', { class: 'hrow-body' }, kids));
+  const findingHint = v.rad_s != null && v.smoke_min_s != null
+    ? `Flame sensor ${v.rad_s} s · cabin smoke detector ${v.smoke_min_s}–${v.smoke_max_s} s`
+    : 'Alarm timing on NASA\'s orbital fires: not available yet';
+  const missionOpen = !!(ctx.params && ctx.params.atm);
   root.append(h('div', { class: 'page home' },
-    heroSection(ctx),
-    pipelineCard(st),
-    findingSection(facts, lat, gas, ctx),
-    shortAnswer(facts, lat, gas, i18n, ctx),
-    h('p', { class: 'story-map' }, 'The challenge asks teams to summarise, rank and interpret NASA\'s fire data. We do that as three questions:'),
-    questions(st),
-    alsoLinks(),
-    isMissing(gaps) ? null : h('p', { class: 'coverage' }, coverageLine(gaps)),
-    isMissing(gaps)
-      ? card('Mission check: is there NASA data for your cabin air?', 'missing', null,
-        empty('Mission check: is there NASA data for your cabin air?', 'gaps', 'The count of NASA tests near each cabin atmosphere is not available yet.'))
-      : missionCheck(gaps, { params: ctx.params }),
-    howToRead(),
-    isMissing(india)
-      ? card('Why this matters for India\'s own crew and station', 'missing', null,
-        empty('Why this matters for India\'s own crew and station', 'india', 'The checked India facts are not available yet.'))
-      : indiaCard(india, i18n, ctx)));
+    storySection(lat, ctx),
+    h('p', { class: 'hero-lead home-lead' }, 'Without gravity, flames turn into dim blue balls and smoke drifts wherever the fans push it. We used NASA\'s own space-station fire experiments to answer three questions: where is the fire, what will it do, and what puts it out.'),
+    h('section', { class: 'ledger', 'aria-labelledby': 'ledger-h' },
+      h('h2', { id: 'ledger-h', class: 'ledger-h' }, 'Everything on this page'),
+      row('From camera to risk', 'One fire, three steps, each on its own page', pipelineCard(st)),
+      row('The finding', findingHint, findingSection(facts, lat, gas, ctx)),
+      row('The short answer', 'In English, తెలుగు or हिन्दी', shortAnswer(facts, lat, gas, i18n, ctx)),
+      row('The three questions', 'Locate, predict, respond', [
+        h('p', { class: 'story-map' }, 'The challenge asks teams to summarise, rank and interpret NASA\'s fire data. We do that as three questions:'),
+        questions(st)]),
+      row('Also on this site', 'Assess and Flame lab', alsoLinks()),
+      row('Mission check', 'Is there NASA data for your cabin air?', [
+        isMissing(gaps) ? null : h('p', { class: 'coverage' }, coverageLine(gaps)),
+        isMissing(gaps)
+          ? card('Mission check: is there NASA data for your cabin air?', 'missing', null,
+            empty('Mission check: is there NASA data for your cabin air?', 'gaps', 'The count of NASA tests near each cabin atmosphere is not available yet.'))
+          : missionCheck(gaps, { params: ctx.params })], { open: missionOpen }),
+      row('How to read this site', 'What the coloured stamps on every panel mean', howToRead()),
+      row('Why this matters for India', 'India\'s own crew and station, with checked sources',
+        isMissing(india)
+          ? card('Why this matters for India\'s own crew and station', 'missing', null,
+            empty('Why this matters for India\'s own crew and station', 'india', 'The checked India facts are not available yet.'))
+          : indiaCard(india, i18n, ctx)))));
 }
 
-// ---------- hero and porthole ----------
-function heroSection(ctx) {
-  const H = hero({ g: 0, fit: 'center', ctx });
-  const gb = [];
-  const gBtn = (v, label) => {
-    const b = h('button', { type: 'button', 'aria-pressed': String(v === 0), onclick: () => { H.setG(v); gb.forEach(x => x.setAttribute('aria-pressed', String(x === b))); } }, label);
-    gb.push(b); return b;
+// ---------- the pinned scroll story (UI lock) ----------
+// Native scroll, no wheel interception: section.story-pin is ~300vh tall and its .story-stick is position:sticky.
+// Progress p (0..1) drives the shared field (js/field.js) and the real Saffire-III Sample 1 traces:
+//   0-33 %  gravity 1 -> 0 (teardrop to blue sphere), captions "On Earth, fire rises" then "In orbit, nothing rises"
+//   33-66 % smoke 0 -> 1, caption "Smoke goes everywhere"
+//   66-100 % the field dims and the flight traces draw in (stroke-dashoffset), with labels computed from the data.
+// Every caption is real text in the DOM; only opacity changes. Calm / reduced motion / short screens / the detached
+// site map: no pinning, all captions stacked, the traces fully drawn, the field set once (g 0, smoke 0).
+// The field and the flame are an ILLUSTRATION. The traces are real data (data/saffire_latency.json).
+const STILL = () => document.documentElement.dataset.motion === 'calm' || matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const ramp = (x, a, b) => clamp((x - a) / (b - a), 0, 1);
+const smooth = x => x * x * (3 - 2 * x);
+const fmt = x => String(+(+x).toFixed(1));            // 7.0 -> "7", 72.0 -> "72"
+const fin = x => typeof x === 'number' && Number.isFinite(x);
+const Y_LO = -0.5, Y_HI = 2;                            // the existing replay's display clamp (Find it): a display choice
+const WIN_END = 130;                                    // display window end, s after the igniter switched on: a display choice
+const DIM_STORY = 0.55, DIM_AFTER = 0.82;               // field dimming: drawing parameters of the illustration
+
+/** Pull the Sample 1 burn's radiometer and scatter traces and the numbers the labels need. Nothing is typed in. */
+function sampleOne(lat) {
+  if (isMissing(lat) || !Array.isArray(lat.burns)) return { why: 'data/saffire_latency.json is missing.' };
+  const b = lat.burns.find(x => /Sample 1/.test(x?.name || ''));
+  if (!b) return { why: 'data/saffire_latency.json has no burn named Sample 1.' };
+  const ch = re => (Array.isArray(b.channels) ? b.channels.find(c => re.test(c?.name || '') || re.test(c?.key || '')) : undefined);
+  const rad = ch(/radiometer/i), sc = ch(/scatter/i), t = Array.isArray(b.t) ? b.t : [];
+  if (!rad || !sc || !t.length || !Array.isArray(rad.values) || !Array.isArray(sc.values)) return { why: 'the Sample 1 burn in data/saffire_latency.json has no radiometer or scatter trace.' };
+  const t0 = t.find(fin);
+  const range = Array.isArray(sc.alarm_s_range) ? sc.alarm_s_range : [];
+  const out = {
+    b, rad, sc, t, t0,
+    radAt: fin(rad.alarm_s) ? rad.alarm_s : null, radRes: fin(rad.resolution_s) ? rad.resolution_s : null,
+    scLo: fin(range[0]) ? range[0] : null, scHi: fin(range[1]) ? range[1] : null,
+    psi: (String(lat.source || '').match(/PSI-\d+/) || [null])[0],
+    status: lat.status,
+    // the alarm level in the traces' own units, read from the file's y_meaning ("... (1.0 = alarm at baseline + 5 SD)")
+    alarmTxt: (String(lat.y_meaning || '').match(/(\d+(?:\.\d+)?)\s*=\s*alarm/i) || [])[1] || null,
   };
-  const ring = document.createElementNS(NS, 'svg');
-  ring.setAttribute('viewBox', '0 0 600 600'); ring.setAttribute('class', 'ring'); ring.setAttribute('aria-hidden', 'true'); ring.setAttribute('focusable', 'false');
-  // Decoration (main, verbatim): 72 ticks every 5°, a longer tick every 30°.
-  ring.innerHTML = `<defs><path id="arc" d="M 300 300 m -292 0 a 292 292 0 1 1 584 0 a 292 292 0 1 1 -584 0"/></defs>
-    <circle class="c" cx="300" cy="300" r="292"/><circle class="d" cx="300" cy="300" r="276"/>
-    ${Array.from({ length: 72 }, (_, i) => { const a = i * 5 * Math.PI / 180, r1 = 292, r2 = i % 6 ? 286 : 280; return `<line x1="${300 + r1 * Math.cos(a)}" y1="${300 + r1 * Math.sin(a)}" x2="${300 + r2 * Math.cos(a)}" y2="${300 + r2 * Math.sin(a)}" stroke="var(--axis)" stroke-width="1"/>`; }).join('')}
-    <text><textPath href="#arc" startOffset="3%">VIEWPORT · FUEL DROPLET · NOT TO SCALE · ILLUSTRATION, NOT DATA · DRAG TO TURN ·</textPath></text>`;
-  return h('section', { class: 'hero2', 'aria-labelledby': 'hero-title' },
-    h('div', { class: 'hero-copy' },
-      h('p', { class: 'kicker' }, 'NASA Space Apps 2026 · Flame in Freefall'),
-      h('h1', { id: 'hero-title' }, 'In orbit, fire doesn\'t rise. ', h('span', { class: 'lit' }, 'It hides.')),
-      h('p', { class: 'hero-lead' }, 'Without gravity, flames turn into dim blue balls and smoke drifts wherever the fans push it. We used NASA\'s own space-station fire experiments to answer three questions: where is the fire, what will it do, and what puts it out.'),
-      h('div', { class: 'hero-cta' }, h('a', { class: 'btn primary', href: '#/detect' }, 'Start with the fire'), tourButton(), h('a', { class: 'btn', href: '#/evidence' }, 'How we checked it'))),
-    h('figure', { class: 'port-fig' },
-      h('div', { class: 'port' }, ring, h('div', { class: 'glass' }, H.el),
-        h('div', { class: 'port-ctl', role: 'group', 'aria-label': 'Gravity in the illustration' }, gBtn(0, 'In orbit'), gBtn(1, 'On Earth'))),
-      h('figcaption', { class: 'port-note' }, H.ok ? 'Same droplet, same fuel. Only gravity changes.' : 'This illustration needs WebGL 2; the rest of the site works without it.')));
+  out.alarmV = out.alarmTxt != null && fin(+out.alarmTxt) ? +out.alarmTxt : null;
+  out.t1 = Math.max(WIN_END, out.scHi != null ? out.scHi + 20 : 0, out.radAt != null ? out.radAt + 20 : 0);
+  out.gap = out.radAt != null && out.scLo != null ? out.scLo - out.radAt : null;
+  return out;
+}
+
+/** The trace panel: SVG paths plus HTML labels. Returns {el, draw(f, still)}; f = sweep 0..1 across the window. */
+function tracePanel(d) {
+  if (d.why) {
+    const el = h('div', { class: 'story-data sd-missing hud' },
+      h('p', { class: 'sd-head' }, h('span', {}, 'Flight data')),
+      h('p', { class: 'sd-why' }, `The real flight traces cannot be drawn: ${d.why}`));
+    return { el, draw: () => {} };
+  }
+  const W = 600, H = 210, L = 6, R = 6, TOP = 30, BOT = 22;
+  const x = t => L + (t - d.t0) / (d.t1 - d.t0) * (W - L - R);
+  const y = v => TOP + (Y_HI - clamp(v, Y_LO, Y_HI)) / (Y_HI - Y_LO) * (H - TOP - BOT);
+  const pts = vals => {
+    const p = [];
+    d.t.forEach((t, i) => { if (fin(t) && t >= d.t0 && t <= d.t1 && fin(vals[i])) p.push([x(t), y(vals[i])]); });
+    const cum = [0];
+    for (let i = 1; i < p.length; i++) cum.push(cum[i - 1] + Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]));
+    return { p, cum, len: cum[cum.length - 1] || 1, d: p.map(([a, b], i) => `${i ? 'L' : 'M'}${a.toFixed(1)} ${b.toFixed(1)}`).join('') };
+  };
+  // length fraction of a path drawn up to screen x = X, so both traces sweep in step with time
+  const lenAt = (P, X) => {
+    const { p, cum, len } = P;
+    if (!p.length || X <= p[0][0]) return 0;
+    for (let i = 1; i < p.length; i++) if (p[i][0] >= X) { const k = (X - p[i - 1][0]) / ((p[i][0] - p[i - 1][0]) || 1); return (cum[i - 1] + k * (cum[i] - cum[i - 1])) / len; }
+    return 1;
+  };
+  const PR = pts(d.rad.values), PS = pts(d.sc.values);
+  const yA = d.alarmV != null ? y(d.alarmV) : null, y0 = y(0), xR = d.radAt != null ? x(d.radAt) : null, xLo = d.scLo != null ? x(d.scLo) : null, xHi = d.scHi != null ? x(d.scHi) : null;
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'sd-svg'); svg.setAttribute('role', 'img');
+  svg.setAttribute('focusable', 'false');
+  const lbl = [
+    `Real NASA Saffire-III flight data${d.psi ? ` (${d.psi})` : ''}, ${d.b.name}, from ${fmt(d.t0)} to ${fmt(d.t1)} seconds after the igniter switched on.`,
+    d.radAt != null ? `The flame radiometer crossed our alarm rule by ${fmt(d.radAt)} seconds${d.radRes != null ? ` (it updates every ${fmt(d.radRes)} seconds)` : ''}.` : 'The flame radiometer alarm time is not available.',
+    d.scLo != null && d.scHi != null ? `The cabin smoke detector's scatter channel crossed it at ${fmt(d.scLo)} to ${fmt(d.scHi)} seconds, loose to strict alarm rule.` : 'The cabin smoke detector alarm time is not available.',
+    d.gap != null ? `That is at least ${fmt(d.gap)} seconds later.` : '',
+  ].filter(Boolean).join(' ');
+  svg.setAttribute('aria-label', lbl);
+  svg.innerHTML = `
+    <line class="sd-zero" x1="${L}" x2="${W - R}" y1="${y0}" y2="${y0}"/>
+    ${yA != null ? `<line class="sd-alarm" x1="${L}" x2="${W - R}" y1="${yA}" y2="${yA}"/>` : ''}
+    ${d.t0 < 0 ? `<line class="sd-ign" x1="${x(0)}" x2="${x(0)}" y1="${TOP}" y2="${H - BOT}"/>` : ''}
+    ${xLo != null && xHi != null ? `<rect class="sd-band sd-rev rv-sc" x="${xLo}" y="${TOP}" width="${Math.max(1, xHi - xLo)}" height="${H - TOP - BOT}"/>` : ''}
+    ${xR != null ? `<line class="sd-mark-r sd-rev rv-rad" x1="${xR}" x2="${xR}" y1="${TOP}" y2="${H - BOT}"/>` : ''}
+    ${xR != null && xLo != null ? `<path class="sd-brk sd-rev rv-sc" d="M${xR} ${TOP - 4}V${TOP - 12}H${xLo}V${TOP - 4}"/>` : ''}
+    <path class="sd-trace sd-tr-r" pathLength="1" d="${PR.d}"/>
+    <path class="sd-trace sd-tr-s" pathLength="1" d="${PS.d}"/>
+    <line class="sd-cur" x1="0" x2="0" y1="${TOP}" y2="${H - BOT}"/>`;
+  const trR = svg.querySelector('.sd-tr-r'), trS = svg.querySelector('.sd-tr-s'), cur = svg.querySelector('.sd-cur');
+  const pct = (v, of) => `${(v / of * 100).toFixed(2)}%`;
+  const src = d.status === 'real' ? 'Real flight data' : `${d.status || 'missing'} data`;
+  const k = (cls, rv, text) => h('li', { class: `${cls} sd-rev ${rv}` }, h('i', { 'aria-hidden': 'true' }), h('span', {}, text));
+  const readout = h('span', { class: 'sd-t', 'aria-hidden': 'true' }, '');
+  const el = h('div', { class: 'story-data hud' },
+    h('p', { class: 'sd-head' },
+      h('span', { class: 'sd-src' }, `${src}${d.psi ? ` · NASA ${d.psi}` : ''}`),
+      h('span', {}, `${d.b.name} · window ${fmt(d.t0)} to ${fmt(d.t1)} s after igniter on (display choice)`)),
+    h('div', { class: 'sd-plot' }, svg,
+      d.gap != null ? h('span', { class: 'sd-gap sd-rev rv-sc', 'aria-hidden': 'true', style: `left:${pct((xR + xLo) / 2, W)}` }, `At least ${fmt(d.gap)} seconds`) : null,
+      yA != null ? h('span', { class: 'sd-alarm-l', 'aria-hidden': 'true', style: `top:${pct(yA, H)}` }, `Alarm rule ${d.alarmTxt}`) : null,
+      d.t0 < 0 ? h('span', { class: 'sd-ign-l', 'aria-hidden': 'true', style: `left:${pct(x(0), W)}` }, 'Igniter on') : null,
+      readout),
+    h('ul', { class: 'sd-key', 'aria-hidden': 'true' },
+      k('k-rad', 'rv-rad', d.radAt != null ? `Flame sensor ≤ ${fmt(d.radAt)} s${d.radRes != null ? ` (± ${fmt(d.radRes)}, it updates every ${fmt(d.radRes)} s)` : ''}` : 'Flame sensor: alarm time not available'),
+      k('k-sc', 'rv-sc', d.scLo != null && d.scHi != null ? `Cabin smoke detector ${fmt(d.scLo)}–${fmt(d.scHi)} s (loose to strict alarm rule)` : 'Cabin smoke detector: alarm time not available')));
+  const revs = [...el.querySelectorAll('.sd-rev')];
+  let lastT = -Infinity;
+  const draw = (f, still) => {
+    const X = L + f * (W - L - R), tNow = d.t0 + f * (d.t1 - d.t0);
+    trR.style.strokeDashoffset = String(1 - lenAt(PR, X));
+    trS.style.strokeDashoffset = String(1 - lenAt(PS, X));
+    cur.setAttribute('x1', X); cur.setAttribute('x2', X);
+    cur.style.opacity = still || f <= 0 || f >= 1 ? '0' : '1';
+    readout.textContent = still || f <= 0 || f >= 1 ? '' : `T ${fmt(Math.round(tNow))} s`;
+    readout.style.left = pct(X, W);
+    const on = { 'rv-rad': d.radAt != null && tNow >= d.radAt, 'rv-sc': d.scLo != null && tNow >= d.scLo };
+    for (const r of revs) for (const c of Object.keys(on)) if (r.classList.contains(c)) r.classList.toggle('on', still || on[c]);
+    // a meaningful event: the sweep crosses an alarm (sound is off unless the visitor turned it on)
+    if (!still) {
+      if (d.radAt != null && lastT < d.radAt && tNow >= d.radAt) blip(880, .05);
+      if (d.scLo != null && lastT < d.scLo && tNow >= d.scLo) blip(560, .06);
+    }
+    lastT = tNow;
+  };
+  return { el, draw };
+}
+
+const canPin = () => !STILL() && matchMedia('(min-height: 560px)').matches;   // short screens get the stacked story
+
+function storySection(lat, ctx) {
+  const d = sampleOne(lat);
+  const panel = tracePanel(d);
+  const live = !ctx.detached && typeof ctx.onMount === 'function';
+  const static0 = !live || !canPin();
+  panel.draw(static0 ? 1 : 0, static0);
+  const caps = ['On Earth, fire rises', 'In orbit, nothing rises', 'Smoke goes everywhere'].map((t, i) =>
+    h('p', { class: `cap cap${i}` }, h('span', { class: 'cap-n', 'aria-hidden': 'true' }, `${String(i + 1).padStart(2, '0')} / 03`), h('span', { class: 'cap-t' }, t)));
+  const drag = h('div', { class: 'story-drag', tabindex: '0', role: 'group', 'aria-roledescription': '3D illustration', 'aria-label': 'Illustration: a fuel droplet flame. Drag or use the arrow keys to turn it.' },
+    h('span', { class: 'illus-tag' }, 'Illustration'),
+    h('span', { class: 'story-hint' }, 'Drag to turn'));
+  const railSeg = ['Gravity', 'Smoke', 'Flight data'].map((t, i) => h('span', {}, h('b', {}, String(i + 1).padStart(2, '0')), ` ${t}`, h('i', {})));
+  const rail = h('div', { class: 'story-rail', 'aria-hidden': 'true' }, railSeg);
+  const pin = h('section', { class: `story-pin bleed${static0 ? ' is-static' : ''}`, 'aria-labelledby': 'hero-title' },
+    h('div', { class: 'story-stick' },
+      h('div', { class: 'story-in' },
+        h('div', { class: 'story-top' },
+          h('p', { class: 'kicker' }, 'NASA Space Apps 2026 · Flame in Freefall'),
+          h('h1', { id: 'hero-title' }, 'In orbit, fire doesn\'t rise. It hides.'),
+          h('div', { class: 'hero-cta' }, h('a', { class: 'btn primary', href: '#/detect' }, 'Start with the fire'), tourButton(), h('a', { class: 'btn', href: '#/evidence' }, 'How we checked it'))),
+        drag,
+        h('div', { class: 'story-stage' }, caps, panel.el),
+        rail)));
+  if (!live) return pin;   // site map: static DOM, start nothing
+
+  let raf = 0, unbind = null, pinned = false, topH = 0, sent = '';
+  const stick = pin.querySelector('.story-stick');
+  const send = v => { const k = JSON.stringify(v); if (k !== sent) { sent = k; setField(v); } };
+  const layout = () => (innerWidth > 900 ? { offx: 0.22 * innerWidth / innerHeight } : { offx: 0, dist: 6.2 });
+  const measure = () => {
+    const top = document.querySelector('.top');
+    topH = top && getComputedStyle(top).position === 'sticky' ? top.offsetHeight : 0;
+    pin.style.setProperty('--top-h', `${topH}px`);
+    pinned = canPin();
+    pin.classList.toggle('is-static', !pinned);
+    if (!pinned) { caps.forEach(c => { c.style.opacity = ''; c.style.transform = ''; }); panel.el.style.opacity = ''; railSeg.forEach(s => s.style.removeProperty('--f')); panel.draw(1, true); }
+  };
+  const update = () => {
+    raf = 0;
+    if (!pin.isConnected) return;
+    const r = pin.getBoundingClientRect();
+    // after the story: dim the field further so the ledger below reads cleanly
+    const after = ramp(innerHeight - r.bottom, 0, innerHeight * 0.6);
+    if (!pinned) { send({ g: 0, smoke: 0, dim: DIM_AFTER * after, ...layout() }); return; }
+    const p = clamp((topH - r.top) / Math.max(1, r.height - stick.offsetHeight), 0, 1);
+    const s1 = ramp(p, 0, 1 / 3), s2 = ramp(p, 1 / 3, 2 / 3), s3 = ramp(p, 2 / 3, 1);
+    const op = [1 - ramp(p, 0.13, 0.2), ramp(p, 0.13, 0.2) * (1 - ramp(p, 0.3, 0.36)), ramp(p, 0.3, 0.36) * (1 - ramp(p, 0.63, 0.69))];
+    caps.forEach((c, i) => { c.style.opacity = String(op[i]); c.style.transform = `translateY(${((1 - op[i]) * 14).toFixed(1)}px)`; });
+    panel.el.style.opacity = String(ramp(p, 0.63, 0.69));
+    panel.draw(ramp(p, 0.68, 0.96), false);
+    [s1, s2, s3].forEach((f, i) => railSeg[i].style.setProperty('--f', f.toFixed(3)));
+    const dim = DIM_STORY * ramp(p, 0.66, 0.8);
+    send({ g: 1 - smooth(s1), smoke: smooth(s2), dim: dim + (DIM_AFTER - dim) * after, ...layout() });
+  };
+  const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+  const onResize = () => { measure(); onScroll(); };
+  ctx.onMount(() => {
+    measure(); update();
+    if (fieldOk()) unbind = bindOrbit(drag);
+    else { drag.setAttribute('aria-label', 'Illustration of a fuel droplet flame: not shown, because this browser has no WebGL 2. The rest of the site works without it.'); drag.removeAttribute('tabindex'); pin.classList.add('no-field'); }
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onResize);
+  });
+  ctx.onLeave(() => {
+    removeEventListener('scroll', onScroll); removeEventListener('resize', onResize);
+    if (raf) cancelAnimationFrame(raf); raf = 0;
+    if (unbind) unbind(); unbind = null;
+  });
+  return pin;
 }
 
 // ---------- C8: from camera to risk ----------
@@ -165,11 +364,10 @@ function howToRead() {
     ['missing', 'Not measured yet. The panel says what file will fill it.'],
     SCRAPPED.approved ? ['scrapped', 'Dropped in plan v2. Kept on the page so nothing disappears without a trace.'] : null,
   ].filter(Boolean);
-  return h('details', { class: 'more readme-fold' },
-    h('summary', {}, h('span', {}, 'How to read this site'), h('small', {}, 'What the coloured stamps on every panel mean')),
+  return [
     h('p', {}, 'Every panel is stamped with where its numbers come from. Only the first three are results.'),
     h('div', { class: 'readme' }, rows.map(([s, t]) => h('div', {}, badge(s), h('p', {}, t)))),
-    h('p', { class: 'readme-foot' }, 'Dotted words have a plain-English meaning: hover, tap or tab to them. The ', h('b', {}, 'Read your way'), ' button changes text size, colours and motion, or reads a page aloud.'));
+    h('p', { class: 'readme-foot' }, 'Dotted words have a plain-English meaning: hover, tap or tab to them. The ', h('b', {}, 'Read your way'), ' button changes text size, colours and motion, or reads a page aloud.')];
 }
 
 // ---------- India card ----------

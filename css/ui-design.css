@@ -1,0 +1,42 @@
+/* UI lock styles for #/design (feat/ui-lock). Scope every rule under #view[data-page="design"]. */
+#view[data-page="design"] .dk-lock{display:grid;gap:var(--sp3)}
+#view[data-page="design"] .dk-lock .card{margin:0}
+
+/* mission console colours */
+#view[data-page="design"] .dk-lock-sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp2);margin-top:var(--sp2)}
+#view[data-page="design"] .dk-lsw{display:grid;gap:2px;min-width:0;border-top:1px solid var(--line);padding-top:var(--sp1);overflow-wrap:anywhere}
+#view[data-page="design"] .dk-lsw i{display:block;height:72px;border-radius:var(--r-data);border:1px solid var(--axis);margin-bottom:var(--sp1)}
+#view[data-page="design"] .dk-lsw b{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+#view[data-page="design"] .dk-lsw code{font:500 12px var(--mono);color:var(--ink2);background:transparent;padding:0}
+#view[data-page="design"] .dk-lsw span{font:500 12px/1.5 var(--mono);color:var(--ink2)}
+#view[data-page="design"] .dk-lsw small{color:var(--mute);font-size:12.5px;line-height:1.4;margin-top:2px}
+
+/* type scale */
+#view[data-page="design"] .dk-spec{border-top:1px solid var(--line);padding:var(--sp2) 0;min-width:0}
+#view[data-page="design"] .dk-spec-k{display:flex;flex-wrap:wrap;gap:4px var(--sp2);align-items:baseline;margin-bottom:var(--sp1)}
+#view[data-page="design"] .dk-spec-k span{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+#view[data-page="design"] .dk-spec-k code{font:500 11.5px var(--mono);color:var(--ink2);background:transparent;padding:0;overflow-wrap:anywhere}
+#view[data-page="design"] .dk-spec-s{color:var(--ink);overflow-wrap:anywhere;min-width:0}
+#view[data-page="design"] .dk-s-display .dk-spec-s{font:var(--display-xl);letter-spacing:-.03em;text-transform:uppercase;font-size:clamp(34px,5.2vw,72px)}
+#view[data-page="design"] .dk-s-label .dk-spec-s{font:var(--label);letter-spacing:.14em;text-transform:uppercase}
+#view[data-page="design"] .dk-s-body .dk-spec-s{font:1rem/1.625 var(--font);max-width:52ch}
+#view[data-page="design"] .dk-spec-m{font:500 11.5px var(--mono);color:var(--mute);margin-top:var(--sp1)}
+
+/* motion curves: a plot of each cubic-bezier and a dot that crosses its track on that curve */
+#view[data-page="design"] .dk-motion{display:grid;gap:var(--sp2);margin:var(--sp2) 0}
+#view[data-page="design"] .dk-mrow{display:grid;grid-template-columns:56px minmax(0,1fr);gap:var(--sp2);align-items:center;border-top:1px solid var(--line);padding-top:var(--sp2)}
+#view[data-page="design"] .dk-curve{width:56px;height:56px;display:block}
+#view[data-page="design"] .dk-curve path{fill:none;vector-effect:non-scaling-stroke}
+#view[data-page="design"] .dk-curve .ax{stroke:var(--axis);stroke-width:1}
+#view[data-page="design"] .dk-curve .cv{stroke:var(--oxy);stroke-width:2}
+#view[data-page="design"] .dk-mk{display:flex;flex-wrap:wrap;gap:4px var(--sp2);align-items:baseline}
+#view[data-page="design"] .dk-mk b{font:var(--label);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+#view[data-page="design"] .dk-mk code{font:500 11.5px var(--mono);color:var(--ink2);background:transparent;padding:0;overflow-wrap:anywhere}
+#view[data-page="design"] .dk-mrow small{color:var(--mute)}
+#view[data-page="design"] .dk-track{position:relative;height:14px;margin:10px 0 6px;border-bottom:1px solid var(--axis)}
+#view[data-page="design"] .dk-track i{position:absolute;left:0;bottom:-6px;width:11px;height:11px;border-radius:50%;background:var(--oxy)}
+#view[data-page="design"] .dk-motion.run .dk-track i{animation:dk-run var(--dk-dur) var(--dk-ease) both}
+@keyframes dk-run{from{left:0}to{left:calc(100% - 11px)}}
+#view[data-page="design"] .dk-play:disabled{opacity:.6;cursor:not-allowed}
+#view[data-page="design"] .dk-play:focus-visible{outline:2px solid var(--oxy);outline-offset:3px}
+#view[data-page="design"] .dk-calm small{color:var(--mute)}
