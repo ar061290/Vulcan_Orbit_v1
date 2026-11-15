@@ -320,12 +320,12 @@ def merge_models(entry):
     """Replace only the m6 entry; keep every other entry, its content and its position, and any extra top-level keys.
 
     File status: 'real', or (as on main since M5 joined) 'model' with a status on every entry, in which case the m6 entry
-    carries "status": "real" (its author's label: NASA measurements, reported de Ris constants)."""
+    carries "status": "model" (predictions and scores; corrected 15 Nov 2026 from "real" after an audit)."""
     doc = json.loads(MODELS_JSON.read_bytes().decode("utf-8")) if MODELS_JSON.exists() else {"status": "real", "models": []}
     if doc.get("status") not in ("real", "model"):
         raise SystemExit(f"data/models.json status is '{doc.get('status')}', not 'real' or 'model'; agree it with the team first.")
     if doc.get("status") != "real" or any("status" in m for m in doc["models"]):
-        entry = {"id": entry["id"], "status": "real", **{k: v for k, v in entry.items() if k != "id"}}
+        entry = {"id": entry["id"], "status": "model", **{k: v for k, v in entry.items() if k != "id"}}
     models = doc["models"]
     pos = next((i for i, m in enumerate(models) if m.get("id") == M6_ID), None)
     if pos is None:

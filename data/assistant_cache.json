@@ -5,7 +5,7 @@
   {
    "id": "saffire-latency",
    "q": "How long did the smoke detector take to notice a real fire in orbit?",
-   "a": "In Saffire-III, a real fire on an uncrewed Cygnus cargo ship, the flame radiometers responded 7 s after ignition of Sample 1. The cabin smoke detector's scatter channel crossed our alarm rule after 92 s (plus or minus 10 s; 72 s with a looser threshold). Its obscuration channel never rose. The alarm rule is ours (baseline + 5 SD), because the file holds raw counts, not the vehicle's setpoint.",
+   "a": "In Saffire-III, a real fire on an uncrewed Cygnus cargo ship, the flame radiometers in the flow duct crossed our alarm rule by 7 s after ignition of Sample 1 (they update only every 5 s). The cabin smoke detector's scatter channel crossed our alarm rule after 92 s (plus or minus 10 s; 72 s with a looser threshold). Its obscuration channel never rose past its alarm level. The alarm rule is ours (baseline + 5 SD), because the file holds raw counts, not the vehicle's setpoint, and the cabin still held smoke from the previous test, which slows the rule down.",
    "sources": [
     {
      "label": "NASA PSI-100, Saffire-III telemetry (doi 10.60555/040q-4h36)",
@@ -396,7 +396,7 @@
   {
    "id": "min-oxygen",
    "q": "What is the lowest oxygen level at which a thin sheet can burn in orbit?",
-   "a": "Our flame-spread model gives 11% oxygen at about 2.7 cm/s airflow for thin acrylic in orbit. That is probably too low: BASS-II observed spread only down to about 16 to 17%.",
+   "a": "Our flame-spread model gives 11% oxygen at about 2.7 cm/s airflow for thin acrylic in orbit. That is probably too low: BASS-II saw steady spread down to 13.6% O2 on acrylic rods, and opposed spread on other samples not below about 16.4% (NASA NTRS 20160000593).",
    "sources": [
     {
      "label": "BASS-II summary report, NASA/TM-20210011385",
@@ -523,7 +523,7 @@
   {
    "id": "mars",
    "q": "Would a fire behave differently on Mars?",
-   "a": "No NASA evidence at Martian gravity in the archives we use. Our flame model draws Mars cases only as model output between the 0 g and 1 g results, and labels them as not validated.",
+   "a": "No NASA evidence at Martian gravity in the archives we use, so we make no Mars prediction. Microgravity and Earth results can only be shown as the two ends.",
    "sources": [
     {
      "label": "NASA Physical Sciences Informatics",

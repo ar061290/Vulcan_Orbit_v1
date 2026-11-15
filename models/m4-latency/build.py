@@ -41,8 +41,16 @@ def series(t, a, col, name, kind):
 
 
 def on_window(t, a, col, name):
-    x = a[:, col[name]]; on = t[x > 0.3]                   # current above 0.3 A = powered (off reads -0.06 or fill)
-    return float(on.min()), float(on.max())
+    x = a[:, col[name]]; on = np.sort(t[x > 0.3])          # current above 0.3 A = powered (off reads -0.06 or fill)
+    gaps = np.where(np.diff(on) > 5.0)[0]                  # first contiguous pulse only (the smoke wire pulses again later)
+    end = on[gaps[0]] if len(gaps) else on.max()
+    return float(on.min()), float(end)
+
+
+def update_interval(tt, xx):
+    # radiometers are logged every ~1 s but the values are sample-and-hold: they only change every ~5 s
+    ch = tt[1:][np.diff(xx) != 0]
+    return float(np.median(np.diff(ch))) if len(ch) > 2 else float(np.median(np.diff(tt)))
 
 
 def first_alarm(tt, xx, t0, t_from, t_next, k, kind):
@@ -56,7 +64,7 @@ def first_alarm(tt, xx, t0, t_from, t_next, k, kind):
 
 def main():
     t, a, col = load()
-    wire = on_window(t, a, col, "SmokeWireCurrent"); wire = (wire[0], min(wire[1], 5700.0))   # the wire pulses again late in the record
+    wire = on_window(t, a, col, "SmokeWireCurrent")
     s2 = on_window(t, a, col, "Sample2IgniterCurrent"); s1 = on_window(t, a, col, "Sample1IgniterCurrent")
     end = float(t.max())
     events = [
@@ -76,8 +84,8 @@ def main():
             hi, mu, sd, thr = first_alarm(tt, xx, t0, t0, tn, K_HEAD, kind)
             lo, *_ = first_alarm(tt, xx, t0, t0, tn, K_LOW, kind)
             after_off, *_ = first_alarm(tt, xx, t0, toff, tn, K_HEAD, kind)
-            res_s = 1.0 if kind == "rad" else float(np.median(np.diff(tt)))
-            per[k] = dict(channel=label, alarm_s=hi, alarm_s_k3=lo, alarm_after_igniter_off_s=after_off, baseline=mu, sd=sd, threshold=thr,
+            res_s = update_interval(tt, xx) if kind == "rad" else float(np.median(np.diff(tt)))
+            per[k] = dict(channel=label, alarm_s=hi, alarm_s_k3=lo, alarm_after_igniter_off_s=after_off,  baseline=mu, sd=sd, threshold=thr,
                           resolution_s=round(res_s, 1), peak=float(xx[(tt >= t0) & (tt < tn)].max()))
             results.append(dict(event=ev["key"], **per[k]))
         # display series: one 'fastest radiometer' line plus the two smoke channels, each as a multiple of its own threshold excess
@@ -99,7 +107,7 @@ def main():
             t=r3(grid),
             channels=[
                 dict(key="radiometer", name="Flame radiometer (first of 4)", values=r3(rad_line), alarm_s=None if not times else round(min(times), 0),
-                     alarm_s_range=None if not times else [rnd(per[fast]["alarm_s_k3"]), rnd(per[fast]["alarm_s"])], resolution_s=1,
+                     alarm_s_range=None, resolution_s=per[fast]["resolution_s"],   # 3 SD is not reported for radiometers: it fails the no-flame control (check L1b)
                      per_radiometer={k: per[k]["alarm_s"] for k in rad_keys}),
                 dict(key="scatter", name="Smoke detector: scatter", values=r3(norm("scatter", "smoke")), alarm_s=None if per["scatter"]["alarm_s"] is None else round(per["scatter"]["alarm_s"], 0),
                      alarm_s_range=rng("scatter"), resolution_s=per["scatter"]["resolution_s"]),
@@ -111,6 +119,9 @@ def main():
     wire_rad = [R[("wire", f"radiometer{i}")]["alarm_s"] for i in range(1, 5)]
     checks.append(dict(id="L1", what="Negative control: no radiometer alarm during the smoke-wire puff (smoke, no flame)",
                        result=f"radiometer alarms in the smoke-wire window: {sum(x is not None for x in wire_rad)}", ok=all(x is None for x in wire_rad)))
+    wire_rad3 = [R[("wire", f"radiometer{i}")]["alarm_s_k3"] for i in range(1, 5)]
+    checks.append(dict(id="L1b", what="Same negative control at the 3 SD low end (added 15 Nov after an audit)",
+                       result=f"radiometer alarms in the smoke-wire window at 3 SD: {sum(x is not None for x in wire_rad3)}; so 3 SD is not reported for radiometers", ok=all(x is None for x in wire_rad3)))
     tt, xx = data["scatter"]; s1 = events[2]; flat = xx.copy(); w = (tt >= s1["on"][0] - 60) & (tt < s1["on"][0]); base = flat[w].mean(); flat[tt >= s1["on"][0]] = base
     broke, *_ = first_alarm(tt, flat, s1["on"][0], s1["on"][0], s1["next"], K_HEAD, "smoke")
     checks.append(dict(id="L2", what="The rule can fail: the Sample 1 scatter channel replaced by its own baseline",
@@ -129,7 +140,9 @@ def main():
                units=dict(time="s after the event's igniter or smoke wire switched on", values="dimensionless", alarm_s_range="[alarm at 3 SD, alarm at 5 SD]"),
                threshold_rule="Alarm at the first reading above the 60 s pre-ignition mean + 5 SD (3 SD reported as the low end). Not the vehicle's real alarm setpoint: "
                               "the smoke channels are raw, uncalibrated counts, so published thresholds in physical units (ISS: 1 %/ft obscuration; about 10 mg/m3) cannot be applied.",
-               resolution_note="Radiometers read about once a second; the smoke channels about every 10 s, so smoke alarm times are +/- 10 s.",
+               resolution_note="Radiometers are logged about once a second, but their values are sample-and-hold and only change about every 5 s, so a radiometer alarm at 7 s means the signal crossed somewhere between 2 and 7 s. The smoke channels read about every 10 s, so smoke alarm times are +/- 10 s.",
+               baseline_note="Each event's baseline is the 60 s just before it. Before Sample 2 and Sample 1 the cabin smoke detector still reads smoke left from the event before, which raises its baseline and spread; that is why the smoke alarm times move so much with the threshold (Sample 2: 27 s at 3 SD, 127 s at 5 SD).",
+               placement_note="The radiometers look at the sample inside the flow duct; the smoke detector is in the Cygnus cabin. The comparison therefore mixes sensor type with sensor position.",
                observation="The obscuration channel never rose. During Sample 1 it fell by at most 0.02 (about 0.5 %), below the 5 SD margin; read as falling light (more obscuration), that would cross a 3 SD margin. The pass rules, written first, count only rises, so it is reported as no alarm.",
                assumption="Igniter 1 is taken as Sample 1 (concurrent) and igniter 2 as Sample 2 (opposed), following the order of the PSI-100 sample table.",
                burns=burns, checks=checks)

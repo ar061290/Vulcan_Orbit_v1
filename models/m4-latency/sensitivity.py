@@ -1,6 +1,6 @@
 """How much do M4's alarm times depend on the threshold? Same rule as build.py (pre-ignition 60 s mean + k SD), k = 3..6.
-t = 0 is when the event's igniter (or smoke wire) current switches on in the telemetry. Radiometers read about once a second,
-the smoke channels about every 10 s, so smoke times are +/- 10 s. Run: python models/m4-latency/sensitivity.py"""
+t = 0 is when the event's igniter (or smoke wire) current switches on in the telemetry. Radiometers are logged about once a second but only
+change about every 5 s (sample-and-hold); the smoke channels about every 10 s, so smoke times are +/- 10 s. Run: python models/m4-latency/sensitivity.py"""
 import json, sys
 from pathlib import Path
 import numpy as np

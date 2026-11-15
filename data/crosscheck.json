@@ -33,8 +33,8 @@
   },
   {
    "topic": "Does the station's smoke detector miss fine smoke?",
-   "nasa": "The ISS detector would not have alarmed for over half of the Kapton smoke tests and two thirds of the Teflon tests.",
-   "ours": "Our size-based view agrees in direction: Kapton and Teflon make the finest smoke (42 and 81 nm average size).",
+   "nasa": "The ISS smoke detector frequently failed to detect the smaller smoke particles from Teflon and Kapton (NIST summary of Meyer et al. 2018; the paper's exact fractions were not checked by us).",
+   "ours": "Our size-based view agrees in direction: Kapton and Teflon make the finest smoke (42 and 81 nm geometric mean diameter).",
    "verdict": "Consistent",
    "sources": [
     [
@@ -57,13 +57,13 @@
   },
   {
    "topic": "Textbook flame-spread formula on BASS-II slabs",
-   "nasa": "Models predict higher spread rates than observed, so need improvement.",
-   "ours": "The plain de Ris formula over-predicts these slabs about 3.5-fold (M6), which is why M6b calibrates it.",
-   "verdict": "Consistent: same direction",
+   "nasa": "BASS-II measured spread rates over thin and thick acrylic slabs (summary report, Table 5.1).",
+   "ours": "The plain de Ris formula over-predicts them: median 3.5-fold, geometric mean 4.4-fold (M6). M6b calibrates it, but a simple lookup by thickness and sides burning does as well or better (see the baselines on the model cards).",
+   "verdict": "Our check, with a caveat",
    "sources": [
     [
-     "NASA Glenn, BASS-II page",
-     "https://www1.grc.nasa.gov/space/iss-research/msg/bass-2/"
+     "Olson et al., BASS-II Summary Report, NASA/TM-20210011385",
+     "https://ntrs.nasa.gov/citations/20210011385"
     ]
    ]
   },
@@ -97,7 +97,7 @@
   },
   {
    "topic": "When cool flames appear",
-   "nasa": "Cool diffusion flames of gas fuels were not seen below 2 bar (CFI-G).",
+   "nasa": "In CFI-G, cool diffusion flames of gas fuels were seen only in the 2 bar tests, not at lower pressure.",
    "ours": "Our cool-flame model's 50% point is at 3.22 atm, and a pressure-only rule (AUC 0.78) almost matches it (0.82): pressure is the main gate.",
    "verdict": "Consistent; our model does not yet beat pressure gating",
    "sources": [

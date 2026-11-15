@@ -81,7 +81,7 @@ function mapCard(sp) {
   draw();
   return card('Where a flame can survive', 'model', 'Thin acrylic sheet, both sides burning. Too little airflow starves the flame of oxygen; too much blows it off.',
     chips('Gravity', ['0 g', 'Earth 1 g'], st.g, v => { st.g = v; draw(); }, o => GNAME[o]), chips('Pressure', [101.3, 70.3], st.p, v => { st.p = v; draw(); }, o => `${o} kPa`),
-    holder, h('p', {}, h('small', {}, 'Limits are set by a Damköhler-number criterion tuned on one BASS-II blow-off and one quench point, so treat the edges as approximate. BASS-II saw spread down to about 16–17% O2; the model\'s 11% minimum in orbit is probably too low.')));
+    holder, h('p', {}, h('small', {}, 'Limits are set by a Damköhler-number criterion tuned on one BASS-II blow-off and one quench point, so treat the edges as approximate. BASS-II saw steady spread down to 13.6% O2 on acrylic rods, and opposed spread on other samples not below about 16.4%; the model\'s 11% minimum in orbit is probably too low.')));
 }
 
 function frontCard(sp) {

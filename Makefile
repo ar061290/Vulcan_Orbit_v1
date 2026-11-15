@@ -12,6 +12,7 @@ models:
 	$(PY) models/m6-spread/build.py
 	$(PY) models/m6b-predictor/build.py
 	$(PY) models/m7-extinction/build.py
+	$(PY) models/m3-drift/build.py
 	$(PY) engine/drift.py
 	$(PY) engine/calibrate.py
 	$(PY) models/flame-sim/build.py
@@ -23,6 +24,7 @@ site:
 	$(PY) scripts/build_india.py
 	$(PY) scripts/build_memory.py
 	$(PY) scripts/build_assistant.py
+	$(PY) scripts/trivial_baselines.py
 	$(PY) scripts/build_crosscheck.py
 	$(PY) scripts/permutation_tests.py
 	$(PY) scripts/build_trust.py

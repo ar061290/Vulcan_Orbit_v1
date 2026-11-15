@@ -23,6 +23,7 @@ export default async function (root) {
       return h('div', { style: 'margin-top:14px' }, card(r.name, tr.status, m.kind || r.kind,
         h('dl', { class: 'made mc' }, ...row('Use it for', use), ...row('Not for', not), ...row('Method', m.how), ...row('Inputs', m.inputs), ...row('NASA data', m.check),
           ...row('Tested on', r.tested), ...row('Score', `${r.metric || ''}: ${f(r.score)} (range ${f(r.range)})`), ...row('Baseline', r.baseline ? `${r.baseline}${r.baseline_score != null ? ': ' + f(r.baseline_score) : ''}` : null),
+          ...row('Honest caveat', r.caveat),
           ...row('Could it be luck?', r.perm_p != null ? `p = ${r.perm_p} (${r.perm_n} label shuffles)` : null), ...row('Own pass rule', `${r.passed ? 'Met' : 'Missed'}: ${r.rule}`),
           ...row('Limits', lim[r.id]), ...row('Trust (0-4)', c ? FACTORS.map(([k, n]) => `${n} ${c[k]}`).join(' · ') + `. ${c.why}` : null), ...row('Files', m.files))));
     }),

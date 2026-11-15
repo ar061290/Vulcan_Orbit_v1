@@ -67,7 +67,7 @@ Run it twice and the outputs are byte-identical. `fetch_extra.py` re-downloads t
 **CFI droplets** (n-dodecane and n-dodecane/iso-dodecane, 3.8–6.4 mm, 0.5–5 atm, 17–21% O2, 0–59% He):
 - A burning rate was measured for a cool flame following the visible flame's radiative extinction in **124 of 145** analysed burns. The rest mostly drifted out of the camera's view.
 - At 0.5–0.75 atm in air, the cool flame always went out and left fuel (0/17 used up).
-- At 2–5 atm the droplet was usually used up: 33/40 in air. The CFI report links this to repeated reignitions above about 2 atm.
+- At 2–5 atm the droplet was usually used up: 33/40 without helium (24/29 in air, 21% O2). The CFI report links this to repeated reignitions above about 2 atm.
 
 **CFI-G gas flames:** the report states "These cool flames were observed only with the following conditions: a) concentrations of 30 vol% n-butane and 40 vol% O2, b) normal flames, c) a pressure of 2.03 bar, and d) mass flow rates between 0.75 – 1.5 mg/s."
 

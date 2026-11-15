@@ -8,7 +8,7 @@ export default async function (root) {
         L('Saffire-III flight telemetry, PSI-100, doi 10.60555/040q-4h36', 'https://doi.org/10.60555/040q-4h36'),
         L('FLEX droplet tests, PSI-69, doi 10.60555/mbq8-0451', 'https://doi.org/10.60555/mbq8-0451'),
         L('BASS-II, PSI-25, doi 10.60555/4qc4-de67', 'https://doi.org/10.60555/4qc4-de67'),
-        L('SAME / SAME-R, PSI-102 and PSI-101', 'https://doi.org/10.60555/2np7-jv14'),
+        L('SAME-R, PSI-101', 'https://doi.org/10.60555/2np7-jv14'), L('SAME, PSI-102', 'https://doi.org/10.60555/gd4k-8h62'),
         L('Saffire-I and II, PSI-98 and PSI-99', 'https://doi.org/10.60555/0t15-1z43'))),
       card('NASA papers we checked numbers against', null, null, h('ul', { style: 'margin:0;padding-left:18px' },
         L('SAME-2 particle sizes: Urban et al. 2012, AIAA 2012-3536 (NTRS 20130000422)', 'https://ntrs.nasa.gov/api/citations/20130000422/downloads/20130000422.pdf'),

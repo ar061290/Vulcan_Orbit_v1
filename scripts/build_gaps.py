@@ -30,7 +30,7 @@ for inv, g in P.groupby("inv"):
 def near(kind, o2, kpa, do2=3, dk=10):
     g = P[P.kind == kind]; return int(((g.o2 - o2).abs() <= do2).mul((g.kpa - kpa).abs() <= dk).sum())
 probe = [("ISS cabin air", 21, 101.3), ("34% O2 at 70.3 kPa (10.2 psi)", 34, 70.3), ("26.5% O2 at 70.3 kPa (10.2 psi)", 26.5, 70.3),
-         ("32% O2 at 55.2 kPa (8.0 psia, NASA EAWG 2010 recommendation)", 32, 55.2)]
+         ("34% O2 at 56.5 kPa (8.2 psia, NASA EAWG 2010 recommendation)", 34, 56.5)]
 grid = [dict(atmosphere=n, o2=o, kpa=k, counts={kind: near(kind, o, k) for kind in ("solids", "liquid droplets", "gas flames")}) for n, o, k in probe]
 verdicts = []
 s = [t for t in tested if t["kind"] == "solids"][0]

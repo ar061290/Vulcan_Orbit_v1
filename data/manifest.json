@@ -101,7 +101,7 @@
    "name": "flame_static",
    "status": "model",
    "owner": "Karthikeya",
-   "what": "Flame sim stages 1-2: droplet burning, flame shapes, flame on a plate (Moon/Mars cases model only)"
+   "what": "Flame sim stages 1-2: droplet burning, flame shapes, flame on a plate (orbit and Earth only)"
   },
   {
    "name": "flame_spread",
@@ -210,6 +210,12 @@
    "status": "model",
    "owner": "Dashboard",
    "what": "Label-permutation p-values for the trained models"
+  },
+  {
+   "name": "trivial_baselines",
+   "status": "model",
+   "owner": "M6",
+   "what": "No-physics baselines beside M6 and M6b (added after audit)"
   }
  ]
 }

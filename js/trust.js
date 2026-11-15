@@ -13,7 +13,7 @@ export function trustCard(t) {
           h('td', {}, h('a', { href: `#/${r.page}` }, r.name), h('br'), h('small', {}, r.metric || '')),
           h('td', {}, r.kind), h('td', { class: 'num' }, f(r.score)), h('td', {}, h('small', {}, Array.isArray(r.range) ? `${f(r.range[0])} to ${f(r.range[1])}` : f(r.range))),
           h('td', {}, r.perm_p != null ? h('small', {}, `p = ${r.perm_p}`, h('br'), `${r.perm_n} label shuffles`) : h('small', {}, '—')),
-          h('td', {}, h('small', {}, r.baseline ? `${r.baseline}${r.baseline_score != null ? ': ' + f(r.baseline_score) : ''}` : '—')),
+          h('td', {}, h('small', {}, r.baseline ? `${r.baseline}${r.baseline_score != null ? ': ' + f(r.baseline_score) : ''}` : '—', r.caveat ? h('br') : null, r.caveat ? h('b', {}, r.caveat) : null)),
           h('td', {}, h('span', { class: `lvl ${r.passed ? 'real' : 'demo'}` }, r.passed ? 'Met' : 'Missed'), h('br'), h('small', {}, r.rule)),
           h('td', {}, c ? h('span', { class: 'trust-dots', title: FACTORS.map(([k, n]) => `${n} ${c[k]}/4`).join(', '), 'aria-label': FACTORS.map(([k, n]) => `${n} ${c[k]} of 4`).join(', ') }, FACTORS.map(([k]) => c[k]).join(' · ')) : '—'));
       })))),
