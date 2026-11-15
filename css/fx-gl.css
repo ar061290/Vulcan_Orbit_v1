@@ -1,1 +1,27 @@
-/* Shared figure CSS (fx-gl). Created empty in phase 1; its owning package fills it (site/REBUILD_PLAN.md §1, §7). */
+/* Shared figure CSS (fx-gl): page-header banners (js/gl_banner.js) and the ambient background (js/bg.js).
+   Owner: P6-B (site/REBUILD_PLAN.md §1, §4 phase 6, §7). components.css places .banner-gl inside .phead and styles
+   .illus-note; base.css fixes #bg behind the page. Classes here are prefixed .gl- and unscoped (used on every page). */
+
+.banner-gl{overflow:hidden;background:var(--screen)}
+.banner-gl:not(.phead .banner-gl){position:relative;min-height:200px;border-radius:12px}
+.banner-gl>canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.banner-gl>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.banner-gl.gl-live>svg{display:none}
+
+/* label, Pause button and fallback sentence: one bar above the header's dark gradient (.phead::after) */
+.banner-gl .gl-bar{position:absolute;right:12px;bottom:8px;z-index:2;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:6px;max-width:min(60ch,calc(100% - 24px))}
+.phead .banner-gl .gl-bar .illus-note{position:static}
+.gl-pause{appearance:none;margin:0;min-height:24px;min-width:24px;padding:2px 9px;font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#eef1f7;background:rgba(5,7,13,.72);border:1px solid rgba(201,208,221,.55);border-radius:5px;cursor:pointer}
+.gl-pause:hover{background:rgba(5,7,13,.9);border-color:#c9d0dd}
+.gl-pause:focus-visible{outline:3px solid #8fb3ff;outline-offset:2px}
+.gl-pause[aria-pressed="true"]{border-color:#ffb089;color:#ffd9c4}
+.gl-fallback{flex-basis:100%;margin:0;max-width:none;text-align:right;font:500 12px/1.35 var(--font);color:#dfe4ee;background:rgba(5,7,13,.72);padding:4px 8px;border-radius:5px}
+
+@media (max-width:680px){
+ .phead .banner-gl .gl-bar{top:8px;bottom:auto}
+ .gl-fallback{text-align:left}
+}
+@media (forced-colors:active){
+ .gl-pause,.gl-fallback{forced-color-adjust:auto;border:1px solid CanvasText}
+}
+@media print{.banner-gl>canvas,.gl-pause{display:none}.banner-gl.gl-live>svg{display:block}}

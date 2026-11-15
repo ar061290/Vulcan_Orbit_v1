@@ -210,3 +210,11 @@ See `AI_LOG.md`.
 | models/m6b-predictor/growth.py and GROWTH_API.md (inside this repo) | js/growth.js is a line-for-line JavaScript port; constants are read from data/spread_predictor.json |
 | WCAG 2.2 contrast ratio and large-text definitions (W3C Recommendation, https://www.w3.org/TR/WCAG22/) | Design kit "Colour and contrast" verdicts (4.5:1 text, 3:1 large text and graphics) |
 | playwright-core 1.56.1 (Apache-2.0), headless Chromium | Agents' browser checks only, installed outside the repo; not a site dependency |
+
+## Added 15 Nov 2026 (site v2, phases 3-6)
+
+| Source | Used for |
+|---|---|
+| Standard atmosphere, 1 atm = 101.325 kPa (ISO 2533:1975; BIPM SI Brochure, 9th ed., 2019) | js/assess_core.js and js/fig_response.js convert the Assess cabin pressure (atm) to kPa to match data/gaps.json |
+| Mitchell et al., Model Cards for Model Reporting (2019), arXiv:1810.03993 | Model cards page layout (js/fig_modelcards.js), already listed above for main's page |
+| NASA FLEX (PSI-69, DOI 10.60555/mbq8-0451), SAME (PSI-102, DOI 10.60555/gd4k-8h62), DAFT (PSI-47, DOI 10.60555/ztgj-d202), BASS-II (PSI-25, DOI 10.60555/4qc4-de67), Saffire-II (PSI-99, DOI 10.60555/2chp-m469); Urban et al. 2012 (NTRS 20130000422); Olson et al. 2021 BASS-II summary (NTRS 20210011385); Olson et al. UCL Discovery eprint 10164340 | Sources listed on the On Earth cards (data/earth_apps.json); each is already cited above for the model that uses it |

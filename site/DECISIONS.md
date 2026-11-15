@@ -97,3 +97,99 @@ The lead took the plan's defaults to keep moving. None of them is final until th
 - Deferred, not applied: the MADE text for "Where a flame can survive" does not mention the hidden-risk band (B6). P5-A explains the band in the card's sub; changing the MADE text waits for the team.
 - Recorded for later phases: the "safe" grep allowlist (P7-E) must include the growth.py limits literal in `js/growth.js` ("Says nothing about whether a material or atmosphere is safe."), which also appears in `data/growth_examples.json`.
 - CI note for the human (outside the site's files): on Node v22 plain `node --check file.js` exits 0 on an ES-module file with a syntax error (checked: `export const a = { b: 'it's' };` passes). `node --input-type=module --check < file.js` catches it. The lead ran both on every file this phase. Adding `node tests/growth.test.mjs` to CI is also suggested. `.github/` belongs to neither the site nor the agents.
+
+## Phases 3 to 6 (commits "Site v2 phase 3" to "Site v2 phase 6", 15 Nov 2026)
+
+Human decisions Q1 to Q10 above stayed in force unchanged through these phases. Every package recorded them in its hand-back; only the ones that touched a package's files are repeated below.
+
+### P3-A core + data steward (js/assess_core.js, data/risk_rules.json, data/cv_example.json, manifest, SHA256SUMS)
+
+- `risk_rules.json` holds 6 rules plus a default (Elevated). R0: no growth run, level null. R1 High: still growing at the slowest smoke alarm (compares `summary.hi.t_max_s` plus the frame time with `smoke_s[1]`). R2 Elevated: spreads and peaks before that alarm. R3 Elevated: near observed extinction but still grows. R4 Low: NASA observed no spread. R5 Low: does not grow beyond the start. No rule uses a fixed threshold number; every test compares two computed values or checks a category (`kind`, `verdict_code`). The detection shares are shown as parts, but no rule reads them, because they do not depend on the visitor's inputs. R1 and R2 reasons carry the Saffire-III "different fire, shown for scale only" caveat (§7 item 12). `approved:false`.
+- `riskLevel`: the first matching rule in file order fires. If a rule needs a missing value, the chain stops and the default (Elevated) fires naming the missing value, so a missing file never yields Low. Every rule is still evaluated and listed with matched true/false/null and fired.
+- `loadAssessData` fetches `cv_latest.json` only when the manifest lists it (or the manifest itself is missing), otherwise `{status:'missing'}`. This is the closest compatible form of the frozen `cv = load('cv_latest')`.
+- `computeAssessment` returns the frozen fields plus extras: `inputs`, `regime`, `errors`, `gap` (nearestProbe at O₂ and pressure × 101.325 kPa), `parts`, `status:'model'`, and detection `n_burns/burns/source/missing/note` plus layout alarm thresholds and run counts. Extra exports: `detectionFrom`, `riskParts`, `LEVELS`, `share`. Cited constants: 101.325 kPa per atm (standard atmosphere); the build_gaps.py probe window (3 O₂ points, 10 kPa); the 1e-9 box tolerance from growth.js/predictor.py.
+- Input checks use only `spread_predictor.constants.*.domain` for the active regime (PMMA thin or thick, plus the thick-PMMA downwind bound; the fabric concurrent box including area density). No typed slider bounds (those are P3-B's).
+- `cv_example.json` is a value-for-value copy of growth example 1's flame state (`sibal_concurrent_panel`) with `coordinates:"fuel"`, `confidence:null`, `droplet:null`, status `demo` (Q5: counts in the banner).
+- Manifest written with `json.dumps(m, indent=1, ensure_ascii=False)`, no trailing newline; only the two lines appended. SHA256SUMS regenerated last with `scripts/hash_data.py` (Q9).
+
+### P3-B Assess page (js/fig_assess.js, js/pages/assess.js, css/p-assess.css)
+
+- Q10: slider bounds the spec does not give are derived from the data and printed under each slider. Pressure, width, length and thickness use the min/max over `spread_predictor.constants.*.domain`, the growth_examples inputs and `gaps.probes` kPa ÷ 101.325; thickness also counts τ and 2τ (τ = thickness ÷ 2 when both sides burn). Bounds are rounded outward to 4 s.f., and the page says so. Airflow and O₂ use the spread_predictor grid (it spans the spec's 0–50 cm/s and 15–35 %); the spec values are the fallback only when the file is missing. Area, x and y are bounded by the fuel's own W×L. A linked value outside the range widens the slider and is labelled, never clamped. The smallest area is one slider step (0.1 cm²); direction runs 0–359° (geometry, not data).
+- Added `verdictCard(result, data)` for "Will it spread here?" (§2.12 listed no function for it). Cards are built once and refreshed with `card.update(result[, state])`; `inputsCard` also has `.sync(state)`, `cameraCard` has `.apply(obj, source, label)`. Other §2.12 signatures kept.
+- If a visit's link carries no Assess query keys and `cv_latest.json` exists, the latest camera reading is applied once on mount; otherwise the URL or preset wins.
+- The short answer shows "Running the growth model…" until the first run, then `computeAssessment`'s sentences. On mount the page calls `store.set({})` so the address bar always holds a working link. Runs are coalesced (only the newest result shows); `ctx.onLeave` unsubscribes and calls `stopGrowth()`.
+- The live region announces only when the verdict label or the risk level changes, never on first render or per slider step; camera load or reject announces once per action.
+- Curve x axis is "Time after ignition, s" (`t_abs_s`); the stats give times after the flame reading (`t_max_s`, `t_end_s`), and the text says so.
+- The phrase "or a certified rating" was removed from the risk banner.
+
+### P3-C response card (js/fig_response.js, css/fx-response.css)
+
+- The card-level stamp is `model` (a summary computed for the visitor's fire). Each line carries its own file's stamp: flex_suppression real, m7_explorer model, spread_predictor model, gaps real, risk_rules team; each matched NASA case keeps its own stamp.
+- M7 column wording: "the model gives more/less than a 50% chance of going out" instead of "flames mostly go out/keep burning" (a 50 % point says no more than that).
+- The gaps window ("within 3 O₂ points, 10 kPa") is read from `nearestProbe().window` (source build_gaps.py). 1 atm = 101.325 kPa kept as a cited constant.
+- Atmosphere chips write only `o2_vol_pct` and `pressure_atm` to the shared store, so Assess shows the same cabin afterwards; the page says so.
+- For a surface fire the FLEX and M7 lines are context, flagged "Gap: droplet data, context only". The M7 table uses the nearest tabulated pressure and flags a non-match outside 0.7–1 atm.
+- Urgency shows "Rules are a team choice, to be approved." while `risk_rules.approved` is false, with the fired rule's reason verbatim.
+
+### P3-D Home (js/pages/overview.js, js/mission.js, js/facts.js, css/p-overview.css)
+
+- Question 03 reworded with no ion wind: "…when a droplet flame goes out. Bench mist trial: not completed."
+- `facts.js` computes the gas sentence even when saffire_latency is missing (main dropped it); a missing file gives the D1.4 "not available yet" sentence. Extra exports `loadDetectFacts()` and `missingSentence(what, file)`; the frozen `detectFacts(lat, gas)` is unchanged.
+- The mission check's "nearby" window (3 O₂ points, 10 kPa) is carried from main as named constants: a team choice with no citation, stated on screen.
+- "From camera to risk" is stamped team; each step stamps its own source file from the manifest (cv_latest, spread_predictor, risk_rules).
+- "How to read this site" says "Only the first three are results" (real, dome, model), because the dome stamp joined the legend. The "scrapped" legend row appears only when `SCRAPPED.approved` is true (Q1).
+- A stray "null" from `replaceChildren(…, null, …)` in mission.js was fixed with `add()`.
+
+### P4-A Find it (js/fig_detect.js, js/pages/detect.js, css/p-detect.css)
+
+- Keep 2 (Replay and Gas visible, 5 folded). With no `?event=` the replay opens on Sample 1, as main does; changing the event now writes `?event=<key>` back (main read it but never wrote it), except when detached.
+- Gas card axis ends come from the file (largest value or limit + 8 %); main typed 460 ppm and 4 mmHg.
+- Smoke-miss empty state: main's example size (47 nm) replaced with a placeholder.
+- Display constants carried from main with comments: replay length about 14 s per event, lane clamp −0.5 to 2, Blind Spot y cap 2, dot-plot domain 20–3000 nm, the 5 SD site rule highlighted in the sensitivity table.
+
+### P4-B Predict: smoke (js/fig_drift.js, js/fig_cabin3d.js, css/fx-drift.css)
+
+- Concentrations in summaries, tooltips and tables are decoded from the file's own `scale` string (value = 255·log10(1+99c/scale_max)/2); a different stated scale shows no concentration rather than a guess.
+- The detector value in the table is the smoke in the detector's grid cell; alarm times include the file's `detector_delay_s` (the table note says so).
+- `ISS_ALARM = 10 mg/m³` carried from main with its source (NTRS 20170002629), used only when whatif.json has no `alarm_hi_mg_m3` (it has one, so the file value shows).
+- The LBM what-if "2 mg/s upper release rate is assumed" line is built from the largest `by_rate` value, and only when `varied.release_mg_s` says "high end assumed".
+- 3D view: 15° turn and 0.15 rad tilt per step (team choice); Shift+Arrow turns, plain arrows read values; Turn/Tilt/Reset buttons added. In Calm the ray-march dither is still and Play stops at the last frame. Up to 4 detector lights from the file (main hard-coded 2). `robustCard(w)` always returns a card (empty state without a robustness block).
+- Empty-state schema text says "seconds per position; a missed position left empty" instead of "seconds or null".
+- Data observation for the M3 owner (not changed): in data/drift.json every grid cell is at or above 1 mg/m³ from the earliest frame checked (30 s), so the summary often says "covers 100% of the section".
+
+### P4-C Predict: spread, models, gaps + page (js/fig_spread.js, js/fig_models.js, js/fig_gaps.js, js/pages/predict.js, css/p-predict.css)
+
+- Block order follows §3.6 rows 1–19 with keep 1. The robustness card is drawn when `whatif.robustness` exists, or as an empty state when whatif.json is missing; it is left out only when the file is present without that block.
+- Gap map: main's axes (0–90 % O₂, 40–600 kPa log) kept, widened only for a point outside them. Fuel kinds by shape as well as colour (droplets circle, gas flames square, solids triangle, reported burns diamond); probes dashed. Arrow-key order: probes, reported burns, then all tested points; text summary and table from the same values.
+- Next experiment: ascending by the sum of counts, ties in file order; the "3 O₂ points and 10 kPa" neighbourhood parsed from the file's verdict text.
+- Short answer: main's three sentences; the run count prints as 4,000; the 1 mg/m³ level read from `whatif.alarm_mg_m3`.
+- The models.json missing-state schema uses "…" placeholders instead of main's example numbers. Moon and Mars card: main's text, stamp team, no values, no link to the Flame lab switch, no MADE entry (text only).
+
+### P4-D Put it out (js/fig_respond.js, js/pages/respond.js, css/p-respond.css)
+
+- Q4/Q8: E-FIELD text goes through `overlays.efieldText()`, with an explicit "Shown as NASA context only" line. Keep 2 (coverage and response evidence visible, 6 folded).
+- Card 7 is titled "Bench mist trial" (the MADE key), replacing "Bench trials: ion wind and fine mist". It always says "Bench mist trial: not completed." without dome data, plus "This trial is optional." from `SCRAPPED.optional`.
+- "200 refits" on the extinction card is read from the m7_explorer note text. `AIR = 0.21` carried from main with a source comment.
+- Coverage card links are Find it, Put it out, Flame lab and Assess (figLink, opening folds), an Assess link added for solids, and DOIs per investigation from investigations.json: `coverageCard(gaps, inv)` (noted in §2.12). `mistRows(tr)` is exported for reuse.
+- The page skips `loadAssessData` on detached renders. `readingCard` is text-only, stamped team, no MADE entry.
+
+### P4-E Checks (js/fig_checks.js, js/pages/evidence.js, css/p-evidence.css)
+
+- Q1: E1, E2, E8, D-dome and the dome_locator/dome_sensor_count manifest rows stay visible with their own state plus "Proposed for scrapping with the old bench rig (see plan v2); waiting for the team's approval." The short answer counts them as "proposed" inside "still to run". `approved:true` switches them to the scrapped stamp (tested by a route override).
+- Q2: the M6b trust dots keep main's values (3·3·3·3·2) with a "draft" tag.
+- E4 and E5 are filled at display time from models/m6b-predictor/results.json and data/models.json and name their source path; a missing source keeps evidence.json's state and says so. Camera rows CV1–CV3 and OF1 come from `overlays.CV_PENDING`.
+- The permutation paragraph is built from permutation.json and the models.json score range; a missing models.json drops the range clause with a note.
+- (The P4-E hand-back reached the integrator truncated after Q2; any further P4-E decisions are in the header comments of js/fig_checks.js and js/pages/evidence.js.)
+
+### Phases 5 and 6 (P5-A to P5-G, P5-S, P6-A to P6-C)
+
+The hand-backs for these packages were not relayed to the integrator of this run, so their decisions are not repeated here; each module's header comment states its own (js/flame_sim.js, js/fig_flame.js, js/pages/flame.js, js/pages/explorer.js, js/fig_modelcards.js, js/pages/models.js, js/ask_match.js, js/llm.js, js/pages/ask.js, js/pages/about.js, js/pages/memory.js, js/pages/locate.js, js/fig_bench.js, js/pages/earth.js, js/i18n.js, js/gl_hero.js, js/gl_banner.js, js/bg.js, js/clock.js). Facts the integrator checked: data/earth_apps.json (status team, 3 cards) and data/i18n.json (status team, `reviewed:false`, Q7) exist with manifest lines; `check_data.py` reports OK: 36 and SHA256SUMS lists 37 files (P5-S, Q9). The lead should append the P5/P6 decision lists here from those hand-backs.
+
+### Lead (integration of phases 3 to 6)
+
+- `lib.load(name)` no longer fetches a data file that data/manifest.json marks `missing` or does not list (requests from P3-A, P3-B, P3-C, P4-D). It returns `{status:'missing'}` as before, so the frozen behaviour is unchanged, but the expected 404s for response_trials.json and cv_latest.json no longer reach the console. If the manifest itself is missing, every file is fetched as before. This follows AGENTS.md rule 5 (a data file and its manifest line land in the same commit); a new file with no manifest line will read as "No data yet" until its line is added.
+- `overlays.MANIFEST_WHAT.assistant_config` = "AI assistant switch: a Worker URL, or none (saved answers only)" (request from P4-E), so the Checks data-file index prints no bare "null". The manifest is unchanged.
+- §2.12 now records `coverageCard(gaps, inv?)` and `mistRows(tr)` (request from P4-D).
+- Phase 7 "safe" grep allowlist (requests from P3-B and P4-C): add the data-file negations "Says nothing about whether a material or atmosphere is safe." (growth_examples.json and the growth.py limits literal in js/growth.js), models.json "does not make an atmosphere safe", and spread_predictor.json `verdict_meaning` "…or that anything is safe".
+- Browser checks in these phases ran with WebGL off (`--disable-webgl --disable-3d-apis`) and a thermal pause between page loads (user caps: CPU 92 °C, GPU 85 °C). A first run with software WebGL put the CPU at 91 °C and was stopped. WebGL-on rendering was checked by P4-B (3D cabin) in its own run.
+- Commit grouping: phase 3 = ff9ac99, phase 4 = 3dc15f0, phase 5 = e00454c, phase 6 = the commit that adds this line. `js/pages/overview.js` and `css/p-overview.css` (P3-D) went into the phase 5 commit, because P5-G edited overview.js to import `js/i18n.js` and a phase 3 commit of it would not load; phases 3 and 4 keep the Home stub. `js/pages/respond.js` (P3-C, then P4-D) is in phase 4. The phase 3 commit carries a manifest with only the risk_rules and cv_example lines and a SHA256SUMS for those 35 files (checked: `sha256sum -c` and `check_data.py` OK: 34 on that tree); phase 5 adds earth_apps and i18n (OK: 36, 37 sums). The integration edits to js/lib.js are in phase 3, js/overlays.js and REBUILD_PLAN §2.12 in phase 4, and DECISIONS, CONTRACT_PROPOSAL, AI_LOG and REFERENCES in phase 6.
