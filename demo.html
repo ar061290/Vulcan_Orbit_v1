@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vulcan Orbit · Prototype demo</title>
+<meta name="description" content="Vulcan Orbit prototype demo: detect a fire, simulate how it spreads in microgravity, assess the risk. NASA Space Apps 2026, Flame in Freefall.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='11' fill='none' stroke='%23EDE8DF' stroke-width='1.5'/%3E%3Ccircle cx='14' cy='14' r='3.5' fill='none' stroke='%237AA2FF' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/demo.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the demo</a>
+<header class="bar">
+  <a class="brand" href="demo.html">
+    <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="11" fill="none" stroke="#EDE8DF" stroke-width="1.5"/><circle cx="14" cy="14" r="3.5" fill="none" stroke="#7AA2FF" stroke-width="2"/><ellipse cx="14" cy="14" rx="12.5" ry="4" transform="rotate(-24 14 14)" fill="none" stroke="#FF7A3D" stroke-width="1.6"/></svg>
+    <span><b>Vulcan Orbit</b><small class="mono">Prototype demo</small></span>
+  </a>
+  <nav class="mono" aria-label="Demo steps">
+    <a href="#detect"><i>01</i> Detect</a><a href="#simulate"><i>02</i> Simulate</a><a href="#assess"><i>03</i> Assess</a><a href="#respond"><i>04</i> Respond</a>
+  </nav>
+  <a class="mono ghost" href="index.html">Full project ↗</a>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="hero-text">
+      <p class="kicker mono"><span></span>NASA Space Apps 2026 · Flame in Freefall</p>
+      <h1 class="disp">In orbit,<br>nothing<br><em>rises.</em></h1>
+      <p class="lede">Without gravity a flame becomes a dim blue ball and smoke drifts wherever the fans push it. Vulcan Orbit finds the fire, simulates how it will spread, and rates the risk, using NASA's own space-station fire data.</p>
+      <a class="cta mono" href="#detect">Run the demo ↓</a>
+    </div>
+    <div class="hud porthole" id="porthole"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+      <p class="tag mono">Illustration, not data</p>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="The headline finding" id="stats"></section>
+
+  <section class="step" id="detect" aria-labelledby="detect-h">
+    <header><p class="num mono">01</p><h2 class="disp" id="detect-h">Detect</h2><p class="one">A camera finds the flame and measures it. A flame sensor beats smoke detection by over a minute.</p></header>
+    <div class="grid2">
+      <div class="panel" id="camera"></div>
+      <div class="panel hud" id="scope"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+    </div>
+  </section>
+
+  <section class="step" id="simulate" aria-labelledby="sim-h">
+    <header><p class="num mono">02</p><h2 class="disp" id="sim-h">Simulate</h2><p class="one">That flame goes into our spread model, calibrated on NASA BASS-II and Saffire flight data. Change the air and watch it react.</p></header>
+    <div class="controls" id="controls"></div>
+    <div class="grid2">
+      <div class="panel hud" id="curve"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+      <div class="panel" id="simnums"></div>
+    </div>
+  </section>
+
+  <section class="step" id="assess" aria-labelledby="assess-h">
+    <header><p class="num mono">03</p><h2 class="disp" id="assess-h">Assess</h2><p class="one">Size, timing and NASA's alarm times become one risk level, with the reason in plain words.</p></header>
+    <div class="panel risk" id="risk" aria-live="polite"></div>
+  </section>
+
+  <section class="step" id="respond" aria-labelledby="respond-h">
+    <header><p class="num mono">04</p><h2 class="disp" id="respond-h">Respond</h2><p class="one">What NASA's droplet flames tell us about putting a fire out.</p></header>
+    <div class="panel" id="flex"></div>
+  </section>
+
+  <section class="end">
+    <h2 class="disp">Every number has a source.</h2>
+    <p>The full project has the method, the checks, every model's score beside its baseline, and the NASA datasets with their DOIs.</p>
+    <a class="cta mono" href="index.html">Open the full project ↗</a>
+  </section>
+</main>
+<footer class="foot mono">Vulcan Orbit · NASA Space Apps 2026 · Data: NASA Physical Sciences Informatics (PSI-100, PSI-25, PSI-99, PSI-69) · <a href="https://github.com/ar061290/Vulcan_Orbit_v1">Code</a></footer>
+<script type="module" src="js/demo.js"></script>
+</body>
+</html>
