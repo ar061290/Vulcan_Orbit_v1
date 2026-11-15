@@ -261,3 +261,41 @@ Phase 7 built the checking tools (P7-A to P7-E), then three fix packages by file
 - site/A11Y.md gets a section 0 with the rerun after the fixes (0 axe violations, keyboard 14 of 14, 0 stops without a focus ring); the first-run findings stay below as the record.
 - Plan v2 "Results so far" was checked against the data files the site reads (drift_whatif, saffire_latency, models.json, spread_predictor, models/m6b-predictor/results.json, flame_static, flame_spread, drift_calibration): no disagreement found.
 - `CONTRACT.md`, `data/`, `models/`, `engine/`, `scripts/` and `worker/` are unchanged in phase 7.
+
+# Site v3 design decisions (branch feat/site-v3-design, 15 Nov 2026)
+
+The v3 pass changes how the site looks and how pages are laid out. No number, data file, model, `CONTRACT.md`, `js/growth.js` or the Ask matcher changed. The brief is the team's `site_redesign_prompt.md`; the inspiration is in `site/inspo/` with `NOTES.md`.
+
+## What we took from each inspiration image (one line each; no logos, brand colours, photos, text or code copied)
+
+- `01_pudding_story_scrolly.jpg` (The Pudding): the story layout on Home, with a short text column on the left and one big live visual on the right, used in "Why it happens".
+- `02_missionmars_hero.jpg`: the hero composition, with the object (our WebGL flame) moving and turning with scroll, a minimal top bar, and one big stat pinned in a corner (ours is the Saffire-III alarm gap, read from `saffire_latency.json`).
+- `03_missionmars_scroll.jpg`: the object turning and shifting as the page scrolls. It is linked to scroll position (`gl_hero.setScroll`) and never takes over the wheel.
+- `04_missionmars_type.jpg`: a huge, wide display headline inside thin corner brackets (Archivo at width 125 %).
+- `05_cursor_crosshair.jpg` (Cursor Structule): the dot with full-viewport hairlines, spring-smoothed, with hairlines in the muted ink colour.
+- `06_cursor_crosshair_hover.png`: the hover state, where the dot opens into a flame-orange ring and an outer ring expands.
+- `07_flowing_cursor_fluid.jpg` (Flowing Cursor): the curling pointer trail, recoloured ember → orange → amber → near-white, fading to smoke. Home only.
+- `08_spectranoise.jpg` (SpectraNoise): the slow warped glow with grain and faint scanlines, recoloured as embers on black. Used behind the Home finding and the closing call to action, and as an 8 px band in the sidebar header.
+- `09_space_journey_stars.jpg` (Space Journey): the starfield flight, used once as the ~1 s warp when "Open the full assessment" or "Start" is pressed.
+- `10_gravity_points.jpg` (Gravity Points): motes that drift with the cabin air and have no "down" until "Turn gravity on". Labelled "Illustration, not data".
+- `11_drama_stars_dark.jpg`, `12_drama_stars_zoom.png` (Drama Collective, dark theme): sparse, tiny, warm stars that twinkle slowly, as the Night background. They replace the v2 drifting motes (`js/bg.js` is no longer started).
+
+## System
+
+- **Dark first.** Night is the default for a first visit (`prefs.js`; it was the system theme in v2). Day is a cool light theme (#f4f6f9 page, white panels), not cream paper, and has no stars.
+- **Tokens** (`css/tokens.css`): ink #07090e, panels #0c0f15 / #131720, 1 px lines. Flame orange `--accent` is the one accent and oxygen blue `--oxy` the second. The v2 names (`--page`, `--surface`, `--raise`, `--ink2`, `--grid`, `--axis`) stay as aliases, so every page CSS restyled at once. The chart series colours were renamed from `--s1..--s4` to `--c1..--c4`, because `--s1..--s9` is now the spacing scale.
+- **One type scale, six sizes**: `--t1` 12, `--t2` 14, `--t3` 16, `--t4` 22, `--t5` 40 and `--t6` clamp(56–136 px), all in rem so "Read your way" text sizes scale them. **One spacing scale** on a 4 px base (`--s1..--s9`).
+- **Type.** Display is Archivo (a grotesque with good digits; its width axis gives the wide headline cut), replacing Bricolage Grotesque. Body stays Atkinson Hyperlegible, as an accessibility choice. Numbers stay in IBM Plex Mono with tabular figures. Special Elite and Libre Caslon stay on the History page only.
+- **Surfaces**: flat panels, radius 4–6 px, no shadows except popovers (tooltip, glossary, pill, Read your way, tour), no corner ticks. Figure numbers are small and quiet ("Fig. N", mono, muted).
+- **Status stamps**: one style for all statuses. The word label is kept, with a coloured square in front, so colour is never the only signal. Plan and Scrapped use an outlined square.
+
+## Shell
+
+- **App shell** on every page except Home: a left sidebar in four groups (Pipeline: Assess, Find it, Predict it, Put it out · Science: Flame lab, NASA experiments, Model cards · Trust: Checks, Ask, Sources · More: On Earth, Bench rig, History, Design kit). The current page is shown with a 2 px flame-orange edge and bold text. Below 1024 px the sidebar is a slide-out drawer with a visible Menu button; Escape closes it and focus returns to Menu.
+- **Top bar**: brand (→ Home), page title, data status pill, and the Read your way button. "Judge mode" and the "1-minute tour" were one action in v2 (`startTour`), so they are one button, "Judge mode: 1-minute tour", at the foot of the sidebar.
+- **Data status pill** replaces the full-width banner. It shows a short count, and clicking it opens a list of each affected file with its stamp. `data/cv_example.json` is not counted, because it is a deliberate worked example (this replaces v2 decision Q5). The popover says so.
+- **Read your way** is now a popover from the top bar (same controls: Day/Night, A/A+/A++, science words, Motion, read-aloud), plus a new **Effects: On/Off** row (`html[data-effects]`), separate from Motion.
+- **Page header** is compact: group / page kicker, the plain question as h1, and the lead. The v2 illustrated header bands (`gl_banner`, header `hero`) are no longer drawn in page headers, as the brief asks. The modules stay in the repo and the Home hero still uses `gl_hero`.
+- **The short answer** is a three-column numbered strip.
+- **On this page** is a sticky right rail at ≥ 1280 px, and a dropdown (`details`) below that.
+- **"Made by"** is now a small "How this was made" button on each figure, opening an inline panel with the credibility strip inside. The v2 fold that held the rest of a long figure note was also called "How this was made", so it is renamed "Read the rest of the note" to avoid two controls with the same name. `site/tools/made_check.mjs` reads the kind from `.mb-kind`.

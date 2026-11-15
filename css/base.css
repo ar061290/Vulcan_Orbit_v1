@@ -1,7 +1,7 @@
 /* Base (v3): reset, the one type scale, links, focus ring, skip link, page grid helpers.
    The app shell (top bar, sidebar, drawer, pill, footer) is css/shell.css. Sizes come only from css/tokens.css scales. */
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--bar-h) + var(--s4));scroll-padding-bottom:var(--s8);background:var(--bg)}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--bar-h) + var(--s4));scroll-padding-bottom:var(--s8)}
 body{margin:0;font:var(--t3)/1.6 var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;min-width:0}
 h1,h2,h3{margin:0;font-family:var(--display);font-weight:650;letter-spacing:-.01em;color:var(--ink);font-stretch:100%}
 h1{font-size:var(--t5);line-height:1.05}h2{font-size:var(--t4);line-height:1.2}h3{font-size:var(--t3);line-height:1.3}

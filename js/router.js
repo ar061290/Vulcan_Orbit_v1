@@ -123,6 +123,8 @@ function buildNav() {
     h('div', { class: 'side-foot' },
       h('button', { type: 'button', class: 'judge', onclick: () => { closeMenus(); startTour(); }, title: 'A 1-minute guided tour of the key results' }, 'Judge mode: 1-minute tour'),
       h('a', { class: 'side-home', href: '#/overview' }, 'Back to the story')));
+  // the one effect allowed in the app: a thin ember band in the sidebar header (js/fx/noise.js; nothing if it fails)
+  import('./fx/noise.js').then(m => m.noiseField(nav.querySelector('.side-fx'), { strength: 0.8 })).catch(e => console.warn('sidebar band not started', e));
   const top = document.querySelector('.top');      // the sticky header's height, so revealed figures are not hidden under it
   if (top && 'ResizeObserver' in window) new ResizeObserver(() => document.documentElement.style.setProperty('--top-h', `${Math.round(top.getBoundingClientRect().height)}px`)).observe(top);
   menu?.addEventListener('click', () => setDrawer(!drawerOpen));
